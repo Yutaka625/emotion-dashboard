@@ -27,7 +27,7 @@ function MetricCard({ label, value, unit, icon, color, sub }: {
         <span style={{ color }}>{icon}</span>
       </div>
       <div className="flex items-baseline gap-1.5">
-        <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '2rem', color: 'oklch(0.15 0.02 250)', lineHeight: 1 }}>
+        <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '2rem', color: 'oklch(0.15 0.02 250)', lineHeight: 1 }}>
           {value}
         </span>
         {unit && (
@@ -94,7 +94,7 @@ export default function OverviewSection({ data }: Props) {
       <div className="flex items-start justify-between">
         <div>
           <div className="section-label mb-1">SESSION OVERVIEW</div>
-          <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.75rem', color: 'oklch(0.15 0.02 250)', lineHeight: 1.1 }}>
+          <h1 style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.75rem', color: 'oklch(0.15 0.02 250)', lineHeight: 1.1 }}>
             感情分析レポート
           </h1>
           <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.52 0.015 250)', marginTop: '0.5rem' }}>
@@ -165,7 +165,7 @@ export default function OverviewSection({ data }: Props) {
         {/* Dominant Emotion Pie */}
         <div className="metric-card">
           <div className="section-label mb-3">支配的感情の分布</div>
-          <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
+          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
             感情状態の占有率
           </div>
           <ResponsiveContainer width="100%" height={240}>
@@ -201,7 +201,7 @@ export default function OverviewSection({ data }: Props) {
         {/* Emotion Radar */}
         <div className="metric-card">
           <div className="section-label mb-3">EMOTION PROFILE</div>
-          <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
+          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
             感情プロファイル（平均値×10スケール）
           </div>
           <ResponsiveContainer width="100%" height={240}>
@@ -231,7 +231,7 @@ export default function OverviewSection({ data }: Props) {
       {/* Key Insights */}
       <div className="metric-card">
         <div className="section-label mb-3">KEY INSIGHTS</div>
-        <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
           主要な発見
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -255,7 +255,7 @@ export default function OverviewSection({ data }: Props) {
             <div key={i} className="p-4 rounded-lg" style={{ background: 'oklch(0.97 0.003 80)', border: `1px solid ${insight.color}30` }}>
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-2 h-2 rounded-full" style={{ background: insight.color }} />
-                <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 600, fontSize: '0.85rem', color: 'oklch(0.15 0.02 250)' }}>
+                <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600, fontSize: '0.85rem', color: 'oklch(0.15 0.02 250)' }}>
                   {insight.title}
                 </span>
               </div>
@@ -270,7 +270,7 @@ export default function OverviewSection({ data }: Props) {
       {/* Data Quality */}
       <div className="metric-card">
         <div className="section-label mb-3">DATA QUALITY</div>
-        <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
           データ品質指標
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

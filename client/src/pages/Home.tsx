@@ -26,7 +26,7 @@ export default function Home() {
         <div className="text-center space-y-4">
           <div className="flex items-center justify-center gap-3">
             <div className="w-3 h-3 rounded-full signal-pulse" style={{ background: 'oklch(0.62 0.18 160)', boxShadow: '0 0 8px oklch(0.62 0.18 160)' }} />
-            <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1.2rem', color: 'oklch(0.15 0.02 250)' }}>
+            <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1.2rem', color: 'oklch(0.15 0.02 250)' }}>
               データを読み込み中...
             </span>
           </div>
@@ -42,7 +42,7 @@ export default function Home() {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'oklch(0.98 0.005 80)' }}>
         <div className="text-center space-y-3">
-          <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1.2rem', color: 'oklch(0.62 0.18 25)' }}>
+          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1.2rem', color: 'oklch(0.62 0.18 25)' }}>
             データの読み込みに失敗しました
           </div>
           <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.75rem', color: 'oklch(0.52 0.015 250)' }}>
@@ -85,7 +85,7 @@ export default function Home() {
         >
           <div className="flex items-center gap-3">
             <Activity size={18} style={{ color: 'oklch(0.62 0.18 160)' }} />
-            <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 600, fontSize: '0.9rem', color: 'oklch(0.15 0.02 250)' }}>
+            <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600, fontSize: '0.9rem', color: 'oklch(0.15 0.02 250)' }}>
               感情分析ダッシュボード
             </span>
             <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.52 0.015 250)' }}>

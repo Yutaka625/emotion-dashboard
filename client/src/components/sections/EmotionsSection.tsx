@@ -54,7 +54,7 @@ export default function EmotionsSection({ data }: Props) {
       {/* Header */}
       <div>
         <div className="section-label mb-1">EMOTION DISTRIBUTION</div>
-        <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.15 0.02 250)' }}>
+        <h2 style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.15 0.02 250)' }}>
           感情分布・統計
         </h2>
         <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.52 0.015 250)', marginTop: '0.25rem' }}>
@@ -75,7 +75,7 @@ export default function EmotionsSection({ data }: Props) {
                   {EMOTION_LABELS_JA[e]}
                 </span>
               </div>
-              <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.4rem', color: EMOTION_COLORS[e], lineHeight: 1 }}>
+              <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.4rem', color: EMOTION_COLORS[e], lineHeight: 1 }}>
                 {stats?.mean.toFixed(3)}
               </div>
               <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', color: 'oklch(0.52 0.015 250)', marginTop: '4px' }}>
@@ -100,7 +100,7 @@ export default function EmotionsSection({ data }: Props) {
       {/* Prevalence Chart */}
       <div className="metric-card">
         <div className="section-label mb-3">EMOTION PREVALENCE</div>
-        <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
           感情出現率（閾値超過の割合）
         </div>
         <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.52 0.015 250)', marginBottom: '1rem' }}>
@@ -130,7 +130,7 @@ export default function EmotionsSection({ data }: Props) {
       {/* Stats Table */}
       <div className="metric-card">
         <div className="section-label mb-3">DESCRIPTIVE STATISTICS</div>
-        <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
           感情スコアの記述統計
         </div>
         <div className="overflow-x-auto">
@@ -179,7 +179,7 @@ export default function EmotionsSection({ data }: Props) {
       {/* Dynamics Comparison */}
       <div className="metric-card">
         <div className="section-label mb-3">AFFECT DYNAMICS COMPARISON</div>
-        <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
           感情動態指標の比較
         </div>
         <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.52 0.015 250)', marginBottom: '1rem' }}>

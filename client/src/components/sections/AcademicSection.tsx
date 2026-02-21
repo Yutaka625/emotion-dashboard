@@ -45,7 +45,7 @@ export default function AcademicSection({ data }: Props) {
       {/* Header */}
       <div>
         <div className="section-label mb-1">ACADEMIC ANALYSIS</div>
-        <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.15 0.02 250)' }}>
+        <h2 style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.15 0.02 250)' }}>
           学術的分析
         </h2>
         <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.52 0.015 250)', marginTop: '0.25rem' }}>
@@ -79,7 +79,7 @@ export default function AcademicSection({ data }: Props) {
             <div className="flex items-start gap-2 mb-2">
               <div className="w-1 h-full min-h-12 rounded-full flex-shrink-0" style={{ background: f.color }} />
               <div>
-                <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '0.85rem', color: 'oklch(0.15 0.02 250)' }}>
+                <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '0.85rem', color: 'oklch(0.15 0.02 250)' }}>
                   {f.title}
                 </div>
                 <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', color: f.color, marginTop: '2px' }}>
@@ -97,7 +97,7 @@ export default function AcademicSection({ data }: Props) {
       {/* Affect Dynamics - Variability */}
       <div className="metric-card">
         <div className="section-label mb-3">AFFECT DYNAMICS — VARIABILITY</div>
-        <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
           感情変動性（Standard Deviation）
         </div>
         <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.52 0.015 250)', marginBottom: '1rem' }}>
@@ -124,7 +124,7 @@ export default function AcademicSection({ data }: Props) {
       {/* Affect Dynamics - Inertia */}
       <div className="metric-card">
         <div className="section-label mb-3">AFFECT DYNAMICS — INERTIA (AR1)</div>
-        <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
           感情慣性（1次自己相関係数）
         </div>
         <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.52 0.015 250)', marginBottom: '1rem' }}>
@@ -152,7 +152,7 @@ export default function AcademicSection({ data }: Props) {
       {/* Correlation Heatmap */}
       <div className="metric-card">
         <div className="section-label mb-3">CORRELATION MATRIX</div>
-        <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
           感情指標間の相関行列
         </div>
         <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.52 0.015 250)', marginBottom: '1rem' }}>
@@ -210,7 +210,7 @@ export default function AcademicSection({ data }: Props) {
       {/* Circumplex Model Visualization */}
       <div className="metric-card">
         <div className="section-label mb-3">CIRCUMPLEX MODEL — QUADRANT ANALYSIS</div>
-        <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
           感情の円環モデル象限分析（Russell, 1980）
         </div>
         <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.52 0.015 250)', marginBottom: '1.5rem' }}>
@@ -229,7 +229,7 @@ export default function AcademicSection({ data }: Props) {
               const pct = total > 0 ? (q.value / total * 100).toFixed(1) : '0';
               return (
                 <div key={i} className="flex flex-col items-center justify-center p-4 rounded-lg m-1" style={{ background: `${q.color}10`, border: `1px solid ${q.color}30` }}>
-                  <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.8rem', color: q.color, lineHeight: 1 }}>
+                  <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.8rem', color: q.color, lineHeight: 1 }}>
                     {q.value.toLocaleString()}
                   </div>
                   <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: q.color, marginTop: '2px' }}>
@@ -264,7 +264,7 @@ export default function AcademicSection({ data }: Props) {
       {/* Academic Interpretation */}
       <div className="metric-card">
         <div className="section-label mb-3">ACADEMIC INTERPRETATION</div>
-        <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
           学術的解釈と考察
         </div>
         <div className="space-y-4">
@@ -291,7 +291,7 @@ export default function AcademicSection({ data }: Props) {
             },
           ].map((item, i) => (
             <div key={i} className="p-4 rounded-lg" style={{ background: 'oklch(0.97 0.003 80)', borderLeft: `3px solid ${item.color}` }}>
-              <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 600, fontSize: '0.85rem', color: 'oklch(0.15 0.02 250)', marginBottom: '6px' }}>
+              <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600, fontSize: '0.85rem', color: 'oklch(0.15 0.02 250)', marginBottom: '6px' }}>
                 {item.heading}
               </div>
               <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.42 0.015 250)', lineHeight: 1.7 }}>

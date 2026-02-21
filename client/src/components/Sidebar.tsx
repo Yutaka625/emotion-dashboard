@@ -47,7 +47,7 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
       <div className="flex items-center justify-between px-4 py-5" style={{ borderBottom: '1px solid oklch(0.22 0.02 250)' }}>
         {!collapsed && (
           <div>
-            <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '0.85rem', color: 'oklch(0.88 0.005 80)', letterSpacing: '0.05em' }}>
+            <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '0.85rem', color: 'oklch(0.88 0.005 80)', letterSpacing: '0.05em' }}>
               NEURO
             </div>
             <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.62 0.18 160)', letterSpacing: '0.1em' }}>

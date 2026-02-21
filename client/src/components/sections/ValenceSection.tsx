@@ -58,7 +58,7 @@ export default function ValenceSection({ data }: Props) {
       {/* Header */}
       <div>
         <div className="section-label mb-1">VALENCE ANALYSIS</div>
-        <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.15 0.02 250)' }}>
+        <h2 style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.15 0.02 250)' }}>
           Valence 詳細分析
         </h2>
         <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.52 0.015 250)', marginTop: '0.25rem' }}>
@@ -77,7 +77,7 @@ export default function ValenceSection({ data }: Props) {
           <div key={i} className="metric-card">
             <div className="section-label mb-2">{m.label}</div>
             <div className="flex items-baseline gap-1">
-              <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.75rem', color: m.color, lineHeight: 1 }}>
+              <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.75rem', color: m.color, lineHeight: 1 }}>
                 {m.value}
               </span>
               <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.7rem', color: 'oklch(0.52 0.015 250)' }}>
@@ -91,7 +91,7 @@ export default function ValenceSection({ data }: Props) {
       {/* Valence Time Series */}
       <div className="metric-card">
         <div className="section-label mb-3">VALENCE SIGNAL</div>
-        <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
           Valenceの時系列推移
         </div>
         <ResponsiveContainer width="100%" height={200}>
@@ -119,7 +119,7 @@ export default function ValenceSection({ data }: Props) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="metric-card">
           <div className="section-label mb-3">DISTRIBUTION</div>
-          <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
+          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
             Valenceレベル分布
           </div>
           <ResponsiveContainer width="100%" height={200}>
@@ -142,7 +142,7 @@ export default function ValenceSection({ data }: Props) {
 
         <div className="metric-card">
           <div className="section-label mb-3">CORRELATIONS</div>
-          <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
+          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
             Valenceと各指標の相関係数
           </div>
           <ResponsiveContainer width="100%" height={200}>
@@ -167,7 +167,7 @@ export default function ValenceSection({ data }: Props) {
       {/* Circumplex Model */}
       <div className="metric-card">
         <div className="section-label mb-3">CIRCUMPLEX MODEL OF AFFECT</div>
-        <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
           感情の円環モデル（Russell, 1980）
         </div>
         <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.52 0.015 250)', marginBottom: '1rem' }}>
@@ -178,7 +178,7 @@ export default function ValenceSection({ data }: Props) {
             <div key={i} className="p-4 rounded-lg flex items-start gap-3" style={{ background: 'oklch(0.97 0.003 80)', border: `1px solid ${item.color}30` }}>
               <div className="w-3 h-3 rounded-sm mt-0.5 flex-shrink-0" style={{ background: item.color }} />
               <div>
-                <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 600, fontSize: '0.82rem', color: 'oklch(0.15 0.02 250)' }}>
+                <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600, fontSize: '0.82rem', color: 'oklch(0.15 0.02 250)' }}>
                   {item.label}
                 </div>
                 <div style={{ fontFamily: 'Roboto Mono, monospace', fontWeight: 700, fontSize: '1.2rem', color: item.color, lineHeight: 1.2 }}>
@@ -202,7 +202,7 @@ export default function ValenceSection({ data }: Props) {
       {valDynamics && (
         <div className="metric-card">
           <div className="section-label mb-3">AFFECT DYNAMICS</div>
-          <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
+          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
             Valenceの動態指標
           </div>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">

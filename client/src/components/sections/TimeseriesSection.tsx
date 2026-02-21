@@ -166,7 +166,7 @@ export default function TimeseriesSection({ data }: Props) {
       {/* Header */}
       <div>
         <div className="section-label mb-1">TIME SERIES ANALYSIS</div>
-        <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.15 0.02 250)' }}>
+        <h2 style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.15 0.02 250)' }}>
           時系列分析
         </h2>
         <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.52 0.015 250)', marginTop: '0.25rem' }}>
@@ -237,7 +237,7 @@ export default function TimeseriesSection({ data }: Props) {
         <div className="flex items-center justify-between mb-3">
           <div>
             <div className="section-label mb-1">SPECIAL METRICS</div>
-            <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)' }}>
+            <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)' }}>
               Engagement / Valence / Attention
             </div>
           </div>
@@ -289,7 +289,7 @@ export default function TimeseriesSection({ data }: Props) {
       {/* Emotion Charts — Tab Switcher */}
       <div className="metric-card">
         <div className="section-label mb-3">EMOTION TIME SERIES</div>
-        <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
           感情スコアの時系列グラフ
         </div>
 
@@ -375,7 +375,7 @@ export default function TimeseriesSection({ data }: Props) {
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full" style={{ background: EMOTION_HEX[emotion] }} />
-                        <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 600, fontSize: '0.82rem', color: 'oklch(0.15 0.02 250)' }}>
+                        <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600, fontSize: '0.82rem', color: 'oklch(0.15 0.02 250)' }}>
                           {EMOTION_LABELS_JA[emotion]}
                         </span>
                       </div>
@@ -602,7 +602,7 @@ export default function TimeseriesSection({ data }: Props) {
       {/* 全感情の統合ビュー（常時表示） */}
       <div className="metric-card">
         <div className="section-label mb-3">ALL EMOTIONS — FULL SESSION</div>
-        <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
           全感情スコアの全期間推移（困惑を除く）
         </div>
         <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.55 0.015 250)', marginBottom: '1rem' }}>
@@ -639,7 +639,7 @@ export default function TimeseriesSection({ data }: Props) {
       {/* 10-second window summary table */}
       <div className="metric-card">
         <div className="section-label mb-3">10-SECOND WINDOWS TABLE</div>
-        <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
           10秒区間ごとのサマリー
         </div>
         <div className="overflow-x-auto">

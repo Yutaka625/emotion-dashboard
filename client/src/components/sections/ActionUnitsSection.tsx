@@ -74,7 +74,7 @@ export default function ActionUnitsSection({ data }: Props) {
       {/* Header */}
       <div>
         <div className="section-label mb-1">ACTION UNITS ANALYSIS</div>
-        <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.15 0.02 250)' }}>
+        <h2 style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.15 0.02 250)' }}>
           アクションユニット分析
         </h2>
         <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.52 0.015 250)', marginTop: '0.25rem' }}>
@@ -85,7 +85,7 @@ export default function ActionUnitsSection({ data }: Props) {
       {/* AU Mean Values Chart */}
       <div className="metric-card">
         <div className="section-label mb-3">AU MEAN ACTIVATION</div>
-        <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
           アクションユニット別平均活性化値
         </div>
         <ResponsiveContainer width="100%" height={280}>
@@ -112,7 +112,7 @@ export default function ActionUnitsSection({ data }: Props) {
       {/* Active AU Percentage */}
       <div className="metric-card">
         <div className="section-label mb-3">AU ACTIVITY RATE</div>
-        <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
           アクションユニット活性率（閾値5%超の割合）
         </div>
         <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.52 0.015 250)', marginBottom: '1rem' }}>
@@ -139,7 +139,7 @@ export default function ActionUnitsSection({ data }: Props) {
       {/* AU Details Table */}
       <div className="metric-card">
         <div className="section-label mb-3">AU REFERENCE TABLE</div>
-        <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
           アクションユニット詳細一覧
         </div>
         <div className="overflow-x-auto">
@@ -197,14 +197,14 @@ export default function ActionUnitsSection({ data }: Props) {
       {/* Head Pose */}
       <div className="metric-card">
         <div className="section-label mb-3">HEAD POSE ANALYSIS</div>
-        <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
           頭部姿勢分析（Pitch / Yaw / Roll）
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {headPoseData.map((pose, i) => (
             <div key={i} className="p-4 rounded-lg" style={{ background: 'oklch(0.97 0.003 80)', border: '1px solid oklch(0.92 0.004 80)' }}>
               <div className="section-label mb-2">{pose.name}</div>
-              <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.25 0.02 250)', lineHeight: 1 }}>
+              <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.25 0.02 250)', lineHeight: 1 }}>
                 {pose.mean.toFixed(2)}°
               </div>
               <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', color: 'oklch(0.52 0.015 250)', marginTop: '4px' }}>

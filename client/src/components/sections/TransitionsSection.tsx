@@ -50,7 +50,7 @@ export default function TransitionsSection({ data }: Props) {
       {/* Header */}
       <div>
         <div className="section-label mb-1">EMOTION TRANSITIONS</div>
-        <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.15 0.02 250)' }}>
+        <h2 style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.15 0.02 250)' }}>
           感情遷移分析
         </h2>
         <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.52 0.015 250)', marginTop: '0.25rem' }}>
@@ -61,7 +61,7 @@ export default function TransitionsSection({ data }: Props) {
       {/* Transition Matrix */}
       <div className="metric-card">
         <div className="section-label mb-3">TRANSITION MATRIX</div>
-        <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
           感情遷移行列
         </div>
         <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.52 0.015 250)', marginBottom: '1rem' }}>
@@ -121,7 +121,7 @@ export default function TransitionsSection({ data }: Props) {
       {/* Top Transitions */}
       <div className="metric-card">
         <div className="section-label mb-3">TOP TRANSITIONS</div>
-        <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
           主要な感情遷移パターン（上位10件）
         </div>
         <div className="space-y-2">
@@ -152,7 +152,7 @@ export default function TransitionsSection({ data }: Props) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="metric-card">
           <div className="section-label mb-3">DURATION ANALYSIS</div>
-          <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
+          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
             感情状態の平均持続時間
           </div>
           <ResponsiveContainer width="100%" height={220}>
@@ -175,7 +175,7 @@ export default function TransitionsSection({ data }: Props) {
 
         <div className="metric-card">
           <div className="section-label mb-3">TOTAL DURATION</div>
-          <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
+          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
             感情状態の累積時間
           </div>
           <ResponsiveContainer width="100%" height={220}>
@@ -200,7 +200,7 @@ export default function TransitionsSection({ data }: Props) {
       {/* Duration Stats Table */}
       <div className="metric-card">
         <div className="section-label mb-3">DURATION STATISTICS</div>
-        <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
           感情持続時間の詳細統計
         </div>
         <div className="overflow-x-auto">

@@ -55,7 +55,7 @@ export default function EngagementSection({ data }: Props) {
       {/* Header */}
       <div>
         <div className="section-label mb-1">ENGAGEMENT ANALYSIS</div>
-        <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.15 0.02 250)' }}>
+        <h2 style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.15 0.02 250)' }}>
           Engagement 詳細分析
         </h2>
         <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.52 0.015 250)', marginTop: '0.25rem' }}>
@@ -74,7 +74,7 @@ export default function EngagementSection({ data }: Props) {
           <div key={i} className="metric-card">
             <div className="section-label mb-2">{m.label}</div>
             <div className="flex items-baseline gap-1">
-              <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.75rem', color: m.color, lineHeight: 1 }}>
+              <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.75rem', color: m.color, lineHeight: 1 }}>
                 {m.value}
               </span>
               <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.7rem', color: 'oklch(0.52 0.015 250)' }}>
@@ -90,7 +90,7 @@ export default function EngagementSection({ data }: Props) {
         {/* Distribution */}
         <div className="metric-card">
           <div className="section-label mb-3">DISTRIBUTION</div>
-          <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
+          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
             Engagementレベル分布
           </div>
           <ResponsiveContainer width="100%" height={220}>
@@ -114,7 +114,7 @@ export default function EngagementSection({ data }: Props) {
         {/* Correlation */}
         <div className="metric-card">
           <div className="section-label mb-3">CORRELATIONS</div>
-          <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
+          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
             Engagementと各指標の相関係数
           </div>
           <ResponsiveContainer width="100%" height={220}>
@@ -139,7 +139,7 @@ export default function EngagementSection({ data }: Props) {
       {/* Engagement vs Valence Scatter */}
       <div className="metric-card">
         <div className="section-label mb-3">ENGAGEMENT × VALENCE</div>
-        <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
           Engagement × Valence 散布図
         </div>
         <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.52 0.015 250)', marginBottom: '1rem' }}>
@@ -186,7 +186,7 @@ export default function EngagementSection({ data }: Props) {
       {/* High vs Low Engagement Profile */}
       <div className="metric-card">
         <div className="section-label mb-3">EMOTION PROFILE BY ENGAGEMENT</div>
-        <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
           高/低Engagement時の感情プロファイル比較
         </div>
         <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.52 0.015 250)', marginBottom: '1rem' }}>
@@ -212,7 +212,7 @@ export default function EngagementSection({ data }: Props) {
       {engDynamics && (
         <div className="metric-card">
           <div className="section-label mb-3">AFFECT DYNAMICS</div>
-          <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
+          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
             Engagementの動態指標（学術的分析）
           </div>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
