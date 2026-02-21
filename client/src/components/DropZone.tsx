@@ -223,8 +223,8 @@ export default function DropZone({ onDataLoaded }: DropZoneProps) {
         </div>
         <div className="grid grid-cols-3 gap-3">
           {[
-            { label: '感情スコア', items: ['anger', 'joy', 'sadness', 'fear', '...'] },
-            { label: '特殊指標', items: ['engagement', 'valence', 'attention'] },
+            { label: '表情指標', items: ['anger', 'joy', 'sadness', 'attention', '...'] },
+            { label: '特殊指標', items: ['engagement', 'valence'] },
             { label: 'アクションユニット', items: ['smile', 'brow raise', 'eye closure', '...'] },
           ].map(group => (
             <div key={group.label}>
