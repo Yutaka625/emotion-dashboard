@@ -1,3 +1,10 @@
+/* 
+ * DESIGN PHILOSOPHY: Neuro-Signal Interface
+ * Inspired by neuroscience / biomedical signal monitoring equipment
+ * Warm off-white background + vivid signal colors for data emphasis
+ * Bold Syne typography + precise Roboto Mono for data values
+ */
+
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -40,77 +47,75 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  
+  /* Custom signal colors */
+  --color-signal-green: var(--signal-green);
+  --color-signal-red: var(--signal-red);
+  --color-signal-blue: var(--signal-blue);
+  --color-signal-yellow: var(--signal-yellow);
+  --color-signal-purple: var(--signal-purple);
 }
 
 :root {
-  --primary: var(--color-blue-700);
-  --primary-foreground: var(--color-blue-50);
-  --sidebar-primary: var(--color-blue-600);
-  --sidebar-primary-foreground: var(--color-blue-50);
-  --chart-1: var(--color-blue-300);
-  --chart-2: var(--color-blue-500);
-  --chart-3: var(--color-blue-600);
-  --chart-4: var(--color-blue-700);
-  --chart-5: var(--color-blue-800);
-  --radius: 0.65rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.235 0.015 65);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.235 0.015 65);
+  /* Neuro-Signal Interface - Light Theme */
+  --radius: 0.5rem;
+  
+  /* Base colors */
+  --background: oklch(0.98 0.005 80);        /* warm off-white */
+  --foreground: oklch(0.15 0.02 250);         /* deep navy */
+  --card: oklch(1 0 0);                        /* pure white cards */
+  --card-foreground: oklch(0.15 0.02 250);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.235 0.015 65);
-  --secondary: oklch(0.98 0.001 286.375);
-  --secondary-foreground: oklch(0.4 0.015 65);
-  --muted: oklch(0.967 0.001 286.375);
-  --muted-foreground: oklch(0.552 0.016 285.938);
-  --accent: oklch(0.967 0.001 286.375);
-  --accent-foreground: oklch(0.141 0.005 285.823);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.92 0.004 286.32);
-  --input: oklch(0.92 0.004 286.32);
-  --ring: oklch(0.623 0.214 259.815);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.235 0.015 65);
-  --sidebar-accent: oklch(0.967 0.001 286.375);
-  --sidebar-accent-foreground: oklch(0.141 0.005 285.823);
-  --sidebar-border: oklch(0.92 0.004 286.32);
-  --sidebar-ring: oklch(0.623 0.214 259.815);
-}
-
-.dark {
-  --primary: var(--color-blue-700);
-  --primary-foreground: var(--color-blue-50);
-  --sidebar-primary: var(--color-blue-500);
-  --sidebar-primary-foreground: var(--color-blue-50);
-  --background: oklch(0.141 0.005 285.823);
-  --foreground: oklch(0.85 0.005 65);
-  --card: oklch(0.21 0.006 285.885);
-  --card-foreground: oklch(0.85 0.005 65);
-  --popover: oklch(0.21 0.006 285.885);
-  --popover-foreground: oklch(0.85 0.005 65);
-  --secondary: oklch(0.24 0.006 286.033);
-  --secondary-foreground: oklch(0.7 0.005 65);
-  --muted: oklch(0.274 0.006 286.033);
-  --muted-foreground: oklch(0.705 0.015 286.067);
-  --accent: oklch(0.274 0.006 286.033);
-  --accent-foreground:  oklch(0.92 0.005 65);
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.488 0.243 264.376);
-  --chart-1: var(--color-blue-300);
-  --chart-2: var(--color-blue-500);
-  --chart-3: var(--color-blue-600);
-  --chart-4: var(--color-blue-700);
-  --chart-5: var(--color-blue-800);
-  --sidebar: oklch(0.21 0.006 285.885);
-  --sidebar-foreground: oklch(0.85 0.005 65);
-  --sidebar-accent: oklch(0.274 0.006 286.033);
-  --sidebar-accent-foreground:  oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.488 0.243 264.376);
+  --popover-foreground: oklch(0.15 0.02 250);
+  
+  /* Primary: Deep forest green */
+  --primary: oklch(0.32 0.08 160);
+  --primary-foreground: oklch(0.97 0.005 80);
+  
+  /* Secondary: Warm gray */
+  --secondary: oklch(0.94 0.005 80);
+  --secondary-foreground: oklch(0.35 0.02 250);
+  
+  /* Muted */
+  --muted: oklch(0.95 0.003 80);
+  --muted-foreground: oklch(0.52 0.015 250);
+  
+  /* Accent: Terracotta */
+  --accent: oklch(0.92 0.015 60);
+  --accent-foreground: oklch(0.25 0.05 40);
+  
+  /* Destructive */
+  --destructive: oklch(0.58 0.22 25);
+  --destructive-foreground: oklch(0.97 0 0);
+  
+  /* Borders */
+  --border: oklch(0.88 0.008 80);
+  --input: oklch(0.88 0.008 80);
+  --ring: oklch(0.55 0.12 160);
+  
+  /* Charts - emotion color palette */
+  --chart-1: oklch(0.62 0.18 160);   /* signal green */
+  --chart-2: oklch(0.62 0.18 25);    /* signal red */
+  --chart-3: oklch(0.62 0.18 250);   /* signal blue */
+  --chart-4: oklch(0.75 0.15 80);    /* signal yellow */
+  --chart-5: oklch(0.55 0.18 300);   /* signal purple */
+  
+  /* Signal colors */
+  --signal-green: oklch(0.62 0.18 160);
+  --signal-red: oklch(0.62 0.18 25);
+  --signal-blue: oklch(0.62 0.18 250);
+  --signal-yellow: oklch(0.75 0.15 80);
+  --signal-purple: oklch(0.55 0.18 300);
+  
+  /* Sidebar */
+  --sidebar: oklch(0.15 0.02 250);
+  --sidebar-foreground: oklch(0.88 0.005 80);
+  --sidebar-primary: oklch(0.62 0.18 160);
+  --sidebar-primary-foreground: oklch(0.15 0.02 250);
+  --sidebar-accent: oklch(0.22 0.025 250);
+  --sidebar-accent-foreground: oklch(0.88 0.005 80);
+  --sidebar-border: oklch(0.25 0.02 250);
+  --sidebar-ring: oklch(0.55 0.12 160);
 }
 
 @layer base {
@@ -119,6 +124,13 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: 'Outfit', sans-serif;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Syne', sans-serif;
+  }
+  .font-mono, .data-value {
+    font-family: 'Roboto Mono', monospace;
   }
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
@@ -134,24 +146,39 @@
 }
 
 @layer components {
-  /**
-   * Custom container utility that centers content and adds responsive padding.
-   *
-   * This overrides Tailwind's default container behavior to:
-   * - Auto-center content (mx-auto)
-   * - Add responsive horizontal padding
-   * - Set max-width for large screens
-   *
-   * Usage: <div className="container">...</div>
-   *
-   * For custom widths, use max-w-* utilities directly:
-   * <div className="max-w-6xl mx-auto px-4">...</div>
-   */
+  /* Neuro-Signal Interface Design System */
+  .metric-card {
+    background: oklch(1 0 0);
+    border: 1px solid oklch(0.91 0.006 80);
+    border-radius: 10px;
+    padding: 1.25rem;
+    box-shadow: 0 1px 3px oklch(0.15 0.02 250 / 0.04), 0 4px 12px oklch(0.15 0.02 250 / 0.03);
+    transition: box-shadow 0.2s ease;
+  }
+  .metric-card:hover {
+    box-shadow: 0 2px 6px oklch(0.15 0.02 250 / 0.07), 0 8px 20px oklch(0.15 0.02 250 / 0.05);
+  }
+  .section-label {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 0.62rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    color: oklch(0.52 0.015 250);
+    text-transform: uppercase;
+  }
+  @keyframes signal-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.85); }
+  }
+  .signal-pulse {
+    animation: signal-pulse 2s ease-in-out infinite;
+  }
+
   .container {
     width: 100%;
     margin-left: auto;
     margin-right: auto;
-    padding-left: 1rem; /* 16px - mobile padding */
+    padding-left: 1rem;
     padding-right: 1rem;
   }
 
@@ -162,16 +189,86 @@
 
   @media (min-width: 640px) {
     .container {
-      padding-left: 1.5rem; /* 24px - tablet padding */
+      padding-left: 1.5rem;
       padding-right: 1.5rem;
     }
   }
 
   @media (min-width: 1024px) {
     .container {
-      padding-left: 2rem; /* 32px - desktop padding */
+      padding-left: 2rem;
       padding-right: 2rem;
-      max-width: 1280px; /* Standard content width */
+      max-width: 1400px;
     }
+  }
+  
+  /* Signal wave animation */
+  @keyframes signal-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  
+  @keyframes scan-line {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+  
+  @keyframes count-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .signal-pulse {
+    animation: signal-pulse 2s ease-in-out infinite;
+  }
+  
+  .scan-line {
+    animation: scan-line 3s linear infinite;
+  }
+  
+  .count-up {
+    animation: count-up 0.6s ease-out forwards;
+  }
+  
+  /* Emotion color classes */
+  .emotion-anger { color: oklch(0.55 0.22 25); }
+  .emotion-contempt { color: oklch(0.55 0.18 300); }
+  .emotion-disgust { color: oklch(0.50 0.18 140); }
+  .emotion-fear { color: oklch(0.55 0.18 280); }
+  .emotion-joy { color: oklch(0.72 0.18 80); }
+  .emotion-sadness { color: oklch(0.55 0.15 250); }
+  .emotion-surprise { color: oklch(0.65 0.18 200); }
+  .emotion-sentimentality { color: oklch(0.60 0.18 340); }
+  .emotion-confusion { color: oklch(0.55 0.12 60); }
+  .emotion-neutral { color: oklch(0.55 0.01 250); }
+  
+  .bg-emotion-anger { background-color: oklch(0.55 0.22 25); }
+  .bg-emotion-contempt { background-color: oklch(0.55 0.18 300); }
+  .bg-emotion-disgust { background-color: oklch(0.50 0.18 140); }
+  .bg-emotion-fear { background-color: oklch(0.55 0.18 280); }
+  .bg-emotion-joy { background-color: oklch(0.72 0.18 80); }
+  .bg-emotion-sadness { background-color: oklch(0.55 0.15 250); }
+  .bg-emotion-surprise { background-color: oklch(0.65 0.18 200); }
+  .bg-emotion-sentimentality { background-color: oklch(0.60 0.18 340); }
+  .bg-emotion-confusion { background-color: oklch(0.55 0.12 60); }
+  .bg-emotion-neutral { background-color: oklch(0.55 0.01 250); }
+  
+  /* Card styles */
+  .metric-card {
+    @apply bg-card rounded-lg border border-border p-5 shadow-sm;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+  .metric-card:hover {
+    box-shadow: 0 4px 20px oklch(0.15 0.02 250 / 0.08);
+    transform: translateY(-1px);
+  }
+  
+  /* Section header */
+  .section-label {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: oklch(0.52 0.015 250);
   }
 }
