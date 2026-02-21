@@ -8,7 +8,8 @@ import type { DashboardData, EmotionStats, AffectDynamics } from './types';
 
 const EMOTION_COLS = ['anger', 'contempt', 'disgust', 'fear', 'joy', 'sadness', 'surprise', 'sentimentality', 'confusion', 'neutral'];
 const NON_NEUTRAL = ['anger', 'contempt', 'disgust', 'fear', 'joy', 'sadness', 'surprise', 'sentimentality', 'confusion'];
-const SPECIAL_COLS = ['engagement', 'valence', 'attention'];
+const SPECIAL_COLS = ['engagement', 'valence'];
+const FACIAL_COLS = [...EMOTION_COLS, 'attention']; // attention treated as facial expression metric
 const ACTION_UNIT_COLS = [
   'inner brow raise', 'brow raise', 'brow furrow', 'eye widen', 'cheek raise',
   'lid tighten', 'nose wrinkle', 'upper lip raise', 'dimpler', 'lip corner depressor',
@@ -208,6 +209,8 @@ export function analyzeCSV(csvText: string, filename: string): DashboardData {
   for (const col of SPECIAL_COLS) {
     special_stats[col] = computeStats(df.map(r => r[col] as number));
   }
+  // attention is a facial expression metric — add to emotion_stats
+  emotion_stats['attention'] = computeStats(df.map(r => r['attention'] as number));
 
   // ---- 4. Timeseries full (downsample to max 600 points for performance) ----
   const maxPoints = 600;
@@ -339,7 +342,7 @@ export function analyzeCSV(csvText: string, filename: string): DashboardData {
 
   // ---- 13. Affect dynamics ----
   const affect_dynamics: DashboardData['affect_dynamics'] = {};
-  for (const col of [...SPECIAL_COLS, ...NON_NEUTRAL.slice(0, 5)]) {
+  for (const col of [...SPECIAL_COLS, 'attention', ...NON_NEUTRAL.slice(0, 5)]) {
     affect_dynamics[col] = computeAffectDynamics(df.map(r => r[col] as number));
   }
 

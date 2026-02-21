@@ -61,6 +61,8 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
 
 export default function OverviewSection({ data }: Props) {
   const { meta, special_stats, dominant_emotion_counts, dominant_emotion_pct, emotion_stats } = data;
+  // attention is treated as a facial expression metric (in emotion_stats)
+  const attentionStats = emotion_stats['attention'] || special_stats['attention'];
 
   const dominantPieData = useMemo(() => {
     return Object.entries(dominant_emotion_counts)
@@ -83,7 +85,7 @@ export default function OverviewSection({ data }: Props) {
 
   const engMean = special_stats.engagement?.mean || 0;
   const valMean = special_stats.valence?.mean || 0;
-  const attMean = special_stats.attention?.mean || 0;
+  const attMean = attentionStats?.mean || 0;
   const engMax = special_stats.engagement?.max || 0;
 
   const topEmotion = Object.entries(dominant_emotion_counts).sort((a, b) => b[1] - a[1])[0];
@@ -149,7 +151,7 @@ export default function OverviewSection({ data }: Props) {
           unit="%"
           icon={<Eye size={16} />}
           color="oklch(0.55 0.18 300)"
-          sub={`最大: ${special_stats.attention?.max.toFixed(1)}%`}
+          sub={`最大: ${attentionStats?.max.toFixed(1)}%`}
         />
         <MetricCard
           label="主要感情"
@@ -277,7 +279,7 @@ export default function OverviewSection({ data }: Props) {
           {[
             { label: '記録日時', value: `${meta.recording_date} ${meta.recording_time}` },
             { label: '平均フレームレート', value: `${meta.fps_avg.toFixed(2)} fps` },
-            { label: 'Attention 最大値', value: `${special_stats.attention?.max.toFixed(1)}%` },
+            { label: 'Attention 最大値', value: `${attentionStats?.max.toFixed(1)}%` },
             { label: 'Attention 平均値', value: `${attMean.toFixed(2)}%` },
           ].map((item, i) => (
             <div key={i}>

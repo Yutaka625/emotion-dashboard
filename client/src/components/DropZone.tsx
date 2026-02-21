@@ -4,7 +4,8 @@
  */
 
 import { useState, useCallback, useRef } from 'react';
-import { Upload, FileText, AlertCircle, Loader2, Activity } from 'lucide-react';
+import { Upload, FileText, AlertCircle } from 'lucide-react';
+import FaceScanIcon from '@/components/FaceScanIcon';
 import { analyzeCSV } from '@/lib/csvAnalyzer';
 import type { DashboardData } from '@/lib/types';
 
@@ -80,17 +81,17 @@ export default function DropZone({ onDataLoaded }: DropZoneProps) {
       {/* Header */}
       <div className="mb-12 text-center">
         <div className="flex items-center justify-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'oklch(0.15 0.02 250)' }}>
-            <Activity size={20} style={{ color: 'oklch(0.62 0.18 160)' }} />
-          </div>
-          <div>
-            <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.15 0.02 250)', letterSpacing: '-0.02em' }}>
-              NEURO
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'oklch(0.15 0.02 250)' }}>
+              <FaceScanIcon size={24} color="oklch(0.88 0.005 80)" scanColor="oklch(0.62 0.18 160)" />
             </div>
-            <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.55rem', color: 'oklch(0.52 0.015 250)', letterSpacing: '0.15em' }}>
-              SIGNAL ANALYZER
+            <div>
+              <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.15 0.02 250)', letterSpacing: '-0.02em' }}>
+                emoSense
+              </div>
+              <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.55rem', color: 'oklch(0.52 0.015 250)', letterSpacing: '0.1em' }}>
+                Facial Expression Analyzer
+              </div>
             </div>
-          </div>
         </div>
         <h1 style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1.75rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
           感情分析ダッシュボード

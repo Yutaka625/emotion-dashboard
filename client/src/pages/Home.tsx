@@ -16,7 +16,8 @@ import EmotionsSection from '@/components/sections/EmotionsSection';
 import TransitionsSection from '@/components/sections/TransitionsSection';
 import AcademicSection from '@/components/sections/AcademicSection';
 import ActionUnitsSection from '@/components/sections/ActionUnitsSection';
-import { Activity, Upload, X } from 'lucide-react';
+import { Upload, X } from 'lucide-react';
+import FaceScanIcon from '@/components/FaceScanIcon';
 
 export default function Home() {
   const [data, setData] = useState<DashboardData | null>(null);
@@ -140,9 +141,12 @@ export default function Home() {
           }}
         >
           <div className="flex items-center gap-3">
-            <Activity size={18} style={{ color: 'oklch(0.62 0.18 160)' }} />
-            <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600, fontSize: '0.9rem', color: 'oklch(0.15 0.02 250)' }}>
-              感情分析ダッシュボード
+            <FaceScanIcon size={20} color="oklch(0.35 0.02 250)" scanColor="oklch(0.52 0.18 160)" />
+            <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '0.9rem', color: 'oklch(0.15 0.02 250)' }}>
+              emoSense
+            </span>
+            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.52 0.015 250)' }}>
+              Facial Expression Analyzer
             </span>
             <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.52 0.015 250)' }}>
               / {activeSection.toUpperCase()}

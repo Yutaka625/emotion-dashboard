@@ -5,7 +5,8 @@
  */
 
 import { useState } from 'react';
-import { Activity, BarChart2, Brain, Clock, GitBranch, Grid, TrendingUp, Zap, ChevronRight } from 'lucide-react';
+import { BarChart2, Brain, Clock, GitBranch, Grid, TrendingUp, Zap, ChevronRight, Activity } from 'lucide-react';
+import FaceScanIcon from '@/components/FaceScanIcon';
 
 interface NavItem {
   id: string;
@@ -46,12 +47,15 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-5" style={{ borderBottom: '1px solid oklch(0.22 0.02 250)' }}>
         {!collapsed && (
-          <div>
-            <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '0.85rem', color: 'oklch(0.88 0.005 80)', letterSpacing: '0.05em' }}>
-              NEURO
-            </div>
-            <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.62 0.18 160)', letterSpacing: '0.1em' }}>
-              SIGNAL ANALYZER
+          <div className="flex items-center gap-2.5">
+            <FaceScanIcon size={28} />
+            <div>
+              <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '0.85rem', color: 'oklch(0.88 0.005 80)', letterSpacing: '-0.01em' }}>
+                emoSense
+              </div>
+              <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.52rem', color: 'oklch(0.62 0.18 160)', letterSpacing: '0.06em', lineHeight: 1.4 }}>
+                Facial Expression Analyzer
+              </div>
             </div>
           </div>
         )}
