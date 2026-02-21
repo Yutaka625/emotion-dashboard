@@ -279,14 +279,19 @@ export default function OverviewSection({ data }: Props) {
           {[
             { label: '記録日時', value: `${meta.recording_date} ${meta.recording_time}` },
             { label: '平均フレームレート', value: `${meta.fps_avg.toFixed(2)} fps` },
-            { label: 'Attention 最大値', value: `${attentionStats?.max.toFixed(1)}%` },
-            { label: 'Attention 平均値', value: `${attMean.toFixed(2)}%` },
+            { label: '顔検出率', value: `${meta.face_detection_rate.toFixed(1)}%`, note: 'データありフレーム割合' },
+            { label: '感情検出率', value: `${meta.emotion_detection_rate.toFixed(1)}%`, note: '少なくと1感情>0の割合' },
           ].map((item, i) => (
             <div key={i}>
               <div className="section-label mb-1">{item.label}</div>
               <div style={{ fontFamily: 'Roboto Mono, monospace', fontWeight: 600, fontSize: '0.9rem', color: 'oklch(0.25 0.02 250)' }}>
                 {item.value}
               </div>
+              {'note' in item && (
+                <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.65rem', color: 'oklch(0.52 0.015 250)', marginTop: '2px' }}>
+                  {(item as { note: string }).note}
+                </div>
+              )}
             </div>
           ))}
         </div>

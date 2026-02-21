@@ -114,6 +114,8 @@ export interface DashboardData {
     end_time: number;
     recording_date: string;
     recording_time: string;
+    face_detection_rate: number;   // % of frames where face data exists (value can be 0)
+    emotion_detection_rate: number; // % of frames where at least one emotion > 0
   };
   emotion_stats: Record<string, EmotionStats>;
   special_stats: Record<string, SpecialStats>;

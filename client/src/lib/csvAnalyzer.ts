@@ -186,6 +186,22 @@ export function analyzeCSV(csvText: string, filename: string): DashboardData {
   const recordingTime = fnMatch ? `${fnMatch[4]}:${fnMatch[5]}:${fnMatch[6]}` : '';
 
   // ---- 1. Meta ----
+  // Face detection rate: frames where any face data column is present (not empty string in raw CSV)
+  // We use the raw rows to detect whether the row has any face data (emotion or AU columns not empty)
+  const faceDetectedCount = rows.filter(r => {
+    // A frame has face data if at least one emotion column is non-empty (even if 0)
+    return EMOTION_COLS.some(col => r[col] !== undefined && r[col].trim() !== '');
+  }).length;
+  const totalRawRows = rows.length;
+
+  // Emotion detection rate: frames where at least one non-neutral emotion > 0
+  const emotionDetectedCount = df.filter(r => {
+    return NON_NEUTRAL.some(col => (r[col] as number) > 0);
+  }).length;
+
+  const face_detection_rate = round((faceDetectedCount / totalRawRows) * 100, 2);
+  const emotion_detection_rate = round((emotionDetectedCount / n) * 100, 2);
+
   const meta: DashboardData['meta'] = {
     filename,
     total_frames: n,
@@ -196,6 +212,8 @@ export function analyzeCSV(csvText: string, filename: string): DashboardData {
     end_time: round(times[n - 1], 3),
     recording_date: recordingDate,
     recording_time: recordingTime,
+    face_detection_rate,
+    emotion_detection_rate,
   };
 
   // ---- 2. Emotion stats ----
