@@ -48,7 +48,7 @@ export default function AcademicSection({ data }: Props) {
         <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.15 0.02 250)' }}>
           学術的分析
         </h2>
-        <p style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.85rem', color: 'oklch(0.52 0.015 250)', marginTop: '0.25rem' }}>
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.52 0.015 250)', marginTop: '0.25rem' }}>
           Affect Dynamics・Circumplex Model・相関分析など学術研究の視点からの多角的分析
         </p>
       </div>
@@ -87,7 +87,7 @@ export default function AcademicSection({ data }: Props) {
                 </div>
               </div>
             </div>
-            <p style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.75rem', color: 'oklch(0.45 0.015 250)', lineHeight: 1.6 }}>
+            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.45 0.015 250)', lineHeight: 1.6 }}>
               {f.desc}
             </p>
           </div>
@@ -100,17 +100,17 @@ export default function AcademicSection({ data }: Props) {
         <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
           感情変動性（Standard Deviation）
         </div>
-        <p style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.78rem', color: 'oklch(0.52 0.015 250)', marginBottom: '1rem' }}>
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.52 0.015 250)', marginBottom: '1rem' }}>
           高い変動性は感情の揺れ幅が大きいことを示します。Fearの変動性が最も高く、Engagementも高い変動性を示しています。
         </p>
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={dynamicsCompare} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.92 0.004 80)" vertical={false} />
-            <XAxis dataKey="name" tick={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.68rem', fill: 'oklch(0.52 0.015 250)' }} />
+            <XAxis dataKey="name" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.68rem', fill: 'oklch(0.52 0.015 250)' }} />
             <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.52 0.015 250)' }} />
             <Tooltip
               formatter={(v: number) => [v.toFixed(4), 'SD（変動性）']}
-              contentStyle={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.88 0.008 80)', borderRadius: '6px' }}
+              contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.88 0.008 80)', borderRadius: '6px' }}
             />
             <Bar dataKey="sd" radius={[4, 4, 0, 0]}>
               {dynamicsCompare.map((entry, i) => (
@@ -127,17 +127,17 @@ export default function AcademicSection({ data }: Props) {
         <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
           感情慣性（1次自己相関係数）
         </div>
-        <p style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.78rem', color: 'oklch(0.52 0.015 250)', marginBottom: '1rem' }}>
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.52 0.015 250)', marginBottom: '1rem' }}>
           高い慣性（AR1が1に近い）は感情状態が持続しやすいことを示します。負の値は振動パターンを示します。
         </p>
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={dynamicsCompare} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.92 0.004 80)" vertical={false} />
-            <XAxis dataKey="name" tick={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.68rem', fill: 'oklch(0.52 0.015 250)' }} />
+            <XAxis dataKey="name" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.68rem', fill: 'oklch(0.52 0.015 250)' }} />
             <YAxis domain={[-1, 1]} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.52 0.015 250)' }} />
             <Tooltip
               formatter={(v: number) => [v.toFixed(4), 'AR1（慣性）']}
-              contentStyle={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.88 0.008 80)', borderRadius: '6px' }}
+              contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.88 0.008 80)', borderRadius: '6px' }}
             />
             <ReferenceLine y={0} stroke="oklch(0.52 0.015 250)" strokeDasharray="4 4" />
             <Bar dataKey="ar1" radius={[4, 4, 0, 0]}>
@@ -155,7 +155,7 @@ export default function AcademicSection({ data }: Props) {
         <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
           感情指標間の相関行列
         </div>
-        <p style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.78rem', color: 'oklch(0.52 0.015 250)', marginBottom: '1rem' }}>
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.52 0.015 250)', marginBottom: '1rem' }}>
           色の濃さは相関の強さを示します。緑：正の相関、赤：負の相関。
         </p>
         <div className="overflow-x-auto">
@@ -164,7 +164,7 @@ export default function AcademicSection({ data }: Props) {
               <tr>
                 <th className="w-16 pb-1" />
                 {corrLabels.map(label => (
-                  <th key={label} className="pb-1 px-0.5 text-center" style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.6rem', color: EMOTION_COLORS[label] || 'oklch(0.52 0.015 250)', minWidth: '44px', writingMode: 'vertical-rl', height: '60px' }}>
+                  <th key={label} className="pb-1 px-0.5 text-center" style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.6rem', color: EMOTION_COLORS[label] || 'oklch(0.52 0.015 250)', minWidth: '44px', writingMode: 'vertical-rl', height: '60px' }}>
                     {EMOTION_LABELS_JA[label] || label}
                   </th>
                 ))}
@@ -173,7 +173,7 @@ export default function AcademicSection({ data }: Props) {
             <tbody>
               {corrLabels.map((rowLabel, ri) => (
                 <tr key={rowLabel}>
-                  <td className="py-0.5 pr-2" style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.62rem', color: EMOTION_COLORS[rowLabel] || 'oklch(0.52 0.015 250)', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                  <td className="py-0.5 pr-2" style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.62rem', color: EMOTION_COLORS[rowLabel] || 'oklch(0.52 0.015 250)', fontWeight: 600, whiteSpace: 'nowrap' }}>
                     {EMOTION_LABELS_JA[rowLabel] || rowLabel}
                   </td>
                   {corrLabels.map((colLabel, ci) => {
@@ -213,7 +213,7 @@ export default function AcademicSection({ data }: Props) {
         <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
           感情の円環モデル象限分析（Russell, 1980）
         </div>
-        <p style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.78rem', color: 'oklch(0.52 0.015 250)', marginBottom: '1.5rem' }}>
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.52 0.015 250)', marginBottom: '1.5rem' }}>
           X軸：Valence（感情価）、Y軸：Engagement（覚醒度代理）。各象限のフレーム数と割合を示します。
         </p>
         <div className="relative" style={{ height: '280px' }}>
@@ -235,10 +235,10 @@ export default function AcademicSection({ data }: Props) {
                   <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: q.color, marginTop: '2px' }}>
                     {pct}%
                   </div>
-                  <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 600, fontSize: '0.75rem', color: 'oklch(0.25 0.02 250)', marginTop: '4px', textAlign: 'center' }}>
+                  <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600, fontSize: '0.75rem', color: 'oklch(0.25 0.02 250)', marginTop: '4px', textAlign: 'center' }}>
                     {q.label}
                   </div>
-                  <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.68rem', color: 'oklch(0.52 0.015 250)', textAlign: 'center' }}>
+                  <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.68rem', color: 'oklch(0.52 0.015 250)', textAlign: 'center' }}>
                     {q.desc}
                   </div>
                 </div>
@@ -294,7 +294,7 @@ export default function AcademicSection({ data }: Props) {
               <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 600, fontSize: '0.85rem', color: 'oklch(0.15 0.02 250)', marginBottom: '6px' }}>
                 {item.heading}
               </div>
-              <p style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.78rem', color: 'oklch(0.42 0.015 250)', lineHeight: 1.7 }}>
+              <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.42 0.015 250)', lineHeight: 1.7 }}>
                 {item.content}
               </p>
             </div>

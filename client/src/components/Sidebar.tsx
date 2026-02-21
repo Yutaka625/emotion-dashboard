@@ -111,7 +111,7 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
               </span>
               {!collapsed && (
                 <div className="overflow-hidden">
-                  <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 500, fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
+                  <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 500, fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
                     {item.label}
                   </div>
                   <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.42 0.01 250)', whiteSpace: 'nowrap', marginTop: '1px' }}>

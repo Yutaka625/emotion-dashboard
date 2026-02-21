@@ -2,7 +2,7 @@
  * DESIGN PHILOSOPHY: Neuro-Signal Interface
  * Inspired by neuroscience / biomedical signal monitoring equipment
  * Warm off-white background + vivid signal colors for data emphasis
- * Bold Syne typography + precise Roboto Mono for data values
+ * Noto Sans JP for Japanese text + Syne for headings + Roboto Mono for data values
  */
 
 @import "tailwindcss";
@@ -124,7 +124,7 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Noto Sans JP', sans-serif;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Syne', sans-serif;

@@ -53,7 +53,7 @@ export default function TransitionsSection({ data }: Props) {
         <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.15 0.02 250)' }}>
           感情遷移分析
         </h2>
-        <p style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.85rem', color: 'oklch(0.52 0.015 250)', marginTop: '0.25rem' }}>
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.52 0.015 250)', marginTop: '0.25rem' }}>
           感情状態間の遷移パターンと持続時間の分析
         </p>
       </div>
@@ -64,7 +64,7 @@ export default function TransitionsSection({ data }: Props) {
         <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
           感情遷移行列
         </div>
-        <p style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.78rem', color: 'oklch(0.52 0.015 250)', marginBottom: '1rem' }}>
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.52 0.015 250)', marginBottom: '1rem' }}>
           行：遷移元の感情、列：遷移先の感情。セルの色の濃さは遷移頻度を示します。
         </p>
         <div className="overflow-x-auto">
@@ -75,7 +75,7 @@ export default function TransitionsSection({ data }: Props) {
                   FROM↓ TO→
                 </th>
                 {NON_NEUTRAL_EMOTIONS.map(e => (
-                  <th key={e} className="pb-2 px-1 text-center" style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.65rem', color: EMOTION_COLORS[e], minWidth: '52px' }}>
+                  <th key={e} className="pb-2 px-1 text-center" style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.65rem', color: EMOTION_COLORS[e], minWidth: '52px' }}>
                     {EMOTION_LABELS_JA[e]}
                   </th>
                 ))}
@@ -84,7 +84,7 @@ export default function TransitionsSection({ data }: Props) {
             <tbody>
               {NON_NEUTRAL_EMOTIONS.map(fromE => (
                 <tr key={fromE}>
-                  <td className="py-1 pr-2" style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.65rem', color: EMOTION_COLORS[fromE], fontWeight: 600, whiteSpace: 'nowrap' }}>
+                  <td className="py-1 pr-2" style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.65rem', color: EMOTION_COLORS[fromE], fontWeight: 600, whiteSpace: 'nowrap' }}>
                     {EMOTION_LABELS_JA[fromE]}
                   </td>
                   {NON_NEUTRAL_EMOTIONS.map(toE => {
@@ -130,11 +130,11 @@ export default function TransitionsSection({ data }: Props) {
               <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.52 0.015 250)', width: '20px' }}>
                 #{i + 1}
               </span>
-              <span className="px-2 py-0.5 rounded text-xs" style={{ background: EMOTION_COLORS[t.from] + '20', color: EMOTION_COLORS[t.from], fontFamily: 'Outfit, sans-serif', minWidth: '60px', textAlign: 'center' }}>
+              <span className="px-2 py-0.5 rounded text-xs" style={{ background: EMOTION_COLORS[t.from] + '20', color: EMOTION_COLORS[t.from], fontFamily: 'Noto Sans JP, sans-serif', minWidth: '60px', textAlign: 'center' }}>
                 {EMOTION_LABELS_JA[t.from]}
               </span>
               <span style={{ color: 'oklch(0.55 0.015 250)', fontSize: '0.8rem' }}>→</span>
-              <span className="px-2 py-0.5 rounded text-xs" style={{ background: EMOTION_COLORS[t.to] + '20', color: EMOTION_COLORS[t.to], fontFamily: 'Outfit, sans-serif', minWidth: '60px', textAlign: 'center' }}>
+              <span className="px-2 py-0.5 rounded text-xs" style={{ background: EMOTION_COLORS[t.to] + '20', color: EMOTION_COLORS[t.to], fontFamily: 'Noto Sans JP, sans-serif', minWidth: '60px', textAlign: 'center' }}>
                 {EMOTION_LABELS_JA[t.to]}
               </span>
               <div className="flex-1 h-1.5 rounded-full" style={{ background: 'oklch(0.92 0.004 80)' }}>
@@ -159,10 +159,10 @@ export default function TransitionsSection({ data }: Props) {
             <BarChart data={durationData} layout="vertical" margin={{ top: 5, right: 30, bottom: 5, left: 55 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.92 0.004 80)" horizontal={false} />
               <XAxis type="number" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.52 0.015 250)' }} unit="s" />
-              <YAxis type="category" dataKey="name" tick={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.72rem', fill: 'oklch(0.35 0.015 250)' }} width={50} />
+              <YAxis type="category" dataKey="name" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fill: 'oklch(0.35 0.015 250)' }} width={50} />
               <Tooltip
                 formatter={(v: number) => [`${v.toFixed(3)}秒`, '平均持続時間']}
-                contentStyle={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.88 0.008 80)', borderRadius: '6px' }}
+                contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.88 0.008 80)', borderRadius: '6px' }}
               />
               <Bar dataKey="mean_duration" radius={[0, 4, 4, 0]}>
                 {durationData.map((entry, i) => (
@@ -182,10 +182,10 @@ export default function TransitionsSection({ data }: Props) {
             <BarChart data={durationData} layout="vertical" margin={{ top: 5, right: 30, bottom: 5, left: 55 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.92 0.004 80)" horizontal={false} />
               <XAxis type="number" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.52 0.015 250)' }} unit="s" />
-              <YAxis type="category" dataKey="name" tick={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.72rem', fill: 'oklch(0.35 0.015 250)' }} width={50} />
+              <YAxis type="category" dataKey="name" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fill: 'oklch(0.35 0.015 250)' }} width={50} />
               <Tooltip
                 formatter={(v: number) => [`${v.toFixed(2)}秒`, '累積時間']}
-                contentStyle={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.88 0.008 80)', borderRadius: '6px' }}
+                contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.88 0.008 80)', borderRadius: '6px' }}
               />
               <Bar dataKey="total_duration" radius={[0, 4, 4, 0]}>
                 {durationData.map((entry, i) => (
@@ -225,7 +225,7 @@ export default function TransitionsSection({ data }: Props) {
                     <td className="py-2 pr-4">
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full" style={{ background: row.color }} />
-                        <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 500, fontSize: '0.8rem', color: 'oklch(0.25 0.02 250)' }}>
+                        <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 500, fontSize: '0.8rem', color: 'oklch(0.25 0.02 250)' }}>
                           {row.name}
                         </span>
                       </div>

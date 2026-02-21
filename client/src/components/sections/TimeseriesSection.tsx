@@ -144,7 +144,7 @@ export default function TimeseriesSection({ data }: Props) {
         {payload.slice(0, 8).map((p: any) => (
           <div key={p.dataKey} className="flex items-center gap-2 mb-1">
             <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: p.color }} />
-            <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.7rem', color: 'oklch(0.75 0.005 80)' }}>
+            <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', color: 'oklch(0.75 0.005 80)' }}>
               {p.name}: <span style={{ fontFamily: 'Roboto Mono, monospace', fontWeight: 600 }}>{Number(p.value).toFixed(3)}</span>
             </span>
           </div>
@@ -169,7 +169,7 @@ export default function TimeseriesSection({ data }: Props) {
         <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.15 0.02 250)' }}>
           時系列分析
         </h2>
-        <p style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.85rem', color: 'oklch(0.52 0.015 250)', marginTop: '0.25rem' }}>
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.52 0.015 250)', marginTop: '0.25rem' }}>
           感情スコアおよびEngagement・Valence・Attentionの時間推移 — 5つの可視化モードで多角的に分析
         </p>
       </div>
@@ -272,7 +272,7 @@ export default function TimeseriesSection({ data }: Props) {
             <XAxis dataKey="time" tickFormatter={formatTime} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.52 0.015 250)' }} />
             <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.52 0.015 250)' }} domain={[0, 100]} />
             <Tooltip content={<CustomTooltip />} />
-            <Legend formatter={v => <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.72rem' }}>{v}</span>} />
+            <Legend formatter={v => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem' }}>{v}</span>} />
             {showSpecial.includes('engagement') && (
               <Area type="monotone" dataKey="engagement" stroke={SPECIAL_COLORS.engagement} fill="url(#engGrad)" strokeWidth={1.5} dot={false} name="Engagement" />
             )}
@@ -301,7 +301,7 @@ export default function TimeseriesSection({ data }: Props) {
               onClick={() => setActiveTab(tab.id)}
               className="px-3 py-1.5 rounded-md text-xs transition-all"
               style={{
-                fontFamily: 'Outfit, sans-serif',
+                fontFamily: 'Noto Sans JP, sans-serif',
                 fontWeight: activeTab === tab.id ? 600 : 400,
                 background: activeTab === tab.id ? 'white' : 'transparent',
                 color: activeTab === tab.id ? 'oklch(0.15 0.02 250)' : 'oklch(0.52 0.015 250)',
@@ -323,7 +323,7 @@ export default function TimeseriesSection({ data }: Props) {
                   onClick={() => toggleEmotion(emotion)}
                   className="px-2.5 py-0.5 rounded-full text-xs transition-all"
                   style={{
-                    fontFamily: 'Outfit, sans-serif',
+                    fontFamily: 'Noto Sans JP, sans-serif',
                     background: selectedEmotions.includes(emotion) ? EMOTION_HEX[emotion] : 'oklch(0.95 0.003 80)',
                     color: selectedEmotions.includes(emotion) ? 'white' : 'oklch(0.45 0.015 250)',
                     border: `1px solid ${selectedEmotions.includes(emotion) ? EMOTION_HEX[emotion] : 'oklch(0.88 0.008 80)'}`,
@@ -334,7 +334,7 @@ export default function TimeseriesSection({ data }: Props) {
                 </button>
               ))}
             </div>
-            <p style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.75rem', color: 'oklch(0.55 0.015 250)', marginBottom: '0.75rem' }}>
+            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.55 0.015 250)', marginBottom: '0.75rem' }}>
               複数の感情スコアを同一グラフ上に重ねて表示します。感情ボタンをクリックして表示/非表示を切り替えられます。
             </p>
             <ResponsiveContainer width="100%" height={280}>
@@ -343,7 +343,7 @@ export default function TimeseriesSection({ data }: Props) {
                 <XAxis dataKey="time" tickFormatter={formatTime} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.52 0.015 250)' }} />
                 <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.52 0.015 250)' }} />
                 <Tooltip content={<CustomTooltip />} />
-                <Legend formatter={v => <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.72rem' }}>{v}</span>} />
+                <Legend formatter={v => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem' }}>{v}</span>} />
                 {selectedEmotions.map(emotion => (
                   <Line
                     key={emotion}
@@ -363,7 +363,7 @@ export default function TimeseriesSection({ data }: Props) {
         {/* TAB: 個別波形（スパークライン） */}
         {activeTab === 'sparklines' && (
           <div>
-            <p style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.75rem', color: 'oklch(0.55 0.015 250)', marginBottom: '1rem' }}>
+            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.55 0.015 250)', marginBottom: '1rem' }}>
               各感情スコアを独立したチャートで表示します。微細な変動パターンを個別に確認できます。
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -401,7 +401,7 @@ export default function TimeseriesSection({ data }: Props) {
                         <Tooltip
                           formatter={(v: number) => [v.toFixed(3), EMOTION_LABELS_JA[emotion]]}
                           labelFormatter={(l: number) => `t=${Number(l).toFixed(1)}s`}
-                          contentStyle={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.72rem', border: `1px solid ${EMOTION_HEX[emotion]}50`, borderRadius: '6px', padding: '4px 8px' }}
+                          contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', border: `1px solid ${EMOTION_HEX[emotion]}50`, borderRadius: '6px', padding: '4px 8px' }}
                         />
                         <Area
                           type="monotone"
@@ -423,7 +423,7 @@ export default function TimeseriesSection({ data }: Props) {
         {/* TAB: ヒートマップ */}
         {activeTab === 'heatmap' && (
           <div>
-            <p style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.75rem', color: 'oklch(0.55 0.015 250)', marginBottom: '1rem' }}>
+            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.55 0.015 250)', marginBottom: '1rem' }}>
               5秒区間ごとの感情スコア平均値をヒートマップで表示します。横軸が時間、縦軸が感情種別、色の濃さがスコアの強度を示します。
             </p>
             <div className="overflow-x-auto">
@@ -436,7 +436,7 @@ export default function TimeseriesSection({ data }: Props) {
                   return (
                     <div key={emotion} className="flex items-center gap-2 mb-1">
                       <div className="flex-shrink-0 text-right" style={{ width: '60px' }}>
-                        <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.68rem', color: EMOTION_HEX[emotion], fontWeight: 600 }}>
+                        <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.68rem', color: EMOTION_HEX[emotion], fontWeight: 600 }}>
                           {EMOTION_LABELS_JA[emotion]}
                         </span>
                       </div>
@@ -482,7 +482,7 @@ export default function TimeseriesSection({ data }: Props) {
                     ))}
                   </div>
                   <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.52 0.015 250)' }}>高</span>
-                  <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.65rem', color: 'oklch(0.52 0.015 250)', marginLeft: '8px' }}>
+                  <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.65rem', color: 'oklch(0.52 0.015 250)', marginLeft: '8px' }}>
                     ※各感情内での相対スケール（5秒区間平均値）
                   </span>
                 </div>
@@ -494,7 +494,7 @@ export default function TimeseriesSection({ data }: Props) {
         {/* TAB: スタック面グラフ */}
         {activeTab === 'stacked' && (
           <div>
-            <p style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.75rem', color: 'oklch(0.55 0.015 250)', marginBottom: '1rem' }}>
+            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.55 0.015 250)', marginBottom: '1rem' }}>
               10秒区間ごとの感情スコア平均値を積み上げ面グラフで表示します。各感情の相対的な変化パターンを把握できます。
             </p>
             <ResponsiveContainer width="100%" height={300}>
@@ -503,10 +503,10 @@ export default function TimeseriesSection({ data }: Props) {
                 <XAxis dataKey="time" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.52 0.015 250)' }} angle={-30} textAnchor="end" />
                 <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.52 0.015 250)' }} />
                 <Tooltip
-                  contentStyle={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.75rem', border: '1px solid oklch(0.88 0.008 80)', borderRadius: '6px' }}
+                  contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', border: '1px solid oklch(0.88 0.008 80)', borderRadius: '6px' }}
                   formatter={(v: number, name: string) => [v.toFixed(3), EMOTION_LABELS_JA[name] || name]}
                 />
-                <Legend formatter={v => <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.72rem' }}>{EMOTION_LABELS_JA[v] || v}</span>} />
+                <Legend formatter={v => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem' }}>{EMOTION_LABELS_JA[v] || v}</span>} />
                 {NON_NEUTRAL_EMOTIONS.filter(e => e !== 'confusion').map(emotion => (
                   <Area
                     key={emotion}
@@ -523,7 +523,7 @@ export default function TimeseriesSection({ data }: Props) {
                 ))}
               </AreaChart>
             </ResponsiveContainer>
-            <p style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.72rem', color: 'oklch(0.55 0.015 250)', marginTop: '0.5rem' }}>
+            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.55 0.015 250)', marginTop: '0.5rem' }}>
               ※「困惑」（平均89.9%）は他感情との視認性確保のため除外しています
             </p>
           </div>
@@ -532,7 +532,7 @@ export default function TimeseriesSection({ data }: Props) {
         {/* TAB: 支配的感情タイムライン */}
         {activeTab === 'dominant' && (
           <div>
-            <p style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.75rem', color: 'oklch(0.55 0.015 250)', marginBottom: '1rem' }}>
+            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.55 0.015 250)', marginBottom: '1rem' }}>
               10秒区間ごとに最も高いスコアを示した「支配的感情」の推移を表示します。感情状態の遷移パターンを視覚的に把握できます。
             </p>
             {/* カラーバータイムライン */}
@@ -547,7 +547,7 @@ export default function TimeseriesSection({ data }: Props) {
                     title={`${d.time}: ${d.label}`}
                   >
                     <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 px-2 py-1 rounded text-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10"
-                      style={{ background: 'oklch(0.15 0.02 250)', color: 'white', fontFamily: 'Outfit, sans-serif', whiteSpace: 'nowrap' }}>
+                      style={{ background: 'oklch(0.15 0.02 250)', color: 'white', fontFamily: 'Noto Sans JP, sans-serif', whiteSpace: 'nowrap' }}>
                       {d.time}: {d.label}
                     </div>
                   </div>
@@ -567,10 +567,10 @@ export default function TimeseriesSection({ data }: Props) {
                 <XAxis dataKey="time" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', fill: 'oklch(0.52 0.015 250)' }} angle={-30} textAnchor="end" />
                 <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.52 0.015 250)' }} />
                 <Tooltip
-                  contentStyle={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.75rem', border: '1px solid oklch(0.88 0.008 80)', borderRadius: '6px' }}
+                  contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', border: '1px solid oklch(0.88 0.008 80)', borderRadius: '6px' }}
                   formatter={(v: number, name: string) => [v.toFixed(3), EMOTION_LABELS_JA[name] || name]}
                 />
-                <Legend formatter={v => <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.72rem' }}>{EMOTION_LABELS_JA[v] || v}</span>} />
+                <Legend formatter={v => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem' }}>{EMOTION_LABELS_JA[v] || v}</span>} />
                 {NON_NEUTRAL_EMOTIONS.filter(e => e !== 'confusion').map(emotion => (
                   <Bar
                     key={emotion}
@@ -589,7 +589,7 @@ export default function TimeseriesSection({ data }: Props) {
               {NON_NEUTRAL_EMOTIONS.map(e => (
                 <div key={e} className="flex items-center gap-1.5">
                   <div className="w-3 h-3 rounded-sm" style={{ background: EMOTION_HEX[e] }} />
-                  <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.72rem', color: 'oklch(0.35 0.015 250)' }}>
+                  <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.35 0.015 250)' }}>
                     {EMOTION_LABELS_JA[e]}
                   </span>
                 </div>
@@ -605,7 +605,7 @@ export default function TimeseriesSection({ data }: Props) {
         <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
           全感情スコアの全期間推移（困惑を除く）
         </div>
-        <p style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.75rem', color: 'oklch(0.55 0.015 250)', marginBottom: '1rem' }}>
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.55 0.015 250)', marginBottom: '1rem' }}>
           困惑（平均89.9%）を除く8感情の全セッション推移。各感情の突発的な上昇イベントを確認できます。
         </p>
         <ResponsiveContainer width="100%" height={260}>
@@ -620,7 +620,7 @@ export default function TimeseriesSection({ data }: Props) {
             <XAxis dataKey="time" tickFormatter={formatTime} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.52 0.015 250)' }} />
             <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.52 0.015 250)' }} />
             <Tooltip content={<CustomTooltip />} />
-            <Legend formatter={v => <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.7rem' }}>{EMOTION_LABELS_JA[v] || v}</span>} />
+            <Legend formatter={v => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem' }}>{EMOTION_LABELS_JA[v] || v}</span>} />
             {NON_NEUTRAL_EMOTIONS.filter(e => e !== 'confusion').map(emotion => (
               <Line
                 key={emotion}
@@ -686,7 +686,7 @@ export default function TimeseriesSection({ data }: Props) {
                     <span className="px-1.5 py-0.5 rounded-full" style={{
                       background: EMOTION_HEX[row.dominant_emotion] + '25',
                       color: EMOTION_HEX[row.dominant_emotion],
-                      fontFamily: 'Outfit, sans-serif',
+                      fontFamily: 'Noto Sans JP, sans-serif',
                       fontSize: '0.65rem',
                       whiteSpace: 'nowrap',
                     }}>

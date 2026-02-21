@@ -57,7 +57,7 @@ export default function EmotionsSection({ data }: Props) {
         <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.15 0.02 250)' }}>
           感情分布・統計
         </h2>
-        <p style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.85rem', color: 'oklch(0.52 0.015 250)', marginTop: '0.25rem' }}>
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.52 0.015 250)', marginTop: '0.25rem' }}>
           10種類の感情スコアの統計的分布と出現パターン
         </p>
       </div>
@@ -71,7 +71,7 @@ export default function EmotionsSection({ data }: Props) {
             <div key={e} className="metric-card" style={{ borderLeft: `3px solid ${EMOTION_COLORS[e]}` }}>
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-2 h-2 rounded-full" style={{ background: EMOTION_COLORS[e] }} />
-                <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 600, fontSize: '0.8rem', color: 'oklch(0.25 0.02 250)' }}>
+                <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600, fontSize: '0.8rem', color: 'oklch(0.25 0.02 250)' }}>
                   {EMOTION_LABELS_JA[e]}
                 </span>
               </div>
@@ -103,20 +103,20 @@ export default function EmotionsSection({ data }: Props) {
         <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
           感情出現率（閾値超過の割合）
         </div>
-        <p style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.78rem', color: 'oklch(0.52 0.015 250)', marginBottom: '1rem' }}>
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.52 0.015 250)', marginBottom: '1rem' }}>
           各感情が設定された閾値を超えたフレームの割合
         </p>
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={prevalenceData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.92 0.004 80)" vertical={false} />
-            <XAxis dataKey="name" tick={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.72rem', fill: 'oklch(0.52 0.015 250)' }} />
+            <XAxis dataKey="name" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fill: 'oklch(0.52 0.015 250)' }} />
             <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.52 0.015 250)' }} unit="%" />
             <Tooltip
               formatter={(v: number, _: string, props: any) => [
                 `${v.toFixed(2)}% (${props.payload.count.toLocaleString()} フレーム)`,
                 '出現率'
               ]}
-              contentStyle={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.88 0.008 80)', borderRadius: '6px' }}
+              contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.88 0.008 80)', borderRadius: '6px' }}
             />
             <Bar dataKey="pct" radius={[4, 4, 0, 0]}>
               {prevalenceData.map((entry, i) => (
@@ -153,7 +153,7 @@ export default function EmotionsSection({ data }: Props) {
                   <td className="py-2 pr-4">
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full" style={{ background: row.color }} />
-                      <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 500, fontSize: '0.8rem', color: 'oklch(0.25 0.02 250)' }}>
+                      <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 500, fontSize: '0.8rem', color: 'oklch(0.25 0.02 250)' }}>
                         {row.emotion}
                       </span>
                     </div>
@@ -182,16 +182,16 @@ export default function EmotionsSection({ data }: Props) {
         <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
           感情動態指標の比較
         </div>
-        <p style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.78rem', color: 'oklch(0.52 0.015 250)', marginBottom: '1rem' }}>
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.52 0.015 250)', marginBottom: '1rem' }}>
           変動性（SD）・不安定性（MSSD平方根）・慣性（AR1絶対値）の感情間比較
         </p>
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={dynamicsData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.92 0.004 80)" vertical={false} />
-            <XAxis dataKey="emotion" tick={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.7rem', fill: 'oklch(0.52 0.015 250)' }} />
+            <XAxis dataKey="emotion" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', fill: 'oklch(0.52 0.015 250)' }} />
             <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.52 0.015 250)' }} />
             <Tooltip
-              contentStyle={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.88 0.008 80)', borderRadius: '6px' }}
+              contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.88 0.008 80)', borderRadius: '6px' }}
             />
             <Bar dataKey="variability" name="変動性(SD)" fill="oklch(0.62 0.18 160)" radius={[4, 4, 0, 0]} opacity={0.85} />
             <Bar dataKey="instability" name="不安定性(√MSSD)" fill="oklch(0.62 0.18 25)" radius={[4, 4, 0, 0]} opacity={0.85} />

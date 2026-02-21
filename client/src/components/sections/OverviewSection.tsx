@@ -37,7 +37,7 @@ function MetricCard({ label, value, unit, icon, color, sub }: {
         )}
       </div>
       {sub && (
-        <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.75rem', color: 'oklch(0.52 0.015 250)' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.52 0.015 250)' }}>
           {sub}
         </div>
       )}
@@ -97,7 +97,7 @@ export default function OverviewSection({ data }: Props) {
           <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.75rem', color: 'oklch(0.15 0.02 250)', lineHeight: 1.1 }}>
             感情分析レポート
           </h1>
-          <p style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.85rem', color: 'oklch(0.52 0.015 250)', marginTop: '0.5rem' }}>
+          <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.52 0.015 250)', marginTop: '0.5rem' }}>
             {meta.recording_date} {meta.recording_time} — 顔表情・感情・Engagement・Valenceの時系列分析
           </p>
         </div>
@@ -189,10 +189,10 @@ export default function OverviewSection({ data }: Props) {
                   `${value.toLocaleString()} フレーム (${((value / meta.total_frames) * 100).toFixed(1)}%)`,
                   name
                 ]}
-                contentStyle={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.88 0.008 80)', borderRadius: '6px' }}
+                contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.88 0.008 80)', borderRadius: '6px' }}
               />
               <Legend
-                formatter={(value) => <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.75rem', color: 'oklch(0.35 0.015 250)' }}>{value}</span>}
+                formatter={(value) => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.35 0.015 250)' }}>{value}</span>}
               />
             </PieChart>
           </ResponsiveContainer>
@@ -209,7 +209,7 @@ export default function OverviewSection({ data }: Props) {
               <PolarGrid stroke="oklch(0.88 0.008 80)" />
               <PolarAngleAxis
                 dataKey="emotion"
-                tick={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.7rem', fill: 'oklch(0.45 0.015 250)' }}
+                tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', fill: 'oklch(0.45 0.015 250)' }}
               />
               <Radar
                 name="平均値"
@@ -220,7 +220,7 @@ export default function OverviewSection({ data }: Props) {
                 strokeWidth={2}
               />
               <Tooltip
-                contentStyle={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.88 0.008 80)', borderRadius: '6px' }}
+                contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.88 0.008 80)', borderRadius: '6px' }}
                 formatter={(v: number) => [`${(v / 10).toFixed(3)}`, '平均値']}
               />
             </RadarChart>
@@ -259,7 +259,7 @@ export default function OverviewSection({ data }: Props) {
                   {insight.title}
                 </span>
               </div>
-              <p style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.78rem', color: 'oklch(0.45 0.015 250)', lineHeight: 1.6 }}>
+              <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.45 0.015 250)', lineHeight: 1.6 }}>
                 {insight.body}
               </p>
             </div>
