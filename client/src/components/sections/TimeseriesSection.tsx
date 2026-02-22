@@ -1,7 +1,8 @@
-/*
+/**
  * DESIGN: Neuro-Signal Interface
  * Time series visualization with signal wave aesthetic
  * Extended with emotion heatmap, sparklines, stacked area, dominant timeline
+ * + Event (intervention) registration with graph highlight and stats
  */
 
 import { useState, useMemo } from 'react';
@@ -9,12 +10,28 @@ import type { DashboardData } from '@/lib/types';
 import { EMOTION_LABELS_JA, EMOTION_COLORS, NON_NEUTRAL_EMOTIONS } from '@/lib/types';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
-  ResponsiveContainer, Area, AreaChart, ComposedChart, BarChart, Bar, Cell,
+  ResponsiveContainer, Area, AreaChart, ComposedChart, BarChart, Bar,
+  ReferenceArea, ReferenceLine,
 } from 'recharts';
+import { Plus, Trash2, ChevronDown, ChevronUp, Tag } from 'lucide-react';
 
 interface Props {
   data: DashboardData;
 }
+
+// ---- Event type ----
+interface EventAnnotation {
+  id: string;
+  name: string;
+  startTime: number;
+  endTime: number;
+  color: string;
+}
+
+const EVENT_PALETTE = [
+  '#3b82f6', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6',
+  '#06b6d4', '#f97316', '#ec4899', '#84cc16', '#6366f1',
+];
 
 const SPECIAL_COLORS: Record<string, string> = {
   engagement: '#d97706',
@@ -22,7 +39,6 @@ const SPECIAL_COLORS: Record<string, string> = {
   attention: '#7c3aed',
 };
 
-// oklchをHEX近似に変換（recharts用）
 const EMOTION_HEX: Record<string, string> = {
   anger: '#e17055',
   contempt: '#a29bfe',
@@ -36,22 +52,35 @@ const EMOTION_HEX: Record<string, string> = {
   neutral: '#636e72',
 };
 
-const TIME_PRESETS: [number, number, string][] = [
-  [0, 278, '全体'],
-  [0, 60, '0-60s'],
-  [60, 120, '60-120s'],
-  [120, 180, '120-180s'],
-  [180, 278, '180-278s'],
-];
+function generateId() {
+  return Math.random().toString(36).slice(2, 9);
+}
 
 export default function TimeseriesSection({ data }: Props) {
   const [selectedEmotions, setSelectedEmotions] = useState<string[]>(['confusion', 'sadness', 'fear', 'disgust']);
   const [showSpecial, setShowSpecial] = useState<string[]>(['engagement', 'valence']);
-  const [timeRange, setTimeRange] = useState<[number, number]>([0, 278]);
+  const [timeRange, setTimeRange] = useState<[number, number]>([0, Math.ceil(data.meta.duration_seconds)]);
   const [activeTab, setActiveTab] = useState<'overlay' | 'sparklines' | 'heatmap' | 'stacked' | 'dominant'>('overlay');
+
+  // ---- Event state ----
+  const [events, setEvents] = useState<EventAnnotation[]>([]);
+  const [newEventName, setNewEventName] = useState('');
+  const [newEventStart, setNewEventStart] = useState('');
+  const [newEventEnd, setNewEventEnd] = useState('');
+  const [eventFormError, setEventFormError] = useState('');
+  const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
+  const [showEventForm, setShowEventForm] = useState(false);
 
   const { timeseries_full, time_summary_10s } = data;
   const maxTime = Math.ceil(data.meta.duration_seconds);
+
+  const TIME_PRESETS: [number, number, string][] = useMemo(() => [
+    [0, maxTime, '全体'],
+    [0, 60, '0-60s'],
+    [60, 120, '60-120s'],
+    [120, 180, '120-180s'],
+    [180, maxTime, `180-${maxTime}s`],
+  ], [maxTime]);
 
   // フィルタリング＆サンプリング（最大600点）
   const sampledData = useMemo(() => {
@@ -62,9 +91,9 @@ export default function TimeseriesSection({ data }: Props) {
     return filtered.filter((_, i) => i % step === 0);
   }, [timeseries_full, timeRange]);
 
-  // ヒートマップ用データ（30秒区間）
+  // ヒートマップ用データ（5秒区間）
   const heatmapData = useMemo(() => {
-    const bucketSize = 5; // 5秒区間
+    const bucketSize = 5;
     const buckets: Record<number, Record<string, number[]>> = {};
     for (const frame of timeseries_full) {
       const bucket = Math.floor(frame.time / bucketSize) * bucketSize;
@@ -86,12 +115,10 @@ export default function TimeseriesSection({ data }: Props) {
       });
   }, [timeseries_full]);
 
-  // スタック面グラフ用（10秒区間サマリーを使用）
+  // スタック面グラフ用（10秒区間サマリー）
   const stackedData = useMemo(() => {
     return time_summary_10s.map(row => {
-      const result: Record<string, number | string> = {
-        time: `${row.time_start}s`,
-      };
+      const result: Record<string, number | string> = { time: `${row.time_start}s` };
       for (const e of NON_NEUTRAL_EMOTIONS) {
         result[e] = (row as any)[`${e}_mean`] || 0;
       }
@@ -109,7 +136,7 @@ export default function TimeseriesSection({ data }: Props) {
     }));
   }, [time_summary_10s]);
 
-  // ヒートマップの最大値（スケーリング用）
+  // ヒートマップの最大値
   const heatmapMax = useMemo(() => {
     let max = 0;
     for (const row of heatmapData) {
@@ -119,6 +146,35 @@ export default function TimeseriesSection({ data }: Props) {
     }
     return max || 1;
   }, [heatmapData]);
+
+  // ---- Event stats: for each event, compute emotion averages ----
+  const eventStats = useMemo(() => {
+    return events.map(ev => {
+      const frames = timeseries_full.filter(
+        f => f.time >= ev.startTime && f.time <= ev.endTime
+      );
+      if (frames.length === 0) {
+        const emptyStats: Record<string, { mean: number; max: number }> = {};
+        return { id: ev.id, frameCount: 0, stats: emptyStats, dominantEmotion: 'confusion' };
+      }
+      const stats: Record<string, { mean: number; max: number }> = {};
+      const allCols = [...NON_NEUTRAL_EMOTIONS, 'engagement', 'valence', 'attention'];
+      for (const col of allCols) {
+        const vals = frames.map(f => (f as any)[col] as number || 0);
+        stats[col] = {
+          mean: vals.reduce((a, b) => a + b, 0) / vals.length,
+          max: Math.max(...vals),
+        };
+      }
+      // dominant emotion
+      let domEmo = 'confusion';
+      let domVal = -Infinity;
+      for (const e of NON_NEUTRAL_EMOTIONS) {
+        if (stats[e].mean > domVal) { domVal = stats[e].mean; domEmo = e; }
+      }
+      return { id: ev.id, frameCount: frames.length, stats, dominantEmotion: domEmo };
+    });
+  }, [events, timeseries_full]);
 
   const toggleEmotion = (emotion: string) => {
     setSelectedEmotions(prev =>
@@ -134,13 +190,55 @@ export default function TimeseriesSection({ data }: Props) {
 
   const formatTime = (t: number) => `${Number(t).toFixed(0)}s`;
 
+  // ---- Add event ----
+  const handleAddEvent = () => {
+    setEventFormError('');
+    const name = newEventName.trim();
+    const start = parseFloat(newEventStart);
+    const end = parseFloat(newEventEnd);
+    if (!name) { setEventFormError('イベント名を入力してください'); return; }
+    if (isNaN(start) || isNaN(end)) { setEventFormError('開始・終了時間を数値で入力してください'); return; }
+    if (start < 0 || end > maxTime) { setEventFormError(`時間は 0 〜 ${maxTime} 秒の範囲で入力してください`); return; }
+    if (start >= end) { setEventFormError('終了時間は開始時間より大きくしてください'); return; }
+    const colorIdx = events.length % EVENT_PALETTE.length;
+    const newEv: EventAnnotation = {
+      id: generateId(),
+      name,
+      startTime: start,
+      endTime: end,
+      color: EVENT_PALETTE[colorIdx],
+    };
+    setEvents(prev => [...prev, newEv]);
+    setNewEventName('');
+    setNewEventStart('');
+    setNewEventEnd('');
+    setShowEventForm(false);
+  };
+
+  const handleDeleteEvent = (id: string) => {
+    setEvents(prev => prev.filter(e => e.id !== id));
+    if (expandedEventId === id) setExpandedEventId(null);
+  };
+
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (!active || !payload?.length) return null;
+    // Find events at this time
+    const t = Number(label);
+    const activeEvents = events.filter(ev => t >= ev.startTime && t <= ev.endTime);
     return (
-      <div className="p-3 rounded-lg shadow-lg" style={{ background: 'oklch(0.15 0.02 250)', border: '1px solid oklch(0.25 0.02 250)', maxWidth: '220px' }}>
+      <div className="p-3 rounded-lg shadow-lg" style={{ background: 'oklch(0.15 0.02 250)', border: '1px solid oklch(0.25 0.02 250)', maxWidth: '240px' }}>
         <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: '#4ade80', marginBottom: '6px' }}>
-          t = {Number(label).toFixed(2)}s
+          t = {t.toFixed(2)}s
         </div>
+        {activeEvents.length > 0 && (
+          <div className="mb-2 flex flex-wrap gap-1">
+            {activeEvents.map(ev => (
+              <span key={ev.id} className="px-1.5 py-0.5 rounded text-xs" style={{ background: ev.color + '30', color: ev.color, fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.65rem', border: `1px solid ${ev.color}60` }}>
+                {ev.name}
+              </span>
+            ))}
+          </div>
+        )}
         {payload.slice(0, 8).map((p: any) => (
           <div key={p.dataKey} className="flex items-center gap-2 mb-1">
             <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: p.color }} />
@@ -161,6 +259,30 @@ export default function TimeseriesSection({ data }: Props) {
     { id: 'dominant', label: '支配感情' },
   ] as const;
 
+  // ---- Render ReferenceAreas for events ----
+  const renderEventAreas = () =>
+    events.map(ev => (
+      <ReferenceArea
+        key={ev.id}
+        x1={ev.startTime}
+        x2={ev.endTime}
+        fill={ev.color}
+        fillOpacity={0.12}
+        stroke={ev.color}
+        strokeOpacity={0.5}
+        strokeWidth={1}
+        strokeDasharray="4 2"
+        label={{ value: ev.name, position: 'insideTopLeft', fontSize: 10, fill: ev.color, fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600 }}
+      />
+    ));
+
+  // ---- Render ReferenceLines (vertical) for event boundaries ----
+  const renderEventLines = () =>
+    events.flatMap(ev => [
+      <ReferenceLine key={`${ev.id}-s`} x={ev.startTime} stroke={ev.color} strokeWidth={1.5} strokeDasharray="4 2" />,
+      <ReferenceLine key={`${ev.id}-e`} x={ev.endTime} stroke={ev.color} strokeWidth={1.5} strokeDasharray="4 2" />,
+    ]);
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -170,8 +292,218 @@ export default function TimeseriesSection({ data }: Props) {
           時系列分析
         </h2>
         <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.52 0.015 250)', marginTop: '0.25rem' }}>
-          感情スコアおよびEngagement・Valence・Attentionの時間推移 — 5つの可視化モードで多角的に分析
+          感情スコアおよびEngagement・Valence・Attentionの時間推移 — イベント登録でグラフに介入区間を重ねて表示
         </p>
+      </div>
+
+      {/* ---- EVENT ANNOTATION PANEL ---- */}
+      <div className="metric-card" style={{ borderLeft: '3px solid oklch(0.55 0.18 250)' }}>
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <div className="section-label mb-1">EVENT ANNOTATIONS</div>
+            <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)' }}>
+              イベント（介入）登録
+            </div>
+            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.52 0.015 250)', marginTop: '2px' }}>
+              イベント名・開始・終了時間を登録するとグラフに反映されます
+            </p>
+          </div>
+          <button
+            onClick={() => setShowEventForm(v => !v)}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg transition-all"
+            style={{
+              fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600, fontSize: '0.82rem',
+              background: showEventForm ? 'oklch(0.32 0.12 250)' : 'oklch(0.15 0.02 250)',
+              color: 'white',
+            }}
+          >
+            <Plus size={14} />
+            イベントを追加
+          </button>
+        </div>
+
+        {/* Add form */}
+        {showEventForm && (
+          <div className="mb-4 p-4 rounded-xl" style={{ background: 'oklch(0.97 0.003 80)', border: '1px solid oklch(0.88 0.008 80)' }}>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+              <div>
+                <label style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fontWeight: 600, color: 'oklch(0.35 0.015 250)', display: 'block', marginBottom: '4px' }}>
+                  イベント名
+                </label>
+                <input
+                  type="text"
+                  value={newEventName}
+                  onChange={e => setNewEventName(e.target.value)}
+                  placeholder="例: プレゼン開始"
+                  className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+                  style={{
+                    fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.82rem',
+                    border: '1px solid oklch(0.85 0.008 80)',
+                    background: 'white', color: 'oklch(0.15 0.02 250)',
+                  }}
+                  onKeyDown={e => e.key === 'Enter' && handleAddEvent()}
+                />
+              </div>
+              <div>
+                <label style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fontWeight: 600, color: 'oklch(0.35 0.015 250)', display: 'block', marginBottom: '4px' }}>
+                  開始時間（秒）
+                </label>
+                <input
+                  type="number"
+                  value={newEventStart}
+                  onChange={e => setNewEventStart(e.target.value)}
+                  placeholder={`0 〜 ${maxTime}`}
+                  min={0} max={maxTime} step={0.1}
+                  className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+                  style={{
+                    fontFamily: 'Roboto Mono, monospace', fontSize: '0.82rem',
+                    border: '1px solid oklch(0.85 0.008 80)',
+                    background: 'white', color: 'oklch(0.15 0.02 250)',
+                  }}
+                />
+              </div>
+              <div>
+                <label style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fontWeight: 600, color: 'oklch(0.35 0.015 250)', display: 'block', marginBottom: '4px' }}>
+                  終了時間（秒）
+                </label>
+                <input
+                  type="number"
+                  value={newEventEnd}
+                  onChange={e => setNewEventEnd(e.target.value)}
+                  placeholder={`0 〜 ${maxTime}`}
+                  min={0} max={maxTime} step={0.1}
+                  className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+                  style={{
+                    fontFamily: 'Roboto Mono, monospace', fontSize: '0.82rem',
+                    border: '1px solid oklch(0.85 0.008 80)',
+                    background: 'white', color: 'oklch(0.15 0.02 250)',
+                  }}
+                />
+              </div>
+            </div>
+            {eventFormError && (
+              <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: '#ef4444', marginBottom: '8px' }}>
+                {eventFormError}
+              </p>
+            )}
+            <div className="flex gap-2">
+              <button
+                onClick={handleAddEvent}
+                className="px-4 py-2 rounded-lg text-sm font-semibold transition-all"
+                style={{ fontFamily: 'Noto Sans JP, sans-serif', background: 'oklch(0.15 0.02 250)', color: 'white' }}
+              >
+                登録する
+              </button>
+              <button
+                onClick={() => { setShowEventForm(false); setEventFormError(''); }}
+                className="px-4 py-2 rounded-lg text-sm transition-all"
+                style={{ fontFamily: 'Noto Sans JP, sans-serif', background: 'oklch(0.92 0.004 80)', color: 'oklch(0.35 0.015 250)' }}
+              >
+                キャンセル
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Event list */}
+        {events.length === 0 ? (
+          <div className="py-6 text-center" style={{ border: '1px dashed oklch(0.85 0.008 80)', borderRadius: '12px' }}>
+            <Tag size={20} style={{ color: 'oklch(0.72 0.015 250)', margin: '0 auto 8px' }} />
+            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.82rem', color: 'oklch(0.55 0.015 250)' }}>
+              まだイベントが登録されていません
+            </p>
+            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.68 0.015 250)', marginTop: '4px' }}>
+              「イベントを追加」ボタンから登録してください
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {events.map((ev, idx) => {
+              const stat = eventStats.find(s => s.id === ev.id);
+              const isExpanded = expandedEventId === ev.id;
+              return (
+                <div key={ev.id} className="rounded-xl overflow-hidden" style={{ border: `1px solid ${ev.color}40`, background: `${ev.color}08` }}>
+                  <div className="flex items-center gap-3 px-4 py-3">
+                    <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: ev.color }} />
+                    <div className="flex-1 min-w-0">
+                      <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '0.88rem', color: 'oklch(0.15 0.02 250)' }}>
+                        {ev.name}
+                      </div>
+                      <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.68rem', color: 'oklch(0.45 0.015 250)' }}>
+                        {ev.startTime}s — {ev.endTime}s &nbsp;|&nbsp; {(ev.endTime - ev.startTime).toFixed(1)}秒間 &nbsp;|&nbsp; {stat?.frameCount || 0} フレーム
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setExpandedEventId(isExpanded ? null : ev.id)}
+                        className="p-1.5 rounded-lg transition-all"
+                        style={{ color: ev.color, background: `${ev.color}15` }}
+                        title="感情統計を表示"
+                      >
+                        {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                      </button>
+                      <button
+                        onClick={() => handleDeleteEvent(ev.id)}
+                        className="p-1.5 rounded-lg transition-all"
+                        style={{ color: '#ef4444', background: '#ef444415' }}
+                        title="削除"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Expanded stats */}
+                  {isExpanded && stat && stat.frameCount > 0 && (
+                    <div className="px-4 pb-4 pt-1">
+                      <div className="section-label mb-2" style={{ color: ev.color }}>EVENT EMOTION STATS — {ev.name}</div>
+                      {/* Special metrics */}
+                      <div className="grid grid-cols-3 gap-3 mb-3">
+                        {(['engagement', 'valence', 'attention'] as const).map(key => (
+                          <div key={key} className="p-2 rounded-lg text-center" style={{ background: SPECIAL_COLORS[key] + '12', border: `1px solid ${SPECIAL_COLORS[key]}30` }}>
+                            <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: SPECIAL_COLORS[key], marginBottom: '2px', textTransform: 'uppercase' }}>{key}</div>
+                            <div style={{ fontFamily: 'Roboto Mono, monospace', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)' }}>
+                              {stat.stats[key]?.mean.toFixed(1)}
+                            </div>
+                            <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.52 0.015 250)' }}>
+                              max {stat.stats[key]?.max.toFixed(1)}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      {/* Emotion bars */}
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+                        {NON_NEUTRAL_EMOTIONS.filter(e => e !== 'confusion').map(e => {
+                          const mean = stat.stats[e]?.mean || 0;
+                          const isDom = stat.dominantEmotion === e;
+                          return (
+                            <div key={e} className="flex items-center gap-2">
+                              <div className="flex-shrink-0 text-right" style={{ width: '52px' }}>
+                                <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', color: isDom ? EMOTION_HEX[e] : 'oklch(0.45 0.015 250)', fontWeight: isDom ? 700 : 400 }}>
+                                  {EMOTION_LABELS_JA[e]}
+                                </span>
+                              </div>
+                              <div className="flex-1 h-3 rounded-full overflow-hidden" style={{ background: 'oklch(0.92 0.004 80)' }}>
+                                <div
+                                  className="h-full rounded-full transition-all"
+                                  style={{ width: `${Math.min(100, mean * 2)}%`, background: EMOTION_HEX[e], opacity: isDom ? 1 : 0.7 }}
+                                />
+                              </div>
+                              <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: isDom ? EMOTION_HEX[e] : 'oklch(0.52 0.015 250)', minWidth: '36px', fontWeight: isDom ? 700 : 400 }}>
+                                {mean.toFixed(2)}
+                              </span>
+                              {isDom && <span className="px-1 py-0.5 rounded text-xs" style={{ background: EMOTION_HEX[e] + '20', color: EMOTION_HEX[e], fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.6rem' }}>主要</span>}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Time Range Selector */}
@@ -191,6 +523,23 @@ export default function TimeseriesSection({ data }: Props) {
                 background: 'oklch(0.62 0.18 160)',
               }}
             />
+            {/* Event markers on range bar */}
+            {events.map(ev => (
+              <div
+                key={ev.id}
+                className="absolute h-3 rounded-sm pointer-events-none"
+                style={{
+                  left: `${(ev.startTime / maxTime) * 100}%`,
+                  width: `${((ev.endTime - ev.startTime) / maxTime) * 100}%`,
+                  background: ev.color,
+                  opacity: 0.35,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  zIndex: 1,
+                }}
+                title={ev.name}
+              />
+            ))}
             <input
               type="range" min={0} max={maxTime} step={5}
               value={timeRange[0]}
@@ -224,6 +573,23 @@ export default function TimeseriesSection({ data }: Props) {
               }}
             >
               {label}
+            </button>
+          ))}
+          {/* Event quick-zoom buttons */}
+          {events.map(ev => (
+            <button
+              key={ev.id}
+              onClick={() => setTimeRange([Math.max(0, ev.startTime - 5), Math.min(maxTime, ev.endTime + 5)])}
+              className="px-2.5 py-1 rounded text-xs transition-all flex items-center gap-1"
+              style={{
+                fontFamily: 'Noto Sans JP, sans-serif',
+                background: ev.color + '18',
+                color: ev.color,
+                border: `1px solid ${ev.color}50`,
+              }}
+            >
+              <div className="w-2 h-2 rounded-full" style={{ background: ev.color }} />
+              {ev.name}
             </button>
           ))}
           <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.52 0.015 250)', alignSelf: 'center', marginLeft: '4px' }}>
@@ -273,6 +639,7 @@ export default function TimeseriesSection({ data }: Props) {
             <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.52 0.015 250)' }} domain={[0, 100]} />
             <Tooltip content={<CustomTooltip />} />
             <Legend formatter={v => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem' }}>{v}</span>} />
+            {renderEventAreas()}
             {showSpecial.includes('engagement') && (
               <Area type="monotone" dataKey="engagement" stroke={SPECIAL_COLORS.engagement} fill="url(#engGrad)" strokeWidth={1.5} dot={false} name="Engagement" />
             )}
@@ -344,6 +711,7 @@ export default function TimeseriesSection({ data }: Props) {
                 <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.52 0.015 250)' }} />
                 <Tooltip content={<CustomTooltip />} />
                 <Legend formatter={v => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem' }}>{v}</span>} />
+                {renderEventAreas()}
                 {selectedEmotions.map(emotion => (
                   <Line
                     key={emotion}
@@ -403,6 +771,7 @@ export default function TimeseriesSection({ data }: Props) {
                           labelFormatter={(l: number) => `t=${Number(l).toFixed(1)}s`}
                           contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', border: `1px solid ${EMOTION_HEX[emotion]}50`, borderRadius: '6px', padding: '4px 8px' }}
                         />
+                        {renderEventLines()}
                         <Area
                           type="monotone"
                           dataKey={emotion}
@@ -428,7 +797,35 @@ export default function TimeseriesSection({ data }: Props) {
             </p>
             <div className="overflow-x-auto">
               <div style={{ minWidth: '600px' }}>
-                {/* 感情ラベル + ヒートマップ行 */}
+                {/* イベントマーカー行 */}
+                {events.length > 0 && (
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="flex-shrink-0 text-right" style={{ width: '60px' }}>
+                      <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.52 0.015 250)' }}>
+                        EVENT
+                      </span>
+                    </div>
+                    <div className="flex-1 relative" style={{ height: '16px' }}>
+                      {events.map(ev => {
+                        const totalDur = data.meta.duration_seconds;
+                        const leftPct = (ev.startTime / totalDur) * 100;
+                        const widthPct = ((ev.endTime - ev.startTime) / totalDur) * 100;
+                        return (
+                          <div
+                            key={ev.id}
+                            className="absolute h-full rounded-sm flex items-center justify-center overflow-hidden"
+                            style={{ left: `${leftPct}%`, width: `${widthPct}%`, background: ev.color, opacity: 0.7 }}
+                            title={ev.name}
+                          >
+                            <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.55rem', color: 'white', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', padding: '0 2px' }}>
+                              {ev.name}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
                 {NON_NEUTRAL_EMOTIONS.map(emotion => {
                   const emotionMax = emotion === 'confusion'
                     ? Math.max(...heatmapData.map(d => d[emotion] as number))
@@ -444,6 +841,7 @@ export default function TimeseriesSection({ data }: Props) {
                         {heatmapData.map((d, i) => {
                           const val = d[emotion] as number;
                           const intensity = emotionMax > 0 ? val / emotionMax : 0;
+                          const isInEvent = events.some(ev => d.time >= ev.startTime && d.time <= ev.endTime);
                           return (
                             <div
                               key={i}
@@ -453,6 +851,7 @@ export default function TimeseriesSection({ data }: Props) {
                                 background: `${EMOTION_HEX[emotion]}`,
                                 opacity: Math.max(0.04, intensity),
                                 minWidth: '4px',
+                                outline: isInEvent ? '1px solid oklch(0.45 0.015 250)' : 'none',
                               }}
                               title={`t=${d.time}s: ${val.toFixed(3)}`}
                             />
@@ -524,7 +923,7 @@ export default function TimeseriesSection({ data }: Props) {
               </AreaChart>
             </ResponsiveContainer>
             <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.55 0.015 250)', marginTop: '0.5rem' }}>
-              ※「困惑」（平均89.9%）は他感情との視認性確保のため除外しています
+              ※「困惑」は他感情との視認性確保のため除外しています
             </p>
           </div>
         )}
@@ -538,6 +937,27 @@ export default function TimeseriesSection({ data }: Props) {
             {/* カラーバータイムライン */}
             <div className="mb-4">
               <div className="section-label mb-2">DOMINANT EMOTION TIMELINE</div>
+              {/* Event overlay bar */}
+              {events.length > 0 && (
+                <div className="relative mb-1" style={{ height: '14px' }}>
+                  {events.map(ev => {
+                    const totalDur = data.meta.duration_seconds;
+                    const leftPct = (ev.startTime / totalDur) * 100;
+                    const widthPct = ((ev.endTime - ev.startTime) / totalDur) * 100;
+                    return (
+                      <div
+                        key={ev.id}
+                        className="absolute h-full rounded-sm flex items-center justify-center overflow-hidden"
+                        style={{ left: `${leftPct}%`, width: `${widthPct}%`, background: ev.color, opacity: 0.75 }}
+                      >
+                        <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.55rem', color: 'white', fontWeight: 700, whiteSpace: 'nowrap', padding: '0 2px' }}>
+                          {ev.name}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
               <div className="flex gap-0.5 rounded-lg overflow-hidden" style={{ height: '40px' }}>
                 {dominantTimeline.map((d, i) => (
                   <div
@@ -555,11 +975,11 @@ export default function TimeseriesSection({ data }: Props) {
               </div>
               <div className="flex justify-between mt-1">
                 <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.52 0.015 250)' }}>0s</span>
-                <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.52 0.015 250)' }}>278s</span>
+                <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.52 0.015 250)' }}>{maxTime}s</span>
               </div>
             </div>
 
-            {/* 棒グラフ：10秒区間ごとの感情 */}
+            {/* 棒グラフ */}
             <div className="section-label mb-2">10-SECOND WINDOW EMOTION SCORES</div>
             <ResponsiveContainer width="100%" height={280}>
               <BarChart data={stackedData} margin={{ top: 5, right: 10, bottom: 20, left: 0 }}>
@@ -606,7 +1026,7 @@ export default function TimeseriesSection({ data }: Props) {
           全感情スコアの全期間推移（困惑を除く）
         </div>
         <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.55 0.015 250)', marginBottom: '1rem' }}>
-          困惑（平均89.9%）を除く8感情の全セッション推移。各感情の突発的な上昇イベントを確認できます。
+          困惑を除く感情の全セッション推移。各感情の突発的な上昇イベントを確認できます。
         </p>
         <ResponsiveContainer width="100%" height={260}>
           <LineChart
@@ -621,6 +1041,19 @@ export default function TimeseriesSection({ data }: Props) {
             <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.52 0.015 250)' }} />
             <Tooltip content={<CustomTooltip />} />
             <Legend formatter={v => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem' }}>{EMOTION_LABELS_JA[v] || v}</span>} />
+            {events.map(ev => (
+              <ReferenceArea
+                key={ev.id}
+                x1={ev.startTime}
+                x2={ev.endTime}
+                fill={ev.color}
+                fillOpacity={0.12}
+                stroke={ev.color}
+                strokeOpacity={0.5}
+                strokeWidth={1}
+                strokeDasharray="4 2"
+              />
+            ))}
             {NON_NEUTRAL_EMOTIONS.filter(e => e !== 'confusion').map(emotion => (
               <Line
                 key={emotion}
@@ -646,7 +1079,7 @@ export default function TimeseriesSection({ data }: Props) {
           <table className="w-full text-sm">
             <thead>
               <tr style={{ borderBottom: '2px solid oklch(0.88 0.008 80)' }}>
-                {['時間区間', 'Eng', 'Val', 'Att', '怒', '軽', '嫌', '恐', '喜', '悲', '驚', '感', '困', '主要感情'].map(h => (
+                {['時間区間', 'イベント', 'Eng', 'Val', 'Att', '怒', '軽', '嫌', '恐', '喜', '悲', '驚', '感', '困', '主要感情'].map(h => (
                   <th key={h} className="text-left pb-2 pr-2" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.52 0.015 250)', letterSpacing: '0.03em', whiteSpace: 'nowrap' }}>
                     {h}
                   </th>
@@ -654,47 +1087,65 @@ export default function TimeseriesSection({ data }: Props) {
               </tr>
             </thead>
             <tbody>
-              {time_summary_10s.map((row, i) => (
-                <tr key={i} style={{ borderBottom: '1px solid oklch(0.94 0.003 80)' }}
-                  onMouseEnter={e => (e.currentTarget.style.background = 'oklch(0.97 0.003 80)')}
-                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                >
-                  <td className="py-1.5 pr-2" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.68rem', color: 'oklch(0.45 0.015 250)', whiteSpace: 'nowrap' }}>
-                    {row.time_start}–{row.time_end}s
-                  </td>
-                  {['engagement_mean', 'valence_mean', 'attention_mean'].map(key => (
-                    <td key={key} className="py-1.5 pr-2" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.68rem' }}>
-                      {((row as any)[key] || 0).toFixed(1)}
+              {time_summary_10s.map((row, i) => {
+                const rowEvents = events.filter(ev =>
+                  ev.startTime < row.time_end && ev.endTime > row.time_start
+                );
+                return (
+                  <tr key={i}
+                    style={{
+                      borderBottom: '1px solid oklch(0.94 0.003 80)',
+                      background: rowEvents.length > 0 ? `${rowEvents[0].color}08` : 'transparent',
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.background = rowEvents.length > 0 ? `${rowEvents[0].color}15` : 'oklch(0.97 0.003 80)')}
+                    onMouseLeave={e => (e.currentTarget.style.background = rowEvents.length > 0 ? `${rowEvents[0].color}08` : 'transparent')}
+                  >
+                    <td className="py-1.5 pr-2" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.68rem', color: 'oklch(0.45 0.015 250)', whiteSpace: 'nowrap' }}>
+                      {row.time_start}–{row.time_end}s
                     </td>
-                  ))}
-                  {['anger_mean', 'contempt_mean', 'disgust_mean', 'fear_mean', 'joy_mean', 'sadness_mean', 'surprise_mean', 'sentimentality_mean', 'confusion_mean'].map((key, j) => {
-                    const val = (row as any)[key] || 0;
-                    const emotionKey = key.replace('_mean', '');
-                    return (
-                      <td key={key} className="py-1.5 pr-2">
-                        <span style={{
-                          fontFamily: 'Roboto Mono, monospace', fontSize: '0.68rem',
-                          color: val > 5 ? EMOTION_HEX[emotionKey] : 'oklch(0.52 0.015 250)',
-                          fontWeight: val > 5 ? 600 : 400,
-                        }}>
-                          {val.toFixed(1)}
-                        </span>
+                    <td className="py-1.5 pr-2">
+                      <div className="flex gap-1 flex-wrap">
+                        {rowEvents.map(ev => (
+                          <span key={ev.id} className="px-1.5 py-0.5 rounded text-xs" style={{ background: ev.color + '20', color: ev.color, fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.6rem', border: `1px solid ${ev.color}40`, whiteSpace: 'nowrap' }}>
+                            {ev.name}
+                          </span>
+                        ))}
+                      </div>
+                    </td>
+                    {['engagement_mean', 'valence_mean', 'attention_mean'].map(key => (
+                      <td key={key} className="py-1.5 pr-2" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.68rem' }}>
+                        {((row as any)[key] || 0).toFixed(1)}
                       </td>
-                    );
-                  })}
-                  <td className="py-1.5">
-                    <span className="px-1.5 py-0.5 rounded-full" style={{
-                      background: EMOTION_HEX[row.dominant_emotion] + '25',
-                      color: EMOTION_HEX[row.dominant_emotion],
-                      fontFamily: 'Noto Sans JP, sans-serif',
-                      fontSize: '0.65rem',
-                      whiteSpace: 'nowrap',
-                    }}>
-                      {EMOTION_LABELS_JA[row.dominant_emotion] || row.dominant_emotion}
-                    </span>
-                  </td>
-                </tr>
-              ))}
+                    ))}
+                    {['anger_mean', 'contempt_mean', 'disgust_mean', 'fear_mean', 'joy_mean', 'sadness_mean', 'surprise_mean', 'sentimentality_mean', 'confusion_mean'].map((key) => {
+                      const val = (row as any)[key] || 0;
+                      const emotionKey = key.replace('_mean', '');
+                      return (
+                        <td key={key} className="py-1.5 pr-2">
+                          <span style={{
+                            fontFamily: 'Roboto Mono, monospace', fontSize: '0.68rem',
+                            color: val > 5 ? EMOTION_HEX[emotionKey] : 'oklch(0.52 0.015 250)',
+                            fontWeight: val > 5 ? 600 : 400,
+                          }}>
+                            {val.toFixed(1)}
+                          </span>
+                        </td>
+                      );
+                    })}
+                    <td className="py-1.5">
+                      <span className="px-1.5 py-0.5 rounded-full" style={{
+                        background: EMOTION_HEX[row.dominant_emotion] + '25',
+                        color: EMOTION_HEX[row.dominant_emotion],
+                        fontFamily: 'Noto Sans JP, sans-serif',
+                        fontSize: '0.65rem',
+                        whiteSpace: 'nowrap',
+                      }}>
+                        {EMOTION_LABELS_JA[row.dominant_emotion] || row.dominant_emotion}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
