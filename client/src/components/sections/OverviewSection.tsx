@@ -27,17 +27,17 @@ function MetricCard({ label, value, unit, icon, color, sub }: {
         <span style={{ color }}>{icon}</span>
       </div>
       <div className="flex items-baseline gap-1.5">
-        <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '2rem', color: 'oklch(0.15 0.02 250)', lineHeight: 1 }}>
+        <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '2rem', color: 'oklch(0.88 0.005 250)', lineHeight: 1 }}>
           {value}
         </span>
         {unit && (
-          <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.75rem', color: 'oklch(0.52 0.015 250)' }}>
+          <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.75rem', color: 'oklch(0.58 0.015 255)' }}>
             {unit}
           </span>
         )}
       </div>
       {sub && (
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.52 0.015 250)' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.58 0.015 255)' }}>
           {sub}
         </div>
       )}
@@ -96,10 +96,10 @@ export default function OverviewSection({ data }: Props) {
       <div className="flex items-start justify-between">
         <div>
           <div className="section-label mb-1">SESSION OVERVIEW</div>
-          <h1 style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.75rem', color: 'oklch(0.15 0.02 250)', lineHeight: 1.1 }}>
+          <h1 style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.75rem', color: 'oklch(0.88 0.005 250)', lineHeight: 1.1 }}>
             感情分析レポート
           </h1>
-          <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.52 0.015 250)', marginTop: '0.5rem' }}>
+          <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.58 0.015 255)', marginTop: '0.5rem' }}>
             {meta.recording_date} {meta.recording_time} — 顔表情・感情・Engagement・Valenceの時系列分析
           </p>
         </div>
@@ -167,7 +167,7 @@ export default function OverviewSection({ data }: Props) {
         {/* Dominant Emotion Pie */}
         <div className="metric-card">
           <div className="section-label mb-3">支配的感情の分布</div>
-          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
+          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
             感情状態の占有率
           </div>
           <ResponsiveContainer width="100%" height={240}>
@@ -191,10 +191,10 @@ export default function OverviewSection({ data }: Props) {
                   `${value.toLocaleString()} フレーム (${((value / meta.total_frames) * 100).toFixed(1)}%)`,
                   name
                 ]}
-                contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.88 0.008 80)', borderRadius: '6px' }}
+                contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
               />
               <Legend
-                formatter={(value) => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.35 0.015 250)' }}>{value}</span>}
+                formatter={(value) => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.75 0.008 250)' }}>{value}</span>}
               />
             </PieChart>
           </ResponsiveContainer>
@@ -203,12 +203,12 @@ export default function OverviewSection({ data }: Props) {
         {/* Emotion Radar */}
         <div className="metric-card">
           <div className="section-label mb-3">EMOTION PROFILE</div>
-          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
+          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
             感情プロファイル（平均値×10スケール）
           </div>
           <ResponsiveContainer width="100%" height={240}>
             <RadarChart data={radarData}>
-              <PolarGrid stroke="oklch(0.88 0.008 80)" />
+              <PolarGrid stroke="oklch(0.28 0.04 255)" />
               <PolarAngleAxis
                 dataKey="emotion"
                 tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', fill: 'oklch(0.45 0.015 250)' }}
@@ -222,7 +222,7 @@ export default function OverviewSection({ data }: Props) {
                 strokeWidth={2}
               />
               <Tooltip
-                contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.88 0.008 80)', borderRadius: '6px' }}
+                contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
                 formatter={(v: number) => [`${(v / 10).toFixed(3)}`, '平均値']}
               />
             </RadarChart>
@@ -233,7 +233,7 @@ export default function OverviewSection({ data }: Props) {
       {/* Key Insights */}
       <div className="metric-card">
         <div className="section-label mb-3">KEY INSIGHTS</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
           主要な発見
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -254,10 +254,10 @@ export default function OverviewSection({ data }: Props) {
               color: 'oklch(0.62 0.18 25)',
             },
           ].map((insight, i) => (
-            <div key={i} className="p-4 rounded-lg" style={{ background: 'oklch(0.97 0.003 80)', border: `1px solid ${insight.color}30` }}>
+            <div key={i} className="p-4 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', border: `1px solid ${insight.color}30` }}>
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-2 h-2 rounded-full" style={{ background: insight.color }} />
-                <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600, fontSize: '0.85rem', color: 'oklch(0.15 0.02 250)' }}>
+                <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600, fontSize: '0.85rem', color: 'oklch(0.88 0.005 250)' }}>
                   {insight.title}
                 </span>
               </div>
@@ -272,7 +272,7 @@ export default function OverviewSection({ data }: Props) {
       {/* Data Quality */}
       <div className="metric-card">
         <div className="section-label mb-3">DATA QUALITY</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
           データ品質指標
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -284,11 +284,11 @@ export default function OverviewSection({ data }: Props) {
           ].map((item, i) => (
             <div key={i}>
               <div className="section-label mb-1">{item.label}</div>
-              <div style={{ fontFamily: 'Roboto Mono, monospace', fontWeight: 600, fontSize: '0.9rem', color: 'oklch(0.25 0.02 250)' }}>
+              <div style={{ fontFamily: 'Roboto Mono, monospace', fontWeight: 600, fontSize: '0.9rem', color: 'oklch(0.88 0.005 250)' }}>
                 {item.value}
               </div>
               {'note' in item && (
-                <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.65rem', color: 'oklch(0.52 0.015 250)', marginTop: '2px' }}>
+                <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.65rem', color: 'oklch(0.58 0.015 255)', marginTop: '2px' }}>
                   {(item as { note: string }).note}
                 </div>
               )}

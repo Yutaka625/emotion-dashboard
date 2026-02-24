@@ -1,7 +1,7 @@
 /* 
- * DESIGN PHILOSOPHY: Neuro-Signal Interface
- * Inspired by neuroscience / biomedical signal monitoring equipment
- * Warm off-white background + vivid signal colors for data emphasis
+ * DESIGN PHILOSOPHY: Navy Intelligence Dashboard
+ * Deep navy dark theme — sophisticated, data-driven, premium
+ * Rich navy backgrounds + gold/teal accent colors for hierarchy
  * Noto Sans JP for all text + Roboto Mono for data values
  */
 
@@ -54,68 +54,88 @@
   --color-signal-blue: var(--signal-blue);
   --color-signal-yellow: var(--signal-yellow);
   --color-signal-purple: var(--signal-purple);
+  --color-navy-900: var(--navy-900);
+  --color-navy-800: var(--navy-800);
+  --color-navy-700: var(--navy-700);
+  --color-navy-600: var(--navy-600);
+  --color-gold: var(--gold);
+  --color-teal: var(--teal);
 }
 
 :root {
-  /* Neuro-Signal Interface - Light Theme */
+  /* Navy Intelligence Dashboard — Dark Theme */
   --radius: 0.5rem;
-  
-  /* Base colors */
-  --background: oklch(0.98 0.005 80);        /* warm off-white */
-  --foreground: oklch(0.15 0.02 250);         /* deep navy */
-  --card: oklch(1 0 0);                        /* pure white cards */
-  --card-foreground: oklch(0.15 0.02 250);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.15 0.02 250);
-  
-  /* Primary: Deep forest green */
-  --primary: oklch(0.32 0.08 160);
-  --primary-foreground: oklch(0.97 0.005 80);
-  
-  /* Secondary: Warm gray */
-  --secondary: oklch(0.94 0.005 80);
-  --secondary-foreground: oklch(0.35 0.02 250);
-  
+
+  /* ── Navy palette ── */
+  --navy-900: oklch(0.14 0.04 255);   /* darkest navy */
+  --navy-800: oklch(0.18 0.04 255);   /* main bg */
+  --navy-700: oklch(0.22 0.04 255);   /* card bg */
+  --navy-600: oklch(0.27 0.04 255);   /* elevated card */
+  --navy-500: oklch(0.33 0.04 255);   /* border / divider */
+  --navy-400: oklch(0.42 0.04 255);   /* muted text bg */
+
+  /* ── Accent palette ── */
+  --gold:  oklch(0.78 0.14 82);       /* warm gold accent */
+  --teal:  oklch(0.70 0.14 195);      /* cool teal accent */
+
+  /* ── Semantic tokens ── */
+  --background: var(--navy-800);
+  --foreground: oklch(0.92 0.005 250);
+
+  --card: var(--navy-700);
+  --card-foreground: oklch(0.90 0.005 250);
+
+  --popover: var(--navy-600);
+  --popover-foreground: oklch(0.90 0.005 250);
+
+  /* Primary: gold */
+  --primary: var(--gold);
+  --primary-foreground: oklch(0.14 0.04 255);
+
+  /* Secondary: navy-600 */
+  --secondary: var(--navy-600);
+  --secondary-foreground: oklch(0.80 0.008 250);
+
   /* Muted */
-  --muted: oklch(0.95 0.003 80);
-  --muted-foreground: oklch(0.52 0.015 250);
-  
-  /* Accent: Terracotta */
-  --accent: oklch(0.92 0.015 60);
-  --accent-foreground: oklch(0.25 0.05 40);
-  
+  --muted: var(--navy-700);
+  --muted-foreground: oklch(0.58 0.015 255);
+
+  /* Accent: teal */
+  --accent: oklch(0.25 0.05 255);
+  --accent-foreground: oklch(0.88 0.005 250);
+
   /* Destructive */
   --destructive: oklch(0.58 0.22 25);
   --destructive-foreground: oklch(0.97 0 0);
-  
+
   /* Borders */
-  --border: oklch(0.88 0.008 80);
-  --input: oklch(0.88 0.008 80);
-  --ring: oklch(0.55 0.12 160);
-  
-  /* Charts - emotion color palette */
-  --chart-1: oklch(0.62 0.18 160);   /* signal green */
-  --chart-2: oklch(0.62 0.18 25);    /* signal red */
-  --chart-3: oklch(0.62 0.18 250);   /* signal blue */
-  --chart-4: oklch(0.75 0.15 80);    /* signal yellow */
-  --chart-5: oklch(0.55 0.18 300);   /* signal purple */
-  
+  --border: var(--navy-500);
+  --input: var(--navy-500);
+  --ring: var(--teal);
+
+  /* Charts — vivid on dark */
+  --chart-1: oklch(0.70 0.14 195);   /* teal */
+  --chart-2: oklch(0.78 0.14 82);    /* gold */
+  --chart-3: oklch(0.68 0.18 25);    /* coral */
+  --chart-4: oklch(0.72 0.16 280);   /* lavender */
+  --chart-5: oklch(0.72 0.16 140);   /* lime */
+
   /* Signal colors */
-  --signal-green: oklch(0.62 0.18 160);
-  --signal-red: oklch(0.62 0.18 25);
-  --signal-blue: oklch(0.62 0.18 250);
-  --signal-yellow: oklch(0.75 0.15 80);
-  --signal-purple: oklch(0.55 0.18 300);
-  
-  /* Sidebar */
-  --sidebar: oklch(0.15 0.02 250);
-  --sidebar-foreground: oklch(0.88 0.005 80);
-  --sidebar-primary: oklch(0.62 0.18 160);
-  --sidebar-primary-foreground: oklch(0.15 0.02 250);
-  --sidebar-accent: oklch(0.22 0.025 250);
-  --sidebar-accent-foreground: oklch(0.88 0.005 80);
-  --sidebar-border: oklch(0.25 0.02 250);
-  --sidebar-ring: oklch(0.55 0.12 160);
+  --signal-green:  oklch(0.70 0.16 160);
+  --signal-red:    oklch(0.65 0.20 25);
+  --signal-blue:   oklch(0.70 0.14 250);
+  --signal-yellow: oklch(0.78 0.14 82);
+  --signal-purple: oklch(0.65 0.18 300);
+
+  /* Sidebar — deepest navy */
+  --sidebar: var(--navy-900);
+  --sidebar-foreground: oklch(0.82 0.008 250);
+  --sidebar-primary: var(--teal);
+  --sidebar-primary-foreground: oklch(0.14 0.04 255);
+  --sidebar-accent: var(--navy-800);
+  --sidebar-accent-foreground: oklch(0.82 0.008 250);
+  --sidebar-border: oklch(0.20 0.04 255);
+  --sidebar-ring: var(--teal);
 }
 
 @layer base {
@@ -125,6 +145,7 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Noto Sans JP', sans-serif;
+    background-color: oklch(0.18 0.04 255);
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Noto Sans JP', sans-serif;
@@ -143,35 +164,60 @@
   input[type="radio"]:not(:disabled) {
     @apply cursor-pointer;
   }
+  /* Scrollbar styling for dark theme */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: oklch(0.14 0.04 255); }
+  ::-webkit-scrollbar-thumb { background: oklch(0.30 0.04 255); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: oklch(0.38 0.04 255); }
 }
 
 @layer components {
-  /* Neuro-Signal Interface Design System */
+  /* Navy Intelligence Dashboard Design System */
+
   .metric-card {
-    background: oklch(1 0 0);
-    border: 1px solid oklch(0.91 0.006 80);
+    background: oklch(0.22 0.04 255);
+    border: 1px solid oklch(0.28 0.04 255);
     border-radius: 10px;
     padding: 1.25rem;
-    box-shadow: 0 1px 3px oklch(0.15 0.02 250 / 0.04), 0 4px 12px oklch(0.15 0.02 250 / 0.03);
-    transition: box-shadow 0.2s ease;
+    box-shadow: 0 1px 3px oklch(0.10 0.04 255 / 0.5), 0 4px 16px oklch(0.10 0.04 255 / 0.3);
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
   }
   .metric-card:hover {
-    box-shadow: 0 2px 6px oklch(0.15 0.02 250 / 0.07), 0 8px 20px oklch(0.15 0.02 250 / 0.05);
+    box-shadow: 0 2px 8px oklch(0.10 0.04 255 / 0.6), 0 10px 30px oklch(0.10 0.04 255 / 0.4);
+    border-color: oklch(0.35 0.06 255);
   }
+
   .section-label {
     font-family: 'Roboto Mono', monospace;
     font-size: 0.62rem;
     font-weight: 500;
-    letter-spacing: 0.1em;
-    color: oklch(0.52 0.015 250);
+    letter-spacing: 0.12em;
+    color: oklch(0.58 0.015 255);
     text-transform: uppercase;
   }
+
   @keyframes signal-pulse {
     0%, 100% { opacity: 1; transform: scale(1); }
     50% { opacity: 0.5; transform: scale(0.85); }
   }
   .signal-pulse {
     animation: signal-pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes scan-line {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+  .scan-line {
+    animation: scan-line 3s linear infinite;
+  }
+
+  @keyframes count-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .count-up {
+    animation: count-up 0.6s ease-out forwards;
   }
 
   .container {
@@ -201,74 +247,33 @@
       max-width: 1400px;
     }
   }
-  
-  /* Signal wave animation */
-  @keyframes signal-pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-  }
-  
-  @keyframes scan-line {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
-  }
-  
-  @keyframes count-up {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  
-  .signal-pulse {
-    animation: signal-pulse 2s ease-in-out infinite;
-  }
-  
-  .scan-line {
-    animation: scan-line 3s linear infinite;
-  }
-  
-  .count-up {
-    animation: count-up 0.6s ease-out forwards;
-  }
-  
-  /* Emotion color classes */
-  .emotion-anger { color: oklch(0.55 0.22 25); }
-  .emotion-contempt { color: oklch(0.55 0.18 300); }
-  .emotion-disgust { color: oklch(0.50 0.18 140); }
-  .emotion-fear { color: oklch(0.55 0.18 280); }
-  .emotion-joy { color: oklch(0.72 0.18 80); }
-  .emotion-sadness { color: oklch(0.55 0.15 250); }
-  .emotion-surprise { color: oklch(0.65 0.18 200); }
-  .emotion-sentimentality { color: oklch(0.60 0.18 340); }
-  .emotion-confusion { color: oklch(0.55 0.12 60); }
-  .emotion-neutral { color: oklch(0.55 0.01 250); }
-  
-  .bg-emotion-anger { background-color: oklch(0.55 0.22 25); }
-  .bg-emotion-contempt { background-color: oklch(0.55 0.18 300); }
-  .bg-emotion-disgust { background-color: oklch(0.50 0.18 140); }
-  .bg-emotion-fear { background-color: oklch(0.55 0.18 280); }
-  .bg-emotion-joy { background-color: oklch(0.72 0.18 80); }
-  .bg-emotion-sadness { background-color: oklch(0.55 0.15 250); }
-  .bg-emotion-surprise { background-color: oklch(0.65 0.18 200); }
-  .bg-emotion-sentimentality { background-color: oklch(0.60 0.18 340); }
-  .bg-emotion-confusion { background-color: oklch(0.55 0.12 60); }
-  .bg-emotion-neutral { background-color: oklch(0.55 0.01 250); }
-  
-  /* Card styles */
-  .metric-card {
-    @apply bg-card rounded-lg border border-border p-5 shadow-sm;
-    transition: box-shadow 0.2s ease, transform 0.2s ease;
-  }
-  .metric-card:hover {
-    box-shadow: 0 4px 20px oklch(0.15 0.02 250 / 0.08);
-    transform: translateY(-1px);
-  }
-  
-  /* Section header */
-  .section-label {
-    font-family: 'Roboto Mono', monospace;
-    font-size: 0.7rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: oklch(0.52 0.015 250);
+
+  /* Emotion color classes — vivid on dark bg */
+  .emotion-anger          { color: oklch(0.68 0.22 25); }
+  .emotion-contempt       { color: oklch(0.68 0.18 300); }
+  .emotion-disgust        { color: oklch(0.65 0.18 140); }
+  .emotion-fear           { color: oklch(0.68 0.18 280); }
+  .emotion-joy            { color: oklch(0.82 0.18 82); }
+  .emotion-sadness        { color: oklch(0.65 0.15 250); }
+  .emotion-surprise       { color: oklch(0.72 0.18 195); }
+  .emotion-sentimentality { color: oklch(0.72 0.18 340); }
+  .emotion-confusion      { color: oklch(0.68 0.12 60); }
+  .emotion-neutral        { color: oklch(0.60 0.01 250); }
+
+  .bg-emotion-anger          { background-color: oklch(0.68 0.22 25); }
+  .bg-emotion-contempt       { background-color: oklch(0.68 0.18 300); }
+  .bg-emotion-disgust        { background-color: oklch(0.65 0.18 140); }
+  .bg-emotion-fear           { background-color: oklch(0.68 0.18 280); }
+  .bg-emotion-joy            { background-color: oklch(0.82 0.18 82); }
+  .bg-emotion-sadness        { background-color: oklch(0.65 0.15 250); }
+  .bg-emotion-surprise       { background-color: oklch(0.72 0.18 195); }
+  .bg-emotion-sentimentality { background-color: oklch(0.72 0.18 340); }
+  .bg-emotion-confusion      { background-color: oklch(0.68 0.12 60); }
+  .bg-emotion-neutral        { background-color: oklch(0.60 0.01 250); }
+
+  /* Gold accent divider */
+  .gold-divider {
+    height: 2px;
+    background: linear-gradient(90deg, transparent, oklch(0.78 0.14 82), transparent);
   }
 }

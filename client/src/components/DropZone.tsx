@@ -76,27 +76,27 @@ export default function DropZone({ onDataLoaded }: DropZoneProps) {
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-center"
-      style={{ background: 'oklch(0.98 0.005 80)' }}
+      style={{ background: 'oklch(0.18 0.04 255)' }}
     >
       {/* Header */}
       <div className="mb-12 text-center">
         <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'oklch(0.15 0.02 250)' }}>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'oklch(0.22 0.04 255)' }}>
               <FaceScanIcon size={24} color="oklch(0.88 0.005 80)" scanColor="oklch(0.62 0.18 160)" />
             </div>
             <div>
-              <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.15 0.02 250)', letterSpacing: '-0.02em' }}>
+              <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.92 0.005 250)', letterSpacing: '-0.02em' }}>
                 emoSense
               </div>
-              <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.55rem', color: 'oklch(0.52 0.015 250)', letterSpacing: '0.1em' }}>
+              <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.55rem', color: 'oklch(0.58 0.015 255)', letterSpacing: '0.1em' }}>
                 Facial Expression Analyzer
               </div>
             </div>
         </div>
-        <h1 style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1.75rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
+        <h1 style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1.75rem', color: 'oklch(0.92 0.005 250)', marginBottom: '0.5rem' }}>
           感情分析ダッシュボード
         </h1>
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.9rem', color: 'oklch(0.52 0.015 250)' }}>
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.9rem', color: 'oklch(0.58 0.015 255)' }}>
           Affectiva / iMotions 形式のCSVファイルをアップロードして分析を開始
         </p>
       </div>
@@ -113,13 +113,13 @@ export default function DropZone({ onDataLoaded }: DropZoneProps) {
           maxWidth: '560px',
           padding: '3rem 2rem',
           borderRadius: '16px',
-          border: `2px dashed ${isDragging ? 'oklch(0.62 0.18 160)' : 'oklch(0.82 0.01 250)'}`,
+          border: `2px dashed ${isDragging ? 'oklch(0.70 0.14 195)' : 'oklch(0.32 0.04 255)'}`,
           background: isDragging
             ? 'oklch(0.62 0.18 160 / 0.06)'
-            : 'oklch(1 0 0)',
+            : 'oklch(0.22 0.04 255)',
           boxShadow: isDragging
-            ? '0 0 0 4px oklch(0.62 0.18 160 / 0.15), 0 8px 32px oklch(0.15 0.02 250 / 0.08)'
-            : '0 2px 12px oklch(0.15 0.02 250 / 0.06)',
+            ? '0 0 0 4px oklch(0.70 0.14 195 / 0.20), 0 8px 32px oklch(0.10 0.04 255 / 0.4)'
+            : '0 2px 12px oklch(0.10 0.04 255 / 0.4)',
           transform: isDragging ? 'scale(1.01)' : 'scale(1)',
         }}
       >
@@ -149,10 +149,10 @@ export default function DropZone({ onDataLoaded }: DropZoneProps) {
                 />
               ))}
             </div>
-            <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600, fontSize: '1rem', color: 'oklch(0.15 0.02 250)' }}>
+            <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600, fontSize: '1rem', color: 'oklch(0.88 0.005 250)' }}>
               {progress}
             </div>
-            <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.7rem', color: 'oklch(0.52 0.015 250)' }}>
+            <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.7rem', color: 'oklch(0.58 0.015 255)' }}>
               ANALYZING NEURAL SIGNAL DATA...
             </div>
           </div>
@@ -161,23 +161,23 @@ export default function DropZone({ onDataLoaded }: DropZoneProps) {
             <div
               className="w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-300"
               style={{
-                background: isDragging ? 'oklch(0.62 0.18 160 / 0.15)' : 'oklch(0.96 0.005 80)',
-                border: `1px solid ${isDragging ? 'oklch(0.62 0.18 160 / 0.4)' : 'oklch(0.88 0.008 80)'}`,
+                background: isDragging ? 'oklch(0.70 0.14 195 / 0.15)' : 'oklch(0.27 0.04 255)',
+                border: `1px solid ${isDragging ? 'oklch(0.62 0.18 160 / 0.4)' : 'oklch(0.28 0.04 255)'}`,
               }}
             >
               {isDragging
-                ? <FileText size={28} style={{ color: 'oklch(0.62 0.18 160)' }} />
-                : <Upload size={28} style={{ color: 'oklch(0.52 0.015 250)' }} />
+                ? <FileText size={28} style={{ color: 'oklch(0.70 0.14 195)' }} />
+                : <Upload size={28} style={{ color: 'oklch(0.65 0.015 255)' }} />
               }
             </div>
 
             <div>
-              <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1.1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.4rem' }}>
+              <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1.1rem', color: 'oklch(0.92 0.005 250)', marginBottom: '0.4rem' }}>
                 {isDragging ? 'ここにドロップ' : 'CSVファイルをドラッグ＆ドロップ'}
               </div>
-              <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.52 0.015 250)' }}>
+              <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.58 0.015 255)' }}>
                 または{' '}
-                <span style={{ color: 'oklch(0.42 0.18 160)', fontWeight: 600, textDecoration: 'underline' }}>
+                <span style={{ color: 'oklch(0.70 0.14 195)', fontWeight: 600, textDecoration: 'underline' }}>
                   クリックしてファイルを選択
                 </span>
               </div>
@@ -197,12 +197,12 @@ export default function DropZone({ onDataLoaded }: DropZoneProps) {
           style={{
             maxWidth: '560px',
             width: '100%',
-            background: 'oklch(0.97 0.01 25)',
-            border: '1px solid oklch(0.85 0.05 25)',
+            background: 'oklch(0.20 0.06 25)',
+            border: '1px solid oklch(0.35 0.10 25)',
           }}
         >
           <AlertCircle size={16} style={{ color: 'oklch(0.62 0.18 25)', flexShrink: 0 }} />
-          <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.42 0.12 25)' }}>
+          <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.80 0.12 25)' }}>
             {error}
           </span>
         </div>
@@ -214,11 +214,11 @@ export default function DropZone({ onDataLoaded }: DropZoneProps) {
         style={{
           maxWidth: '560px',
           width: '100%',
-          background: 'oklch(1 0 0)',
-          border: '1px solid oklch(0.91 0.006 80)',
+          background: 'oklch(0.22 0.04 255)',
+          border: '1px solid oklch(0.28 0.04 255)',
         }}
       >
-        <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.52 0.015 250)', letterSpacing: '0.1em', marginBottom: '0.75rem' }}>
+        <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)', letterSpacing: '0.1em', marginBottom: '0.75rem' }}>
           EXPECTED CSV FORMAT
         </div>
         <div className="grid grid-cols-3 gap-3">
@@ -228,11 +228,11 @@ export default function DropZone({ onDataLoaded }: DropZoneProps) {
             { label: 'アクションユニット', items: ['smile', 'brow raise', 'eye closure', '...'] },
           ].map(group => (
             <div key={group.label}>
-              <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', fontWeight: 600, color: 'oklch(0.35 0.02 250)', marginBottom: '0.3rem' }}>
+              <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', fontWeight: 600, color: 'oklch(0.78 0.14 82)', marginBottom: '0.3rem' }}>
                 {group.label}
               </div>
               {group.items.map(item => (
-                <div key={item} style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', color: 'oklch(0.55 0.015 250)', lineHeight: 1.8 }}>
+                <div key={item} style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', color: 'oklch(0.58 0.015 255)', lineHeight: 1.8 }}>
                   {item}
                 </div>
               ))}

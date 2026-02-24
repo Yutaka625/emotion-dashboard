@@ -226,7 +226,7 @@ export default function TimeseriesSection({ data }: Props) {
     const t = Number(label);
     const activeEvents = events.filter(ev => t >= ev.startTime && t <= ev.endTime);
     return (
-      <div className="p-3 rounded-lg shadow-lg" style={{ background: 'oklch(0.15 0.02 250)', border: '1px solid oklch(0.25 0.02 250)', maxWidth: '240px' }}>
+      <div className="p-3 rounded-lg shadow-lg" style={{ background: 'oklch(0.22 0.04 255)', border: '1px solid oklch(0.30 0.04 255)', maxWidth: '240px' }}>
         <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: '#4ade80', marginBottom: '6px' }}>
           t = {t.toFixed(2)}s
         </div>
@@ -288,10 +288,10 @@ export default function TimeseriesSection({ data }: Props) {
       {/* Header */}
       <div>
         <div className="section-label mb-1">TIME SERIES ANALYSIS</div>
-        <h2 style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.15 0.02 250)' }}>
+        <h2 style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.88 0.005 250)' }}>
           時系列分析
         </h2>
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.52 0.015 250)', marginTop: '0.25rem' }}>
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.58 0.015 255)', marginTop: '0.25rem' }}>
           感情スコアおよびEngagement・Valence・Attentionの時間推移 — イベント登録でグラフに介入区間を重ねて表示
         </p>
       </div>
@@ -301,10 +301,10 @@ export default function TimeseriesSection({ data }: Props) {
         <div className="flex items-center justify-between mb-3">
           <div>
             <div className="section-label mb-1">EVENT ANNOTATIONS</div>
-            <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)' }}>
+            <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)' }}>
               イベント（介入）登録
             </div>
-            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.52 0.015 250)', marginTop: '2px' }}>
+            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.58 0.015 255)', marginTop: '2px' }}>
               イベント名・開始・終了時間を登録するとグラフに反映されます
             </p>
           </div>
@@ -313,8 +313,8 @@ export default function TimeseriesSection({ data }: Props) {
             className="flex items-center gap-1.5 px-3 py-2 rounded-lg transition-all"
             style={{
               fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600, fontSize: '0.82rem',
-              background: showEventForm ? 'oklch(0.32 0.12 250)' : 'oklch(0.15 0.02 250)',
-              color: 'white',
+              background: showEventForm ? 'oklch(0.32 0.12 250)' : 'oklch(0.22 0.04 255)',
+              color: 'oklch(0.90 0.005 250)',
             }}
           >
             <Plus size={14} />
@@ -324,10 +324,10 @@ export default function TimeseriesSection({ data }: Props) {
 
         {/* Add form */}
         {showEventForm && (
-          <div className="mb-4 p-4 rounded-xl" style={{ background: 'oklch(0.97 0.003 80)', border: '1px solid oklch(0.88 0.008 80)' }}>
+          <div className="mb-4 p-4 rounded-xl" style={{ background: 'oklch(0.22 0.04 255)', border: '1px solid oklch(0.28 0.04 255)' }}>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
               <div>
-                <label style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fontWeight: 600, color: 'oklch(0.35 0.015 250)', display: 'block', marginBottom: '4px' }}>
+                <label style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fontWeight: 600, color: 'oklch(0.75 0.008 250)', display: 'block', marginBottom: '4px' }}>
                   イベント名
                 </label>
                 <input
@@ -338,14 +338,14 @@ export default function TimeseriesSection({ data }: Props) {
                   className="w-full px-3 py-2 rounded-lg text-sm outline-none"
                   style={{
                     fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.82rem',
-                    border: '1px solid oklch(0.85 0.008 80)',
-                    background: 'white', color: 'oklch(0.15 0.02 250)',
+                    border: '1px solid oklch(0.28 0.04 255)',
+                    background: 'oklch(0.22 0.04 255)', color: 'oklch(0.88 0.005 250)',
                   }}
                   onKeyDown={e => e.key === 'Enter' && handleAddEvent()}
                 />
               </div>
               <div>
-                <label style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fontWeight: 600, color: 'oklch(0.35 0.015 250)', display: 'block', marginBottom: '4px' }}>
+                <label style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fontWeight: 600, color: 'oklch(0.75 0.008 250)', display: 'block', marginBottom: '4px' }}>
                   開始時間（秒）
                 </label>
                 <input
@@ -357,13 +357,13 @@ export default function TimeseriesSection({ data }: Props) {
                   className="w-full px-3 py-2 rounded-lg text-sm outline-none"
                   style={{
                     fontFamily: 'Roboto Mono, monospace', fontSize: '0.82rem',
-                    border: '1px solid oklch(0.85 0.008 80)',
-                    background: 'white', color: 'oklch(0.15 0.02 250)',
+                    border: '1px solid oklch(0.28 0.04 255)',
+                    background: 'oklch(0.22 0.04 255)', color: 'oklch(0.88 0.005 250)',
                   }}
                 />
               </div>
               <div>
-                <label style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fontWeight: 600, color: 'oklch(0.35 0.015 250)', display: 'block', marginBottom: '4px' }}>
+                <label style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fontWeight: 600, color: 'oklch(0.75 0.008 250)', display: 'block', marginBottom: '4px' }}>
                   終了時間（秒）
                 </label>
                 <input
@@ -375,8 +375,8 @@ export default function TimeseriesSection({ data }: Props) {
                   className="w-full px-3 py-2 rounded-lg text-sm outline-none"
                   style={{
                     fontFamily: 'Roboto Mono, monospace', fontSize: '0.82rem',
-                    border: '1px solid oklch(0.85 0.008 80)',
-                    background: 'white', color: 'oklch(0.15 0.02 250)',
+                    border: '1px solid oklch(0.28 0.04 255)',
+                    background: 'oklch(0.22 0.04 255)', color: 'oklch(0.88 0.005 250)',
                   }}
                 />
               </div>
@@ -390,14 +390,14 @@ export default function TimeseriesSection({ data }: Props) {
               <button
                 onClick={handleAddEvent}
                 className="px-4 py-2 rounded-lg text-sm font-semibold transition-all"
-                style={{ fontFamily: 'Noto Sans JP, sans-serif', background: 'oklch(0.15 0.02 250)', color: 'white' }}
+                style={{ fontFamily: 'Noto Sans JP, sans-serif', background: 'oklch(0.22 0.04 255)', color: 'oklch(0.90 0.005 250)' }}
               >
                 登録する
               </button>
               <button
                 onClick={() => { setShowEventForm(false); setEventFormError(''); }}
                 className="px-4 py-2 rounded-lg text-sm transition-all"
-                style={{ fontFamily: 'Noto Sans JP, sans-serif', background: 'oklch(0.92 0.004 80)', color: 'oklch(0.35 0.015 250)' }}
+                style={{ fontFamily: 'Noto Sans JP, sans-serif', background: 'oklch(0.22 0.04 255)', color: 'oklch(0.75 0.008 250)' }}
               >
                 キャンセル
               </button>
@@ -407,9 +407,9 @@ export default function TimeseriesSection({ data }: Props) {
 
         {/* Event list */}
         {events.length === 0 ? (
-          <div className="py-6 text-center" style={{ border: '1px dashed oklch(0.85 0.008 80)', borderRadius: '12px' }}>
+          <div className="py-6 text-center" style={{ border: '1px dashed oklch(0.28 0.04 255)', borderRadius: '12px' }}>
             <Tag size={20} style={{ color: 'oklch(0.72 0.015 250)', margin: '0 auto 8px' }} />
-            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.82rem', color: 'oklch(0.55 0.015 250)' }}>
+            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.82rem', color: 'oklch(0.58 0.015 255)' }}>
               まだイベントが登録されていません
             </p>
             <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.68 0.015 250)', marginTop: '4px' }}>
@@ -426,7 +426,7 @@ export default function TimeseriesSection({ data }: Props) {
                   <div className="flex items-center gap-3 px-4 py-3">
                     <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: ev.color }} />
                     <div className="flex-1 min-w-0">
-                      <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '0.88rem', color: 'oklch(0.15 0.02 250)' }}>
+                      <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '0.88rem', color: 'oklch(0.88 0.005 250)' }}>
                         {ev.name}
                       </div>
                       <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.68rem', color: 'oklch(0.45 0.015 250)' }}>
@@ -462,10 +462,10 @@ export default function TimeseriesSection({ data }: Props) {
                         {(['engagement', 'valence', 'attention'] as const).map(key => (
                           <div key={key} className="p-2 rounded-lg text-center" style={{ background: SPECIAL_COLORS[key] + '12', border: `1px solid ${SPECIAL_COLORS[key]}30` }}>
                             <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: SPECIAL_COLORS[key], marginBottom: '2px', textTransform: 'uppercase' }}>{key}</div>
-                            <div style={{ fontFamily: 'Roboto Mono, monospace', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)' }}>
+                            <div style={{ fontFamily: 'Roboto Mono, monospace', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)' }}>
                               {stat.stats[key]?.mean.toFixed(1)}
                             </div>
-                            <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.52 0.015 250)' }}>
+                            <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)' }}>
                               max {stat.stats[key]?.max.toFixed(1)}
                             </div>
                           </div>
@@ -483,13 +483,13 @@ export default function TimeseriesSection({ data }: Props) {
                                   {EMOTION_LABELS_JA[e]}
                                 </span>
                               </div>
-                              <div className="flex-1 h-3 rounded-full overflow-hidden" style={{ background: 'oklch(0.92 0.004 80)' }}>
+                              <div className="flex-1 h-3 rounded-full overflow-hidden" style={{ background: 'oklch(0.22 0.04 255)' }}>
                                 <div
                                   className="h-full rounded-full transition-all"
                                   style={{ width: `${Math.min(100, mean * 2)}%`, background: EMOTION_HEX[e], opacity: isDom ? 1 : 0.7 }}
                                 />
                               </div>
-                              <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: isDom ? EMOTION_HEX[e] : 'oklch(0.52 0.015 250)', minWidth: '36px', fontWeight: isDom ? 700 : 400 }}>
+                              <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: isDom ? EMOTION_HEX[e] : 'oklch(0.58 0.015 255)', minWidth: '36px', fontWeight: isDom ? 700 : 400 }}>
                                 {mean.toFixed(2)}
                               </span>
                               {isDom && <span className="px-1 py-0.5 rounded text-xs" style={{ background: EMOTION_HEX[e] + '20', color: EMOTION_HEX[e], fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.6rem' }}>主要</span>}
@@ -514,7 +514,7 @@ export default function TimeseriesSection({ data }: Props) {
             {timeRange[0]}s
           </span>
           <div className="flex-1 relative h-6 flex items-center">
-            <div className="absolute w-full h-1 rounded-full" style={{ background: 'oklch(0.9 0.005 80)' }} />
+            <div className="absolute w-full h-1 rounded-full" style={{ background: 'oklch(0.28 0.04 255)' }} />
             <div
               className="absolute h-1 rounded-full"
               style={{
@@ -567,9 +567,9 @@ export default function TimeseriesSection({ data }: Props) {
               className="px-2.5 py-1 rounded text-xs transition-all"
               style={{
                 fontFamily: 'Roboto Mono, monospace',
-                background: timeRange[0] === s && timeRange[1] === e ? 'oklch(0.32 0.12 160)' : 'oklch(0.95 0.003 80)',
+                background: timeRange[0] === s && timeRange[1] === e ? 'oklch(0.32 0.12 160)' : 'oklch(0.20 0.04 255)',
                 color: timeRange[0] === s && timeRange[1] === e ? 'white' : 'oklch(0.45 0.015 250)',
-                border: `1px solid ${timeRange[0] === s && timeRange[1] === e ? 'oklch(0.52 0.18 160)' : 'oklch(0.88 0.008 80)'}`,
+                border: `1px solid ${timeRange[0] === s && timeRange[1] === e ? 'oklch(0.52 0.18 160)' : 'oklch(0.28 0.04 255)'}`,
               }}
             >
               {label}
@@ -592,7 +592,7 @@ export default function TimeseriesSection({ data }: Props) {
               {ev.name}
             </button>
           ))}
-          <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.52 0.015 250)', alignSelf: 'center', marginLeft: '4px' }}>
+          <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.58 0.015 255)', alignSelf: 'center', marginLeft: '4px' }}>
             {sampledData.length} pts表示中
           </span>
         </div>
@@ -603,7 +603,7 @@ export default function TimeseriesSection({ data }: Props) {
         <div className="flex items-center justify-between mb-3">
           <div>
             <div className="section-label mb-1">SPECIAL METRICS</div>
-            <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)' }}>
+            <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)' }}>
               Engagement / Valence / Attention
             </div>
           </div>
@@ -615,9 +615,9 @@ export default function TimeseriesSection({ data }: Props) {
                 className="px-3 py-1 rounded-full text-xs transition-all"
                 style={{
                   fontFamily: 'Roboto Mono, monospace',
-                  background: showSpecial.includes(key) ? SPECIAL_COLORS[key] : 'oklch(0.95 0.003 80)',
+                  background: showSpecial.includes(key) ? SPECIAL_COLORS[key] : 'oklch(0.20 0.04 255)',
                   color: showSpecial.includes(key) ? 'white' : 'oklch(0.45 0.015 250)',
-                  border: `1px solid ${showSpecial.includes(key) ? SPECIAL_COLORS[key] : 'oklch(0.88 0.008 80)'}`,
+                  border: `1px solid ${showSpecial.includes(key) ? SPECIAL_COLORS[key] : 'oklch(0.28 0.04 255)'}`,
                   opacity: showSpecial.includes(key) ? 1 : 0.6,
                 }}
               >
@@ -634,9 +634,9 @@ export default function TimeseriesSection({ data }: Props) {
                 <stop offset="95%" stopColor={SPECIAL_COLORS.engagement} stopOpacity={0.02} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.92 0.004 80)" />
-            <XAxis dataKey="time" tickFormatter={formatTime} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.52 0.015 250)' }} />
-            <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.52 0.015 250)' }} domain={[0, 100]} />
+            <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" />
+            <XAxis dataKey="time" tickFormatter={formatTime} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} />
+            <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} domain={[0, 100]} />
             <Tooltip content={<CustomTooltip />} />
             <Legend formatter={v => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem' }}>{v}</span>} />
             {renderEventAreas()}
@@ -656,12 +656,12 @@ export default function TimeseriesSection({ data }: Props) {
       {/* Emotion Charts — Tab Switcher */}
       <div className="metric-card">
         <div className="section-label mb-3">EMOTION TIME SERIES</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
           感情スコアの時系列グラフ
         </div>
 
         {/* Tab Bar */}
-        <div className="flex gap-1 mb-5 p-1 rounded-lg" style={{ background: 'oklch(0.95 0.003 80)', width: 'fit-content' }}>
+        <div className="flex gap-1 mb-5 p-1 rounded-lg" style={{ background: 'oklch(0.20 0.04 255)', width: 'fit-content' }}>
           {tabs.map(tab => (
             <button
               key={tab.id}
@@ -671,7 +671,7 @@ export default function TimeseriesSection({ data }: Props) {
                 fontFamily: 'Noto Sans JP, sans-serif',
                 fontWeight: activeTab === tab.id ? 600 : 400,
                 background: activeTab === tab.id ? 'white' : 'transparent',
-                color: activeTab === tab.id ? 'oklch(0.15 0.02 250)' : 'oklch(0.52 0.015 250)',
+                color: activeTab === tab.id ? 'oklch(0.22 0.04 255)' : 'oklch(0.58 0.015 255)',
                 boxShadow: activeTab === tab.id ? '0 1px 3px oklch(0.15 0.02 250 / 0.1)' : 'none',
               }}
             >
@@ -691,9 +691,9 @@ export default function TimeseriesSection({ data }: Props) {
                   className="px-2.5 py-0.5 rounded-full text-xs transition-all"
                   style={{
                     fontFamily: 'Noto Sans JP, sans-serif',
-                    background: selectedEmotions.includes(emotion) ? EMOTION_HEX[emotion] : 'oklch(0.95 0.003 80)',
+                    background: selectedEmotions.includes(emotion) ? EMOTION_HEX[emotion] : 'oklch(0.20 0.04 255)',
                     color: selectedEmotions.includes(emotion) ? 'white' : 'oklch(0.45 0.015 250)',
-                    border: `1px solid ${selectedEmotions.includes(emotion) ? EMOTION_HEX[emotion] : 'oklch(0.88 0.008 80)'}`,
+                    border: `1px solid ${selectedEmotions.includes(emotion) ? EMOTION_HEX[emotion] : 'oklch(0.28 0.04 255)'}`,
                     fontSize: '0.72rem',
                   }}
                 >
@@ -701,14 +701,14 @@ export default function TimeseriesSection({ data }: Props) {
                 </button>
               ))}
             </div>
-            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.55 0.015 250)', marginBottom: '0.75rem' }}>
+            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.58 0.015 255)', marginBottom: '0.75rem' }}>
               複数の感情スコアを同一グラフ上に重ねて表示します。感情ボタンをクリックして表示/非表示を切り替えられます。
             </p>
             <ResponsiveContainer width="100%" height={280}>
               <LineChart data={sampledData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.92 0.004 80)" />
-                <XAxis dataKey="time" tickFormatter={formatTime} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.52 0.015 250)' }} />
-                <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.52 0.015 250)' }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" />
+                <XAxis dataKey="time" tickFormatter={formatTime} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} />
+                <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} />
                 <Tooltip content={<CustomTooltip />} />
                 <Legend formatter={v => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem' }}>{v}</span>} />
                 {renderEventAreas()}
@@ -731,7 +731,7 @@ export default function TimeseriesSection({ data }: Props) {
         {/* TAB: 個別波形（スパークライン） */}
         {activeTab === 'sparklines' && (
           <div>
-            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.55 0.015 250)', marginBottom: '1rem' }}>
+            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.58 0.015 255)', marginBottom: '1rem' }}>
               各感情スコアを独立したチャートで表示します。微細な変動パターンを個別に確認できます。
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -739,11 +739,11 @@ export default function TimeseriesSection({ data }: Props) {
                 const maxVal = Math.max(...sampledData.map(d => (d as any)[emotion] || 0));
                 const meanVal = sampledData.reduce((acc, d) => acc + ((d as any)[emotion] || 0), 0) / sampledData.length;
                 return (
-                  <div key={emotion} className="p-3 rounded-lg" style={{ background: 'oklch(0.97 0.003 80)', border: `1px solid ${EMOTION_HEX[emotion]}30` }}>
+                  <div key={emotion} className="p-3 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', border: `1px solid ${EMOTION_HEX[emotion]}30` }}>
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full" style={{ background: EMOTION_HEX[emotion] }} />
-                        <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600, fontSize: '0.82rem', color: 'oklch(0.15 0.02 250)' }}>
+                        <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600, fontSize: '0.82rem', color: 'oklch(0.88 0.005 250)' }}>
                           {EMOTION_LABELS_JA[emotion]}
                         </span>
                       </div>
@@ -751,7 +751,7 @@ export default function TimeseriesSection({ data }: Props) {
                         <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: EMOTION_HEX[emotion] }}>
                           max {maxVal.toFixed(2)}
                         </div>
-                        <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.52 0.015 250)' }}>
+                        <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)' }}>
                           avg {meanVal.toFixed(3)}
                         </div>
                       </div>
@@ -792,7 +792,7 @@ export default function TimeseriesSection({ data }: Props) {
         {/* TAB: ヒートマップ */}
         {activeTab === 'heatmap' && (
           <div>
-            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.55 0.015 250)', marginBottom: '1rem' }}>
+            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.58 0.015 255)', marginBottom: '1rem' }}>
               5秒区間ごとの感情スコア平均値をヒートマップで表示します。横軸が時間、縦軸が感情種別、色の濃さがスコアの強度を示します。
             </p>
             <div className="overflow-x-auto">
@@ -801,7 +801,7 @@ export default function TimeseriesSection({ data }: Props) {
                 {events.length > 0 && (
                   <div className="flex items-center gap-2 mb-2">
                     <div className="flex-shrink-0 text-right" style={{ width: '60px' }}>
-                      <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.52 0.015 250)' }}>
+                      <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)' }}>
                         EVENT
                       </span>
                     </div>
@@ -817,7 +817,7 @@ export default function TimeseriesSection({ data }: Props) {
                             style={{ left: `${leftPct}%`, width: `${widthPct}%`, background: ev.color, opacity: 0.7 }}
                             title={ev.name}
                           >
-                            <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.55rem', color: 'white', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', padding: '0 2px' }}>
+                            <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.55rem', color: 'oklch(0.90 0.005 250)', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', padding: '0 2px' }}>
                               {ev.name}
                             </span>
                           </div>
@@ -866,7 +866,7 @@ export default function TimeseriesSection({ data }: Props) {
                   <div style={{ width: '60px' }} />
                   <div className="flex justify-between flex-1">
                     {[0, 50, 100, 150, 200, 250].map(t => (
-                      <span key={t} style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.52 0.015 250)' }}>
+                      <span key={t} style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)' }}>
                         {t}s
                       </span>
                     ))}
@@ -874,14 +874,14 @@ export default function TimeseriesSection({ data }: Props) {
                 </div>
                 {/* カラースケール凡例 */}
                 <div className="flex items-center gap-3 mt-3">
-                  <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.52 0.015 250)' }}>低</span>
+                  <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)' }}>低</span>
                   <div className="flex gap-0.5">
                     {[0.05, 0.15, 0.3, 0.5, 0.7, 0.85, 1.0].map((op, i) => (
                       <div key={i} className="w-6 h-3 rounded-sm" style={{ background: '#74b9ff', opacity: op }} />
                     ))}
                   </div>
-                  <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.52 0.015 250)' }}>高</span>
-                  <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.65rem', color: 'oklch(0.52 0.015 250)', marginLeft: '8px' }}>
+                  <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)' }}>高</span>
+                  <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.65rem', color: 'oklch(0.58 0.015 255)', marginLeft: '8px' }}>
                     ※各感情内での相対スケール（5秒区間平均値）
                   </span>
                 </div>
@@ -893,16 +893,16 @@ export default function TimeseriesSection({ data }: Props) {
         {/* TAB: スタック面グラフ */}
         {activeTab === 'stacked' && (
           <div>
-            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.55 0.015 250)', marginBottom: '1rem' }}>
+            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.58 0.015 255)', marginBottom: '1rem' }}>
               10秒区間ごとの感情スコア平均値を積み上げ面グラフで表示します。各感情の相対的な変化パターンを把握できます。
             </p>
             <ResponsiveContainer width="100%" height={300}>
               <AreaChart data={stackedData} margin={{ top: 5, right: 10, bottom: 20, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.92 0.004 80)" />
-                <XAxis dataKey="time" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.52 0.015 250)' }} angle={-30} textAnchor="end" />
-                <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.52 0.015 250)' }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" />
+                <XAxis dataKey="time" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} angle={-30} textAnchor="end" />
+                <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} />
                 <Tooltip
-                  contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', border: '1px solid oklch(0.88 0.008 80)', borderRadius: '6px' }}
+                  contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
                   formatter={(v: number, name: string) => [v.toFixed(3), EMOTION_LABELS_JA[name] || name]}
                 />
                 <Legend formatter={v => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem' }}>{EMOTION_LABELS_JA[v] || v}</span>} />
@@ -922,7 +922,7 @@ export default function TimeseriesSection({ data }: Props) {
                 ))}
               </AreaChart>
             </ResponsiveContainer>
-            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.55 0.015 250)', marginTop: '0.5rem' }}>
+            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.58 0.015 255)', marginTop: '0.5rem' }}>
               ※「困惑」は他感情との視認性確保のため除外しています
             </p>
           </div>
@@ -931,7 +931,7 @@ export default function TimeseriesSection({ data }: Props) {
         {/* TAB: 支配的感情タイムライン */}
         {activeTab === 'dominant' && (
           <div>
-            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.55 0.015 250)', marginBottom: '1rem' }}>
+            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.58 0.015 255)', marginBottom: '1rem' }}>
               10秒区間ごとに最も高いスコアを示した「支配的感情」の推移を表示します。感情状態の遷移パターンを視覚的に把握できます。
             </p>
             {/* カラーバータイムライン */}
@@ -950,7 +950,7 @@ export default function TimeseriesSection({ data }: Props) {
                         className="absolute h-full rounded-sm flex items-center justify-center overflow-hidden"
                         style={{ left: `${leftPct}%`, width: `${widthPct}%`, background: ev.color, opacity: 0.75 }}
                       >
-                        <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.55rem', color: 'white', fontWeight: 700, whiteSpace: 'nowrap', padding: '0 2px' }}>
+                        <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.55rem', color: 'oklch(0.90 0.005 250)', fontWeight: 700, whiteSpace: 'nowrap', padding: '0 2px' }}>
                           {ev.name}
                         </span>
                       </div>
@@ -967,15 +967,15 @@ export default function TimeseriesSection({ data }: Props) {
                     title={`${d.time}: ${d.label}`}
                   >
                     <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 px-2 py-1 rounded text-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10"
-                      style={{ background: 'oklch(0.15 0.02 250)', color: 'white', fontFamily: 'Noto Sans JP, sans-serif', whiteSpace: 'nowrap' }}>
+                      style={{ background: 'oklch(0.22 0.04 255)', color: 'oklch(0.90 0.005 250)', fontFamily: 'Noto Sans JP, sans-serif', whiteSpace: 'nowrap' }}>
                       {d.time}: {d.label}
                     </div>
                   </div>
                 ))}
               </div>
               <div className="flex justify-between mt-1">
-                <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.52 0.015 250)' }}>0s</span>
-                <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.52 0.015 250)' }}>{maxTime}s</span>
+                <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)' }}>0s</span>
+                <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)' }}>{maxTime}s</span>
               </div>
             </div>
 
@@ -983,11 +983,11 @@ export default function TimeseriesSection({ data }: Props) {
             <div className="section-label mb-2">10-SECOND WINDOW EMOTION SCORES</div>
             <ResponsiveContainer width="100%" height={280}>
               <BarChart data={stackedData} margin={{ top: 5, right: 10, bottom: 20, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.92 0.004 80)" vertical={false} />
-                <XAxis dataKey="time" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', fill: 'oklch(0.52 0.015 250)' }} angle={-30} textAnchor="end" />
-                <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.52 0.015 250)' }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" vertical={false} />
+                <XAxis dataKey="time" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', fill: 'oklch(0.58 0.015 255)' }} angle={-30} textAnchor="end" />
+                <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} />
                 <Tooltip
-                  contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', border: '1px solid oklch(0.88 0.008 80)', borderRadius: '6px' }}
+                  contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
                   formatter={(v: number, name: string) => [v.toFixed(3), EMOTION_LABELS_JA[name] || name]}
                 />
                 <Legend formatter={v => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem' }}>{EMOTION_LABELS_JA[v] || v}</span>} />
@@ -1009,7 +1009,7 @@ export default function TimeseriesSection({ data }: Props) {
               {NON_NEUTRAL_EMOTIONS.map(e => (
                 <div key={e} className="flex items-center gap-1.5">
                   <div className="w-3 h-3 rounded-sm" style={{ background: EMOTION_HEX[e] }} />
-                  <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.35 0.015 250)' }}>
+                  <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.75 0.008 250)' }}>
                     {EMOTION_LABELS_JA[e]}
                   </span>
                 </div>
@@ -1022,10 +1022,10 @@ export default function TimeseriesSection({ data }: Props) {
       {/* 全感情の統合ビュー（常時表示） */}
       <div className="metric-card">
         <div className="section-label mb-3">ALL EMOTIONS — FULL SESSION</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '0.5rem' }}>
           全感情スコアの全期間推移（困惑を除く）
         </div>
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.55 0.015 250)', marginBottom: '1rem' }}>
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.58 0.015 255)', marginBottom: '1rem' }}>
           困惑を除く感情の全セッション推移。各感情の突発的な上昇イベントを確認できます。
         </p>
         <ResponsiveContainer width="100%" height={260}>
@@ -1036,9 +1036,9 @@ export default function TimeseriesSection({ data }: Props) {
             }, [timeseries_full])}
             margin={{ top: 5, right: 10, bottom: 5, left: 0 }}
           >
-            <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.92 0.004 80)" />
-            <XAxis dataKey="time" tickFormatter={formatTime} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.52 0.015 250)' }} />
-            <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.52 0.015 250)' }} />
+            <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" />
+            <XAxis dataKey="time" tickFormatter={formatTime} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} />
+            <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} />
             <Tooltip content={<CustomTooltip />} />
             <Legend formatter={v => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem' }}>{EMOTION_LABELS_JA[v] || v}</span>} />
             {events.map(ev => (
@@ -1072,15 +1072,15 @@ export default function TimeseriesSection({ data }: Props) {
       {/* 10-second window summary table */}
       <div className="metric-card">
         <div className="section-label mb-3">10-SECOND WINDOWS TABLE</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
           10秒区間ごとのサマリー
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr style={{ borderBottom: '2px solid oklch(0.88 0.008 80)' }}>
+              <tr style={{ borderBottom: '2px solid oklch(0.28 0.04 255)' }}>
                 {['時間区間', 'イベント', 'Eng', 'Val', 'Att', '怒', '軽', '嫌', '恐', '喜', '悲', '驚', '感', '困', '主要感情'].map(h => (
-                  <th key={h} className="text-left pb-2 pr-2" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.52 0.015 250)', letterSpacing: '0.03em', whiteSpace: 'nowrap' }}>
+                  <th key={h} className="text-left pb-2 pr-2" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)', letterSpacing: '0.03em', whiteSpace: 'nowrap' }}>
                     {h}
                   </th>
                 ))}
@@ -1094,10 +1094,10 @@ export default function TimeseriesSection({ data }: Props) {
                 return (
                   <tr key={i}
                     style={{
-                      borderBottom: '1px solid oklch(0.94 0.003 80)',
+                      borderBottom: '1px solid oklch(0.20 0.04 255)',
                       background: rowEvents.length > 0 ? `${rowEvents[0].color}08` : 'transparent',
                     }}
-                    onMouseEnter={e => (e.currentTarget.style.background = rowEvents.length > 0 ? `${rowEvents[0].color}15` : 'oklch(0.97 0.003 80)')}
+                    onMouseEnter={e => (e.currentTarget.style.background = rowEvents.length > 0 ? `${rowEvents[0].color}15` : 'oklch(0.22 0.04 255)')}
                     onMouseLeave={e => (e.currentTarget.style.background = rowEvents.length > 0 ? `${rowEvents[0].color}08` : 'transparent')}
                   >
                     <td className="py-1.5 pr-2" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.68rem', color: 'oklch(0.45 0.015 250)', whiteSpace: 'nowrap' }}>
@@ -1124,7 +1124,7 @@ export default function TimeseriesSection({ data }: Props) {
                         <td key={key} className="py-1.5 pr-2">
                           <span style={{
                             fontFamily: 'Roboto Mono, monospace', fontSize: '0.68rem',
-                            color: val > 5 ? EMOTION_HEX[emotionKey] : 'oklch(0.52 0.015 250)',
+                            color: val > 5 ? EMOTION_HEX[emotionKey] : 'oklch(0.58 0.015 255)',
                             fontWeight: val > 5 ? 600 : 400,
                           }}>
                             {val.toFixed(1)}

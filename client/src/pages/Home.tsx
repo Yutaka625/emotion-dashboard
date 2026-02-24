@@ -101,7 +101,7 @@ export default function Home() {
   return (
     <div
       className="flex h-screen overflow-hidden relative"
-      style={{ background: 'oklch(0.98 0.005 80)' }}
+      style={{ background: 'oklch(0.18 0.04 255)' }}
       onDragOver={handleDashboardDragOver}
       onDragLeave={handleDashboardDragLeave}
       onDrop={handleDashboardDrop}
@@ -119,7 +119,7 @@ export default function Home() {
         >
           <div className="text-center">
             <Upload size={48} style={{ color: 'oklch(0.42 0.18 160)', margin: '0 auto 1rem' }} />
-            <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1.25rem', color: 'oklch(0.25 0.02 250)' }}>
+            <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1.25rem', color: 'oklch(0.92 0.005 250)' }}>
               新しいCSVファイルをドロップして再分析
             </div>
           </div>
@@ -135,31 +135,31 @@ export default function Home() {
         <header
           className="flex items-center justify-between px-6 py-3 flex-shrink-0"
           style={{
-            background: 'oklch(1 0 0)',
-            borderBottom: '1px solid oklch(0.88 0.008 80)',
+            background: 'oklch(0.22 0.04 255)',
+            borderBottom: '1px solid oklch(0.28 0.04 255)',
             boxShadow: '0 1px 4px oklch(0.15 0.02 250 / 0.04)',
           }}
         >
           <div className="flex items-center gap-3">
-            <FaceScanIcon size={20} color="oklch(0.35 0.02 250)" scanColor="oklch(0.52 0.18 160)" />
-            <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '0.9rem', color: 'oklch(0.15 0.02 250)' }}>
+            <FaceScanIcon size={20} color="oklch(0.75 0.008 250)" scanColor="oklch(0.70 0.14 195)" />
+            <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '0.9rem', color: 'oklch(0.92 0.005 250)' }}>
               emoSense
             </span>
-            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.52 0.015 250)' }}>
+            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)' }}>
               Facial Expression Analyzer
             </span>
-            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.52 0.015 250)' }}>
+            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.58 0.015 255)' }}>
               / {activeSection.toUpperCase()}
             </span>
           </div>
 
           <div className="flex items-center gap-3">
-            <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.52 0.015 250)' }}>
+            <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.58 0.015 255)' }}>
               {data.meta.total_frames.toLocaleString()} frames · {data.meta.duration_minutes.toFixed(2)} min
             </div>
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: 'oklch(0.62 0.18 160 / 0.1)', border: '1px solid oklch(0.62 0.18 160 / 0.25)' }}>
-              <div className="w-1.5 h-1.5 rounded-full" style={{ background: 'oklch(0.62 0.18 160)' }} />
-              <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', color: 'oklch(0.42 0.12 160)' }}>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: 'oklch(0.70 0.14 195 / 0.12)', border: '1px solid oklch(0.70 0.14 195 / 0.30)' }}>
+              <div className="w-1.5 h-1.5 rounded-full" style={{ background: 'oklch(0.70 0.14 195)' }} />
+              <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', color: 'oklch(0.70 0.14 195)' }}>
                 {data.meta.recording_date}
               </span>
             </div>
@@ -167,13 +167,13 @@ export default function Home() {
             {/* File info + reset button */}
             <div
               className="flex items-center gap-2 px-3 py-1.5 rounded-lg"
-              style={{ background: 'oklch(0.96 0.005 80)', border: '1px solid oklch(0.88 0.008 80)' }}
+              style={{ background: 'oklch(0.27 0.04 255)', border: '1px solid oklch(0.32 0.04 255)' }}
             >
               <span
                 style={{
                   fontFamily: 'Roboto Mono, monospace',
                   fontSize: '0.6rem',
-                  color: 'oklch(0.45 0.015 250)',
+                  color: 'oklch(0.72 0.008 250)',
                   maxWidth: '180px',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
@@ -186,7 +186,7 @@ export default function Home() {
               <button
                 onClick={handleReset}
                 className="flex items-center gap-1 transition-colors"
-                style={{ color: 'oklch(0.55 0.015 250)' }}
+                style={{ color: 'oklch(0.58 0.015 255)' }}
                 title="別のファイルを読み込む"
               >
                 <X size={12} />
@@ -196,12 +196,12 @@ export default function Home() {
             {/* Upload new file hint */}
             <div
               className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg cursor-pointer transition-colors"
-              style={{ background: 'oklch(0.96 0.005 80)', border: '1px solid oklch(0.88 0.008 80)' }}
+              style={{ background: 'oklch(0.27 0.04 255)', border: '1px solid oklch(0.32 0.04 255)' }}
               onClick={handleReset}
               title="新しいCSVファイルをアップロード"
             >
-              <Upload size={12} style={{ color: 'oklch(0.52 0.015 250)' }} />
-              <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', color: 'oklch(0.45 0.015 250)' }}>
+              <Upload size={12} style={{ color: 'oklch(0.58 0.015 255)' }} />
+              <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', color: 'oklch(0.72 0.008 250)' }}>
                 別のファイル
               </span>
             </div>

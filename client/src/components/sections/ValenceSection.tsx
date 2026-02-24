@@ -58,10 +58,10 @@ export default function ValenceSection({ data }: Props) {
       {/* Header */}
       <div>
         <div className="section-label mb-1">VALENCE ANALYSIS</div>
-        <h2 style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.15 0.02 250)' }}>
+        <h2 style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.88 0.005 250)' }}>
           Valence 詳細分析
         </h2>
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.52 0.015 250)', marginTop: '0.25rem' }}>
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.58 0.015 255)', marginTop: '0.25rem' }}>
           感情価（ポジティブ/ネガティブ）の分布と時系列パターン
         </p>
       </div>
@@ -80,7 +80,7 @@ export default function ValenceSection({ data }: Props) {
               <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.75rem', color: m.color, lineHeight: 1 }}>
                 {m.value}
               </span>
-              <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.7rem', color: 'oklch(0.52 0.015 250)' }}>
+              <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.7rem', color: 'oklch(0.58 0.015 255)' }}>
                 {m.unit}
               </span>
             </div>
@@ -91,7 +91,7 @@ export default function ValenceSection({ data }: Props) {
       {/* Valence Time Series */}
       <div className="metric-card">
         <div className="section-label mb-3">VALENCE SIGNAL</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
           Valenceの時系列推移
         </div>
         <ResponsiveContainer width="100%" height={200}>
@@ -102,12 +102,12 @@ export default function ValenceSection({ data }: Props) {
                 <stop offset="95%" stopColor="oklch(0.62 0.18 25)" stopOpacity={0.02} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.92 0.004 80)" />
-            <XAxis dataKey="time" tickFormatter={t => `${t.toFixed(0)}s`} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.52 0.015 250)' }} />
-            <YAxis domain={[25, 100]} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.52 0.015 250)' }} />
+            <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" />
+            <XAxis dataKey="time" tickFormatter={t => `${t.toFixed(0)}s`} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.58 0.015 255)' }} />
+            <YAxis domain={[25, 100]} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.58 0.015 255)' }} />
             <Tooltip
               formatter={(v: number) => [v.toFixed(2), 'Valence']}
-              contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.88 0.008 80)', borderRadius: '6px' }}
+              contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
             />
             <ReferenceLine y={90} stroke="oklch(0.62 0.18 160)" strokeDasharray="4 4" label={{ value: '90%', style: { fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', fill: 'oklch(0.42 0.12 160)' } }} />
             <Area type="monotone" dataKey="valence" stroke="oklch(0.62 0.18 25)" fill="url(#valGrad)" strokeWidth={1.5} dot={false} />
@@ -119,17 +119,17 @@ export default function ValenceSection({ data }: Props) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="metric-card">
           <div className="section-label mb-3">DISTRIBUTION</div>
-          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
+          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
             Valenceレベル分布
           </div>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={distData} margin={{ top: 5, right: 10, bottom: 20, left: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.92 0.004 80)" vertical={false} />
-              <XAxis dataKey="label" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.62rem', fill: 'oklch(0.52 0.015 250)' }} />
-              <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.52 0.015 250)' }} />
+              <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" vertical={false} />
+              <XAxis dataKey="label" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} />
+              <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.58 0.015 255)' }} />
               <Tooltip
                 formatter={(v: number) => [`${v.toLocaleString()} フレーム`, 'フレーム数']}
-                contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.88 0.008 80)', borderRadius: '6px' }}
+                contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
               />
               <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                 {distData.map((entry, i) => (
@@ -142,17 +142,17 @@ export default function ValenceSection({ data }: Props) {
 
         <div className="metric-card">
           <div className="section-label mb-3">CORRELATIONS</div>
-          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
+          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
             Valenceと各指標の相関係数
           </div>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={corrData} layout="vertical" margin={{ top: 5, right: 30, bottom: 5, left: 60 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.92 0.004 80)" horizontal={false} />
-              <XAxis type="number" domain={[-1, 1]} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.52 0.015 250)' }} />
-              <YAxis type="category" dataKey="name" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fill: 'oklch(0.35 0.015 250)' }} width={55} />
+              <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" horizontal={false} />
+              <XAxis type="number" domain={[-1, 1]} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.58 0.015 255)' }} />
+              <YAxis type="category" dataKey="name" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fill: 'oklch(0.75 0.008 250)' }} width={55} />
               <Tooltip
                 formatter={(v: number) => [v.toFixed(4), '相関係数']}
-                contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.88 0.008 80)', borderRadius: '6px' }}
+                contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
               />
               <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                 {corrData.map((entry, i) => (
@@ -167,24 +167,24 @@ export default function ValenceSection({ data }: Props) {
       {/* Circumplex Model */}
       <div className="metric-card">
         <div className="section-label mb-3">CIRCUMPLEX MODEL OF AFFECT</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '0.5rem' }}>
           感情の円環モデル（Russell, 1980）
         </div>
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.52 0.015 250)', marginBottom: '1rem' }}>
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.58 0.015 255)', marginBottom: '1rem' }}>
           Engagementを覚醒度（Arousal）の代理指標として使用。各象限のフレーム数を示します。
         </p>
         <div className="grid grid-cols-2 gap-4">
           {circumplexData.map((item, i) => (
-            <div key={i} className="p-4 rounded-lg flex items-start gap-3" style={{ background: 'oklch(0.97 0.003 80)', border: `1px solid ${item.color}30` }}>
+            <div key={i} className="p-4 rounded-lg flex items-start gap-3" style={{ background: 'oklch(0.22 0.04 255)', border: `1px solid ${item.color}30` }}>
               <div className="w-3 h-3 rounded-sm mt-0.5 flex-shrink-0" style={{ background: item.color }} />
               <div>
-                <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600, fontSize: '0.82rem', color: 'oklch(0.15 0.02 250)' }}>
+                <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600, fontSize: '0.82rem', color: 'oklch(0.88 0.005 250)' }}>
                   {item.label}
                 </div>
                 <div style={{ fontFamily: 'Roboto Mono, monospace', fontWeight: 700, fontSize: '1.2rem', color: item.color, lineHeight: 1.2 }}>
                   {item.value.toLocaleString()}
                 </div>
-                <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', color: 'oklch(0.52 0.015 250)' }}>
+                <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', color: 'oklch(0.58 0.015 255)' }}>
                   フレーム — {item.desc}
                 </div>
               </div>
@@ -202,7 +202,7 @@ export default function ValenceSection({ data }: Props) {
       {valDynamics && (
         <div className="metric-card">
           <div className="section-label mb-3">AFFECT DYNAMICS</div>
-          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
+          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
             Valenceの動態指標
           </div>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -213,12 +213,12 @@ export default function ValenceSection({ data }: Props) {
               { label: 'レンジ', value: valDynamics.range.toFixed(4), desc: '最大-最小' },
               { label: '平均絶対変化量', value: valDynamics.mean_absolute_change.toFixed(4), desc: '1フレームあたりの変化' },
             ].map((m, i) => (
-              <div key={i} className="p-3 rounded-lg" style={{ background: 'oklch(0.97 0.003 80)', border: '1px solid oklch(0.92 0.004 80)' }}>
+              <div key={i} className="p-3 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', border: '1px solid oklch(0.22 0.04 255)' }}>
                 <div className="section-label mb-1">{m.label}</div>
-                <div style={{ fontFamily: 'Roboto Mono, monospace', fontWeight: 600, fontSize: '1rem', color: 'oklch(0.25 0.02 250)' }}>
+                <div style={{ fontFamily: 'Roboto Mono, monospace', fontWeight: 600, fontSize: '1rem', color: 'oklch(0.88 0.005 250)' }}>
                   {m.value}
                 </div>
-                <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.68rem', color: 'oklch(0.52 0.015 250)', marginTop: '2px' }}>
+                <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.68rem', color: 'oklch(0.58 0.015 255)', marginTop: '2px' }}>
                   {m.desc}
                 </div>
               </div>

@@ -55,10 +55,10 @@ export default function EngagementSection({ data }: Props) {
       {/* Header */}
       <div>
         <div className="section-label mb-1">ENGAGEMENT ANALYSIS</div>
-        <h2 style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.15 0.02 250)' }}>
+        <h2 style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.88 0.005 250)' }}>
           Engagement 詳細分析
         </h2>
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.52 0.015 250)', marginTop: '0.25rem' }}>
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.58 0.015 255)', marginTop: '0.25rem' }}>
           関与度・覚醒度の時系列パターンと感情との関係性
         </p>
       </div>
@@ -77,7 +77,7 @@ export default function EngagementSection({ data }: Props) {
               <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.75rem', color: m.color, lineHeight: 1 }}>
                 {m.value}
               </span>
-              <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.7rem', color: 'oklch(0.52 0.015 250)' }}>
+              <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.7rem', color: 'oklch(0.58 0.015 255)' }}>
                 {m.unit}
               </span>
             </div>
@@ -90,17 +90,17 @@ export default function EngagementSection({ data }: Props) {
         {/* Distribution */}
         <div className="metric-card">
           <div className="section-label mb-3">DISTRIBUTION</div>
-          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
+          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
             Engagementレベル分布
           </div>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={distData} margin={{ top: 5, right: 10, bottom: 20, left: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.92 0.004 80)" vertical={false} />
-              <XAxis dataKey="label" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.65rem', fill: 'oklch(0.52 0.015 250)' }} />
-              <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.52 0.015 250)' }} />
+              <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" vertical={false} />
+              <XAxis dataKey="label" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.65rem', fill: 'oklch(0.58 0.015 255)' }} />
+              <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.58 0.015 255)' }} />
               <Tooltip
                 formatter={(v: number) => [`${v.toLocaleString()} フレーム`, 'フレーム数']}
-                contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.88 0.008 80)', borderRadius: '6px' }}
+                contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
               />
               <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                 {distData.map((entry, i) => (
@@ -114,17 +114,17 @@ export default function EngagementSection({ data }: Props) {
         {/* Correlation */}
         <div className="metric-card">
           <div className="section-label mb-3">CORRELATIONS</div>
-          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
+          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
             Engagementと各指標の相関係数
           </div>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={corrData} layout="vertical" margin={{ top: 5, right: 30, bottom: 5, left: 60 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.92 0.004 80)" horizontal={false} />
-              <XAxis type="number" domain={[-1, 1]} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.52 0.015 250)' }} />
-              <YAxis type="category" dataKey="name" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fill: 'oklch(0.35 0.015 250)' }} width={55} />
+              <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" horizontal={false} />
+              <XAxis type="number" domain={[-1, 1]} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.58 0.015 255)' }} />
+              <YAxis type="category" dataKey="name" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fill: 'oklch(0.75 0.008 250)' }} width={55} />
               <Tooltip
                 formatter={(v: number) => [v.toFixed(4), '相関係数']}
-                contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.88 0.008 80)', borderRadius: '6px' }}
+                contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
               />
               <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                 {corrData.map((entry, i) => (
@@ -139,22 +139,22 @@ export default function EngagementSection({ data }: Props) {
       {/* Engagement vs Valence Scatter */}
       <div className="metric-card">
         <div className="section-label mb-3">ENGAGEMENT × VALENCE</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '0.5rem' }}>
           Engagement × Valence 散布図
         </div>
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.52 0.015 250)', marginBottom: '1rem' }}>
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.58 0.015 255)', marginBottom: '1rem' }}>
           各点は1フレームを表します。色は支配的感情を示します（先頭1000点を表示）。
         </p>
         <ResponsiveContainer width="100%" height={280}>
           <ScatterChart margin={{ top: 10, right: 20, bottom: 20, left: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.92 0.004 80)" />
+            <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" />
             <XAxis dataKey="valence" name="Valence" type="number" domain={[25, 100]}
-              label={{ value: 'Valence (%)', position: 'insideBottom', offset: -10, style: { fontFamily: 'Roboto Mono, monospace', fontSize: '0.7rem', fill: 'oklch(0.52 0.015 250)' } }}
-              tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.52 0.015 250)' }}
+              label={{ value: 'Valence (%)', position: 'insideBottom', offset: -10, style: { fontFamily: 'Roboto Mono, monospace', fontSize: '0.7rem', fill: 'oklch(0.58 0.015 255)' } }}
+              tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.58 0.015 255)' }}
             />
             <YAxis dataKey="engagement" name="Engagement" type="number"
-              label={{ value: 'Engagement (%)', angle: -90, position: 'insideLeft', style: { fontFamily: 'Roboto Mono, monospace', fontSize: '0.7rem', fill: 'oklch(0.52 0.015 250)' } }}
-              tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.52 0.015 250)' }}
+              label={{ value: 'Engagement (%)', angle: -90, position: 'insideLeft', style: { fontFamily: 'Roboto Mono, monospace', fontSize: '0.7rem', fill: 'oklch(0.58 0.015 255)' } }}
+              tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.58 0.015 255)' }}
             />
             <Tooltip
               cursor={{ strokeDasharray: '3 3' }}
@@ -162,7 +162,7 @@ export default function EngagementSection({ data }: Props) {
                 if (!active || !payload?.length) return null;
                 const d = payload[0]?.payload;
                 return (
-                  <div className="p-2 rounded shadow-lg" style={{ background: 'oklch(0.15 0.02 250)', border: '1px solid oklch(0.25 0.02 250)' }}>
+                  <div className="p-2 rounded shadow-lg" style={{ background: 'oklch(0.22 0.04 255)', border: '1px solid oklch(0.30 0.04 255)' }}>
                     <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.62 0.18 160)' }}>t={d?.time?.toFixed(2)}s</div>
                     <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.75 0.005 80)' }}>
                       Eng: {d?.engagement?.toFixed(1)} | Val: {d?.valence?.toFixed(1)}
@@ -186,20 +186,20 @@ export default function EngagementSection({ data }: Props) {
       {/* High vs Low Engagement Profile */}
       <div className="metric-card">
         <div className="section-label mb-3">EMOTION PROFILE BY ENGAGEMENT</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '0.5rem' }}>
           高/低Engagement時の感情プロファイル比較
         </div>
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.52 0.015 250)', marginBottom: '1rem' }}>
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.58 0.015 255)', marginBottom: '1rem' }}>
           高Engagement（&gt;60%）: {engagement_emotion_profile.high_count}フレーム　
           低Engagement（≤10%）: {engagement_emotion_profile.low_count}フレーム
         </p>
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={profileData} margin={{ top: 5, right: 10, bottom: 20, left: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.92 0.004 80)" vertical={false} />
-            <XAxis dataKey="name" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', fill: 'oklch(0.52 0.015 250)' }} />
-            <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.52 0.015 250)' }} />
+            <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" vertical={false} />
+            <XAxis dataKey="name" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', fill: 'oklch(0.58 0.015 255)' }} />
+            <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.58 0.015 255)' }} />
             <Tooltip
-              contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.88 0.008 80)', borderRadius: '6px' }}
+              contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
             />
             <Legend formatter={v => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem' }}>{v}</span>} />
             <Bar dataKey="high" name="高Engagement時" fill="oklch(0.62 0.18 25)" radius={[4, 4, 0, 0]} opacity={0.85} />
@@ -212,7 +212,7 @@ export default function EngagementSection({ data }: Props) {
       {engDynamics && (
         <div className="metric-card">
           <div className="section-label mb-3">AFFECT DYNAMICS</div>
-          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
+          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
             Engagementの動態指標（学術的分析）
           </div>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -223,12 +223,12 @@ export default function EngagementSection({ data }: Props) {
               { label: 'レンジ', value: engDynamics.range.toFixed(4), desc: '最大-最小' },
               { label: '平均絶対変化量', value: engDynamics.mean_absolute_change.toFixed(4), desc: '1フレームあたりの変化' },
             ].map((m, i) => (
-              <div key={i} className="p-3 rounded-lg" style={{ background: 'oklch(0.97 0.003 80)', border: '1px solid oklch(0.92 0.004 80)' }}>
+              <div key={i} className="p-3 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', border: '1px solid oklch(0.22 0.04 255)' }}>
                 <div className="section-label mb-1">{m.label}</div>
-                <div style={{ fontFamily: 'Roboto Mono, monospace', fontWeight: 600, fontSize: '1rem', color: 'oklch(0.25 0.02 250)' }}>
+                <div style={{ fontFamily: 'Roboto Mono, monospace', fontWeight: 600, fontSize: '1rem', color: 'oklch(0.88 0.005 250)' }}>
                   {m.value}
                 </div>
-                <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.68rem', color: 'oklch(0.52 0.015 250)', marginTop: '2px' }}>
+                <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.68rem', color: 'oklch(0.58 0.015 255)', marginTop: '2px' }}>
                   {m.desc}
                 </div>
               </div>

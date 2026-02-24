@@ -45,10 +45,10 @@ export default function AcademicSection({ data }: Props) {
       {/* Header */}
       <div>
         <div className="section-label mb-1">ACADEMIC ANALYSIS</div>
-        <h2 style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.15 0.02 250)' }}>
+        <h2 style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.88 0.005 250)' }}>
           学術的分析
         </h2>
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.52 0.015 250)', marginTop: '0.25rem' }}>
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.58 0.015 255)', marginTop: '0.25rem' }}>
           Affect Dynamics・Circumplex Model・相関分析など学術研究の視点からの多角的分析
         </p>
       </div>
@@ -75,11 +75,11 @@ export default function AcademicSection({ data }: Props) {
             color: 'oklch(0.55 0.18 300)',
           },
         ].map((f, i) => (
-          <div key={i} className="p-4 rounded-lg" style={{ background: 'oklch(0.97 0.003 80)', border: `1px solid ${f.color}30` }}>
+          <div key={i} className="p-4 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', border: `1px solid ${f.color}30` }}>
             <div className="flex items-start gap-2 mb-2">
               <div className="w-1 h-full min-h-12 rounded-full flex-shrink-0" style={{ background: f.color }} />
               <div>
-                <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '0.85rem', color: 'oklch(0.15 0.02 250)' }}>
+                <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '0.85rem', color: 'oklch(0.88 0.005 250)' }}>
                   {f.title}
                 </div>
                 <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', color: f.color, marginTop: '2px' }}>
@@ -97,20 +97,20 @@ export default function AcademicSection({ data }: Props) {
       {/* Affect Dynamics - Variability */}
       <div className="metric-card">
         <div className="section-label mb-3">AFFECT DYNAMICS — VARIABILITY</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '0.5rem' }}>
           感情変動性（Standard Deviation）
         </div>
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.52 0.015 250)', marginBottom: '1rem' }}>
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.58 0.015 255)', marginBottom: '1rem' }}>
           高い変動性は感情の揺れ幅が大きいことを示します。Fearの変動性が最も高く、Engagementも高い変動性を示しています。
         </p>
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={dynamicsCompare} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.92 0.004 80)" vertical={false} />
-            <XAxis dataKey="name" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.68rem', fill: 'oklch(0.52 0.015 250)' }} />
-            <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.52 0.015 250)' }} />
+            <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" vertical={false} />
+            <XAxis dataKey="name" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.68rem', fill: 'oklch(0.58 0.015 255)' }} />
+            <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.58 0.015 255)' }} />
             <Tooltip
               formatter={(v: number) => [v.toFixed(4), 'SD（変動性）']}
-              contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.88 0.008 80)', borderRadius: '6px' }}
+              contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
             />
             <Bar dataKey="sd" radius={[4, 4, 0, 0]}>
               {dynamicsCompare.map((entry, i) => (
@@ -124,22 +124,22 @@ export default function AcademicSection({ data }: Props) {
       {/* Affect Dynamics - Inertia */}
       <div className="metric-card">
         <div className="section-label mb-3">AFFECT DYNAMICS — INERTIA (AR1)</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '0.5rem' }}>
           感情慣性（1次自己相関係数）
         </div>
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.52 0.015 250)', marginBottom: '1rem' }}>
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.58 0.015 255)', marginBottom: '1rem' }}>
           高い慣性（AR1が1に近い）は感情状態が持続しやすいことを示します。負の値は振動パターンを示します。
         </p>
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={dynamicsCompare} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.92 0.004 80)" vertical={false} />
-            <XAxis dataKey="name" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.68rem', fill: 'oklch(0.52 0.015 250)' }} />
-            <YAxis domain={[-1, 1]} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.52 0.015 250)' }} />
+            <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" vertical={false} />
+            <XAxis dataKey="name" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.68rem', fill: 'oklch(0.58 0.015 255)' }} />
+            <YAxis domain={[-1, 1]} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.58 0.015 255)' }} />
             <Tooltip
               formatter={(v: number) => [v.toFixed(4), 'AR1（慣性）']}
-              contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.88 0.008 80)', borderRadius: '6px' }}
+              contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
             />
-            <ReferenceLine y={0} stroke="oklch(0.52 0.015 250)" strokeDasharray="4 4" />
+            <ReferenceLine y={0} stroke="oklch(0.58 0.015 255)" strokeDasharray="4 4" />
             <Bar dataKey="ar1" radius={[4, 4, 0, 0]}>
               {dynamicsCompare.map((entry, i) => (
                 <Cell key={i} fill={entry.ar1 >= 0 ? 'oklch(0.62 0.18 160)' : 'oklch(0.62 0.18 25)'} />
@@ -152,10 +152,10 @@ export default function AcademicSection({ data }: Props) {
       {/* Correlation Heatmap */}
       <div className="metric-card">
         <div className="section-label mb-3">CORRELATION MATRIX</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '0.5rem' }}>
           感情指標間の相関行列
         </div>
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.52 0.015 250)', marginBottom: '1rem' }}>
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.58 0.015 255)', marginBottom: '1rem' }}>
           色の濃さは相関の強さを示します。緑：正の相関、赤：負の相関。
         </p>
         <div className="overflow-x-auto">
@@ -164,7 +164,7 @@ export default function AcademicSection({ data }: Props) {
               <tr>
                 <th className="w-16 pb-1" />
                 {corrLabels.map(label => (
-                  <th key={label} className="pb-1 px-0.5 text-center" style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.6rem', color: EMOTION_COLORS[label] || 'oklch(0.52 0.015 250)', minWidth: '44px', writingMode: 'vertical-rl', height: '60px' }}>
+                  <th key={label} className="pb-1 px-0.5 text-center" style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.6rem', color: EMOTION_COLORS[label] || 'oklch(0.58 0.015 255)', minWidth: '44px', writingMode: 'vertical-rl', height: '60px' }}>
                     {EMOTION_LABELS_JA[label] || label}
                   </th>
                 ))}
@@ -173,7 +173,7 @@ export default function AcademicSection({ data }: Props) {
             <tbody>
               {corrLabels.map((rowLabel, ri) => (
                 <tr key={rowLabel}>
-                  <td className="py-0.5 pr-2" style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.62rem', color: EMOTION_COLORS[rowLabel] || 'oklch(0.52 0.015 250)', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                  <td className="py-0.5 pr-2" style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.62rem', color: EMOTION_COLORS[rowLabel] || 'oklch(0.58 0.015 255)', fontWeight: 600, whiteSpace: 'nowrap' }}>
                     {EMOTION_LABELS_JA[rowLabel] || rowLabel}
                   </td>
                   {corrLabels.map((colLabel, ci) => {
@@ -193,7 +193,7 @@ export default function AcademicSection({ data }: Props) {
                                 : `oklch(0.62 0.18 25 / ${Math.min(0.9, intensity * 1.2)})`,
                           }}
                         >
-                          <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.55rem', color: intensity > 0.4 ? 'white' : 'oklch(0.35 0.015 250)', fontWeight: 600 }}>
+                          <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.55rem', color: intensity > 0.4 ? 'white' : 'oklch(0.75 0.008 250)', fontWeight: 600 }}>
                             {isDiag ? '1.0' : val.toFixed(2)}
                           </span>
                         </div>
@@ -210,10 +210,10 @@ export default function AcademicSection({ data }: Props) {
       {/* Circumplex Model Visualization */}
       <div className="metric-card">
         <div className="section-label mb-3">CIRCUMPLEX MODEL — QUADRANT ANALYSIS</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '0.5rem' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '0.5rem' }}>
           感情の円環モデル象限分析（Russell, 1980）
         </div>
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.52 0.015 250)', marginBottom: '1.5rem' }}>
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.58 0.015 255)', marginBottom: '1.5rem' }}>
           X軸：Valence（感情価）、Y軸：Engagement（覚醒度代理）。各象限のフレーム数と割合を示します。
         </p>
         <div className="relative" style={{ height: '280px' }}>
@@ -235,10 +235,10 @@ export default function AcademicSection({ data }: Props) {
                   <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: q.color, marginTop: '2px' }}>
                     {pct}%
                   </div>
-                  <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600, fontSize: '0.75rem', color: 'oklch(0.25 0.02 250)', marginTop: '4px', textAlign: 'center' }}>
+                  <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600, fontSize: '0.75rem', color: 'oklch(0.88 0.005 250)', marginTop: '4px', textAlign: 'center' }}>
                     {q.label}
                   </div>
-                  <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.68rem', color: 'oklch(0.52 0.015 250)', textAlign: 'center' }}>
+                  <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.68rem', color: 'oklch(0.58 0.015 255)', textAlign: 'center' }}>
                     {q.desc}
                   </div>
                 </div>
@@ -246,16 +246,16 @@ export default function AcademicSection({ data }: Props) {
             })}
           </div>
           {/* Axis labels */}
-          <div className="absolute left-1/2 top-1 -translate-x-1/2" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.52 0.015 250)' }}>
+          <div className="absolute left-1/2 top-1 -translate-x-1/2" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)' }}>
             ↑ 高覚醒 (High Arousal)
           </div>
-          <div className="absolute left-1/2 bottom-1 -translate-x-1/2" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.52 0.015 250)' }}>
+          <div className="absolute left-1/2 bottom-1 -translate-x-1/2" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)' }}>
             ↓ 低覚醒 (Low Arousal)
           </div>
-          <div className="absolute top-1/2 left-1 -translate-y-1/2" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.52 0.015 250)', writingMode: 'vertical-rl' }}>
+          <div className="absolute top-1/2 left-1 -translate-y-1/2" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)', writingMode: 'vertical-rl' }}>
             ← 低Valence
           </div>
-          <div className="absolute top-1/2 right-1 -translate-y-1/2" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.52 0.015 250)', writingMode: 'vertical-rl' }}>
+          <div className="absolute top-1/2 right-1 -translate-y-1/2" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)', writingMode: 'vertical-rl' }}>
             高Valence →
           </div>
         </div>
@@ -264,7 +264,7 @@ export default function AcademicSection({ data }: Props) {
       {/* Academic Interpretation */}
       <div className="metric-card">
         <div className="section-label mb-3">ACADEMIC INTERPRETATION</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.15 0.02 250)', marginBottom: '1rem' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
           学術的解釈と考察
         </div>
         <div className="space-y-4">
@@ -290,8 +290,8 @@ export default function AcademicSection({ data }: Props) {
               color: 'oklch(0.72 0.12 80)',
             },
           ].map((item, i) => (
-            <div key={i} className="p-4 rounded-lg" style={{ background: 'oklch(0.97 0.003 80)', borderLeft: `3px solid ${item.color}` }}>
-              <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600, fontSize: '0.85rem', color: 'oklch(0.15 0.02 250)', marginBottom: '6px' }}>
+            <div key={i} className="p-4 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', borderLeft: `3px solid ${item.color}` }}>
+              <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600, fontSize: '0.85rem', color: 'oklch(0.88 0.005 250)', marginBottom: '6px' }}>
                 {item.heading}
               </div>
               <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.42 0.015 250)', lineHeight: 1.7 }}>
