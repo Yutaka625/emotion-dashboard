@@ -904,7 +904,7 @@ export default function TimeseriesSection({ data }: Props) {
                   formatter={(v: number, name: string) => [v.toFixed(3), EMOTION_LABELS_JA[name] || name]}
                 />
                 <Legend formatter={v => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem' }}>{EMOTION_LABELS_JA[v] || v}</span>} />
-                {NON_NEUTRAL_EMOTIONS.filter(e => e !== 'confusion').map(emotion => (
+                {NON_NEUTRAL_EMOTIONS.map(emotion => (
                   <Area
                     key={emotion}
                     type="monotone"
@@ -920,9 +920,6 @@ export default function TimeseriesSection({ data }: Props) {
                 ))}
               </AreaChart>
             </ResponsiveContainer>
-            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.58 0.015 255)', marginTop: '0.5rem' }}>
-              ※「困惑」は他感情との視認性確保のため除外しています
-            </p>
           </div>
         )}
 
@@ -989,7 +986,7 @@ export default function TimeseriesSection({ data }: Props) {
                   formatter={(v: number, name: string) => [v.toFixed(3), EMOTION_LABELS_JA[name] || name]}
                 />
                 <Legend formatter={v => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem' }}>{EMOTION_LABELS_JA[v] || v}</span>} />
-                {NON_NEUTRAL_EMOTIONS.filter(e => e !== 'confusion').map(emotion => (
+                {NON_NEUTRAL_EMOTIONS.map(emotion => (
                   <Bar
                     key={emotion}
                     dataKey={emotion}
@@ -1015,56 +1012,6 @@ export default function TimeseriesSection({ data }: Props) {
             </div>
           </div>
         )}
-      </div>
-
-      {/* 全感情の統合ビュー（常時表示） */}
-      <div className="metric-card">
-        <div className="section-label mb-3">ALL EMOTIONS — FULL SESSION</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '0.5rem' }}>
-          全感情スコアの全期間推移（困惑を除く）
-        </div>
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.58 0.015 255)', marginBottom: '1rem' }}>
-          困惑を除く感情の全セッション推移。各感情の突発的な上昇イベントを確認できます。
-        </p>
-        <ResponsiveContainer width="100%" height={260}>
-          <LineChart
-            data={useMemo(() => {
-              const step = Math.max(1, Math.floor(timeseries_full.length / 600));
-              return timeseries_full.filter((_, i) => i % step === 0);
-            }, [timeseries_full])}
-            margin={{ top: 5, right: 10, bottom: 5, left: 0 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" />
-            <XAxis dataKey="time" tickFormatter={formatTime} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} />
-            <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} />
-            <Tooltip content={<CustomTooltip />} />
-            <Legend formatter={v => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem' }}>{EMOTION_LABELS_JA[v] || v}</span>} />
-            {events.map(ev => (
-              <ReferenceArea
-                key={ev.id}
-                x1={ev.startTime}
-                x2={ev.endTime}
-                fill={ev.color}
-                fillOpacity={0.12}
-                stroke={ev.color}
-                strokeOpacity={0.5}
-                strokeWidth={1}
-                strokeDasharray="4 2"
-              />
-            ))}
-            {NON_NEUTRAL_EMOTIONS.filter(e => e !== 'confusion').map(emotion => (
-              <Line
-                key={emotion}
-                type="monotone"
-                dataKey={emotion}
-                stroke={EMOTION_HEX[emotion]}
-                strokeWidth={1.5}
-                dot={false}
-                name={emotion}
-              />
-            ))}
-          </LineChart>
-        </ResponsiveContainer>
       </div>
 
       {/* 10-second window summary table */}
