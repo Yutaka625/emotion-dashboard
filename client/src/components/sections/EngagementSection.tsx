@@ -23,8 +23,8 @@ export default function EngagementSection({ data }: Props) {
     { label: '非常に低い\n(<10)', value: engagement_distribution.very_low || 0, color: 'oklch(0.75 0.05 250)' },
     { label: '低い\n(10-30)', value: engagement_distribution.low || 0, color: 'oklch(0.65 0.1 250)' },
     { label: '中程度\n(30-60)', value: engagement_distribution.medium || 0, color: 'oklch(0.72 0.18 80)' },
-    { label: '高い\n(60-80)', value: engagement_distribution.high || 0, color: 'oklch(0.62 0.18 25)' },
-    { label: '非常に高い\n(>80)', value: engagement_distribution.very_high || 0, color: 'oklch(0.55 0.22 25)' },
+    { label: '高い\n(60-80)', value: engagement_distribution.high || 0, color: 'oklch(0.68 0.26 22)' },
+    { label: '非常に高い\n(>80)', value: engagement_distribution.very_high || 0, color: 'oklch(0.58 0.26 22)' },
   ];
 
   const corrData = Object.entries(engagement_correlations)
@@ -33,7 +33,7 @@ export default function EngagementSection({ data }: Props) {
     .map(([key, val]) => ({
       name: EMOTION_LABELS_JA[key] || key,
       value: val,
-      color: val > 0 ? 'oklch(0.62 0.18 160)' : 'oklch(0.62 0.18 25)',
+      color: val > 0 ? 'oklch(0.70 0.14 195)' : 'oklch(0.68 0.26 22)',
     }));
 
   const profileData = Object.entries(engagement_emotion_profile.high_engagement || {})
@@ -67,8 +67,8 @@ export default function EngagementSection({ data }: Props) {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { label: '平均値', value: eng.mean.toFixed(2), unit: '%', color: 'oklch(0.72 0.18 80)' },
-          { label: '最大値', value: eng.max.toFixed(2), unit: '%', color: 'oklch(0.62 0.18 25)' },
-          { label: '中央値', value: eng.median.toFixed(2), unit: '%', color: 'oklch(0.62 0.18 160)' },
+          { label: '最大値', value: eng.max.toFixed(2), unit: '%', color: 'oklch(0.68 0.26 22)' },
+          { label: '中央値', value: eng.median.toFixed(2), unit: '%', color: 'oklch(0.70 0.14 195)' },
           { label: '標準偏差', value: eng.std.toFixed(2), unit: '%', color: 'oklch(0.55 0.18 300)' },
         ].map((m, i) => (
           <div key={i} className="metric-card">
@@ -163,7 +163,7 @@ export default function EngagementSection({ data }: Props) {
                 const d = payload[0]?.payload;
                 return (
                   <div className="p-2 rounded shadow-lg" style={{ background: 'oklch(0.22 0.04 255)', border: '1px solid oklch(0.30 0.04 255)' }}>
-                    <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.62 0.18 160)' }}>t={d?.time?.toFixed(2)}s</div>
+                    <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.70 0.14 195)' }}>t={d?.time?.toFixed(2)}s</div>
                     <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.75 0.005 80)' }}>
                       Eng: {d?.engagement?.toFixed(1)} | Val: {d?.valence?.toFixed(1)}
                     </div>
@@ -202,7 +202,7 @@ export default function EngagementSection({ data }: Props) {
               contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
             />
             <Legend formatter={v => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem' }}>{v}</span>} />
-            <Bar dataKey="high" name="高Engagement時" fill="oklch(0.62 0.18 25)" radius={[4, 4, 0, 0]} opacity={0.85} />
+            <Bar dataKey="high" name="高Engagement時" fill="oklch(0.68 0.26 22)" radius={[4, 4, 0, 0]} opacity={0.85} />
             <Bar dataKey="low" name="低Engagement時" fill="oklch(0.62 0.18 250)" radius={[4, 4, 0, 0]} opacity={0.85} />
           </BarChart>
         </ResponsiveContainer>

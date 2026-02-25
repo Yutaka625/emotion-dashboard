@@ -249,27 +249,29 @@
   }
 
   /* Emotion color classes — vivid on dark bg */
-  .emotion-anger          { color: oklch(0.68 0.22 25); }
-  .emotion-contempt       { color: oklch(0.68 0.18 300); }
-  .emotion-disgust        { color: oklch(0.65 0.18 140); }
-  .emotion-fear           { color: oklch(0.68 0.18 280); }
-  .emotion-joy            { color: oklch(0.82 0.18 82); }
-  .emotion-sadness        { color: oklch(0.65 0.15 250); }
-  .emotion-surprise       { color: oklch(0.72 0.18 195); }
-  .emotion-sentimentality { color: oklch(0.72 0.18 340); }
-  .emotion-confusion      { color: oklch(0.68 0.12 60); }
-  .emotion-neutral        { color: oklch(0.60 0.01 250); }
+  .emotion-anger          { color: oklch(0.68 0.26 22); }
+  .emotion-contempt       { color: oklch(0.72 0.22 300); }
+  .emotion-disgust        { color: oklch(0.72 0.22 145); }
+  .emotion-fear           { color: oklch(0.68 0.20 280); }
+  .emotion-joy            { color: oklch(0.88 0.20 82); }
+  .emotion-sadness        { color: oklch(0.68 0.18 235); }
+  .emotion-surprise       { color: oklch(0.82 0.22 195); }
+  .emotion-sentimentality { color: oklch(0.78 0.22 340); }
+  .emotion-confusion      { color: oklch(0.78 0.18 60); }
+  .emotion-neutral        { color: oklch(0.58 0.03 255); }
+  .emotion-attention      { color: oklch(0.80 0.18 160); }
 
-  .bg-emotion-anger          { background-color: oklch(0.68 0.22 25); }
-  .bg-emotion-contempt       { background-color: oklch(0.68 0.18 300); }
-  .bg-emotion-disgust        { background-color: oklch(0.65 0.18 140); }
-  .bg-emotion-fear           { background-color: oklch(0.68 0.18 280); }
-  .bg-emotion-joy            { background-color: oklch(0.82 0.18 82); }
-  .bg-emotion-sadness        { background-color: oklch(0.65 0.15 250); }
-  .bg-emotion-surprise       { background-color: oklch(0.72 0.18 195); }
-  .bg-emotion-sentimentality { background-color: oklch(0.72 0.18 340); }
-  .bg-emotion-confusion      { background-color: oklch(0.68 0.12 60); }
-  .bg-emotion-neutral        { background-color: oklch(0.60 0.01 250); }
+  .bg-emotion-anger          { background-color: oklch(0.68 0.26 22); }
+  .bg-emotion-contempt       { background-color: oklch(0.72 0.22 300); }
+  .bg-emotion-disgust        { background-color: oklch(0.72 0.22 145); }
+  .bg-emotion-fear           { background-color: oklch(0.68 0.20 280); }
+  .bg-emotion-joy            { background-color: oklch(0.88 0.20 82); }
+  .bg-emotion-sadness        { background-color: oklch(0.68 0.18 235); }
+  .bg-emotion-surprise       { background-color: oklch(0.82 0.22 195); }
+  .bg-emotion-sentimentality { background-color: oklch(0.78 0.22 340); }
+  .bg-emotion-confusion      { background-color: oklch(0.78 0.18 60); }
+  .bg-emotion-neutral        { background-color: oklch(0.58 0.03 255); }
+  .bg-emotion-attention      { background-color: oklch(0.80 0.18 160); }
 
   /* Gold accent divider */
   .gold-divider {

@@ -29,28 +29,26 @@ interface EventAnnotation {
 }
 
 const EVENT_PALETTE = [
-  '#3b82f6', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6',
-  '#06b6d4', '#f97316', '#ec4899', '#84cc16', '#6366f1',
+  'oklch(0.78 0.14 82)',   /* gold */
+  'oklch(0.70 0.14 195)', /* teal */
+  'oklch(0.78 0.22 340)', /* hot pink */
+  'oklch(0.80 0.18 160)', /* emerald */
+  'oklch(0.72 0.22 300)', /* magenta */
+  'oklch(0.82 0.22 195)', /* bright cyan */
+  'oklch(0.78 0.18 60)',  /* amber */
+  'oklch(0.68 0.26 22)',  /* vivid red */
+  'oklch(0.88 0.20 82)',  /* bright gold */
+  'oklch(0.68 0.20 280)', /* violet */
 ];
 
 const SPECIAL_COLORS: Record<string, string> = {
-  engagement: '#d97706',
-  valence: '#dc4f1e',
-  attention: '#7c3aed',
+  engagement: 'oklch(0.78 0.14 82)',   /* ゴールド */
+  valence:    'oklch(0.70 0.14 195)',  /* ティール */
+  attention:  'oklch(0.80 0.18 160)', /* エメラルド */
 };
 
-const EMOTION_HEX: Record<string, string> = {
-  anger: '#e17055',
-  contempt: '#a29bfe',
-  disgust: '#00b894',
-  fear: '#6c5ce7',
-  joy: '#fdcb6e',
-  sadness: '#74b9ff',
-  surprise: '#00cec9',
-  sentimentality: '#fd79a8',
-  confusion: '#b2bec3',
-  neutral: '#636e72',
-};
+// EMOTION_HEX は EMOTION_COLORS (types.ts) に統一
+const EMOTION_HEX = EMOTION_COLORS;
 
 function generateId() {
   return Math.random().toString(36).slice(2, 9);
@@ -877,7 +875,7 @@ export default function TimeseriesSection({ data }: Props) {
                   <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)' }}>低</span>
                   <div className="flex gap-0.5">
                     {[0.05, 0.15, 0.3, 0.5, 0.7, 0.85, 1.0].map((op, i) => (
-                      <div key={i} className="w-6 h-3 rounded-sm" style={{ background: '#74b9ff', opacity: op }} />
+                      <div key={i} className="w-6 h-3 rounded-sm" style={{ background: 'oklch(0.68 0.18 235)', opacity: op }} />
                     ))}
                   </div>
                   <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)' }}>高</span>

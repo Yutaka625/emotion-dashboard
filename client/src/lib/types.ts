@@ -141,16 +141,17 @@ export interface DashboardData {
 }
 
 export const EMOTION_COLORS: Record<string, string> = {
-  anger: '#e17055',
-  contempt: '#a29bfe',
-  disgust: '#00b894',
-  fear: '#6c5ce7',
-  joy: '#fdcb6e',
-  sadness: '#74b9ff',
-  surprise: '#00cec9',
-  sentimentality: '#fd79a8',
-  confusion: '#b2bec3',
-  neutral: '#636e72',
+  anger:         'oklch(0.68 0.26 22)',    /* 鮮烈な赤 — 怒り */
+  contempt:       'oklch(0.72 0.22 300)',   /* 紫マゼンタ — 軽蔑 */
+  disgust:        'oklch(0.72 0.22 145)',   /* 毒々しいグリーン — 嫌悪 */
+  fear:           'oklch(0.68 0.20 280)',   /* ディープバイオレット — 恐怖 */
+  joy:            'oklch(0.88 0.20 82)',    /* 輝くゴールド — 喜び */
+  sadness:        'oklch(0.68 0.18 235)',   /* コバルトブルー — 悲しみ */
+  surprise:       'oklch(0.82 0.22 195)',   /* ブライトシアン — 驚き */
+  sentimentality: 'oklch(0.78 0.22 340)',   /* ホットピンク — 感傷 */
+  confusion:      'oklch(0.78 0.18 60)',    /* アンバー — 困惑 */
+  neutral:        'oklch(0.58 0.03 255)',   /* ミッドグレーブルー — ニュートラル */
+  attention:      'oklch(0.80 0.18 160)',   /* エメラルドグリーン — 注意 */
 };
 
 export const EMOTION_LABELS_JA: Record<string, string> = {
