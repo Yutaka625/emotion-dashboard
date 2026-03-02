@@ -131,7 +131,7 @@ export default function ValenceSection({ data }: Props) {
                 formatter={(v: number) => [`${v.toLocaleString()} フレーム`, 'フレーム数']}
                 contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
               />
-              <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+              <Bar dataKey="value" radius={[4, 4, 0, 0]} activeBar={{ fill: 'oklch(0.55 0.04 255 / 0.6)', stroke: 'none' }}>
                 {distData.map((entry, i) => (
                   <Cell key={i} fill={entry.color} />
                 ))}
@@ -154,7 +154,7 @@ export default function ValenceSection({ data }: Props) {
                 formatter={(v: number) => [v.toFixed(4), '相関係数']}
                 contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
               />
-              <Bar dataKey="value" radius={[0, 4, 4, 0]}>
+              <Bar dataKey="value" radius={[0, 4, 4, 0]} activeBar={{ fill: 'oklch(0.55 0.04 255 / 0.6)', stroke: 'none' }}>
                 {corrData.map((entry, i) => (
                   <Cell key={i} fill={entry.color} />
                 ))}

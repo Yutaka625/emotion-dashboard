@@ -164,7 +164,7 @@ export default function TransitionsSection({ data }: Props) {
                 formatter={(v: number) => [`${v.toFixed(3)}秒`, '平均持続時間']}
                 contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
               />
-              <Bar dataKey="mean_duration" radius={[0, 4, 4, 0]}>
+              <Bar dataKey="mean_duration" radius={[0, 4, 4, 0]} activeBar={{ fill: 'oklch(0.55 0.04 255 / 0.6)', stroke: 'none' }}>
                 {durationData.map((entry, i) => (
                   <Cell key={i} fill={entry.color} />
                 ))}
@@ -187,7 +187,7 @@ export default function TransitionsSection({ data }: Props) {
                 formatter={(v: number) => [`${v.toFixed(2)}秒`, '累積時間']}
                 contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
               />
-              <Bar dataKey="total_duration" radius={[0, 4, 4, 0]}>
+              <Bar dataKey="total_duration" radius={[0, 4, 4, 0]} activeBar={{ fill: 'oklch(0.55 0.04 255 / 0.6)', stroke: 'none' }}>
                 {durationData.map((entry, i) => (
                   <Cell key={i} fill={entry.color} opacity={0.7} />
                 ))}

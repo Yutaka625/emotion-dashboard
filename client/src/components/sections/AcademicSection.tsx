@@ -112,7 +112,7 @@ export default function AcademicSection({ data }: Props) {
               formatter={(v: number) => [v.toFixed(4), 'SD（変動性）']}
               contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
             />
-            <Bar dataKey="sd" radius={[4, 4, 0, 0]}>
+            <Bar dataKey="sd" radius={[4, 4, 0, 0]} activeBar={{ fill: 'oklch(0.55 0.04 255 / 0.6)', stroke: 'none' }}>
               {dynamicsCompare.map((entry, i) => (
                 <Cell key={i} fill={entry.color} />
               ))}
@@ -140,7 +140,7 @@ export default function AcademicSection({ data }: Props) {
               contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
             />
             <ReferenceLine y={0} stroke="oklch(0.58 0.015 255)" strokeDasharray="4 4" />
-            <Bar dataKey="ar1" radius={[4, 4, 0, 0]}>
+            <Bar dataKey="ar1" radius={[4, 4, 0, 0]} activeBar={{ fill: 'oklch(0.55 0.04 255 / 0.6)', stroke: 'none' }}>
               {dynamicsCompare.map((entry, i) => (
                 <Cell key={i} fill={entry.ar1 >= 0 ? 'oklch(0.62 0.18 160)' : 'oklch(0.62 0.18 25)'} />
               ))}

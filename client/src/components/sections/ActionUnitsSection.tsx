@@ -51,7 +51,7 @@ export default function ActionUnitsSection({ data }: Props) {
     }))
     .sort((a, b) => b.mean - a.mean);
 
-  const topActive = auData.filter(d => d.active_pct > 0).sort((a, b) => b.active_pct - a.active_pct).slice(0, 10);
+  const topActive = auData.filter(d => d.active_pct > 0).sort((a, b) => b.active_pct - a.active_pct);
 
   const headPoseData = Object.entries(head_pose_stats).map(([key, stats]) => ({
     name: key === 'pitch' ? 'Pitch（上下）' : key === 'yaw' ? 'Yaw（左右）' : 'Roll（傾き）',
@@ -100,7 +100,7 @@ export default function ActionUnitsSection({ data }: Props) {
               ]}
               contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
             />
-            <Bar dataKey="mean" radius={[4, 4, 0, 0]}>
+            <Bar dataKey="mean" radius={[4, 4, 0, 0]} activeBar={{ fill: 'oklch(0.55 0.04 255 / 0.6)', stroke: 'none' }}>
               {auData.map((entry, i) => (
                 <Cell key={i} fill={getColor(entry.mean)} />
               ))}
@@ -118,16 +118,16 @@ export default function ActionUnitsSection({ data }: Props) {
         <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.58 0.015 255)', marginBottom: '1rem' }}>
           各AUが5%以上の活性化を示したフレームの割合
         </p>
-        <ResponsiveContainer width="100%" height={220}>
-          <BarChart data={topActive} layout="vertical" margin={{ top: 5, right: 40, bottom: 5, left: 80 }}>
+        <ResponsiveContainer width="100%" height={Math.max(220, topActive.length * 28 + 20)}>
+          <BarChart data={topActive} layout="vertical" margin={{ top: 5, right: 60, bottom: 5, left: 130 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" horizontal={false} />
             <XAxis type="number" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.58 0.015 255)' }} unit="%" />
-            <YAxis type="category" dataKey="desc" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.68rem', fill: 'oklch(0.75 0.008 250)' }} width={75} />
+            <YAxis type="category" dataKey="desc" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fill: 'oklch(0.75 0.008 250)' }} width={125} />
             <Tooltip
               formatter={(v: number, _: string, props: any) => [`${v.toFixed(2)}%`, `${props.payload.label}: ${props.payload.desc}`]}
               contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
             />
-            <Bar dataKey="active_pct" radius={[0, 4, 4, 0]}>
+            <Bar dataKey="active_pct" radius={[0, 4, 4, 0]} activeBar={{ fill: 'oklch(0.55 0.04 255 / 0.6)', stroke: 'none' }}>
               {topActive.map((entry, i) => (
                 <Cell key={i} fill={getColor(entry.mean)} />
               ))}
