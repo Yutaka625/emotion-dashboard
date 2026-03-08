@@ -557,22 +557,43 @@ export default function TimeseriesSection({ data }: Props) {
             {timeRange[1]}s
           </span>
         </div>
-        <div className="flex gap-2 flex-wrap">
-          {TIME_PRESETS.map(([s, e, label]) => (
-            <button
-              key={label}
-              onClick={() => setTimeRange([s, e])}
-              className="px-2.5 py-1 rounded text-xs transition-all"
+        <div className="flex gap-2 flex-wrap items-center">
+          <div className="flex gap-2 items-center">
+            <label style={{ fontSize: '0.75rem', color: 'oklch(0.45 0.015 250)' }}>開始:</label>
+            <input
+              type="number"
+              min={0}
+              max={maxTime}
+              value={timeRange[0]}
+              onChange={e => setTimeRange([Math.min(Number(e.target.value), timeRange[1] - 1), timeRange[1]])}
+              className="w-16 px-2 py-1 rounded text-xs"
               style={{
                 fontFamily: 'Roboto Mono, monospace',
-                background: timeRange[0] === s && timeRange[1] === e ? 'oklch(0.32 0.12 160)' : 'oklch(0.20 0.04 255)',
-                color: timeRange[0] === s && timeRange[1] === e ? 'white' : 'oklch(0.45 0.015 250)',
-                border: `1px solid ${timeRange[0] === s && timeRange[1] === e ? 'oklch(0.52 0.18 160)' : 'oklch(0.28 0.04 255)'}`,
+                background: 'oklch(0.20 0.04 255)',
+                color: 'oklch(0.85 0.005 65)',
+                border: '1px solid oklch(0.28 0.04 255)',
               }}
-            >
-              {label}
-            </button>
-          ))}
+            />
+            <span style={{ fontSize: '0.75rem', color: 'oklch(0.45 0.015 250)' }}>秒</span>
+          </div>
+          <div className="flex gap-2 items-center">
+            <label style={{ fontSize: '0.75rem', color: 'oklch(0.45 0.015 250)' }}>終了:</label>
+            <input
+              type="number"
+              min={0}
+              max={maxTime}
+              value={timeRange[1]}
+              onChange={e => setTimeRange([timeRange[0], Math.max(Number(e.target.value), timeRange[0] + 1)])}
+              className="w-16 px-2 py-1 rounded text-xs"
+              style={{
+                fontFamily: 'Roboto Mono, monospace',
+                background: 'oklch(0.20 0.04 255)',
+                color: 'oklch(0.85 0.005 65)',
+                border: '1px solid oklch(0.28 0.04 255)',
+              }}
+            />
+            <span style={{ fontSize: '0.75rem', color: 'oklch(0.45 0.015 250)' }}>秒</span>
+          </div>
           {/* Event quick-zoom buttons */}
           {events.map(ev => (
             <button
