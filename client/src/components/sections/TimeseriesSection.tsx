@@ -13,7 +13,7 @@ import {
   ResponsiveContainer, Area, AreaChart, ComposedChart, BarChart, Bar,
   ReferenceArea, ReferenceLine,
 } from 'recharts';
-import { Plus, Trash2, ChevronDown, ChevronUp, Tag } from 'lucide-react';
+import { Plus, Trash2, ChevronDown, ChevronUp, Tag, Download } from 'lucide-react';
 
 interface Props {
   data: DashboardData;
@@ -216,6 +216,57 @@ export default function TimeseriesSection({ data }: Props) {
   const handleDeleteEvent = (id: string) => {
     setEvents(prev => prev.filter(e => e.id !== id));
     if (expandedEventId === id) setExpandedEventId(null);
+  };
+
+  const exportFilteredDataToCSV = () => {
+    const filteredData = timeseries_full.filter(
+      d => d.time >= timeRange[0] && d.time <= timeRange[1]
+    );
+
+    if (filteredData.length === 0) {
+      alert('フィルタリング範囲にデータがありません');
+      return;
+    }
+
+    const headers = ['time'];
+    for (const emotion of NON_NEUTRAL_EMOTIONS) {
+      headers.push(emotion);
+    }
+    headers.push('engagement', 'valence', 'attention');
+    for (let i = 1; i <= 45; i++) {
+      headers.push(`AU${String(i).padStart(2, '0')}`);
+    }
+
+    const rows = filteredData.map(row => {
+      const values: (string | number)[] = [row.time];
+      for (const emotion of NON_NEUTRAL_EMOTIONS) {
+        values.push((row as any)[emotion] ?? 0);
+      }
+      values.push(row.engagement ?? 0, row.valence ?? 0, row.attention ?? 0);
+      for (let i = 1; i <= 45; i++) {
+        const auKey = `AU${String(i).padStart(2, '0')}`;
+        values.push((row as any)[auKey] ?? 0);
+      }
+      return values;
+    });
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(r => r.map(v => {
+        if (typeof v === 'number') return v.toFixed(3);
+        return v;
+      }).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `emotion_data_${timeRange[0]}-${timeRange[1]}s.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -611,6 +662,20 @@ export default function TimeseriesSection({ data }: Props) {
               {ev.name}
             </button>
           ))}
+          <button
+            onClick={exportFilteredDataToCSV}
+            className="px-3 py-1 rounded text-xs transition-all flex items-center gap-1 ml-auto"
+            style={{
+              fontFamily: 'Noto Sans JP, sans-serif',
+              background: 'oklch(0.32 0.12 160)',
+              color: 'white',
+              border: '1px solid oklch(0.52 0.18 160)',
+            }}
+            title="フィルタリング範囲のデータをCSVでダウンロード"
+          >
+            <Download size={14} />
+            CSV出力
+          </button>
           <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.58 0.015 255)', alignSelf: 'center', marginLeft: '4px' }}>
             {sampledData.length} pts表示中
           </span>
