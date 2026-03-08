@@ -1,8 +1,9 @@
-/**
+/*
  * DESIGN: Neuro-Signal Interface
  * Time series visualization with signal wave aesthetic
  * Extended with emotion heatmap, sparklines, stacked area, dominant timeline
  * + Event (intervention) registration with graph highlight and stats
+ * + Time range selection for detailed analysis
  */
 
 import { useState, useMemo } from 'react';
@@ -13,7 +14,7 @@ import {
   ResponsiveContainer, Area, AreaChart, ComposedChart, BarChart, Bar,
   ReferenceArea, ReferenceLine,
 } from 'recharts';
-import { Plus, Trash2, ChevronDown, ChevronUp, Tag } from 'lucide-react';
+import { Plus, Trash2, ChevronDown, ChevronUp, Tag, Clock } from 'lucide-react';
 
 interface Props {
   data: DashboardData;
@@ -26,6 +27,14 @@ interface EventAnnotation {
   startTime: number;
   endTime: number;
   color: string;
+}
+
+// ---- Time Range Selection type ----
+interface TimeRangeSelection {
+  id: string;
+  name: string;
+  startTime: number;
+  endTime: number;
 }
 
 const EVENT_PALETTE = [
@@ -69,6 +78,15 @@ export default function TimeseriesSection({ data }: Props) {
   const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
   const [showEventForm, setShowEventForm] = useState(false);
 
+  // ---- Time Range Selection state ----
+  const [timeRangeSelections, setTimeRangeSelections] = useState<TimeRangeSelection[]>([]);
+  const [newRangeName, setNewRangeName] = useState('');
+  const [newRangeStart, setNewRangeStart] = useState('');
+  const [newRangeEnd, setNewRangeEnd] = useState('');
+  const [rangeFormError, setRangeFormError] = useState('');
+  const [showRangeForm, setShowRangeForm] = useState(false);
+  const [selectedRangeId, setSelectedRangeId] = useState<string | null>(null);
+
   const { timeseries_full, time_summary_10s } = data;
   const maxTime = Math.ceil(data.meta.duration_seconds);
 
@@ -83,7 +101,7 @@ export default function TimeseriesSection({ data }: Props) {
   // フィルタリング＆サンプリング（最大600点）
   const sampledData = useMemo(() => {
     const filtered = timeseries_full.filter(
-      d => d.time >= timeRange[0] && d.time <= timeRange[1]
+      d => (typeof d.time === 'number' ? d.time : parseFloat(String(d.time))) >= timeRange[0] && (typeof d.time === 'number' ? d.time : parseFloat(String(d.time))) <= timeRange[1]
     );
     const step = Math.max(1, Math.floor(filtered.length / 600));
     return filtered.filter((_, i) => i % step === 0);
@@ -94,7 +112,8 @@ export default function TimeseriesSection({ data }: Props) {
     const bucketSize = 5;
     const buckets: Record<number, Record<string, number[]>> = {};
     for (const frame of timeseries_full) {
-      const bucket = Math.floor(frame.time / bucketSize) * bucketSize;
+      const frameTime = typeof frame.time === 'number' ? frame.time : parseFloat(String(frame.time));
+      const bucket = Math.floor(frameTime / bucketSize) * bucketSize;
       if (!buckets[bucket]) buckets[bucket] = {};
       for (const e of NON_NEUTRAL_EMOTIONS) {
         if (!buckets[bucket][e]) buckets[bucket][e] = [];
@@ -102,300 +121,270 @@ export default function TimeseriesSection({ data }: Props) {
       }
     }
     return Object.entries(buckets)
-      .sort((a, b) => Number(a[0]) - Number(b[0]))
-      .map(([t, emotionData]) => {
-        const row: Record<string, number> = { time: Number(t) };
-        for (const e of NON_NEUTRAL_EMOTIONS) {
-          const vals = emotionData[e] || [0];
-          row[e] = vals.reduce((a, b) => a + b, 0) / vals.length;
-        }
-        return row;
-      });
-  }, [timeseries_full]);
+      .filter(([t]) => {
+        const bucketTime = Number(t);
+        return bucketTime >= timeRange[0] && bucketTime <= timeRange[1];
+      })
+      .map(([t, emotions]) => ({
+        time: Number(t),
+        ...Object.fromEntries(
+          NON_NEUTRAL_EMOTIONS.map(e => [e, emotions[e]?.length > 0 ? emotions[e].reduce((a, b) => a + b) / emotions[e].length : 0])
+        ),
+      }));
+  }, [timeseries_full, timeRange]);
 
-  // スタック面グラフ用（10秒区間サマリー）
+  // スタック面用データ（10秒区間）
   const stackedData = useMemo(() => {
-    return time_summary_10s.map(row => {
-      const result: Record<string, number | string> = { time: `${row.time_start}s` };
-      for (const e of NON_NEUTRAL_EMOTIONS) {
-        result[e] = (row as any)[`${e}_mean`] || 0;
-      }
-      return result;
-    });
-  }, [time_summary_10s]);
+    return time_summary_10s
+      .filter(d => {
+        const dTime = typeof d.time === 'number' ? d.time : parseFloat(String(d.time));
+        return dTime >= timeRange[0] && dTime <= timeRange[1];
+      })
+      .map(d => ({
+        time: d.time,
+        ...Object.fromEntries(NON_NEUTRAL_EMOTIONS.map(e => [e, (d as any)[e] || 0]))
+      }));
+  }, [time_summary_10s, timeRange]);
 
-  // 支配的感情タイムライン（10秒区間）
+  // 支配感情タイムライン（10秒区間）
   const dominantTimeline = useMemo(() => {
-    return time_summary_10s.map(row => ({
-      time: `${row.time_start}s`,
-      emotion: row.dominant_emotion,
-      color: EMOTION_HEX[row.dominant_emotion] || '#999',
-      label: EMOTION_LABELS_JA[row.dominant_emotion] || row.dominant_emotion,
-    }));
-  }, [time_summary_10s]);
-
-  // ヒートマップの最大値
-  const heatmapMax = useMemo(() => {
-    let max = 0;
-    for (const row of heatmapData) {
-      for (const e of NON_NEUTRAL_EMOTIONS) {
-        if (e !== 'confusion' && (row[e] as number) > max) max = row[e] as number;
-      }
-    }
-    return max || 1;
-  }, [heatmapData]);
-
-  // ---- Event stats: for each event, compute emotion averages ----
-  const eventStats = useMemo(() => {
-    return events.map(ev => {
-      const frames = timeseries_full.filter(
-        f => f.time >= ev.startTime && f.time <= ev.endTime
-      );
-      if (frames.length === 0) {
-        const emptyStats: Record<string, { mean: number; max: number }> = {};
-        return { id: ev.id, frameCount: 0, stats: emptyStats, dominantEmotion: 'confusion' };
-      }
-      const stats: Record<string, { mean: number; max: number }> = {};
-      const allCols = [...NON_NEUTRAL_EMOTIONS, 'engagement', 'valence', 'attention'];
-      for (const col of allCols) {
-        const vals = frames.map(f => (f as any)[col] as number || 0);
-        stats[col] = {
-          mean: vals.reduce((a, b) => a + b, 0) / vals.length,
-          max: Math.max(...vals),
+    return time_summary_10s
+      .filter(d => {
+        const dTime = typeof d.time === 'number' ? d.time : parseFloat(String(d.time));
+        return dTime >= timeRange[0] && dTime <= timeRange[1];
+      })
+      .map(d => {
+        const scores = NON_NEUTRAL_EMOTIONS.map(e => ({ emotion: e, score: (d as any)[e] || 0 }));
+        const dominant = scores.reduce((a, b) => a.score > b.score ? a : b);
+        return {
+          time: d.time,
+          dominant: dominant.emotion,
+          score: dominant.score,
         };
-      }
-      // dominant emotion
-      let domEmo = 'confusion';
-      let domVal = -Infinity;
-      for (const e of NON_NEUTRAL_EMOTIONS) {
-        if (stats[e].mean > domVal) { domVal = stats[e].mean; domEmo = e; }
-      }
-      return { id: ev.id, frameCount: frames.length, stats, dominantEmotion: domEmo };
-    });
-  }, [events, timeseries_full]);
+      });
+  }, [time_summary_10s, timeRange]);
 
-  const toggleEmotion = (emotion: string) => {
-    setSelectedEmotions(prev =>
-      prev.includes(emotion) ? prev.filter(e => e !== emotion) : [...prev, emotion]
-    );
+  // ---- Time Range Selection Logic ----
+  const addTimeRange = () => {
+    setRangeFormError('');
+    const start = parseFloat(newRangeStart);
+    const end = parseFloat(newRangeEnd);
+    if (!newRangeName.trim()) {
+      setRangeFormError('区間名を入力してください');
+      return;
+    }
+    if (isNaN(start) || isNaN(end) || start < 0 || end > maxTime || start >= end) {
+      setRangeFormError('有効な時間範囲を入力してください');
+      return;
+    }
+    setTimeRangeSelections([...timeRangeSelections, { id: generateId(), name: newRangeName, startTime: start, endTime: end }]);
+    setNewRangeName('');
+    setNewRangeStart('');
+    setNewRangeEnd('');
+    setShowRangeForm(false);
   };
 
-  const toggleSpecial = (key: string) => {
-    setShowSpecial(prev =>
-      prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
-    );
+  const removeTimeRange = (id: string) => {
+    setTimeRangeSelections(timeRangeSelections.filter(r => r.id !== id));
+    if (selectedRangeId === id) setSelectedRangeId(null);
   };
 
-  const formatTime = (t: number) => `${Number(t).toFixed(0)}s`;
+  // 選択された区間のデータ分析
+  const selectedRangeAnalysis = useMemo(() => {
+    if (!selectedRangeId) return null;
+    const range = timeRangeSelections.find(r => r.id === selectedRangeId);
+    if (!range) return null;
 
-  // ---- Add event ----
-  const handleAddEvent = () => {
+    const rangeData = timeseries_full.filter(d => d.time >= range.startTime && d.time <= range.endTime);
+    if (rangeData.length === 0) return null;
+
+    const emotionStats: Record<string, { mean: number; max: number; min: number }> = {};
+    for (const e of NON_NEUTRAL_EMOTIONS) {
+      const values = rangeData.map(d => (d as any)[e] || 0);
+      emotionStats[e] = {
+        mean: values.reduce((a, b) => a + b) / values.length,
+        max: Math.max(...values),
+        min: Math.min(...values),
+      };
+    }
+
+    const engagementValues = rangeData.map(d => (d as any).engagement || 0);
+    const valenceValues = rangeData.map(d => (d as any).valence || 0);
+    const attentionValues = rangeData.map(d => (d as any).attention || 0);
+
+    return {
+      duration: range.endTime - range.startTime,
+      frameCount: rangeData.length,
+      emotionStats,
+      engagement: {
+        mean: engagementValues.reduce((a, b) => a + b) / engagementValues.length,
+        max: Math.max(...engagementValues),
+      },
+      valence: {
+        mean: valenceValues.reduce((a, b) => a + b) / valenceValues.length,
+        max: Math.max(...valenceValues),
+      },
+      attention: {
+        mean: attentionValues.reduce((a, b) => a + b) / attentionValues.length,
+        max: Math.max(...attentionValues),
+      },
+    };
+  }, [selectedRangeId, timeRangeSelections, timeseries_full]);
+
+  // ---- Event Logic ----
+  const addEvent = () => {
     setEventFormError('');
-    const name = newEventName.trim();
     const start = parseFloat(newEventStart);
     const end = parseFloat(newEventEnd);
-    if (!name) { setEventFormError('イベント名を入力してください'); return; }
-    if (isNaN(start) || isNaN(end)) { setEventFormError('開始・終了時間を数値で入力してください'); return; }
-    if (start < 0 || end > maxTime) { setEventFormError(`時間は 0 〜 ${maxTime} 秒の範囲で入力してください`); return; }
-    if (start >= end) { setEventFormError('終了時間は開始時間より大きくしてください'); return; }
-    const colorIdx = events.length % EVENT_PALETTE.length;
-    const newEv: EventAnnotation = {
-      id: generateId(),
-      name,
-      startTime: start,
-      endTime: end,
-      color: EVENT_PALETTE[colorIdx],
-    };
-    setEvents(prev => [...prev, newEv]);
+    if (!newEventName.trim()) {
+      setEventFormError('イベント名を入力してください');
+      return;
+    }
+    if (isNaN(start) || isNaN(end) || start < 0 || end > maxTime || start >= end) {
+      setEventFormError('有効な時間範囲を入力してください');
+      return;
+    }
+    const colorIndex = events.length % EVENT_PALETTE.length;
+    setEvents([...events, { id: generateId(), name: newEventName, startTime: start, endTime: end, color: EVENT_PALETTE[colorIndex] }]);
     setNewEventName('');
     setNewEventStart('');
     setNewEventEnd('');
     setShowEventForm(false);
   };
 
-  const handleDeleteEvent = (id: string) => {
-    setEvents(prev => prev.filter(e => e.id !== id));
+  const removeEvent = (id: string) => {
+    setEvents(events.filter(e => e.id !== id));
     if (expandedEventId === id) setExpandedEventId(null);
   };
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (!active || !payload?.length) return null;
-    // Find events at this time
-    const t = Number(label);
-    const activeEvents = events.filter(ev => t >= ev.startTime && t <= ev.endTime);
-    return (
-      <div className="p-3 rounded-lg shadow-lg" style={{ background: 'oklch(0.22 0.04 255)', border: '1px solid oklch(0.30 0.04 255)', maxWidth: '240px' }}>
-        <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: '#4ade80', marginBottom: '6px' }}>
-          t = {t.toFixed(2)}s
-        </div>
-        {activeEvents.length > 0 && (
-          <div className="mb-2 flex flex-wrap gap-1">
-            {activeEvents.map(ev => (
-              <span key={ev.id} className="px-1.5 py-0.5 rounded text-xs" style={{ background: ev.color + '30', color: ev.color, fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.65rem', border: `1px solid ${ev.color}60` }}>
-                {ev.name}
-              </span>
-            ))}
-          </div>
-        )}
-        {payload.slice(0, 8).map((p: any) => (
-          <div key={p.dataKey} className="flex items-center gap-2 mb-1">
-            <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: p.color }} />
-            <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', color: 'oklch(0.75 0.005 80)' }}>
-              {p.name}: <span style={{ fontFamily: 'Roboto Mono, monospace', fontWeight: 600 }}>{Number(p.value).toFixed(3)}</span>
-            </span>
-          </div>
-        ))}
-      </div>
-    );
-  };
+  // イベント中の感情統計
+  const eventStats = useMemo(() => {
+    if (!expandedEventId) return null;
+    const event = events.find(e => e.id === expandedEventId);
+    if (!event) return null;
 
-  const tabs = [
-    { id: 'overlay', label: 'オーバーレイ' },
-    { id: 'sparklines', label: '個別波形' },
-    { id: 'heatmap', label: 'ヒートマップ' },
-    { id: 'stacked', label: 'スタック面' },
-    { id: 'dominant', label: '支配感情' },
-  ] as const;
+    const eventData = timeseries_full.filter(d => d.time >= event.startTime && d.time <= event.endTime);
+    if (eventData.length === 0) return null;
 
-  // ---- Render ReferenceAreas for events ----
-  const renderEventAreas = () =>
-    events.map(ev => (
-      <ReferenceArea
-        key={ev.id}
-        x1={ev.startTime}
-        x2={ev.endTime}
-        fill={ev.color}
-        fillOpacity={0.12}
-        stroke={ev.color}
-        strokeOpacity={0.5}
-        strokeWidth={1}
-        strokeDasharray="4 2"
-        label={{ value: ev.name, position: 'insideTopLeft', fontSize: 10, fill: ev.color, fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600 }}
-      />
-    ));
+    const emotionStats: Record<string, { mean: number; max: number }> = {};
+    for (const e of NON_NEUTRAL_EMOTIONS) {
+      const values = eventData.map(d => (d as any)[e] || 0);
+      emotionStats[e] = {
+        mean: values.reduce((a, b) => a + b) / values.length,
+        max: Math.max(...values),
+      };
+    }
 
-  // ---- Render ReferenceLines (vertical) for event boundaries ----
-  const renderEventLines = () =>
-    events.flatMap(ev => [
-      <ReferenceLine key={`${ev.id}-s`} x={ev.startTime} stroke={ev.color} strokeWidth={1.5} strokeDasharray="4 2" />,
-      <ReferenceLine key={`${ev.id}-e`} x={ev.endTime} stroke={ev.color} strokeWidth={1.5} strokeDasharray="4 2" />,
-    ]);
+    const engagementValues = eventData.map(d => (d as any).engagement || 0);
+    const valenceValues = eventData.map(d => (d as any).valence || 0);
+    const attentionValues = eventData.map(d => (d as any).attention || 0);
+
+    const dominantEmotions = Object.entries(emotionStats)
+      .sort((a, b) => b[1].mean - a[1].mean)
+      .slice(0, 3);
+
+    return {
+      duration: event.endTime - event.startTime,
+      frameCount: eventData.length,
+      emotionStats,
+      engagement: {
+        mean: engagementValues.reduce((a, b) => a + b) / engagementValues.length,
+        max: Math.max(...engagementValues),
+      },
+      valence: {
+        mean: valenceValues.reduce((a, b) => a + b) / valenceValues.length,
+        max: Math.max(...valenceValues),
+      },
+      attention: {
+        mean: attentionValues.reduce((a, b) => a + b) / attentionValues.length,
+        max: Math.max(...attentionValues),
+      },
+      dominantEmotions,
+    };
+  }, [expandedEventId, events, timeseries_full]);
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <div className="section-label mb-1">TIME SERIES ANALYSIS</div>
-        <h2 style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.88 0.005 250)' }}>
-          時系列分析
-        </h2>
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.58 0.015 255)', marginTop: '0.25rem' }}>
-          感情スコアおよびEngagement・Valence・Attentionの時間推移 — イベント登録でグラフに介入区間を重ねて表示
-        </p>
-      </div>
-
-      {/* ---- EVENT ANNOTATION PANEL ---- */}
-      <div className="metric-card" style={{ borderLeft: '3px solid oklch(0.55 0.18 250)' }}>
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <div className="section-label mb-1">EVENT ANNOTATIONS</div>
-            <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)' }}>
-              イベント（介入）登録
-            </div>
-            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.58 0.015 255)', marginTop: '2px' }}>
-              イベント名・開始・終了時間を登録するとグラフに反映されます
-            </p>
-          </div>
-          <button
-            onClick={() => setShowEventForm(v => !v)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg transition-all"
-            style={{
-              fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600, fontSize: '0.82rem',
-              background: showEventForm ? 'oklch(0.32 0.12 250)' : 'oklch(0.22 0.04 255)',
-              color: 'oklch(0.90 0.005 250)',
-            }}
-          >
-            <Plus size={14} />
-            イベントを追加
-          </button>
+    <section className="space-y-6">
+      {/* ---- Time Range Selection Panel ---- */}
+      <div className="bg-navy-800 border border-navy-700 rounded-lg p-4 space-y-3">
+        <div className="flex items-center gap-2">
+          <Clock className="w-5 h-5 text-teal-400" />
+          <h3 className="text-lg font-semibold text-gray-100">区間別分析</h3>
         </div>
 
-        {/* Add form */}
-        {showEventForm && (
-          <div className="mb-4 p-4 rounded-xl" style={{ background: 'oklch(0.22 0.04 255)', border: '1px solid oklch(0.28 0.04 255)' }}>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
-              <div>
-                <label style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fontWeight: 600, color: 'oklch(0.75 0.008 250)', display: 'block', marginBottom: '4px' }}>
-                  イベント名
-                </label>
-                <input
-                  type="text"
-                  value={newEventName}
-                  onChange={e => setNewEventName(e.target.value)}
-                  placeholder="例: プレゼン開始"
-                  className="w-full px-3 py-2 rounded-lg text-sm outline-none"
-                  style={{
-                    fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.82rem',
-                    border: '1px solid oklch(0.28 0.04 255)',
-                    background: 'oklch(0.22 0.04 255)', color: 'oklch(0.88 0.005 250)',
-                  }}
-                  onKeyDown={e => e.key === 'Enter' && handleAddEvent()}
-                />
+        {/* Time Range List */}
+        <div className="space-y-2">
+          {timeRangeSelections.map(range => (
+            <div
+              key={range.id}
+              className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition ${
+                selectedRangeId === range.id
+                  ? 'bg-teal-900 border-teal-500'
+                  : 'bg-navy-700 border-navy-600 hover:border-teal-500'
+              }`}
+              onClick={() => setSelectedRangeId(selectedRangeId === range.id ? null : range.id)}
+            >
+              <div className="flex-1">
+                <p className="font-medium text-gray-100">{range.name}</p>
+                <p className="text-sm text-gray-400">{range.startTime.toFixed(1)}s - {range.endTime.toFixed(1)}s</p>
               </div>
-              <div>
-                <label style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fontWeight: 600, color: 'oklch(0.75 0.008 250)', display: 'block', marginBottom: '4px' }}>
-                  開始時間（秒）
-                </label>
-                <input
-                  type="number"
-                  value={newEventStart}
-                  onChange={e => setNewEventStart(e.target.value)}
-                  placeholder={`0 〜 ${maxTime}`}
-                  min={0} max={maxTime} step={0.1}
-                  className="w-full px-3 py-2 rounded-lg text-sm outline-none"
-                  style={{
-                    fontFamily: 'Roboto Mono, monospace', fontSize: '0.82rem',
-                    border: '1px solid oklch(0.28 0.04 255)',
-                    background: 'oklch(0.22 0.04 255)', color: 'oklch(0.88 0.005 250)',
-                  }}
-                />
-              </div>
-              <div>
-                <label style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fontWeight: 600, color: 'oklch(0.75 0.008 250)', display: 'block', marginBottom: '4px' }}>
-                  終了時間（秒）
-                </label>
-                <input
-                  type="number"
-                  value={newEventEnd}
-                  onChange={e => setNewEventEnd(e.target.value)}
-                  placeholder={`0 〜 ${maxTime}`}
-                  min={0} max={maxTime} step={0.1}
-                  className="w-full px-3 py-2 rounded-lg text-sm outline-none"
-                  style={{
-                    fontFamily: 'Roboto Mono, monospace', fontSize: '0.82rem',
-                    border: '1px solid oklch(0.28 0.04 255)',
-                    background: 'oklch(0.22 0.04 255)', color: 'oklch(0.88 0.005 250)',
-                  }}
-                />
-              </div>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removeTimeRange(range.id);
+                }}
+                className="p-1 hover:bg-red-900 rounded transition"
+              >
+                <Trash2 className="w-4 h-4 text-red-400" />
+              </button>
             </div>
-            {eventFormError && (
-              <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: '#ef4444', marginBottom: '8px' }}>
-                {eventFormError}
-              </p>
-            )}
+          ))}
+        </div>
+
+        {/* Add Time Range Form */}
+        {!showRangeForm ? (
+          <button
+            onClick={() => setShowRangeForm(true)}
+            className="w-full py-2 px-3 bg-teal-900 hover:bg-teal-800 text-teal-100 rounded-lg flex items-center justify-center gap-2 transition"
+          >
+            <Plus className="w-4 h-4" /> 区間を追加
+          </button>
+        ) : (
+          <div className="bg-navy-700 p-3 rounded-lg space-y-2">
+            <input
+              type="text"
+              placeholder="区間名（例：介入前）"
+              value={newRangeName}
+              onChange={(e) => setNewRangeName(e.target.value)}
+              className="w-full px-3 py-2 bg-navy-600 border border-navy-500 rounded text-gray-100 placeholder-gray-500"
+            />
+            <div className="flex gap-2">
+              <input
+                type="number"
+                placeholder="開始時間（秒）"
+                value={newRangeStart}
+                onChange={(e) => setNewRangeStart(e.target.value)}
+                className="flex-1 px-3 py-2 bg-navy-600 border border-navy-500 rounded text-gray-100 placeholder-gray-500"
+              />
+              <input
+                type="number"
+                placeholder="終了時間（秒）"
+                value={newRangeEnd}
+                onChange={(e) => setNewRangeEnd(e.target.value)}
+                className="flex-1 px-3 py-2 bg-navy-600 border border-navy-500 rounded text-gray-100 placeholder-gray-500"
+              />
+            </div>
+            {rangeFormError && <p className="text-sm text-red-400">{rangeFormError}</p>}
             <div className="flex gap-2">
               <button
-                onClick={handleAddEvent}
-                className="px-4 py-2 rounded-lg text-sm font-semibold transition-all"
-                style={{ fontFamily: 'Noto Sans JP, sans-serif', background: 'oklch(0.22 0.04 255)', color: 'oklch(0.90 0.005 250)' }}
+                onClick={addTimeRange}
+                className="flex-1 py-2 bg-teal-700 hover:bg-teal-600 text-white rounded transition"
               >
-                登録する
+                追加
               </button>
               <button
-                onClick={() => { setShowEventForm(false); setEventFormError(''); }}
-                className="px-4 py-2 rounded-lg text-sm transition-all"
-                style={{ fontFamily: 'Noto Sans JP, sans-serif', background: 'oklch(0.22 0.04 255)', color: 'oklch(0.75 0.008 250)' }}
+                onClick={() => setShowRangeForm(false)}
+                className="flex-1 py-2 bg-navy-600 hover:bg-navy-500 text-gray-300 rounded transition"
               >
                 キャンセル
               </button>
@@ -403,698 +392,411 @@ export default function TimeseriesSection({ data }: Props) {
           </div>
         )}
 
-        {/* Event list */}
-        {events.length === 0 ? (
-          <div className="py-6 text-center" style={{ border: '1px dashed oklch(0.28 0.04 255)', borderRadius: '12px' }}>
-            <Tag size={20} style={{ color: 'oklch(0.72 0.015 250)', margin: '0 auto 8px' }} />
-            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.82rem', color: 'oklch(0.58 0.015 255)' }}>
-              まだイベントが登録されていません
-            </p>
-            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.68 0.015 250)', marginTop: '4px' }}>
-              「イベントを追加」ボタンから登録してください
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {events.map((ev, idx) => {
-              const stat = eventStats.find(s => s.id === ev.id);
-              const isExpanded = expandedEventId === ev.id;
-              return (
-                <div key={ev.id} className="rounded-xl overflow-hidden" style={{ border: `1px solid ${ev.color}40`, background: `${ev.color}08` }}>
-                  <div className="flex items-center gap-3 px-4 py-3">
-                    <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: ev.color }} />
-                    <div className="flex-1 min-w-0">
-                      <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '0.88rem', color: 'oklch(0.88 0.005 250)' }}>
-                        {ev.name}
+        {/* Selected Range Analysis */}
+        {selectedRangeAnalysis && (
+          <div className="bg-navy-700 p-4 rounded-lg border border-teal-500 space-y-3">
+            <h4 className="font-semibold text-teal-100">区間分析結果</h4>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-navy-600 p-3 rounded">
+                <p className="text-xs text-gray-400">区間長</p>
+                <p className="text-lg font-semibold text-teal-300">{selectedRangeAnalysis.duration.toFixed(1)}秒</p>
+              </div>
+              <div className="bg-navy-600 p-3 rounded">
+                <p className="text-xs text-gray-400">フレーム数</p>
+                <p className="text-lg font-semibold text-teal-300">{selectedRangeAnalysis.frameCount}</p>
+              </div>
+              <div className="bg-navy-600 p-3 rounded">
+                <p className="text-xs text-gray-400">Engagement平均</p>
+                <p className="text-lg font-semibold text-gold-300">{selectedRangeAnalysis.engagement.mean.toFixed(2)}</p>
+              </div>
+              <div className="bg-navy-600 p-3 rounded">
+                <p className="text-xs text-gray-400">Valence平均</p>
+                <p className="text-lg font-semibold text-teal-300">{selectedRangeAnalysis.valence.mean.toFixed(2)}</p>
+              </div>
+            </div>
+            <div className="bg-navy-600 p-3 rounded">
+              <p className="text-xs text-gray-400 mb-2">感情スコア（平均値）</p>
+              <div className="space-y-1">
+                {NON_NEUTRAL_EMOTIONS.map(e => (
+                  <div key={e} className="flex items-center justify-between text-sm">
+                    <span className="text-gray-300">{EMOTION_LABELS_JA[e]}</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-32 h-2 bg-navy-500 rounded overflow-hidden">
+                        <div
+                          className="h-full"
+                          style={{
+                            width: `${Math.min(100, selectedRangeAnalysis.emotionStats[e].mean * 10)}%`,
+                            backgroundColor: EMOTION_HEX[e],
+                          }}
+                        />
                       </div>
-                      <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.68rem', color: 'oklch(0.45 0.015 250)' }}>
-                        {ev.startTime}s — {ev.endTime}s &nbsp;|&nbsp; {(ev.endTime - ev.startTime).toFixed(1)}秒間 &nbsp;|&nbsp; {stat?.frameCount || 0} フレーム
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <button
-                        onClick={() => setExpandedEventId(isExpanded ? null : ev.id)}
-                        className="p-1.5 rounded-lg transition-all"
-                        style={{ color: ev.color, background: `${ev.color}15` }}
-                        title="感情統計を表示"
-                      >
-                        {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                      </button>
-                      <button
-                        onClick={() => handleDeleteEvent(ev.id)}
-                        className="p-1.5 rounded-lg transition-all"
-                        style={{ color: '#ef4444', background: '#ef444415' }}
-                        title="削除"
-                      >
-                        <Trash2 size={14} />
-                      </button>
+                      <span className="text-gray-400 w-10 text-right">{selectedRangeAnalysis.emotionStats[e].mean.toFixed(1)}</span>
                     </div>
                   </div>
-
-                  {/* Expanded stats */}
-                  {isExpanded && stat && stat.frameCount > 0 && (
-                    <div className="px-4 pb-4 pt-1">
-                      <div className="section-label mb-2" style={{ color: ev.color }}>EVENT EMOTION STATS — {ev.name}</div>
-                      {/* Special metrics */}
-                      <div className="grid grid-cols-3 gap-3 mb-3">
-                        {(['engagement', 'valence', 'attention'] as const).map(key => (
-                          <div key={key} className="p-2 rounded-lg text-center" style={{ background: SPECIAL_COLORS[key] + '12', border: `1px solid ${SPECIAL_COLORS[key]}30` }}>
-                            <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: SPECIAL_COLORS[key], marginBottom: '2px', textTransform: 'uppercase' }}>{key}</div>
-                            <div style={{ fontFamily: 'Roboto Mono, monospace', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)' }}>
-                              {stat.stats[key]?.mean.toFixed(1)}
-                            </div>
-                            <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)' }}>
-                              max {stat.stats[key]?.max.toFixed(1)}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      {/* Emotion bars */}
-                      <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
-                        {NON_NEUTRAL_EMOTIONS.filter(e => e !== 'confusion').map(e => {
-                          const mean = stat.stats[e]?.mean || 0;
-                          const isDom = stat.dominantEmotion === e;
-                          return (
-                            <div key={e} className="flex items-center gap-2">
-                              <div className="flex-shrink-0 text-right" style={{ width: '52px' }}>
-                                <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', color: isDom ? EMOTION_HEX[e] : 'oklch(0.45 0.015 250)', fontWeight: isDom ? 700 : 400 }}>
-                                  {EMOTION_LABELS_JA[e]}
-                                </span>
-                              </div>
-                              <div className="flex-1 h-3 rounded-full overflow-hidden" style={{ background: 'oklch(0.22 0.04 255)' }}>
-                                <div
-                                  className="h-full rounded-full transition-all"
-                                  style={{ width: `${Math.min(100, mean * 2)}%`, background: EMOTION_HEX[e], opacity: isDom ? 1 : 0.7 }}
-                                />
-                              </div>
-                              <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: isDom ? EMOTION_HEX[e] : 'oklch(0.58 0.015 255)', minWidth: '36px', fontWeight: isDom ? 700 : 400 }}>
-                                {mean.toFixed(2)}
-                              </span>
-                              {isDom && <span className="px-1 py-0.5 rounded text-xs" style={{ background: EMOTION_HEX[e] + '20', color: EMOTION_HEX[e], fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.6rem' }}>主要</span>}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+                ))}
+              </div>
+            </div>
           </div>
         )}
       </div>
 
-      {/* Time Range Selector */}
-      <div className="metric-card">
-        <div className="section-label mb-2">TIME RANGE FILTER</div>
-        <div className="flex items-center gap-3 mb-2">
-          <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: 'oklch(0.45 0.015 250)', minWidth: '32px' }}>
-            {timeRange[0]}s
-          </span>
-          <div className="flex-1 relative h-6 flex items-center">
-            <div className="absolute w-full h-1 rounded-full" style={{ background: 'oklch(0.28 0.04 255)' }} />
-            <div
-              className="absolute h-1 rounded-full"
-              style={{
-                left: `${(timeRange[0] / maxTime) * 100}%`,
-                right: `${100 - (timeRange[1] / maxTime) * 100}%`,
-                background: 'oklch(0.62 0.18 160)',
-              }}
-            />
-            {/* Event markers on range bar */}
-            {events.map(ev => (
-              <div
-                key={ev.id}
-                className="absolute h-3 rounded-sm pointer-events-none"
-                style={{
-                  left: `${(ev.startTime / maxTime) * 100}%`,
-                  width: `${((ev.endTime - ev.startTime) / maxTime) * 100}%`,
-                  background: ev.color,
-                  opacity: 0.35,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  zIndex: 1,
-                }}
-                title={ev.name}
-              />
-            ))}
-            <input
-              type="range" min={0} max={maxTime} step={5}
-              value={timeRange[0]}
-              onChange={e => setTimeRange([Math.min(Number(e.target.value), timeRange[1] - 10), timeRange[1]])}
-              className="absolute w-full opacity-0 cursor-pointer h-6"
-              style={{ zIndex: 2 }}
-            />
-            <input
-              type="range" min={0} max={maxTime} step={5}
-              value={timeRange[1]}
-              onChange={e => setTimeRange([timeRange[0], Math.max(Number(e.target.value), timeRange[0] + 10)])}
-              className="absolute w-full opacity-0 cursor-pointer h-6"
-              style={{ zIndex: 3 }}
-            />
-          </div>
-          <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: 'oklch(0.45 0.015 250)', minWidth: '32px', textAlign: 'right' }}>
-            {timeRange[1]}s
-          </span>
+      {/* ---- Event Panel (existing) ---- */}
+      <div className="bg-navy-800 border border-navy-700 rounded-lg p-4 space-y-3">
+        <div className="flex items-center gap-2">
+          <Tag className="w-5 h-5 text-gold-400" />
+          <h3 className="text-lg font-semibold text-gray-100">イベント（介入）</h3>
         </div>
-        <div className="flex gap-2 flex-wrap">
-          {TIME_PRESETS.map(([s, e, label]) => (
+
+        {/* Event List */}
+        <div className="space-y-2">
+          {events.map(event => (
+            <div key={event.id} className="bg-navy-700 rounded-lg border border-navy-600 overflow-hidden">
+              <div
+                className="flex items-center justify-between p-3 cursor-pointer hover:bg-navy-600 transition"
+                onClick={() => setExpandedEventId(expandedEventId === event.id ? null : event.id)}
+              >
+                <div className="flex items-center gap-3 flex-1">
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: event.color }} />
+                  <div>
+                    <p className="font-medium text-gray-100">{event.name}</p>
+                    <p className="text-sm text-gray-400">{event.startTime.toFixed(1)}s - {event.endTime.toFixed(1)}s</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {expandedEventId === event.id ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeEvent(event.id);
+                    }}
+                    className="p-1 hover:bg-red-900 rounded transition"
+                  >
+                    <Trash2 className="w-4 h-4 text-red-400" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Event Stats */}
+              {expandedEventId === event.id && eventStats && (
+                <div className="bg-navy-600 p-3 border-t border-navy-500 space-y-2">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="bg-navy-700 p-2 rounded">
+                      <p className="text-xs text-gray-400">区間長</p>
+                      <p className="text-sm font-semibold text-gray-100">{eventStats.duration.toFixed(1)}秒</p>
+                    </div>
+                    <div className="bg-navy-700 p-2 rounded">
+                      <p className="text-xs text-gray-400">フレーム数</p>
+                      <p className="text-sm font-semibold text-gray-100">{eventStats.frameCount}</p>
+                    </div>
+                    <div className="bg-navy-700 p-2 rounded">
+                      <p className="text-xs text-gray-400">Engagement</p>
+                      <p className="text-sm font-semibold text-gold-300">{eventStats.engagement.mean.toFixed(2)}</p>
+                    </div>
+                    <div className="bg-navy-700 p-2 rounded">
+                      <p className="text-xs text-gray-400">Valence</p>
+                      <p className="text-sm font-semibold text-teal-300">{eventStats.valence.mean.toFixed(2)}</p>
+                    </div>
+                  </div>
+                  <div className="bg-navy-700 p-2 rounded">
+                    <p className="text-xs text-gray-400 mb-1">主要感情</p>
+                    <div className="space-y-1">
+                      {eventStats.dominantEmotions.map(([emotion, stats]) => (
+                        <div key={emotion} className="flex items-center justify-between text-xs">
+                          <span className="text-gray-300">{EMOTION_LABELS_JA[emotion]}</span>
+                          <span className="text-gray-400">{stats.mean.toFixed(2)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Add Event Form */}
+        {!showEventForm ? (
+          <button
+            onClick={() => setShowEventForm(true)}
+            className="w-full py-2 px-3 bg-gold-900 hover:bg-gold-800 text-gold-100 rounded-lg flex items-center justify-center gap-2 transition"
+          >
+            <Plus className="w-4 h-4" /> イベントを追加
+          </button>
+        ) : (
+          <div className="bg-navy-700 p-3 rounded-lg space-y-2">
+            <input
+              type="text"
+              placeholder="イベント名"
+              value={newEventName}
+              onChange={(e) => setNewEventName(e.target.value)}
+              className="w-full px-3 py-2 bg-navy-600 border border-navy-500 rounded text-gray-100 placeholder-gray-500"
+            />
+            <div className="flex gap-2">
+              <input
+                type="number"
+                placeholder="開始時間（秒）"
+                value={newEventStart}
+                onChange={(e) => setNewEventStart(e.target.value)}
+                className="flex-1 px-3 py-2 bg-navy-600 border border-navy-500 rounded text-gray-100 placeholder-gray-500"
+              />
+              <input
+                type="number"
+                placeholder="終了時間（秒）"
+                value={newEventEnd}
+                onChange={(e) => setNewEventEnd(e.target.value)}
+                className="flex-1 px-3 py-2 bg-navy-600 border border-navy-500 rounded text-gray-100 placeholder-gray-500"
+              />
+            </div>
+            {eventFormError && <p className="text-sm text-red-400">{eventFormError}</p>}
+            <div className="flex gap-2">
+              <button
+                onClick={addEvent}
+                className="flex-1 py-2 bg-gold-700 hover:bg-gold-600 text-white rounded transition"
+              >
+                追加
+              </button>
+              <button
+                onClick={() => setShowEventForm(false)}
+                className="flex-1 py-2 bg-navy-600 hover:bg-navy-500 text-gray-300 rounded transition"
+              >
+                キャンセル
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ---- Time Range Presets & Controls ---- */}
+      <div className="bg-navy-800 border border-navy-700 rounded-lg p-4 space-y-3">
+        <h3 className="text-lg font-semibold text-gray-100">時間範囲プリセット</h3>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+          {TIME_PRESETS.map(([start, end, label]) => (
             <button
               key={label}
-              onClick={() => setTimeRange([s, e])}
-              className="px-2.5 py-1 rounded text-xs transition-all"
-              style={{
-                fontFamily: 'Roboto Mono, monospace',
-                background: timeRange[0] === s && timeRange[1] === e ? 'oklch(0.32 0.12 160)' : 'oklch(0.20 0.04 255)',
-                color: timeRange[0] === s && timeRange[1] === e ? 'white' : 'oklch(0.45 0.015 250)',
-                border: `1px solid ${timeRange[0] === s && timeRange[1] === e ? 'oklch(0.52 0.18 160)' : 'oklch(0.28 0.04 255)'}`,
-              }}
+              onClick={() => setTimeRange([start, end])}
+              className={`py-2 px-3 rounded-lg transition ${
+                timeRange[0] === start && timeRange[1] === end
+                  ? 'bg-teal-700 text-white'
+                  : 'bg-navy-700 hover:bg-navy-600 text-gray-300'
+              }`}
             >
               {label}
             </button>
           ))}
-          {/* Event quick-zoom buttons */}
-          {events.map(ev => (
-            <button
-              key={ev.id}
-              onClick={() => setTimeRange([Math.max(0, ev.startTime - 5), Math.min(maxTime, ev.endTime + 5)])}
-              className="px-2.5 py-1 rounded text-xs transition-all flex items-center gap-1"
-              style={{
-                fontFamily: 'Noto Sans JP, sans-serif',
-                background: ev.color + '18',
-                color: ev.color,
-                border: `1px solid ${ev.color}50`,
-              }}
-            >
-              <div className="w-2 h-2 rounded-full" style={{ background: ev.color }} />
-              {ev.name}
-            </button>
-          ))}
-          <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.58 0.015 255)', alignSelf: 'center', marginLeft: '4px' }}>
-            {sampledData.length} pts表示中
-          </span>
         </div>
       </div>
 
-      {/* Special Metrics Chart — always visible */}
-      <div className="metric-card">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <div className="section-label mb-1">SPECIAL METRICS</div>
-            <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)' }}>
-              Engagement / Valence / Attention
-            </div>
-          </div>
-          <div className="flex gap-2">
-            {(['engagement', 'valence', 'attention'] as const).map(key => (
+      {/* ---- Tab Selection ---- */}
+      <div className="flex gap-2 overflow-x-auto pb-2">
+        {(['overlay', 'sparklines', 'heatmap', 'stacked', 'dominant'] as const).map(tab => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-4 py-2 rounded-lg whitespace-nowrap transition ${
+              activeTab === tab
+                ? 'bg-teal-700 text-white'
+                : 'bg-navy-700 hover:bg-navy-600 text-gray-300'
+            }`}
+          >
+            {tab === 'overlay' && 'オーバーレイ'}
+            {tab === 'sparklines' && '個別波形'}
+            {tab === 'heatmap' && 'ヒートマップ'}
+            {tab === 'stacked' && 'スタック面'}
+            {tab === 'dominant' && '支配感情'}
+          </button>
+        ))}
+      </div>
+
+      {/* ---- Tab Content ---- */}
+      {activeTab === 'overlay' && (
+        <div className="bg-navy-800 border border-navy-700 rounded-lg p-4 space-y-3">
+          <h3 className="text-lg font-semibold text-gray-100">感情スコア（オーバーレイ）</h3>
+          <div className="flex flex-wrap gap-2">
+            {NON_NEUTRAL_EMOTIONS.map(e => (
               <button
-                key={key}
-                onClick={() => toggleSpecial(key)}
-                className="px-3 py-1 rounded-full text-xs transition-all"
-                style={{
-                  fontFamily: 'Roboto Mono, monospace',
-                  background: showSpecial.includes(key) ? SPECIAL_COLORS[key] : 'oklch(0.20 0.04 255)',
-                  color: showSpecial.includes(key) ? 'white' : 'oklch(0.45 0.015 250)',
-                  border: `1px solid ${showSpecial.includes(key) ? SPECIAL_COLORS[key] : 'oklch(0.28 0.04 255)'}`,
-                  opacity: showSpecial.includes(key) ? 1 : 0.6,
-                }}
+                key={e}
+                onClick={() => setSelectedEmotions(
+                  selectedEmotions.includes(e)
+                    ? selectedEmotions.filter(x => x !== e)
+                    : [...selectedEmotions, e]
+                )}
+                className={`px-3 py-1 rounded-full text-sm transition ${
+                  selectedEmotions.includes(e)
+                    ? 'text-white'
+                    : 'bg-navy-700 text-gray-400 hover:text-gray-300'
+                }`}
+                style={selectedEmotions.includes(e) ? { backgroundColor: EMOTION_HEX[e] } : {}}
               >
-                {key.charAt(0).toUpperCase() + key.slice(1)}
+                {EMOTION_LABELS_JA[e]}
               </button>
             ))}
           </div>
-        </div>
-        <ResponsiveContainer width="100%" height={200}>
-          <ComposedChart data={sampledData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
-            <defs>
-              <linearGradient id="engGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={SPECIAL_COLORS.engagement} stopOpacity={0.25} />
-                <stop offset="95%" stopColor={SPECIAL_COLORS.engagement} stopOpacity={0.02} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" />
-            <XAxis dataKey="time" tickFormatter={formatTime} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} />
-            <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} domain={[0, 100]} />
-            <Tooltip content={<CustomTooltip />} />
-            <Legend formatter={v => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem' }}>{v}</span>} />
-            {renderEventAreas()}
-            {showSpecial.includes('engagement') && (
-              <Area type="monotone" dataKey="engagement" stroke={SPECIAL_COLORS.engagement} fill="url(#engGrad)" strokeWidth={1.5} dot={false} name="Engagement" />
-            )}
-            {showSpecial.includes('valence') && (
-              <Line type="monotone" dataKey="valence" stroke={SPECIAL_COLORS.valence} strokeWidth={1.5} dot={false} name="Valence" />
-            )}
-            {showSpecial.includes('attention') && (
-              <Line type="monotone" dataKey="attention" stroke={SPECIAL_COLORS.attention} strokeWidth={1.5} dot={false} name="Attention" />
-            )}
-          </ComposedChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* Emotion Charts — Tab Switcher */}
-      <div className="metric-card">
-        <div className="section-label mb-3">EMOTION TIME SERIES</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
-          感情スコアの時系列グラフ
-        </div>
-
-        {/* Tab Bar */}
-        <div className="flex gap-1 mb-5 p-1 rounded-lg" style={{ background: 'oklch(0.20 0.04 255)', width: 'fit-content' }}>
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className="px-3 py-1.5 rounded-md text-xs transition-all"
-              style={{
-                fontFamily: 'Noto Sans JP, sans-serif',
-                fontWeight: activeTab === tab.id ? 600 : 400,
-                background: activeTab === tab.id ? 'white' : 'transparent',
-                color: activeTab === tab.id ? 'oklch(0.22 0.04 255)' : 'oklch(0.58 0.015 255)',
-                boxShadow: activeTab === tab.id ? '0 1px 3px oklch(0.15 0.02 250 / 0.1)' : 'none',
-              }}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        {/* TAB: オーバーレイ */}
-        {activeTab === 'overlay' && (
-          <div>
-            <div className="flex flex-wrap gap-1.5 mb-4">
-              {NON_NEUTRAL_EMOTIONS.map(emotion => (
-                <button
-                  key={emotion}
-                  onClick={() => toggleEmotion(emotion)}
-                  className="px-2.5 py-0.5 rounded-full text-xs transition-all"
-                  style={{
-                    fontFamily: 'Noto Sans JP, sans-serif',
-                    background: selectedEmotions.includes(emotion) ? EMOTION_HEX[emotion] : 'oklch(0.20 0.04 255)',
-                    color: selectedEmotions.includes(emotion) ? 'white' : 'oklch(0.45 0.015 250)',
-                    border: `1px solid ${selectedEmotions.includes(emotion) ? EMOTION_HEX[emotion] : 'oklch(0.28 0.04 255)'}`,
-                    fontSize: '0.72rem',
-                  }}
-                >
-                  {EMOTION_LABELS_JA[emotion]}
-                </button>
+          <ResponsiveContainer width="100%" height={400}>
+            <LineChart data={sampledData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.3 0.02 250)" />
+              <XAxis dataKey="time" stroke="oklch(0.6 0.04 250)" />
+              <YAxis stroke="oklch(0.6 0.04 250)" />
+              <Tooltip contentStyle={{ backgroundColor: 'oklch(0.18 0.02 250)', border: '1px solid oklch(0.4 0.04 250)' }} />
+              <Legend />
+              {selectedEmotions.map(e => (
+                <Line key={e} type="monotone" dataKey={e} stroke={EMOTION_HEX[e]} dot={false} isAnimationActive={false} />
               ))}
-            </div>
-            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.58 0.015 255)', marginBottom: '0.75rem' }}>
-              複数の感情スコアを同一グラフ上に重ねて表示します。感情ボタンをクリックして表示/非表示を切り替えられます。
-            </p>
-            <ResponsiveContainer width="100%" height={280}>
-              <LineChart data={sampledData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" />
-                <XAxis dataKey="time" tickFormatter={formatTime} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} />
-                <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend formatter={v => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem' }}>{v}</span>} />
-                {renderEventAreas()}
-                {selectedEmotions.map(emotion => (
-                  <Line
-                    key={emotion}
-                    type="monotone"
-                    dataKey={emotion}
-                    stroke={EMOTION_HEX[emotion]}
-                    strokeWidth={1.5}
-                    dot={false}
-                    name={EMOTION_LABELS_JA[emotion]}
-                  />
-                ))}
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        )}
+              {showSpecial.map(s => (
+                <Line key={s} type="monotone" dataKey={s} stroke={SPECIAL_COLORS[s]} dot={false} isAnimationActive={false} strokeDasharray="5 5" />
+              ))}
+              {events.map(event => (
+                <ReferenceArea key={event.id} x1={event.startTime} x2={event.endTime} fill={event.color} fillOpacity={0.1} />
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
 
-        {/* TAB: 個別波形（スパークライン） */}
-        {activeTab === 'sparklines' && (
-          <div>
-            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.58 0.015 255)', marginBottom: '1rem' }}>
-              各感情スコアを独立したチャートで表示します。微細な変動パターンを個別に確認できます。
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {NON_NEUTRAL_EMOTIONS.map(emotion => {
-                const maxVal = Math.max(...sampledData.map(d => (d as any)[emotion] || 0));
-                const meanVal = sampledData.reduce((acc, d) => acc + ((d as any)[emotion] || 0), 0) / sampledData.length;
-                return (
-                  <div key={emotion} className="p-3 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', border: `1px solid ${EMOTION_HEX[emotion]}30` }}>
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full" style={{ background: EMOTION_HEX[emotion] }} />
-                        <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600, fontSize: '0.82rem', color: 'oklch(0.88 0.005 250)' }}>
-                          {EMOTION_LABELS_JA[emotion]}
-                        </span>
-                      </div>
-                      <div className="text-right">
-                        <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: EMOTION_HEX[emotion] }}>
-                          max {maxVal.toFixed(2)}
-                        </div>
-                        <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)' }}>
-                          avg {meanVal.toFixed(3)}
-                        </div>
-                      </div>
-                    </div>
-                    <ResponsiveContainer width="100%" height={80}>
-                      <AreaChart data={sampledData} margin={{ top: 2, right: 2, bottom: 2, left: 0 }}>
-                        <defs>
-                          <linearGradient id={`grad-${emotion}`} x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor={EMOTION_HEX[emotion]} stopOpacity={0.4} />
-                            <stop offset="95%" stopColor={EMOTION_HEX[emotion]} stopOpacity={0.02} />
-                          </linearGradient>
-                        </defs>
-                        <XAxis dataKey="time" hide />
-                        <YAxis hide domain={[0, Math.max(maxVal * 1.1, 0.01)]} />
-                        <Tooltip
-                          formatter={(v: number) => [v.toFixed(3), EMOTION_LABELS_JA[emotion]]}
-                          labelFormatter={(l: number) => `t=${Number(l).toFixed(1)}s`}
-                          contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', border: `1px solid ${EMOTION_HEX[emotion]}50`, borderRadius: '6px', padding: '4px 8px' }}
-                        />
-                        {renderEventLines()}
-                        <Area
-                          type="monotone"
-                          dataKey={emotion}
-                          stroke={EMOTION_HEX[emotion]}
-                          fill={`url(#grad-${emotion})`}
-                          strokeWidth={1.5}
-                          dot={false}
-                        />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* TAB: ヒートマップ */}
-        {activeTab === 'heatmap' && (
-          <div>
-            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.58 0.015 255)', marginBottom: '1rem' }}>
-              5秒区間ごとの感情スコア平均値をヒートマップで表示します。横軸が時間、縦軸が感情種別、色の濃さがスコアの強度を示します。
-            </p>
-            <div className="overflow-x-auto">
-              <div style={{ minWidth: '600px' }}>
-                {/* イベントマーカー行 */}
-                {events.length > 0 && (
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="flex-shrink-0 text-right" style={{ width: '60px' }}>
-                      <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)' }}>
-                        EVENT
-                      </span>
-                    </div>
-                    <div className="flex-1 relative" style={{ height: '16px' }}>
-                      {events.map(ev => {
-                        const totalDur = data.meta.duration_seconds;
-                        const leftPct = (ev.startTime / totalDur) * 100;
-                        const widthPct = ((ev.endTime - ev.startTime) / totalDur) * 100;
-                        return (
-                          <div
-                            key={ev.id}
-                            className="absolute h-full rounded-sm flex items-center justify-center overflow-hidden"
-                            style={{ left: `${leftPct}%`, width: `${widthPct}%`, background: ev.color, opacity: 0.7 }}
-                            title={ev.name}
-                          >
-                            <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.55rem', color: 'oklch(0.90 0.005 250)', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', padding: '0 2px' }}>
-                              {ev.name}
-                            </span>
-                          </div>
-                        );
-                      })}
+      {activeTab === 'sparklines' && (
+        <div className="bg-navy-800 border border-navy-700 rounded-lg p-4 space-y-3">
+          <h3 className="text-lg font-semibold text-gray-100">感情スコア（個別波形）</h3>
+          <div className="space-y-4">
+            {NON_NEUTRAL_EMOTIONS.map(e => {
+              const emotionData = sampledData.map(d => ({ time: d.time, value: (d as any)[e] || 0 }));
+              const values = emotionData.map(d => d.value);
+              const max = Math.max(...values);
+              const avg = values.reduce((a, b) => a + b) / values.length;
+              return (
+                <div key={e} className="bg-navy-700 p-3 rounded-lg">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-gray-100 font-medium">{EMOTION_LABELS_JA[e]}</span>
+                    <div className="flex gap-4 text-sm">
+                      <span className="text-gray-400">最大: <span className="text-gray-100 font-semibold">{max.toFixed(2)}</span></span>
+                      <span className="text-gray-400">平均: <span className="text-gray-100 font-semibold">{avg.toFixed(2)}</span></span>
                     </div>
                   </div>
-                )}
-                {NON_NEUTRAL_EMOTIONS.map(emotion => {
-                  const emotionMax = emotion === 'confusion'
-                    ? Math.max(...heatmapData.map(d => d[emotion] as number))
-                    : heatmapMax;
-                  return (
-                    <div key={emotion} className="flex items-center gap-2 mb-1">
-                      <div className="flex-shrink-0 text-right" style={{ width: '60px' }}>
-                        <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.68rem', color: EMOTION_HEX[emotion], fontWeight: 600 }}>
-                          {EMOTION_LABELS_JA[emotion]}
-                        </span>
-                      </div>
-                      <div className="flex gap-0.5 flex-1">
-                        {heatmapData.map((d, i) => {
-                          const val = d[emotion] as number;
-                          const intensity = emotionMax > 0 ? val / emotionMax : 0;
-                          const isInEvent = events.some(ev => d.time >= ev.startTime && d.time <= ev.endTime);
-                          return (
-                            <div
-                              key={i}
-                              className="flex-1 rounded-sm"
-                              style={{
-                                height: '22px',
-                                background: `${EMOTION_HEX[emotion]}`,
-                                opacity: Math.max(0.04, intensity),
-                                minWidth: '4px',
-                                outline: isInEvent ? '1px solid oklch(0.45 0.015 250)' : 'none',
-                              }}
-                              title={`t=${d.time}s: ${val.toFixed(3)}`}
-                            />
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                })}
-                {/* 時間軸 */}
-                <div className="flex items-center gap-2 mt-2">
-                  <div style={{ width: '60px' }} />
-                  <div className="flex justify-between flex-1">
-                    {[0, 50, 100, 150, 200, 250].map(t => (
-                      <span key={t} style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)' }}>
-                        {t}s
-                      </span>
-                    ))}
-                  </div>
+                  <ResponsiveContainer width="100%" height={80}>
+                    <LineChart data={emotionData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.3 0.02 250)" />
+                      <XAxis dataKey="time" stroke="oklch(0.6 0.04 250)" tick={false} />
+                      <YAxis stroke="oklch(0.6 0.04 250)" tick={false} />
+                      <Tooltip contentStyle={{ backgroundColor: 'oklch(0.18 0.02 250)', border: '1px solid oklch(0.4 0.04 250)' }} />
+                      <Line type="monotone" dataKey="value" stroke={EMOTION_HEX[e]} dot={false} isAnimationActive={false} />
+                    </LineChart>
+                  </ResponsiveContainer>
                 </div>
-                {/* カラースケール凡例 */}
-                <div className="flex items-center gap-3 mt-3">
-                  <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)' }}>低</span>
-                  <div className="flex gap-0.5">
-                    {[0.05, 0.15, 0.3, 0.5, 0.7, 0.85, 1.0].map((op, i) => (
-                      <div key={i} className="w-6 h-3 rounded-sm" style={{ background: 'oklch(0.68 0.18 235)', opacity: op }} />
-                    ))}
-                  </div>
-                  <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)' }}>高</span>
-                  <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.65rem', color: 'oklch(0.58 0.015 255)', marginLeft: '8px' }}>
-                    ※各感情内での相対スケール（5秒区間平均値）
-                  </span>
-                </div>
-              </div>
-            </div>
+              );
+            })}
           </div>
-        )}
+        </div>
+      )}
 
-        {/* TAB: スタック面グラフ */}
-        {activeTab === 'stacked' && (
-          <div>
-            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.58 0.015 255)', marginBottom: '1rem' }}>
-              10秒区間ごとの感情スコア平均値を積み上げ面グラフで表示します。各感情の相対的な変化パターンを把握できます。
-            </p>
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={stackedData} margin={{ top: 5, right: 10, bottom: 20, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" />
-                <XAxis dataKey="time" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} angle={-30} textAnchor="end" />
-                <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} />
-                <Tooltip
-                  contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
-                  formatter={(v: number, name: string) => [v.toFixed(3), EMOTION_LABELS_JA[name] || name]}
-                />
-                <Legend formatter={v => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem' }}>{EMOTION_LABELS_JA[v] || v}</span>} />
-                {NON_NEUTRAL_EMOTIONS.map(emotion => (
-                  <Area
-                    key={emotion}
-                    type="monotone"
-                    dataKey={emotion}
-                    stackId="1"
-                    stroke={EMOTION_HEX[emotion]}
-                    fill={EMOTION_HEX[emotion]}
-                    fillOpacity={0.75}
-                    strokeWidth={0.5}
-                    dot={false}
-                    name={emotion}
-                  />
-                ))}
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        )}
-
-        {/* TAB: 支配的感情タイムライン */}
-        {activeTab === 'dominant' && (
-          <div>
-            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.58 0.015 255)', marginBottom: '1rem' }}>
-              10秒区間ごとに最も高いスコアを示した「支配的感情」の推移を表示します。感情状態の遷移パターンを視覚的に把握できます。
-            </p>
-            {/* カラーバータイムライン */}
-            <div className="mb-4">
-              <div className="section-label mb-2">DOMINANT EMOTION TIMELINE</div>
-              {/* Event overlay bar */}
-              {events.length > 0 && (
-                <div className="relative mb-1" style={{ height: '14px' }}>
-                  {events.map(ev => {
-                    const totalDur = data.meta.duration_seconds;
-                    const leftPct = (ev.startTime / totalDur) * 100;
-                    const widthPct = ((ev.endTime - ev.startTime) / totalDur) * 100;
-                    return (
-                      <div
-                        key={ev.id}
-                        className="absolute h-full rounded-sm flex items-center justify-center overflow-hidden"
-                        style={{ left: `${leftPct}%`, width: `${widthPct}%`, background: ev.color, opacity: 0.75 }}
-                      >
-                        <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.55rem', color: 'oklch(0.90 0.005 250)', fontWeight: 700, whiteSpace: 'nowrap', padding: '0 2px' }}>
-                          {ev.name}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-              <div className="flex gap-0.5 rounded-lg overflow-hidden" style={{ height: '40px' }}>
-                {dominantTimeline.map((d, i) => (
-                  <div
-                    key={i}
-                    className="flex-1 flex items-center justify-center relative group"
-                    style={{ background: d.color, minWidth: '8px' }}
-                    title={`${d.time}: ${d.label}`}
-                  >
-                    <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 px-2 py-1 rounded text-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10"
-                      style={{ background: 'oklch(0.22 0.04 255)', color: 'oklch(0.90 0.005 250)', fontFamily: 'Noto Sans JP, sans-serif', whiteSpace: 'nowrap' }}>
-                      {d.time}: {d.label}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="flex justify-between mt-1">
-                <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)' }}>0s</span>
-                <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)' }}>{maxTime}s</span>
-              </div>
-            </div>
-
-            {/* 棒グラフ */}
-            <div className="section-label mb-2">10-SECOND WINDOW EMOTION SCORES</div>
-            <ResponsiveContainer width="100%" height={280}>
-              <BarChart data={stackedData} margin={{ top: 5, right: 10, bottom: 20, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" vertical={false} />
-                <XAxis dataKey="time" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', fill: 'oklch(0.58 0.015 255)' }} angle={-30} textAnchor="end" />
-                <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} />
-                <Tooltip
-                  contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
-                  formatter={(v: number, name: string) => [v.toFixed(3), EMOTION_LABELS_JA[name] || name]}
-                />
-                <Legend formatter={v => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem' }}>{EMOTION_LABELS_JA[v] || v}</span>} />
-                {NON_NEUTRAL_EMOTIONS.map(emotion => (
-                  <Bar
-                    key={emotion}
-                    dataKey={emotion}
-                    stackId="a"
-                    fill={EMOTION_HEX[emotion]}
-                    fillOpacity={0.85}
-                    name={emotion}
-                  />
-                ))}
-              </BarChart>
-            </ResponsiveContainer>
-
-            {/* 凡例 */}
-            <div className="flex flex-wrap gap-3 mt-3">
+      {activeTab === 'heatmap' && (
+        <div className="bg-navy-800 border border-navy-700 rounded-lg p-4 space-y-3">
+          <h3 className="text-lg font-semibold text-gray-100">感情ヒートマップ（5秒区間）</h3>
+          <ResponsiveContainer width="100%" height={400}>
+            <AreaChart data={heatmapData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.3 0.02 250)" />
+              <XAxis dataKey="time" stroke="oklch(0.6 0.04 250)" />
+              <YAxis stroke="oklch(0.6 0.04 250)" />
+              <Tooltip contentStyle={{ backgroundColor: 'oklch(0.18 0.02 250)', border: '1px solid oklch(0.4 0.04 250)' }} />
+              <Legend />
               {NON_NEUTRAL_EMOTIONS.map(e => (
-                <div key={e} className="flex items-center gap-1.5">
-                  <div className="w-3 h-3 rounded-sm" style={{ background: EMOTION_HEX[e] }} />
-                  <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.75 0.008 250)' }}>
-                    {EMOTION_LABELS_JA[e]}
-                  </span>
-                </div>
+                <Area key={e} type="monotone" dataKey={e} stackId="1" stroke={EMOTION_HEX[e]} fill={EMOTION_HEX[e]} fillOpacity={0.6} />
               ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* 10-second window summary table */}
-      <div className="metric-card">
-        <div className="section-label mb-3">10-SECOND WINDOWS TABLE</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
-          10秒区間ごとのサマリー
+              {events.map(event => (
+                <ReferenceArea key={event.id} x1={event.startTime} x2={event.endTime} fill={event.color} fillOpacity={0.05} />
+              ))}
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
+      )}
+
+      {activeTab === 'stacked' && (
+        <div className="bg-navy-800 border border-navy-700 rounded-lg p-4 space-y-3">
+          <h3 className="text-lg font-semibold text-gray-100">感情構成比（スタック面）</h3>
+          <ResponsiveContainer width="100%" height={400}>
+            <AreaChart data={stackedData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.3 0.02 250)" />
+              <XAxis dataKey="time" stroke="oklch(0.6 0.04 250)" />
+              <YAxis stroke="oklch(0.6 0.04 250)" />
+              <Tooltip contentStyle={{ backgroundColor: 'oklch(0.18 0.02 250)', border: '1px solid oklch(0.4 0.04 250)' }} />
+              <Legend />
+              {NON_NEUTRAL_EMOTIONS.map(e => (
+                <Area key={e} type="monotone" dataKey={e} stackId="1" stroke={EMOTION_HEX[e]} fill={EMOTION_HEX[e]} fillOpacity={0.7} />
+              ))}
+              {events.map(event => (
+                <ReferenceArea key={event.id} x1={event.startTime} x2={event.endTime} fill={event.color} fillOpacity={0.05} />
+              ))}
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
+      {activeTab === 'dominant' && (
+        <div className="bg-navy-800 border border-navy-700 rounded-lg p-4 space-y-3">
+          <h3 className="text-lg font-semibold text-gray-100">支配感情タイムライン</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={dominantTimeline}>
+              <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.3 0.02 250)" />
+              <XAxis dataKey="time" stroke="oklch(0.6 0.04 250)" />
+              <YAxis stroke="oklch(0.6 0.04 250)" />
+              <Tooltip contentStyle={{ backgroundColor: 'oklch(0.18 0.02 250)', border: '1px solid oklch(0.4 0.04 250)' }} />
+              <Bar dataKey="score" radius={[4, 4, 0, 0]} fill="oklch(0.78 0.14 82)" activeBar={{ fill: 'oklch(0.55 0.04 255 / 0.6)', stroke: 'none' }}>
+                {dominantTimeline.map((entry, index) => (
+                  <Bar key={index} dataKey="score" fill={EMOTION_HEX[entry.dominant]} />
+                ))}
+              </Bar>
+              {events.map(event => (
+                <ReferenceArea key={event.id} x1={event.startTime} x2={event.endTime} fill={event.color} fillOpacity={0.05} />
+              ))}
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
+      {/* ---- 10s Summary Table ---- */}
+      <div className="bg-navy-800 border border-navy-700 rounded-lg p-4 space-y-3">
+        <h3 className="text-lg font-semibold text-gray-100">10秒区間サマリー</h3>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr style={{ borderBottom: '2px solid oklch(0.28 0.04 255)' }}>
-                {['時間区間', 'イベント', 'Eng', 'Val', 'Att', '怒', '軽', '嫌', '恐', '喜', '悲', '驚', '感', '困', '主要感情'].map(h => (
-                  <th key={h} className="text-left pb-2 pr-2" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)', letterSpacing: '0.03em', whiteSpace: 'nowrap' }}>
-                    {h}
-                  </th>
+              <tr className="border-b border-navy-600">
+                <th className="text-left py-2 px-3 text-gray-300">時間</th>
+                {NON_NEUTRAL_EMOTIONS.map(e => (
+                  <th key={e} className="text-right py-2 px-2 text-gray-400">{EMOTION_LABELS_JA[e]}</th>
                 ))}
+                <th className="text-right py-2 px-2 text-gray-400">Eng</th>
+                <th className="text-right py-2 px-2 text-gray-400">Val</th>
+                <th className="text-center py-2 px-2 text-gray-400">イベント</th>
               </tr>
             </thead>
             <tbody>
-              {time_summary_10s.map((row, i) => {
-                const rowEvents = events.filter(ev =>
-                  ev.startTime < row.time_end && ev.endTime > row.time_start
-                );
-                return (
-                  <tr key={i}
-                    style={{
-                      borderBottom: '1px solid oklch(0.20 0.04 255)',
-                      background: rowEvents.length > 0 ? `${rowEvents[0].color}08` : 'transparent',
-                    }}
-                    onMouseEnter={e => (e.currentTarget.style.background = rowEvents.length > 0 ? `${rowEvents[0].color}15` : 'oklch(0.22 0.04 255)')}
-                    onMouseLeave={e => (e.currentTarget.style.background = rowEvents.length > 0 ? `${rowEvents[0].color}08` : 'transparent')}
-                  >
-                    <td className="py-1.5 pr-2" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.68rem', color: 'oklch(0.45 0.015 250)', whiteSpace: 'nowrap' }}>
-                      {row.time_start}–{row.time_end}s
-                    </td>
-                    <td className="py-1.5 pr-2">
-                      <div className="flex gap-1 flex-wrap">
-                        {rowEvents.map(ev => (
-                          <span key={ev.id} className="px-1.5 py-0.5 rounded text-xs" style={{ background: ev.color + '20', color: ev.color, fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.6rem', border: `1px solid ${ev.color}40`, whiteSpace: 'nowrap' }}>
-                            {ev.name}
+              {time_summary_10s
+                .filter(d => {
+                  const dTime = typeof d.time === 'number' ? d.time : parseFloat(String(d.time));
+                  return dTime >= timeRange[0] && dTime <= timeRange[1];
+                })
+                .map((row, idx) => {
+                  const rowTime = typeof row.time === 'number' ? row.time : parseFloat(String(row.time));
+                  const rowEvents = events.filter(e => e.startTime <= rowTime && rowTime < e.endTime);
+                  return (
+                    <tr key={idx} className="border-b border-navy-700 hover:bg-navy-700 transition">
+                      <td className="py-2 px-3 text-gray-300 font-medium">{rowTime.toFixed(1)}s</td>
+                      {NON_NEUTRAL_EMOTIONS.map(e => (
+                        <td key={e} className="text-right py-2 px-2 text-gray-400">{((row as any)[e] || 0).toFixed(2)}</td>
+                      ))}
+                      <td className="text-right py-2 px-2 text-gold-300">{((row as any).engagement || 0).toFixed(2)}</td>
+                      <td className="text-right py-2 px-2 text-teal-300">{((row as any).valence || 0).toFixed(2)}</td>
+                      <td className="text-center py-2 px-2">
+                        {rowEvents.map(e => (
+                          <span key={e.id} className="inline-block px-2 py-1 rounded text-xs text-white mr-1" style={{ backgroundColor: e.color }}>
+                            {e.name}
                           </span>
                         ))}
-                      </div>
-                    </td>
-                    {['engagement_mean', 'valence_mean', 'attention_mean'].map(key => (
-                      <td key={key} className="py-1.5 pr-2" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.68rem' }}>
-                        {((row as any)[key] || 0).toFixed(1)}
                       </td>
-                    ))}
-                    {['anger_mean', 'contempt_mean', 'disgust_mean', 'fear_mean', 'joy_mean', 'sadness_mean', 'surprise_mean', 'sentimentality_mean', 'confusion_mean'].map((key) => {
-                      const val = (row as any)[key] || 0;
-                      const emotionKey = key.replace('_mean', '');
-                      return (
-                        <td key={key} className="py-1.5 pr-2">
-                          <span style={{
-                            fontFamily: 'Roboto Mono, monospace', fontSize: '0.68rem',
-                            color: val > 5 ? EMOTION_HEX[emotionKey] : 'oklch(0.58 0.015 255)',
-                            fontWeight: val > 5 ? 600 : 400,
-                          }}>
-                            {val.toFixed(1)}
-                          </span>
-                        </td>
-                      );
-                    })}
-                    <td className="py-1.5">
-                      <span className="px-1.5 py-0.5 rounded-full" style={{
-                        background: EMOTION_HEX[row.dominant_emotion] + '25',
-                        color: EMOTION_HEX[row.dominant_emotion],
-                        fontFamily: 'Noto Sans JP, sans-serif',
-                        fontSize: '0.65rem',
-                        whiteSpace: 'nowrap',
-                      }}>
-                        {EMOTION_LABELS_JA[row.dominant_emotion] || row.dominant_emotion}
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })}
+                    </tr>
+                  );
+                })}
             </tbody>
           </table>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
