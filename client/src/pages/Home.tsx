@@ -10,8 +10,7 @@ import DropZone from '@/components/DropZone';
 import Sidebar from '@/components/Sidebar';
 import OverviewSection from '@/components/sections/OverviewSection';
 import TimeseriesSection from '@/components/sections/TimeseriesSection';
-import EngagementSection from '@/components/sections/EngagementSection';
-import ValenceSection from '@/components/sections/ValenceSection';
+import EngagementValenceSection from '@/components/sections/EngagementValenceSection';
 import EmotionsSection from '@/components/sections/EmotionsSection';
 import TransitionsSection from '@/components/sections/TransitionsSection';
 import AcademicSection from '@/components/sections/AcademicSection';
@@ -88,8 +87,8 @@ export default function Home() {
     switch (activeSection) {
       case 'overview': return <OverviewSection data={data} />;
       case 'timeseries': return <TimeseriesSection data={data} />;
-      case 'engagement': return <EngagementSection data={data} />;
-      case 'valence': return <ValenceSection data={data} />;
+      case 'engagement': return <EngagementValenceSection data={data} />;
+      case 'valence': return <EngagementValenceSection data={data} />;
       case 'emotions': return <EmotionsSection data={data} />;
       case 'transitions': return <TransitionsSection data={data} />;
       case 'academic': return <AcademicSection data={data} />;
