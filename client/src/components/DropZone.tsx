@@ -184,7 +184,7 @@ export default function DropZone({ onDataLoaded }: DropZoneProps) {
             </div>
 
             <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.65 0.01 250)', letterSpacing: '0.05em' }}>
-              .CSV FORMAT · AFFECTIVA / IMOTIONS COMPATIBLE
+              .CSV FORMAT · AFFECTIVA COMPATIBLE
             </div>
           </div>
         )}
