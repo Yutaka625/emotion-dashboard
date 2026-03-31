@@ -97,7 +97,7 @@ export default function DropZone({ onDataLoaded }: DropZoneProps) {
           感情分析ダッシュボード
         </h1>
         <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.9rem', color: 'oklch(0.58 0.015 255)' }}>
-          Affectiva / iMotions 形式のCSVファイルをアップロードして分析を開始
+          Affectiva 形式のCSVファイルをアップロードして分析を開始
         </p>
       </div>
 
