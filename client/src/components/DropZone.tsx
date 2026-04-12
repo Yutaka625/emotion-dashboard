@@ -97,7 +97,7 @@ export default function DropZone({ onDataLoaded }: DropZoneProps) {
           感情分析ダッシュボード
         </h1>
         <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.9rem', color: 'oklch(0.58 0.015 255)' }}>
-          Affectiva 形式のCSVファイルをアップロードして分析を開始
+          心sensorの感情ログファイルをアップロードして分析を開始
         </p>
       </div>
 
@@ -184,7 +184,7 @@ export default function DropZone({ onDataLoaded }: DropZoneProps) {
             </div>
 
             <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.65 0.01 250)', letterSpacing: '0.05em' }}>
-              .CSV FORMAT · AFFECTIVA COMPATIBLE
+              .CSV FORMAT · AFFDEX COMPATIBLE
             </div>
           </div>
         )}
