@@ -88,7 +88,6 @@ export default function Home() {
       case 'overview': return <OverviewSection data={data} />;
       case 'timeseries': return <TimeseriesSection data={data} />;
       case 'engagement': return <EngagementValenceSection data={data} />;
-      case 'valence': return <EngagementValenceSection data={data} />;
       case 'emotions': return <EmotionsSection data={data} />;
       case 'transitions': return <TransitionsSection data={data} />;
       case 'academic': return <AcademicSection data={data} />;

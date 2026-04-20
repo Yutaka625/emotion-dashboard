@@ -18,8 +18,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { id: 'overview', label: '概要', icon: <Grid size={16} />, description: 'セッションサマリー' },
   { id: 'timeseries', label: '時系列分析', icon: <Activity size={16} />, description: '感情・指標の推移' },
-  { id: 'engagement', label: 'Engagement', icon: <Zap size={16} />, description: '関与度の詳細分析' },
-  { id: 'valence', label: 'Valence', icon: <TrendingUp size={16} />, description: '感情価の分析' },
+  { id: 'engagement', label: '特殊指標', icon: <Zap size={16} />, description: '関与度・感情価の詳細分析' },
   { id: 'emotions', label: '感情分布', icon: <BarChart2 size={16} />, description: '10感情の統計' },
   { id: 'transitions', label: '感情遷移', icon: <GitBranch size={16} />, description: '状態遷移パターン' },
   { id: 'academic', label: '学術的分析', icon: <Brain size={16} />, description: 'Affect Dynamics等' },
