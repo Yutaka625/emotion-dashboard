@@ -44,7 +44,7 @@ const EVENT_PALETTE = [
 const SPECIAL_COLORS: Record<string, string> = {
   engagement: 'oklch(0.78 0.14 82)',   /* ゴールド */
   valence:    'oklch(0.70 0.14 195)',  /* ティール */
-  attention:  'oklch(0.80 0.18 160)', /* エメラルド */
+  attention:  'oklch(0.60 0.25 15)', /* 赤 */
 };
 
 // EMOTION_HEX は EMOTION_COLORS (types.ts) に統一
@@ -56,7 +56,7 @@ function generateId() {
 
 export default function TimeseriesSection({ data }: Props) {
   const [selectedEmotions, setSelectedEmotions] = useState<string[]>(['confusion', 'sadness', 'fear', 'disgust']);
-  const [showSpecial, setShowSpecial] = useState<string[]>(['engagement', 'valence']);
+  const [showSpecial, setShowSpecial] = useState<string[]>(['engagement', 'valence', 'attention']);
   const [timeRange, setTimeRange] = useState<[number, number]>([0, Math.ceil(data.meta.duration_seconds)]);
   const [activeTab, setActiveTab] = useState<'overlay' | 'sparklines' | 'heatmap' | 'stacked' | 'dominant'>('overlay');
 
@@ -345,216 +345,6 @@ export default function TimeseriesSection({ data }: Props) {
         </p>
       </div>
 
-      {/* ---- EVENT ANNOTATION PANEL ---- */}
-      <div className="metric-card" style={{ borderLeft: '3px solid oklch(0.55 0.18 250)' }}>
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <div className="section-label mb-1">EVENT ANNOTATIONS</div>
-            <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)' }}>
-              イベント（介入）登録
-            </div>
-            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.58 0.015 255)', marginTop: '2px' }}>
-              イベント名・開始・終了時間を登録するとグラフに反映されます
-            </p>
-          </div>
-          <button
-            onClick={() => setShowEventForm(v => !v)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg transition-all"
-            style={{
-              fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600, fontSize: '0.82rem',
-              background: showEventForm ? 'oklch(0.32 0.12 250)' : 'oklch(0.22 0.04 255)',
-              color: 'oklch(0.90 0.005 250)',
-            }}
-          >
-            <Plus size={14} />
-            イベントを追加
-          </button>
-        </div>
-
-        {/* Add form */}
-        {showEventForm && (
-          <div className="mb-4 p-4 rounded-xl" style={{ background: 'oklch(0.22 0.04 255)', border: '1px solid oklch(0.28 0.04 255)' }}>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
-              <div>
-                <label style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fontWeight: 600, color: 'oklch(0.75 0.008 250)', display: 'block', marginBottom: '4px' }}>
-                  イベント名
-                </label>
-                <input
-                  type="text"
-                  value={newEventName}
-                  onChange={e => setNewEventName(e.target.value)}
-                  placeholder="例: プレゼン開始"
-                  className="w-full px-3 py-2 rounded-lg text-sm outline-none"
-                  style={{
-                    fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.82rem',
-                    border: '1px solid oklch(0.28 0.04 255)',
-                    background: 'oklch(0.22 0.04 255)', color: 'oklch(0.88 0.005 250)',
-                  }}
-                  onKeyDown={e => e.key === 'Enter' && handleAddEvent()}
-                />
-              </div>
-              <div>
-                <label style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fontWeight: 600, color: 'oklch(0.75 0.008 250)', display: 'block', marginBottom: '4px' }}>
-                  開始時間（秒）
-                </label>
-                <input
-                  type="number"
-                  value={newEventStart}
-                  onChange={e => setNewEventStart(e.target.value)}
-                  placeholder={`0 〜 ${maxTime}`}
-                  min={0} max={maxTime} step={0.1}
-                  className="w-full px-3 py-2 rounded-lg text-sm outline-none"
-                  style={{
-                    fontFamily: 'Roboto Mono, monospace', fontSize: '0.82rem',
-                    border: '1px solid oklch(0.28 0.04 255)',
-                    background: 'oklch(0.22 0.04 255)', color: 'oklch(0.88 0.005 250)',
-                  }}
-                />
-              </div>
-              <div>
-                <label style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fontWeight: 600, color: 'oklch(0.75 0.008 250)', display: 'block', marginBottom: '4px' }}>
-                  終了時間（秒）
-                </label>
-                <input
-                  type="number"
-                  value={newEventEnd}
-                  onChange={e => setNewEventEnd(e.target.value)}
-                  placeholder={`0 〜 ${maxTime}`}
-                  min={0} max={maxTime} step={0.1}
-                  className="w-full px-3 py-2 rounded-lg text-sm outline-none"
-                  style={{
-                    fontFamily: 'Roboto Mono, monospace', fontSize: '0.82rem',
-                    border: '1px solid oklch(0.28 0.04 255)',
-                    background: 'oklch(0.22 0.04 255)', color: 'oklch(0.88 0.005 250)',
-                  }}
-                />
-              </div>
-            </div>
-            {eventFormError && (
-              <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: '#ef4444', marginBottom: '8px' }}>
-                {eventFormError}
-              </p>
-            )}
-            <div className="flex gap-2">
-              <button
-                onClick={handleAddEvent}
-                className="px-4 py-2 rounded-lg text-sm font-semibold transition-all"
-                style={{ fontFamily: 'Noto Sans JP, sans-serif', background: 'oklch(0.22 0.04 255)', color: 'oklch(0.90 0.005 250)' }}
-              >
-                登録する
-              </button>
-              <button
-                onClick={() => { setShowEventForm(false); setEventFormError(''); }}
-                className="px-4 py-2 rounded-lg text-sm transition-all"
-                style={{ fontFamily: 'Noto Sans JP, sans-serif', background: 'oklch(0.22 0.04 255)', color: 'oklch(0.75 0.008 250)' }}
-              >
-                キャンセル
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Event list */}
-        {events.length === 0 ? (
-          <div className="py-6 text-center" style={{ border: '1px dashed oklch(0.28 0.04 255)', borderRadius: '12px' }}>
-            <Tag size={20} style={{ color: 'oklch(0.72 0.015 250)', margin: '0 auto 8px' }} />
-            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.82rem', color: 'oklch(0.58 0.015 255)' }}>
-              まだイベントが登録されていません
-            </p>
-            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.68 0.015 250)', marginTop: '4px' }}>
-              「イベントを追加」ボタンから登録してください
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {events.map((ev, idx) => {
-              const stat = eventStats.find(s => s.id === ev.id);
-              const isExpanded = expandedEventId === ev.id;
-              return (
-                <div key={ev.id} className="rounded-xl overflow-hidden" style={{ border: `1px solid ${ev.color}40`, background: `${ev.color}08` }}>
-                  <div className="flex items-center gap-3 px-4 py-3">
-                    <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: ev.color }} />
-                    <div className="flex-1 min-w-0">
-                      <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '0.88rem', color: 'oklch(0.88 0.005 250)' }}>
-                        {ev.name}
-                      </div>
-                      <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.68rem', color: 'oklch(0.45 0.015 250)' }}>
-                        {ev.startTime}s — {ev.endTime}s &nbsp;|&nbsp; {(ev.endTime - ev.startTime).toFixed(1)}秒間 &nbsp;|&nbsp; {stat?.frameCount || 0} フレーム
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <button
-                        onClick={() => setExpandedEventId(isExpanded ? null : ev.id)}
-                        className="p-1.5 rounded-lg transition-all"
-                        style={{ color: ev.color, background: `${ev.color}15` }}
-                        title="感情統計を表示"
-                      >
-                        {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                      </button>
-                      <button
-                        onClick={() => handleDeleteEvent(ev.id)}
-                        className="p-1.5 rounded-lg transition-all"
-                        style={{ color: '#ef4444', background: '#ef444415' }}
-                        title="削除"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Expanded stats */}
-                  {isExpanded && stat && stat.frameCount > 0 && (
-                    <div className="px-4 pb-4 pt-1">
-                      <div className="section-label mb-2" style={{ color: ev.color }}>EVENT EMOTION STATS — {ev.name}</div>
-                      {/* Special metrics */}
-                      <div className="grid grid-cols-3 gap-3 mb-3">
-                        {(['engagement', 'valence', 'attention'] as const).map(key => (
-                          <div key={key} className="p-2 rounded-lg text-center" style={{ background: SPECIAL_COLORS[key] + '12', border: `1px solid ${SPECIAL_COLORS[key]}30` }}>
-                            <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: SPECIAL_COLORS[key], marginBottom: '2px', textTransform: 'uppercase' }}>{key}</div>
-                            <div style={{ fontFamily: 'Roboto Mono, monospace', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)' }}>
-                              {stat.stats[key]?.mean.toFixed(1)}
-                            </div>
-                            <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)' }}>
-                              max {stat.stats[key]?.max.toFixed(1)}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      {/* Emotion bars */}
-                      <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
-                        {NON_NEUTRAL_EMOTIONS.filter(e => e !== 'confusion').map(e => {
-                          const mean = stat.stats[e]?.mean || 0;
-                          const isDom = stat.dominantEmotion === e;
-                          return (
-                            <div key={e} className="flex items-center gap-2">
-                              <div className="flex-shrink-0 text-right" style={{ width: '52px' }}>
-                                <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', color: isDom ? EMOTION_HEX[e] : 'oklch(0.45 0.015 250)', fontWeight: isDom ? 700 : 400 }}>
-                                  {EMOTION_LABELS_JA[e]}
-                                </span>
-                              </div>
-                              <div className="flex-1 h-3 rounded-full overflow-hidden" style={{ background: 'oklch(0.22 0.04 255)' }}>
-                                <div
-                                  className="h-full rounded-full transition-all"
-                                  style={{ width: `${Math.min(100, mean * 2)}%`, background: EMOTION_HEX[e], opacity: isDom ? 1 : 0.7 }}
-                                />
-                              </div>
-                              <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: isDom ? EMOTION_HEX[e] : 'oklch(0.58 0.015 255)', minWidth: '36px', fontWeight: isDom ? 700 : 400 }}>
-                                {mean.toFixed(2)}
-                              </span>
-                              {isDom && <span className="px-1 py-0.5 rounded text-xs" style={{ background: EMOTION_HEX[e] + '20', color: EMOTION_HEX[e], fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.6rem' }}>主要</span>}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
       {/* Time Range Selector */}
       <div className="metric-card">
         <div className="section-label mb-2">TIME RANGE FILTER</div>
@@ -572,23 +362,6 @@ export default function TimeseriesSection({ data }: Props) {
                 background: 'oklch(0.62 0.18 160)',
               }}
             />
-            {/* Event markers on range bar */}
-            {events.map(ev => (
-              <div
-                key={ev.id}
-                className="absolute h-3 rounded-sm pointer-events-none"
-                style={{
-                  left: `${(ev.startTime / maxTime) * 100}%`,
-                  width: `${((ev.endTime - ev.startTime) / maxTime) * 100}%`,
-                  background: ev.color,
-                  opacity: 0.35,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  zIndex: 1,
-                }}
-                title={ev.name}
-              />
-            ))}
             <input
               type="range" min={0} max={maxTime} step={5}
               value={timeRange[0]}
@@ -615,8 +388,9 @@ export default function TimeseriesSection({ data }: Props) {
               type="number"
               min={0}
               max={maxTime}
+              step={0.1}
               value={timeRange[0]}
-              onChange={e => setTimeRange([Math.min(Number(e.target.value), timeRange[1] - 1), timeRange[1]])}
+              onChange={e => setTimeRange([Math.min(Number(e.target.value), timeRange[1] - 0.1), timeRange[1]])}
               className="w-16 px-2 py-1 rounded text-xs"
               style={{
                 fontFamily: 'Roboto Mono, monospace',
@@ -633,8 +407,9 @@ export default function TimeseriesSection({ data }: Props) {
               type="number"
               min={0}
               max={maxTime}
+              step={0.1}
               value={timeRange[1]}
-              onChange={e => setTimeRange([timeRange[0], Math.max(Number(e.target.value), timeRange[0] + 1)])}
+              onChange={e => setTimeRange([timeRange[0], Math.max(Number(e.target.value), timeRange[0] + 0.1)])}
               className="w-16 px-2 py-1 rounded text-xs"
               style={{
                 fontFamily: 'Roboto Mono, monospace',
@@ -680,61 +455,6 @@ export default function TimeseriesSection({ data }: Props) {
             {sampledData.length} pts表示中
           </span>
         </div>
-      </div>
-
-      {/* Special Metrics Chart — always visible */}
-      <div className="metric-card">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <div className="section-label mb-1">SPECIAL METRICS</div>
-            <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)' }}>
-              Engagement / Valence / Attention
-            </div>
-          </div>
-          <div className="flex gap-2">
-            {(['engagement', 'valence', 'attention'] as const).map(key => (
-              <button
-                key={key}
-                onClick={() => toggleSpecial(key)}
-                className="px-3 py-1 rounded-full text-xs transition-all"
-                style={{
-                  fontFamily: 'Roboto Mono, monospace',
-                  background: showSpecial.includes(key) ? SPECIAL_COLORS[key] : 'oklch(0.20 0.04 255)',
-                  color: showSpecial.includes(key) ? 'white' : 'oklch(0.45 0.015 250)',
-                  border: `1px solid ${showSpecial.includes(key) ? SPECIAL_COLORS[key] : 'oklch(0.28 0.04 255)'}`,
-                  opacity: showSpecial.includes(key) ? 1 : 0.6,
-                }}
-              >
-                {key.charAt(0).toUpperCase() + key.slice(1)}
-              </button>
-            ))}
-          </div>
-        </div>
-        <ResponsiveContainer width="100%" height={200}>
-          <ComposedChart data={sampledData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
-            <defs>
-              <linearGradient id="engGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={SPECIAL_COLORS.engagement} stopOpacity={0.25} />
-                <stop offset="95%" stopColor={SPECIAL_COLORS.engagement} stopOpacity={0.02} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" />
-            <XAxis dataKey="time" tickFormatter={formatTime} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} />
-            <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} domain={[0, 100]} />
-            <Tooltip content={<CustomTooltip />} />
-            <Legend formatter={v => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem' }}>{v}</span>} />
-            {renderEventAreas()}
-            {showSpecial.includes('engagement') && (
-              <Area type="monotone" dataKey="engagement" stroke={SPECIAL_COLORS.engagement} fill="url(#engGrad)" strokeWidth={1.5} dot={false} name="Engagement" />
-            )}
-            {showSpecial.includes('valence') && (
-              <Line type="monotone" dataKey="valence" stroke={SPECIAL_COLORS.valence} strokeWidth={1.5} dot={false} name="Valence" />
-            )}
-            {showSpecial.includes('attention') && (
-              <Line type="monotone" dataKey="attention" stroke={SPECIAL_COLORS.attention} strokeWidth={1.5} dot={false} name="Attention" />
-            )}
-          </ComposedChart>
-        </ResponsiveContainer>
       </div>
 
       {/* Emotion Charts — Tab Switcher */}
@@ -791,7 +511,7 @@ export default function TimeseriesSection({ data }: Props) {
             <ResponsiveContainer width="100%" height={280}>
               <LineChart data={sampledData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" />
-                <XAxis dataKey="time" tickFormatter={formatTime} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} />
+                <XAxis dataKey="time" type="number" domain={['dataMin', 'dataMax']} tickFormatter={formatTime} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} />
                 <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} />
                 <Tooltip content={<CustomTooltip />} />
                 <Legend formatter={v => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem' }}>{v}</span>} />
@@ -848,7 +568,7 @@ export default function TimeseriesSection({ data }: Props) {
                             <stop offset="95%" stopColor={EMOTION_HEX[emotion]} stopOpacity={0.02} />
                           </linearGradient>
                         </defs>
-                        <XAxis dataKey="time" hide />
+                        <XAxis dataKey="time" type="number" domain={['dataMin', 'dataMax']} hide />
                         <YAxis hide domain={[0, Math.max(maxVal * 1.1, 0.01)]} />
                         <Tooltip
                           formatter={(v: number) => [v.toFixed(3), EMOTION_LABELS_JA[emotion]]}
@@ -1096,6 +816,271 @@ export default function TimeseriesSection({ data }: Props) {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* Special Metrics Chart — always visible */}
+      <div className="metric-card">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <div className="section-label mb-1">SPECIAL METRICS</div>
+            <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)' }}>
+              Engagement / Valence / Attention
+            </div>
+          </div>
+          <div className="flex gap-2">
+            {(['engagement', 'valence', 'attention'] as const).map(key => (
+              <button
+                key={key}
+                onClick={() => toggleSpecial(key)}
+                className="px-3 py-1 rounded-full text-xs transition-all"
+                style={{
+                  fontFamily: 'Roboto Mono, monospace',
+                  background: showSpecial.includes(key) ? SPECIAL_COLORS[key] : 'oklch(0.20 0.04 255)',
+                  color: showSpecial.includes(key) ? 'white' : 'oklch(0.45 0.015 250)',
+                  border: `1px solid ${showSpecial.includes(key) ? SPECIAL_COLORS[key] : 'oklch(0.28 0.04 255)'}`,
+                  opacity: showSpecial.includes(key) ? 1 : 0.6,
+                }}
+              >
+                {key.charAt(0).toUpperCase() + key.slice(1)}
+              </button>
+            ))}
+          </div>
+        </div>
+        <ResponsiveContainer width="100%" height={200}>
+          <ComposedChart data={sampledData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
+            <defs>
+              <linearGradient id="engGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor={SPECIAL_COLORS.engagement} stopOpacity={0.25} />
+                <stop offset="95%" stopColor={SPECIAL_COLORS.engagement} stopOpacity={0.02} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" />
+            <XAxis dataKey="time" type="number" domain={['dataMin', 'dataMax']} tickFormatter={formatTime} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} />
+            <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} domain={[0, 100]} />
+            <Tooltip content={<CustomTooltip />} />
+            <Legend formatter={v => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem' }}>{v}</span>} />
+            {renderEventAreas()}
+            {showSpecial.includes('engagement') && (
+              <Area type="monotone" dataKey="engagement" stroke={SPECIAL_COLORS.engagement} fill="url(#engGrad)" strokeWidth={1.5} dot={false} name="Engagement" />
+            )}
+            {showSpecial.includes('valence') && (
+              <Line type="monotone" dataKey="valence" stroke={SPECIAL_COLORS.valence} strokeWidth={1.5} dot={false} name="Valence" />
+            )}
+            {showSpecial.includes('attention') && (
+              <Line type="monotone" dataKey="attention" stroke={SPECIAL_COLORS.attention} strokeWidth={1.5} dot={false} name="Attention" />
+            )}
+          </ComposedChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* ---- EVENT ANNOTATION PANEL ---- */}
+      <div className="metric-card" style={{ borderLeft: '3px solid oklch(0.55 0.18 250)' }}>
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <div className="section-label mb-1">EVENT ANNOTATIONS</div>
+            <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)' }}>
+              イベント（介入）登録
+            </div>
+            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.58 0.015 255)', marginTop: '2px' }}>
+              イベント名・開始・終了時間を登録するとグラフに反映されます
+            </p>
+          </div>
+          <button
+            onClick={() => setShowEventForm(v => !v)}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg transition-all"
+            style={{
+              fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600, fontSize: '0.82rem',
+              background: showEventForm ? 'oklch(0.32 0.12 250)' : 'oklch(0.22 0.04 255)',
+              color: 'oklch(0.90 0.005 250)',
+            }}
+          >
+            <Plus size={14} />
+            イベントを追加
+          </button>
+        </div>
+
+        {/* Add form */}
+        {showEventForm && (
+          <div className="mb-4 p-4 rounded-xl" style={{ background: 'oklch(0.22 0.04 255)', border: '1px solid oklch(0.28 0.04 255)' }}>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+              <div>
+                <label style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fontWeight: 600, color: 'oklch(0.75 0.008 250)', display: 'block', marginBottom: '4px' }}>
+                  イベント名
+                </label>
+                <input
+                  type="text"
+                  value={newEventName}
+                  onChange={e => setNewEventName(e.target.value)}
+                  placeholder="例: プレゼン開始"
+                  className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+                  style={{
+                    fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.82rem',
+                    border: '1px solid oklch(0.28 0.04 255)',
+                    background: 'oklch(0.22 0.04 255)', color: 'oklch(0.88 0.005 250)',
+                  }}
+                  onKeyDown={e => e.key === 'Enter' && handleAddEvent()}
+                />
+              </div>
+              <div>
+                <label style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fontWeight: 600, color: 'oklch(0.75 0.008 250)', display: 'block', marginBottom: '4px' }}>
+                  開始時間（秒）
+                </label>
+                <input
+                  type="number"
+                  value={newEventStart}
+                  onChange={e => setNewEventStart(e.target.value)}
+                  placeholder={`0 〜 ${maxTime}`}
+                  min={0} max={maxTime} step={0.1}
+                  className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+                  style={{
+                    fontFamily: 'Roboto Mono, monospace', fontSize: '0.82rem',
+                    border: '1px solid oklch(0.28 0.04 255)',
+                    background: 'oklch(0.22 0.04 255)', color: 'oklch(0.88 0.005 250)',
+                  }}
+                />
+              </div>
+              <div>
+                <label style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fontWeight: 600, color: 'oklch(0.75 0.008 250)', display: 'block', marginBottom: '4px' }}>
+                  終了時間（秒）
+                </label>
+                <input
+                  type="number"
+                  value={newEventEnd}
+                  onChange={e => setNewEventEnd(e.target.value)}
+                  placeholder={`0 〜 ${maxTime}`}
+                  min={0} max={maxTime} step={0.1}
+                  className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+                  style={{
+                    fontFamily: 'Roboto Mono, monospace', fontSize: '0.82rem',
+                    border: '1px solid oklch(0.28 0.04 255)',
+                    background: 'oklch(0.22 0.04 255)', color: 'oklch(0.88 0.005 250)',
+                  }}
+                />
+              </div>
+            </div>
+            {eventFormError && (
+              <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: '#ef4444', marginBottom: '8px' }}>
+                {eventFormError}
+              </p>
+            )}
+            <div className="flex gap-2">
+              <button
+                onClick={handleAddEvent}
+                className="px-4 py-2 rounded-lg text-sm font-semibold transition-all"
+                style={{ fontFamily: 'Noto Sans JP, sans-serif', background: 'oklch(0.22 0.04 255)', color: 'oklch(0.90 0.005 250)' }}
+              >
+                登録する
+              </button>
+              <button
+                onClick={() => { setShowEventForm(false); setEventFormError(''); }}
+                className="px-4 py-2 rounded-lg text-sm transition-all"
+                style={{ fontFamily: 'Noto Sans JP, sans-serif', background: 'oklch(0.22 0.04 255)', color: 'oklch(0.75 0.008 250)' }}
+              >
+                キャンセル
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Event list */}
+        {events.length === 0 ? (
+          <div className="py-6 text-center" style={{ border: '1px dashed oklch(0.28 0.04 255)', borderRadius: '12px' }}>
+            <Tag size={20} style={{ color: 'oklch(0.72 0.015 250)', margin: '0 auto 8px' }} />
+            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.82rem', color: 'oklch(0.58 0.015 255)' }}>
+              まだイベントが登録されていません
+            </p>
+            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.68 0.015 250)', marginTop: '4px' }}>
+              「イベントを追加」ボタンから登録してください
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {events.map((ev, idx) => {
+              const stat = eventStats.find(s => s.id === ev.id);
+              const isExpanded = expandedEventId === ev.id;
+              return (
+                <div key={ev.id} className="rounded-xl overflow-hidden" style={{ border: `1px solid ${ev.color}40`, background: `${ev.color}08` }}>
+                  <div className="flex items-center gap-3 px-4 py-3">
+                    <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: ev.color }} />
+                    <div className="flex-1 min-w-0">
+                      <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '0.88rem', color: 'oklch(0.88 0.005 250)' }}>
+                        {ev.name}
+                      </div>
+                      <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.68rem', color: 'oklch(0.45 0.015 250)' }}>
+                        {ev.startTime}s — {ev.endTime}s &nbsp;|&nbsp; {(ev.endTime - ev.startTime).toFixed(1)}秒間 &nbsp;|&nbsp; {stat?.frameCount || 0} フレーム
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setExpandedEventId(isExpanded ? null : ev.id)}
+                        className="p-1.5 rounded-lg transition-all"
+                        style={{ color: ev.color, background: `${ev.color}15` }}
+                        title="感情統計を表示"
+                      >
+                        {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                      </button>
+                      <button
+                        onClick={() => handleDeleteEvent(ev.id)}
+                        className="p-1.5 rounded-lg transition-all"
+                        style={{ color: '#ef4444', background: '#ef444415' }}
+                        title="削除"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Expanded stats */}
+                  {isExpanded && stat && stat.frameCount > 0 && (
+                    <div className="px-4 pb-4 pt-1">
+                      <div className="section-label mb-2" style={{ color: ev.color }}>EVENT EMOTION STATS — {ev.name}</div>
+                      {/* Special metrics */}
+                      <div className="grid grid-cols-3 gap-3 mb-3">
+                        {(['engagement', 'valence', 'attention'] as const).map(key => (
+                          <div key={key} className="p-2 rounded-lg text-center" style={{ background: SPECIAL_COLORS[key] + '12', border: `1px solid ${SPECIAL_COLORS[key]}30` }}>
+                            <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: SPECIAL_COLORS[key], marginBottom: '2px', textTransform: 'uppercase' }}>{key}</div>
+                            <div style={{ fontFamily: 'Roboto Mono, monospace', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)' }}>
+                              {stat.stats[key]?.mean.toFixed(1)}
+                            </div>
+                            <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)' }}>
+                              max {stat.stats[key]?.max.toFixed(1)}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      {/* Emotion bars */}
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+                        {NON_NEUTRAL_EMOTIONS.filter(e => e !== 'confusion').map(e => {
+                          const mean = stat.stats[e]?.mean || 0;
+                          const isDom = stat.dominantEmotion === e;
+                          return (
+                            <div key={e} className="flex items-center gap-2">
+                              <div className="flex-shrink-0 text-right" style={{ width: '52px' }}>
+                                <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', color: isDom ? EMOTION_HEX[e] : 'oklch(0.45 0.015 250)', fontWeight: isDom ? 700 : 400 }}>
+                                  {EMOTION_LABELS_JA[e]}
+                                </span>
+                              </div>
+                              <div className="flex-1 h-3 rounded-full overflow-hidden" style={{ background: 'oklch(0.22 0.04 255)' }}>
+                                <div
+                                  className="h-full rounded-full transition-all"
+                                  style={{ width: `${Math.min(100, mean * 2)}%`, background: EMOTION_HEX[e], opacity: isDom ? 1 : 0.7 }}
+                                />
+                              </div>
+                              <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: isDom ? EMOTION_HEX[e] : 'oklch(0.58 0.015 255)', minWidth: '36px', fontWeight: isDom ? 700 : 400 }}>
+                                {mean.toFixed(2)}
+                              </span>
+                              {isDom && <span className="px-1 py-0.5 rounded text-xs" style={{ background: EMOTION_HEX[e] + '20', color: EMOTION_HEX[e], fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.6rem' }}>主要</span>}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

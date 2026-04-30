@@ -58,6 +58,8 @@ export default function TransitionsSection({ data }: Props) {
         </p>
       </div>
 
+      {/* Transition Matrix + Top Transitions */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Transition Matrix */}
       <div className="metric-card">
         <div className="section-label mb-3">TRANSITION MATRIX</div>
@@ -147,6 +149,7 @@ export default function TransitionsSection({ data }: Props) {
           ))}
         </div>
       </div>
+      </div>{/* end grid: TRANSITION MATRIX + TOP TRANSITIONS */}
 
       {/* Duration Analysis */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
