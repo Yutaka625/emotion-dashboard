@@ -4,7 +4,7 @@
  * Replicates Python analysis logic entirely in TypeScript
  */
 
-import type { DashboardData, EmotionStats, AffectDynamics } from './types';
+import type { DashboardData, EmotionStats, AffectDynamics, BaselineOffsets, TimeseriesPoint } from './types';
 
 const EMOTION_COLS = ['anger', 'contempt', 'disgust', 'fear', 'joy', 'sadness', 'surprise', 'sentimentality', 'confusion', 'neutral'];
 const NON_NEUTRAL = ['anger', 'contempt', 'disgust', 'fear', 'joy', 'sadness', 'surprise', 'sentimentality', 'confusion'];
@@ -485,4 +485,65 @@ export function analyzeCSV(csvText: string, filename: string): DashboardData {
     engagement_emotion_profile,
     histograms,
   };
+}
+
+// ============================================================
+// ベースライン補正ユーティリティ（純粋関数・非破壊）
+// ============================================================
+
+// 補正対象の感情フィールド一覧
+const BASELINE_EMOTION_COLS = [
+  'anger', 'contempt', 'disgust', 'fear', 'joy',
+  'sadness', 'surprise', 'sentimentality', 'confusion', 'neutral'
+] as const;
+
+/**
+ * ベースライン区間内の各感情スコアの平均値（オフセット）を計算する
+ * @param points - timeseries_full 全体のデータ
+ * @param rangeStart - ベースライン区間の開始秒
+ * @param rangeEnd   - ベースライン区間の終了秒
+ * @returns 各感情のオフセット平均値（区間にデータがない場合は全て 0）
+ */
+export function computeBaselineOffsets(
+  points: TimeseriesPoint[],
+  rangeStart: number,
+  rangeEnd: number
+): BaselineOffsets {
+  // ベースライン区間内のデータだけを取り出す
+  const baselinePoints = points.filter(p => p.time >= rangeStart && p.time <= rangeEnd);
+
+  // 区間内にデータがなければオフセット 0（補正なし）として返す
+  if (baselinePoints.length === 0) {
+    return { anger: 0, contempt: 0, disgust: 0, fear: 0, joy: 0, sadness: 0, surprise: 0, sentimentality: 0, confusion: 0, neutral: 0 };
+  }
+
+  // 各感情フィールドの平均値を計算してオフセットとする
+  const offsets = {} as BaselineOffsets;
+  for (const col of BASELINE_EMOTION_COLS) {
+    const values = baselinePoints.map(p => p[col]).filter(v => !isNaN(v));
+    offsets[col] = values.length > 0 ? mean(values) : 0;
+  }
+  return offsets;
+}
+
+/**
+ * 全タイムスタンプにオフセット補正を適用した新しい配列を返す（元データは変更しない）
+ * 補正後にマイナスになった値は 0 に丸める（「発現なし」として扱う）
+ * @param points - 補正対象の TimeseriesPoint[]
+ * @param offsets - computeBaselineOffsets で計算したオフセット
+ * @returns 補正後の新しい TimeseriesPoint[]
+ */
+export function applyBaselineCorrection(
+  points: TimeseriesPoint[],
+  offsets: BaselineOffsets
+): TimeseriesPoint[] {
+  return points.map(p => {
+    // time / engagement / valence / attention / dominant_emotion は変更しない
+    const corrected = { ...p };
+    for (const col of BASELINE_EMOTION_COLS) {
+      // 元スコア − オフセット、マイナスは 0 に丸める
+      corrected[col] = Math.max(0, p[col] - offsets[col]);
+    }
+    return corrected;
+  });
 }

@@ -167,6 +167,20 @@ export const EMOTION_LABELS_JA: Record<string, string> = {
   neutral: 'ニュートラル',
 };
 
+// ベースライン補正で使う「各感情のオフセット平均値」の型
+export interface BaselineOffsets {
+  anger: number;
+  contempt: number;
+  disgust: number;
+  fear: number;
+  joy: number;
+  sadness: number;
+  surprise: number;
+  sentimentality: number;
+  confusion: number;
+  neutral: number;
+}
+
 export const NON_NEUTRAL_EMOTIONS = [
   'anger', 'contempt', 'disgust', 'fear', 'joy', 
   'sadness', 'surprise', 'sentimentality', 'confusion'
