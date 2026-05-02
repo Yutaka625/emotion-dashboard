@@ -93,6 +93,11 @@ export default function TransitionsSection({ data }: Props) {
                     const count = emotion_transitions[fromE]?.[toE] || 0;
                     const intensity = maxVal > 0 ? count / maxVal : 0;
                     const isDiag = fromE === toE;
+                    // 知覚的に均等な色変化のため、強度の平方根でスケール（低値の差を視認しやすくする）
+                    const scaledIntensity = Math.pow(intensity, 0.5);
+                    // 明度を暗（0.22）→明（0.72）で補間し、彩度も同時に変化させる
+                    const L = 0.22 + scaledIntensity * 0.50;
+                    const C = 0.02 + scaledIntensity * 0.20;
                     return (
                       <td key={toE} className="py-1 px-1 text-center" title={`${EMOTION_LABELS_JA[fromE]} → ${EMOTION_LABELS_JA[toE]}: ${count}回`}>
                         <div
@@ -101,13 +106,17 @@ export default function TransitionsSection({ data }: Props) {
                             background: isDiag
                               ? 'oklch(0.22 0.04 255)'
                               : count > 0
-                                ? `oklch(0.62 0.18 160 / ${Math.max(0.05, intensity)})`
-                                : 'oklch(0.97 0.002 80)',
-                            border: isDiag ? '1px dashed oklch(0.85 0.005 80)' : '1px solid oklch(0.22 0.04 255)',
+                                ? `oklch(${L.toFixed(2)} ${C.toFixed(2)} 160)`
+                                : 'oklch(0.19 0.01 255)',
+                            border: isDiag
+                              ? '1px dashed oklch(0.40 0.01 255)'
+                              : count > 0
+                                ? `1px solid oklch(${(L + 0.08).toFixed(2)} ${C.toFixed(2)} 160 / 0.6)`
+                                : '1px solid oklch(0.25 0.02 255)',
                           }}
                         >
-                          <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: intensity > 0.5 ? 'white' : 'oklch(0.45 0.015 250)', fontWeight: count > 0 ? 600 : 400 }}>
-                            {isDiag ? '—' : count > 0 ? count : '0'}
+                          <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: scaledIntensity > 0.45 ? 'oklch(0.98 0.005 250)' : 'oklch(0.52 0.015 250)', fontWeight: count > 0 ? 600 : 400 }}>
+                            {isDiag ? '—' : count > 0 ? count : '·'}
                           </span>
                         </div>
                       </td>
