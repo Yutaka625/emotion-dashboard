@@ -4,7 +4,7 @@
  * State: 'upload' → 'dashboard'
  */
 
-import { useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import type { DashboardData } from '@/lib/types';
 import DropZone from '@/components/DropZone';
 import Sidebar from '@/components/Sidebar';
@@ -83,17 +83,18 @@ export default function Home() {
   }
 
   // ---- Dashboard screen ----
-  const renderSection = () => {
-    switch (activeSection) {
-      case 'overview': return <OverviewSection data={data} />;
-      case 'timeseries': return <TimeseriesSection data={data} />;
-      case 'engagement': return <EngagementValenceSection data={data} />;
-      case 'emotions': return <EmotionsSection data={data} />;
-      case 'transitions': return <TransitionsSection data={data} />;
-      case 'academic': return <AcademicSection data={data} />;
-      case 'actionunits': return <ActionUnitsSection data={data} />;
-      default: return <OverviewSection data={data} />;
-    }
+  // switch による条件レンダリングではなく CSS で show/hide する。
+  // こうすることで、セクション切り替え時にコンポーネントが破棄されず、
+  // 各セクション内の状態（選択中の感情など）がリセットされない。
+  const sectionIds = ['overview', 'timeseries', 'engagement', 'emotions', 'transitions', 'academic', 'actionunits'] as const;
+  const sectionComponents: Record<string, React.ReactNode> = {
+    overview:    <OverviewSection data={data} />,
+    timeseries:  <TimeseriesSection data={data} />,
+    engagement:  <EngagementValenceSection data={data} />,
+    emotions:    <EmotionsSection data={data} />,
+    transitions: <TransitionsSection data={data} />,
+    academic:    <AcademicSection data={data} />,
+    actionunits: <ActionUnitsSection data={data} />,
   };
 
   return (
@@ -207,8 +208,14 @@ export default function Home() {
         </header>
 
         {/* Scrollable Content */}
+        {/* 各セクションを常時マウントし、非アクティブ時は display:none で隠す。
+            これによりセクション切り替えで内部状態がリセットされなくなる。 */}
         <main className="flex-1 overflow-y-auto p-6">
-          {renderSection()}
+          {sectionIds.map(id => (
+            <div key={id} style={{ display: activeSection === id ? 'block' : 'none' }}>
+              {sectionComponents[id]}
+            </div>
+          ))}
         </main>
       </div>
     </div>

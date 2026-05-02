@@ -57,7 +57,7 @@ function generateId() {
 }
 
 export default function TimeseriesSection({ data }: Props) {
-  const [selectedEmotions, setSelectedEmotions] = useState<string[]>(['confusion', 'sadness', 'fear', 'disgust']);
+  const [selectedEmotions, setSelectedEmotions] = useState<string[]>(['anger', 'sadness', 'surprise', 'disgust', 'fear', 'joy']);
   const [showSpecial, setShowSpecial] = useState<string[]>(['engagement', 'valence', 'attention']);
   const [timeRange, setTimeRange] = useState<[number, number]>([0, Math.ceil(data.meta.duration_seconds)]);
   const [activeTab, setActiveTab] = useState<'overlay' | 'sparklines' | 'heatmap' | 'stacked' | 'dominant'>('overlay');
