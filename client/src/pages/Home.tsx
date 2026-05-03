@@ -6,8 +6,11 @@
 
 import React, { useState, useCallback } from 'react';
 import type { DashboardData } from '@/lib/types';
+import { parseCSV, computeDashboardData, detectFaceIdColumn, groupRowsByFaceId } from '@/lib/csvAnalyzer';
+import { useFaceID } from '@/contexts/FaceIDContext';
 import DropZone from '@/components/DropZone';
 import Sidebar from '@/components/Sidebar';
+import FaceIDSelector from '@/components/FaceIDSelector';
 import OverviewSection from '@/components/sections/OverviewSection';
 import TimeseriesSection from '@/components/sections/TimeseriesSection';
 import EngagementValenceSection from '@/components/sections/EngagementValenceSection';
@@ -24,17 +27,57 @@ export default function Home() {
   const [activeSection, setActiveSection] = useState('overview');
   const [isDragOverDashboard, setIsDragOverDashboard] = useState(false);
 
-  const handleDataLoaded = useCallback((newData: DashboardData, newFilename: string) => {
+  // マルチ FaceID の状態管理（Context 経由）
+  const { activeDashboardData, setMultiFaceData, isMultiFace } = useFaceID();
+
+  // CSV テキストからマルチ FaceID データを構築するヘルパー
+  const buildMultiFaceData = useCallback((csvText: string, fname: string, allCombined: DashboardData) => {
+    try {
+      const rows = parseCSV(csvText);
+      if (rows.length === 0) return;
+      const headers = Object.keys(rows[0]);
+      const faceIdCol = detectFaceIdColumn(headers);
+
+      if (faceIdCol) {
+        const grouped = groupRowsByFaceId(rows, faceIdCol);
+        const faceIds = Array.from(grouped.keys()).sort();
+        if (faceIds.length > 1) {
+          // 複数の FaceID が存在 → 各 FaceID の DashboardData を事前計算
+          const perFace = new Map<string, DashboardData>();
+          grouped.forEach((faceRows, id) => {
+            perFace.set(id, computeDashboardData(faceRows, fname));
+          });
+          setMultiFaceData({ faceIds, perFace, allCombined, rawRowsByFace: grouped, filename: fname });
+          return;
+        }
+      }
+      // FaceID 列なし or 1人分のみ → 通常モード
+      setMultiFaceData({ faceIds: [], perFace: new Map(), allCombined, rawRowsByFace: new Map(), filename: fname });
+    } catch {
+      // エラー時は通常モードにフォールバック
+      setMultiFaceData({ faceIds: [], perFace: new Map(), allCombined, rawRowsByFace: new Map(), filename: fname });
+    }
+  }, [setMultiFaceData]);
+
+  const handleDataLoaded = useCallback((newData: DashboardData, newFilename: string, rawCsvText?: string) => {
     setData(newData);
     setFilename(newFilename);
     setActiveSection('overview');
-  }, []);
+    // マルチ FaceID データを構築（生 CSV テキストがある場合のみ）
+    if (rawCsvText) {
+      buildMultiFaceData(rawCsvText, newFilename, newData);
+    } else {
+      // 生テキストなし → 通常モード
+      setMultiFaceData({ faceIds: [], perFace: new Map(), allCombined: newData, rawRowsByFace: new Map(), filename: newFilename });
+    }
+  }, [buildMultiFaceData, setMultiFaceData]);
 
   const handleReset = useCallback(() => {
     setData(null);
     setFilename('');
     setActiveSection('overview');
-  }, []);
+    setMultiFaceData(null);
+  }, [setMultiFaceData]);
 
   // Allow re-uploading by dragging onto the dashboard
   const handleDashboardDragOver = useCallback((e: React.DragEvent) => {
@@ -68,9 +111,12 @@ export default function Home() {
           setData(newData);
           setFilename(file.name);
           setActiveSection('overview');
+          // マルチ FaceID データを構築
+          buildMultiFaceData(text, file.name, newData);
         } catch {
           setData(null);
           setFilename('');
+          setMultiFaceData(null);
         }
       };
       reader.readAsText(file);
@@ -86,15 +132,18 @@ export default function Home() {
   // switch による条件レンダリングではなく CSS で show/hide する。
   // こうすることで、セクション切り替え時にコンポーネントが破棄されず、
   // 各セクション内の状態（選択中の感情など）がリセットされない。
+  // FaceID 選択中はその DashboardData、未選択/非マルチフェイスなら従来の data を使う
+  const displayData = (isMultiFace && activeDashboardData) ? activeDashboardData : data;
+
   const sectionIds = ['overview', 'timeseries', 'engagement', 'emotions', 'transitions', 'academic', 'actionunits'] as const;
   const sectionComponents: Record<string, React.ReactNode> = {
-    overview:    <OverviewSection data={data} />,
-    timeseries:  <TimeseriesSection data={data} />,
-    engagement:  <EngagementValenceSection data={data} />,
-    emotions:    <EmotionsSection data={data} />,
-    transitions: <TransitionsSection data={data} />,
-    academic:    <AcademicSection data={data} />,
-    actionunits: <ActionUnitsSection data={data} />,
+    overview:    <OverviewSection data={displayData} />,
+    timeseries:  <TimeseriesSection data={displayData} />,
+    engagement:  <EngagementValenceSection data={displayData} />,
+    emotions:    <EmotionsSection data={displayData} />,
+    transitions: <TransitionsSection data={displayData} />,
+    academic:    <AcademicSection data={displayData} />,
+    actionunits: <ActionUnitsSection data={displayData} />,
   };
 
   return (
@@ -153,13 +202,16 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* マルチ FaceID セレクター（複数人データの場合のみ表示） */}
+            <FaceIDSelector />
+
             <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.58 0.015 255)' }}>
-              {data.meta.total_frames.toLocaleString()} frames · {data.meta.duration_minutes.toFixed(2)} min
+              {displayData.meta.total_frames.toLocaleString()} frames · {displayData.meta.duration_minutes.toFixed(2)} min
             </div>
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: 'oklch(0.70 0.14 195 / 0.12)', border: '1px solid oklch(0.70 0.14 195 / 0.30)' }}>
               <div className="w-1.5 h-1.5 rounded-full" style={{ background: 'oklch(0.70 0.14 195)' }} />
               <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', color: 'oklch(0.70 0.14 195)' }}>
-                {data.meta.recording_date}
+                {displayData.meta.recording_date}
               </span>
             </div>
 

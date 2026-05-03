@@ -181,6 +181,20 @@ export interface BaselineOffsets {
   neutral: number;
 }
 
+// マルチ FaceID 対応: 複数の顔を含む CSV データの管理構造
+export interface MultiFaceData {
+  /** 検出された全 FaceID（出現順）。FaceID 列がない場合は空配列 */
+  faceIds: string[];
+  /** FaceID 別に事前計算した DashboardData */
+  perFace: Map<string, DashboardData>;
+  /** 全 FaceID を合算した DashboardData（従来と同じ） */
+  allCombined: DashboardData;
+  /** FaceID 別の生行データ（複数選択時の再計算用） */
+  rawRowsByFace: Map<string, Record<string, string>[]>;
+  /** 元ファイル名 */
+  filename: string;
+}
+
 export const NON_NEUTRAL_EMOTIONS = [
   'anger', 'contempt', 'disgust', 'fear', 'joy', 
   'sadness', 'surprise', 'sentimentality', 'confusion'

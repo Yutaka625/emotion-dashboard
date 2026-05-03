@@ -10,7 +10,8 @@ import { analyzeCSV } from '@/lib/csvAnalyzer';
 import type { DashboardData } from '@/lib/types';
 
 interface DropZoneProps {
-  onDataLoaded: (data: DashboardData, filename: string) => void;
+  // 第3引数: 生 CSV テキスト（マルチ FaceID 解析用）
+  onDataLoaded: (data: DashboardData, filename: string, rawCsvText?: string) => void;
 }
 
 export default function DropZone({ onDataLoaded }: DropZoneProps) {
@@ -43,7 +44,8 @@ export default function DropZone({ onDataLoaded }: DropZoneProps) {
       setProgress('グラフデータを生成中...');
       await new Promise(resolve => setTimeout(resolve, 50));
 
-      onDataLoaded(data, file.name);
+      // 生 CSV テキストも渡す（マルチ FaceID 解析に必要）
+      onDataLoaded(data, file.name, text);
     } catch (err) {
       setError(err instanceof Error ? err.message : '分析中にエラーが発生しました');
       setIsProcessing(false);

@@ -115,7 +115,7 @@ function pearson(x: number[], y: number[]): number {
 
 // ---- CSV Parser ----
 
-function parseCSV(text: string): Record<string, string>[] {
+export function parseCSV(text: string): Record<string, string>[] {
   // Handle BOM
   const cleaned = text.startsWith('\uFEFF') ? text.slice(1) : text;
   const lines = cleaned.split(/\r?\n/).filter(l => l.trim());
@@ -138,8 +138,15 @@ function parseCSV(text: string): Record<string, string>[] {
 
 // ---- Main Analysis Function ----
 
+// CSV テキストから DashboardData を生成するエントリーポイント（既存の呼び出し元と互換）
 export function analyzeCSV(csvText: string, filename: string): DashboardData {
   const rows = parseCSV(csvText);
+  if (rows.length === 0) throw new Error('CSVデータが空です');
+  return computeDashboardData(rows, filename);
+}
+
+// パース済みの行配列から DashboardData を計算する（マルチ FaceID 対応用に分離）
+export function computeDashboardData(rows: Record<string, string>[], filename: string): DashboardData {
   if (rows.length === 0) throw new Error('CSVデータが空です');
 
   // Extract time from index (first column = time stamp)
@@ -485,6 +492,37 @@ export function analyzeCSV(csvText: string, filename: string): DashboardData {
     engagement_emotion_profile,
     histograms,
   };
+}
+
+// ============================================================
+// マルチ FaceID ユーティリティ
+// ============================================================
+
+/**
+ * CSV ヘッダーから FaceID 列を検出する（大文字小文字・スペース・アンダースコア不問）
+ * 例: "FaceId", "face_id", "Face ID", "faceid" のいずれにもマッチ
+ */
+export function detectFaceIdColumn(headers: string[]): string | null {
+  return headers.find(h => /^face\s*_?\s*id$/i.test(h.trim())) ?? null;
+}
+
+/**
+ * パース済みの CSV 行を FaceID 別にグルーピングする
+ * @param rows - parseCSV() で取得した生行配列
+ * @param faceIdCol - FaceID 列のヘッダー名
+ * @returns FaceID をキーとした Map（出現順を保持）
+ */
+export function groupRowsByFaceId(
+  rows: Record<string, string>[],
+  faceIdCol: string
+): Map<string, Record<string, string>[]> {
+  const groups = new Map<string, Record<string, string>[]>();
+  for (const row of rows) {
+    const id = row[faceIdCol]?.trim() || 'unknown';
+    if (!groups.has(id)) groups.set(id, []);
+    groups.get(id)!.push(row);
+  }
+  return groups;
 }
 
 // ============================================================
