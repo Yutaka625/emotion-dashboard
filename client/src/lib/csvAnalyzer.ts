@@ -4,7 +4,7 @@
  * Replicates Python analysis logic entirely in TypeScript
  */
 
-import type { DashboardData, EmotionStats, AffectDynamics, BaselineOffsets, TimeseriesPoint } from './types';
+import type { DashboardData, EmotionStats, AffectDynamics, BaselineOffsets, TimeseriesPoint, HeadMotionEvent } from './types';
 
 const EMOTION_COLS = ['anger', 'contempt', 'disgust', 'fear', 'joy', 'sadness', 'surprise', 'sentimentality', 'confusion', 'neutral'];
 const NON_NEUTRAL = ['anger', 'contempt', 'disgust', 'fear', 'joy', 'sadness', 'surprise', 'sentimentality', 'confusion'];
@@ -164,7 +164,8 @@ export function computeDashboardData(rows: Record<string, string>[], filename: s
   const df: Row[] = rows.map(r => {
     const time = parseFloat(r[timeCol]);
     const row: Row = { time: isNaN(time) ? 0 : time, dominant_emotion: '' };
-    for (const col of [...EMOTION_COLS, ...SPECIAL_COLS, ...ACTION_UNIT_COLS, ...HEAD_POSE_COLS]) {
+    // FACIAL_COLS = [...EMOTION_COLS, 'attention'] — attention を含めて抽出する
+    for (const col of [...FACIAL_COLS, ...SPECIAL_COLS, ...ACTION_UNIT_COLS, ...HEAD_POSE_COLS]) {
       const v = parseFloat(r[col]);
       row[col] = isNaN(v) ? 0 : v;
     }
@@ -453,7 +454,7 @@ export function computeDashboardData(rows: Record<string, string>[], filename: s
 
   // ---- 21. Histograms ----
   const histograms: DashboardData['histograms'] = {};
-  for (const col of ['engagement', 'valence', 'attention']) {
+  for (const col of ['engagement', 'valence', 'attention'] as const) {
     const vals = df.map(r => r[col] as number).filter(v => !isNaN(v));
     const sorted = [...vals].sort((a, b) => a - b);
     const bins = 20;
@@ -467,6 +468,14 @@ export function computeDashboardData(rows: Record<string, string>[], filename: s
     });
     histograms[col] = { counts, bin_edges };
   }
+
+  // ---- 22. Head motion events (うなづき・首振り・首傾げ検知) ----
+  const head_motion_events = detectHeadMotions(df.map(r => ({
+    time: r.time,
+    pitch: r.pitch as number,
+    yaw: r.yaw as number,
+    roll: r.roll as number,
+  })));
 
   return {
     meta,
@@ -491,6 +500,7 @@ export function computeDashboardData(rows: Record<string, string>[], filename: s
     circumplex_summary,
     engagement_emotion_profile,
     histograms,
+    head_motion_events,
   };
 }
 
@@ -584,4 +594,168 @@ export function applyBaselineCorrection(
     }
     return corrected;
   });
+}
+
+// ============================================================
+// 頭部動作検知（うなづき・首振り・首傾げ）
+// ============================================================
+
+/**
+ * per-frame の pitch/yaw/roll から「明確な頭部動作」を検知してイベント一覧を返す。
+ *
+ * 検知ロジック:
+ *   - 移動平均で信号を平滑化（追跡ノイズを除去）
+ *   - 各軸の局所的な極値（ピーク・トラフ）を検出
+ *   - 連続する極値間の振幅が閾値を超え、かつ持続時間が妥当な範囲なら動作として登録
+ *
+ * 閾値 (度):
+ *   - うなづき (pitch): 8°
+ *   - 首振り   (yaw):  12°
+ *   - 首傾げ   (roll): 15°
+ */
+function detectHeadMotions(
+  df: Array<{ time: number; pitch: number; yaw: number; roll: number }>
+): HeadMotionEvent[] {
+  if (df.length < 10) return [];
+
+  const times = df.map(r => r.time);
+  const hasMeaningfulData = (vals: number[]) => vals.some(v => !isNaN(v) && Math.abs(v) > 0.5);
+
+  // 移動平均による平滑化
+  const smooth = (vals: number[], w: number): number[] =>
+    vals.map((_, i) => {
+      const s = Math.max(0, i - w);
+      const e = Math.min(vals.length - 1, i + w);
+      let sum = 0;
+      for (let j = s; j <= e; j++) sum += (isNaN(vals[j]) ? 0 : vals[j]);
+      return sum / (e - s + 1);
+    });
+
+  const pitchRaw = df.map(r => (isNaN(r.pitch) ? 0 : r.pitch));
+  const yawRaw   = df.map(r => (isNaN(r.yaw)   ? 0 : r.yaw));
+  const rollRaw  = df.map(r => (isNaN(r.roll)   ? 0 : r.roll));
+
+  if (!hasMeaningfulData(pitchRaw) && !hasMeaningfulData(yawRaw) && !hasMeaningfulData(rollRaw)) {
+    return []; // pitch/yaw/roll のデータがなければスキップ
+  }
+
+  const ps = smooth(pitchRaw, 3);
+  const ys = smooth(yawRaw, 3);
+  const rs = smooth(rollRaw, 3);
+
+  const events: HeadMotionEvent[] = [];
+
+  /**
+   * 局所的な極値インデックスを返す（前後 2 点との比較）
+   */
+  const findExtrema = (vals: number[]): number[] => {
+    const idx: number[] = [];
+    for (let i = 2; i < vals.length - 2; i++) {
+      const isPeak   = vals[i] >= vals[i-1] && vals[i] >= vals[i+1] && vals[i] > vals[i-2] && vals[i] > vals[i+2];
+      const isTrough = vals[i] <= vals[i-1] && vals[i] <= vals[i+1] && vals[i] < vals[i-2] && vals[i] < vals[i+2];
+      if (isPeak || isTrough) idx.push(i);
+    }
+    return idx;
+  };
+
+    /**
+   * うなづき・首振り用: 連続する 3 極値 (a→b→c) で「往復（方向反転）」を検知する。
+   * a→b と b→c の符号が逆（反対方向へ折り返している）場合のみイベントとして登録。
+   * 一方向のみの動きは除外される。
+   *
+   * @param vals      - 平滑化済みの角度列
+   * @param type      - 動作種別
+   * @param threshold - 往路・復路それぞれの振幅閾値（度）
+   * @param maxDur    - 往復全体の最大持続時間（秒）
+   */
+  const detectOscillation = (
+    vals: number[],
+    type: HeadMotionEvent['type'],
+    threshold: number,
+    maxDur: number
+  ) => {
+    const extremaIdx = findExtrema(vals);
+    let lastEventEnd = -Infinity;
+
+    // 3 点 (a, b, c) を sliding window で走査
+    for (let i = 2; i < extremaIdx.length; i++) {
+      const ai = extremaIdx[i - 2]; // 始点
+      const bi = extremaIdx[i - 1]; // 折り返し点
+      const ci = extremaIdx[i];     // 終点
+
+      const amp1 = vals[bi] - vals[ai]; // 往路の変化量（符号付き）
+      const amp2 = vals[ci] - vals[bi]; // 復路の変化量（符号付き）
+
+      // 方向が逆（往復している）かつ両方の振幅が閾値以上
+      const isReversal = amp1 * amp2 < 0;
+      const strongEnough = Math.abs(amp1) >= threshold && Math.abs(amp2) >= threshold;
+
+      const tStart   = times[ai];
+      const tEnd     = times[ci];
+      const duration = tEnd - tStart;
+
+      if (
+        isReversal &&
+        strongEnough &&
+        duration >= 0.3 &&
+        duration <= maxDur &&
+        tStart > lastEventEnd
+      ) {
+        // 変化量は往路・復路のうち大きい方を代表値とする
+        const magnitude = round(Math.max(Math.abs(amp1), Math.abs(amp2)), 1);
+        events.push({
+          type,
+          time_start: round(tStart, 2),
+          time_end:   round(tEnd, 2),
+          magnitude,
+        });
+        lastEventEnd = tEnd;
+      }
+    }
+  };
+
+  /**
+   * 首傾げ用: 一方向への大きな変化でも検知する（往復不要）。
+   * 傾いたまま維持するのが自然な動作のため、単一極値ペアで検出。
+   */
+  const detectTilt = (
+    vals: number[],
+    threshold: number,
+    maxDur: number
+  ) => {
+    const extremaIdx = findExtrema(vals);
+    let lastEventEnd = -Infinity;
+
+    for (let i = 1; i < extremaIdx.length; i++) {
+      const pi = extremaIdx[i - 1];
+      const ci = extremaIdx[i];
+      const amplitude = Math.abs(vals[ci] - vals[pi]);
+      const tStart = times[pi];
+      const tEnd   = times[ci];
+      const duration = tEnd - tStart;
+
+      if (
+        amplitude >= threshold &&
+        duration >= 0.2 &&
+        duration <= maxDur &&
+        tStart > lastEventEnd
+      ) {
+        events.push({
+          type: 'tilt',
+          time_start: round(tStart, 2),
+          time_end:   round(tEnd, 2),
+          magnitude:  round(amplitude, 1),
+        });
+        lastEventEnd = tEnd;
+      }
+    }
+  };
+
+  // うなづき・首振りは往復（反転）のみ検出
+  detectOscillation(ps, 'nod',   8,  4.0); // うなづき: pitch 各方向 8° 以上の往復
+  detectOscillation(ys, 'shake', 12, 5.0); // 首振り:   yaw  各方向 12° 以上の往復
+  // 首傾げは一方向への変化でも検出（傾いて維持が自然）
+  detectTilt(rs, 15, 5.0);
+
+  return events.sort((a, b) => a.time_start - b.time_start);
 }

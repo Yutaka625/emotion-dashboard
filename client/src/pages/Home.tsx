@@ -19,7 +19,6 @@ import TransitionsSection from '@/components/sections/TransitionsSection';
 import AcademicSection from '@/components/sections/AcademicSection';
 import ActionUnitsSection from '@/components/sections/ActionUnitsSection';
 import { Upload, X } from 'lucide-react';
-import FaceScanIcon from '@/components/FaceScanIcon';
 
 export default function Home() {
   const [data, setData] = useState<DashboardData | null>(null);
@@ -188,19 +187,6 @@ export default function Home() {
             boxShadow: '0 1px 4px oklch(0.15 0.02 250 / 0.04)',
           }}
         >
-          <div className="flex items-center gap-3">
-            <FaceScanIcon size={20} color="oklch(0.75 0.008 250)" scanColor="oklch(0.70 0.14 195)" />
-            <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '0.9rem', color: 'oklch(0.92 0.005 250)' }}>
-              emoSense
-            </span>
-            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)' }}>
-              Facial Expression Analyzer
-            </span>
-            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.58 0.015 255)' }}>
-              / {activeSection.toUpperCase()}
-            </span>
-          </div>
-
           <div className="flex items-center gap-3">
             {/* マルチ FaceID セレクター（複数人データの場合のみ表示） */}
             <FaceIDSelector />

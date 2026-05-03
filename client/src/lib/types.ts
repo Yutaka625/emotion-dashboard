@@ -68,6 +68,18 @@ export interface HeadPoseStat {
   max: number;
 }
 
+/** 頭部動作検知イベント（うなづき・首振り・首傾げ） */
+export interface HeadMotionEvent {
+  /** nod=うなづき(pitch) / shake=首振り(yaw) / tilt=首傾げ(roll) */
+  type: 'nod' | 'shake' | 'tilt';
+  /** 開始時刻（秒） */
+  time_start: number;
+  /** 終了時刻（秒） */
+  time_end: number;
+  /** 最大変化量（度） */
+  magnitude: number;
+}
+
 export interface EmotionDurationStat {
   count: number;
   mean_duration: number;
@@ -138,18 +150,20 @@ export interface DashboardData {
   circumplex_summary: CircumplexSummary;
   engagement_emotion_profile: EngagementEmotionProfile;
   histograms: Record<string, { counts: number[]; bin_edges: number[] }>;
+  /** 頭部動作検知イベント一覧（うなづき・首振り・首傾げ） */
+  head_motion_events: HeadMotionEvent[];
 }
 
 export const EMOTION_COLORS: Record<string, string> = {
-  anger:         'oklch(0.68 0.26 22)',    /* 鮮烈な赤 — 怒り */
-  contempt:       'oklch(0.72 0.22 300)',   /* 紫マゼンタ — 軽蔑 */
-  disgust:        'oklch(0.72 0.22 145)',   /* 毒々しいグリーン — 嫌悪 */
-  fear:           'oklch(0.68 0.20 280)',   /* ディープバイオレット — 恐怖 */
-  joy:            'oklch(0.88 0.20 82)',    /* 輝くゴールド — 喜び */
-  sadness:        'oklch(0.68 0.18 235)',   /* コバルトブルー — 悲しみ */
-  surprise:       'oklch(0.82 0.22 195)',   /* ブライトシアン — 驚き */
-  sentimentality: 'oklch(0.78 0.22 340)',   /* ホットピンク — 感傷 */
-  confusion:      'oklch(0.78 0.18 60)',    /* アンバー — 困惑 */
+  anger:         'oklch(0.58 0.24 24)',    /* スカーレット（朱赤）— 怒り */
+  contempt:       'oklch(0.65 0.04 250)',   /* クールグレー — 軽蔑 */
+  disgust:        'oklch(0.82 0.12 52)',    /* アプリコット — 嫌悪 */
+  fear:           'oklch(0.78 0.13 135)',   /* ピスタチオグリーン — 恐怖 */
+  joy:            'oklch(0.92 0.18 96)',    /* カナリアイエロー — 喜び */
+  sadness:        'oklch(0.82 0.15 198)',   /* シアン — 悲しみ */
+  surprise:       'oklch(0.94 0.02 85)',    /* オフホワイト — 驚き */
+  sentimentality: 'oklch(0.84 0.08 355)',   /* シェルピンク — 感傷 */
+  confusion:      'oklch(0.73 0.07 228)',   /* フォグブルー（霧色）— 困惑 */
   neutral:        'oklch(0.58 0.03 255)',   /* ミッドグレーブルー — ニュートラル */
   attention:      'oklch(0.80 0.18 160)',   /* エメラルドグリーン — 注意 */
 };
