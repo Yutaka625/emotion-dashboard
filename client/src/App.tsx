@@ -3,6 +3,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
+import BaselineBanner from "./components/BaselineBanner";
+import { BaselineProvider } from "./contexts/BaselineContext";
+import { FaceIDProvider } from "./contexts/FaceIDContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 
@@ -20,10 +23,16 @@ function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="light">
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
+        <BaselineProvider>
+          <FaceIDProvider>
+            <TooltipProvider>
+              <Toaster />
+              {/* ベースライン補正中は画面上部にバナーを表示 */}
+              <BaselineBanner />
+              <Router />
+            </TooltipProvider>
+          </FaceIDProvider>
+        </BaselineProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );

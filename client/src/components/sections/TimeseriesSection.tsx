@@ -13,7 +13,9 @@ import {
   ResponsiveContainer, Area, AreaChart, ComposedChart, BarChart, Bar,
   ReferenceArea, ReferenceLine,
 } from 'recharts';
-import { Plus, Trash2, ChevronDown, ChevronUp, Tag, Download } from 'lucide-react';
+import { Plus, Trash2, ChevronDown, ChevronUp, Tag, Download, Target } from 'lucide-react';
+import { useBaseline } from '@/contexts/BaselineContext';
+import { applyBaselineCorrection } from '@/lib/csvAnalyzer';
 
 interface Props {
   data: DashboardData;
@@ -55,7 +57,7 @@ function generateId() {
 }
 
 export default function TimeseriesSection({ data }: Props) {
-  const [selectedEmotions, setSelectedEmotions] = useState<string[]>(['confusion', 'sadness', 'fear', 'disgust']);
+  const [selectedEmotions, setSelectedEmotions] = useState<string[]>(['anger', 'sadness', 'surprise', 'disgust', 'fear', 'joy']);
   const [showSpecial, setShowSpecial] = useState<string[]>(['engagement', 'valence', 'attention']);
   const [timeRange, setTimeRange] = useState<[number, number]>([0, Math.ceil(data.meta.duration_seconds)]);
   const [activeTab, setActiveTab] = useState<'overlay' | 'sparklines' | 'heatmap' | 'stacked' | 'dominant'>('overlay');
@@ -68,6 +70,9 @@ export default function TimeseriesSection({ data }: Props) {
   const [eventFormError, setEventFormError] = useState('');
   const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
   const [showEventForm, setShowEventForm] = useState(false);
+
+  // ベースライン補正 Context
+  const { baselineRange, baselineOffsets, isBaselineActive, setBaseline, clearBaseline } = useBaseline();
 
   const { timeseries_full, time_summary_10s } = data;
   const maxTime = Math.ceil(data.meta.duration_seconds);
@@ -89,11 +94,23 @@ export default function TimeseriesSection({ data }: Props) {
     return filtered.filter((_, i) => i % step === 0);
   }, [timeseries_full, timeRange]);
 
+  // ベースライン補正済みの表示用データ（補正OFFなら元データをそのまま返す）
+  const displayData = useMemo(() => {
+    if (!isBaselineActive || !baselineOffsets) return sampledData;
+    return applyBaselineCorrection(sampledData, baselineOffsets);
+  }, [sampledData, isBaselineActive, baselineOffsets]);
+
+  // ヒートマップ・イベント統計用の全件補正済みデータ
+  const displayTimeseriesFull = useMemo(() => {
+    if (!isBaselineActive || !baselineOffsets) return timeseries_full;
+    return applyBaselineCorrection(timeseries_full, baselineOffsets);
+  }, [timeseries_full, isBaselineActive, baselineOffsets]);
+
   // ヒートマップ用データ（5秒区間）
   const heatmapData = useMemo(() => {
     const bucketSize = 5;
     const buckets: Record<number, Record<string, number[]>> = {};
-    for (const frame of timeseries_full) {
+    for (const frame of displayTimeseriesFull) {
       const bucket = Math.floor(frame.time / bucketSize) * bucketSize;
       if (!buckets[bucket]) buckets[bucket] = {};
       for (const e of NON_NEUTRAL_EMOTIONS) {
@@ -111,7 +128,7 @@ export default function TimeseriesSection({ data }: Props) {
         }
         return row;
       });
-  }, [timeseries_full]);
+  }, [displayTimeseriesFull]);
 
   // スタック面グラフ用（10秒区間サマリー）
   const stackedData = useMemo(() => {
@@ -148,7 +165,7 @@ export default function TimeseriesSection({ data }: Props) {
   // ---- Event stats: for each event, compute emotion averages ----
   const eventStats = useMemo(() => {
     return events.map(ev => {
-      const frames = timeseries_full.filter(
+      const frames = displayTimeseriesFull.filter(
         f => f.time >= ev.startTime && f.time <= ev.endTime
       );
       if (frames.length === 0) {
@@ -172,7 +189,7 @@ export default function TimeseriesSection({ data }: Props) {
       }
       return { id: ev.id, frameCount: frames.length, stats, dominantEmotion: domEmo };
     });
-  }, [events, timeseries_full]);
+  }, [events, displayTimeseriesFull]);
 
   const toggleEmotion = (emotion: string) => {
     setSelectedEmotions(prev =>
@@ -308,6 +325,37 @@ export default function TimeseriesSection({ data }: Props) {
     { id: 'dominant', label: '支配感情' },
   ] as const;
 
+  // ---- ベースライン区間ハイライト（全グラフで共通利用） ----
+  const renderBaselineArea = () => {
+    if (!baselineRange) return null;
+    return (
+      <ReferenceArea
+        x1={baselineRange[0]}
+        x2={baselineRange[1]}
+        fill="oklch(0.70 0.14 195)"
+        fillOpacity={0.08}
+        stroke="oklch(0.70 0.14 195)"
+        strokeOpacity={0.4}
+        strokeDasharray="4 2"
+        label={{ value: 'BL区間', position: 'insideTopLeft', fontSize: 9, fill: 'oklch(0.70 0.14 195)', fontFamily: 'Roboto Mono, monospace' }}
+      />
+    );
+  };
+
+  // ---- ベースライン ゼロライン（補正適用中のみ） ----
+  const renderBaselineZeroLine = () => {
+    if (!isBaselineActive) return null;
+    return (
+      <ReferenceLine
+        y={0}
+        stroke="oklch(0.70 0.14 195)"
+        strokeWidth={1.5}
+        strokeDasharray="6 3"
+        label={{ value: 'BASELINE=0', position: 'insideTopLeft', fontSize: 9, fill: 'oklch(0.70 0.14 195)' }}
+      />
+    );
+  };
+
   // ---- Render ReferenceAreas for events ----
   const renderEventAreas = () =>
     events.map(ev => (
@@ -437,6 +485,21 @@ export default function TimeseriesSection({ data }: Props) {
               {ev.name}
             </button>
           ))}
+          {/* ベースラインとして設定ボタン */}
+          <button
+            onClick={() => setBaseline(timeRange, data.timeseries_full)}
+            className="px-3 py-1 rounded text-xs transition-all flex items-center gap-1"
+            style={{
+              fontFamily: 'Noto Sans JP, sans-serif',
+              background: isBaselineActive ? 'rgba(0,180,216,0.20)' : 'oklch(0.22 0.04 255)',
+              color: isBaselineActive ? 'oklch(0.70 0.14 195)' : 'oklch(0.72 0.008 250)',
+              border: `1px solid ${isBaselineActive ? 'rgba(0,180,216,0.5)' : 'oklch(0.32 0.04 255)'}`,
+            }}
+            title="現在の表示範囲をベースライン区間として設定する"
+          >
+            <Target size={14} />
+            ベースラインとして設定
+          </button>
           <button
             onClick={exportFilteredDataToCSV}
             className="px-3 py-1 rounded text-xs transition-all flex items-center gap-1 ml-auto"
@@ -455,6 +518,115 @@ export default function TimeseriesSection({ data }: Props) {
             {sampledData.length} pts表示中
           </span>
         </div>
+      </div>
+
+      {/* ---- BASELINE SETTINGS ---- */}
+      <div className="metric-card" style={{ borderLeft: '3px solid oklch(0.70 0.14 195)' }}>
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <div className="section-label mb-1" style={{ color: 'oklch(0.70 0.14 195)' }}>BASELINE SETTINGS</div>
+            <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)' }}>
+              ベースライン補正設定
+            </div>
+            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.58 0.015 255)', marginTop: '2px' }}>
+              セッション冒頭の無表情区間を差し引いて、感情変化を相対値で比較します
+            </p>
+          </div>
+          {isBaselineActive && (
+            <span style={{
+              fontFamily: 'Roboto Mono, monospace', fontSize: '0.7rem',
+              background: 'rgba(0,180,216,0.15)', border: '1px solid rgba(0,180,216,0.4)',
+              color: 'oklch(0.70 0.14 195)', padding: '3px 10px', borderRadius: '4px',
+            }}>
+              ⚡ 補正適用中
+            </span>
+          )}
+        </div>
+
+        {/* STEP 1: ベースライン区間の状態表示 */}
+        <div className="mb-4 p-3 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', border: '1px solid oklch(0.28 0.04 255)' }}>
+          <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.70 0.14 195)', letterSpacing: '0.08em', marginBottom: '8px' }}>
+            STEP 1 — ベースライン区間
+          </div>
+          {baselineRange ? (
+            <div className="flex items-center gap-3 flex-wrap">
+              <div style={{
+                fontFamily: 'Roboto Mono, monospace', fontSize: '0.88rem', fontWeight: 700,
+                color: isBaselineActive ? 'oklch(0.70 0.14 195)' : 'oklch(0.75 0.008 250)',
+              }}>
+                {baselineRange[0]}s 〜 {baselineRange[1]}s
+              </div>
+              <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.58 0.015 255)' }}>
+                （{(baselineRange[1] - baselineRange[0]).toFixed(1)}秒区間）
+              </span>
+            </div>
+          ) : (
+            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.58 0.015 255)' }}>
+              未設定 — TIME RANGE FILTERで無表情区間を選択し、「ベースラインとして設定」を押してください
+            </p>
+          )}
+        </div>
+
+        {/* STEP 2: 補正プレビュー（区間設定済みの場合のみ表示） */}
+        {baselineOffsets && (
+          <div className="mb-4 p-3 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', border: '1px solid oklch(0.28 0.04 255)' }}>
+            <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.70 0.14 195)', letterSpacing: '0.08em', marginBottom: '8px' }}>
+              STEP 2 — オフセット値（ベースライン平均）
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {NON_NEUTRAL_EMOTIONS
+                .map(e => ({ emotion: e, offset: baselineOffsets[e as keyof typeof baselineOffsets] ?? 0 }))
+                .sort((a, b) => b.offset - a.offset)
+                .map(({ emotion, offset }) => (
+                  <div key={emotion} className="flex items-center gap-1.5 px-2 py-1 rounded" style={{ background: EMOTION_COLORS[emotion] + '18', border: `1px solid ${EMOTION_COLORS[emotion]}40` }}>
+                    <div className="w-1.5 h-1.5 rounded-full" style={{ background: EMOTION_COLORS[emotion] }} />
+                    <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', color: 'oklch(0.75 0.008 250)' }}>
+                      {EMOTION_LABELS_JA[emotion]}
+                    </span>
+                    <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.68rem', color: EMOTION_COLORS[emotion] }}>
+                      {offset.toFixed(2)}
+                    </span>
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
+
+        {/* STEP 3: 適用/解除 */}
+        {baselineRange && (
+          <div className="flex items-center gap-3">
+            {isBaselineActive ? (
+              <button
+                onClick={clearBaseline}
+                className="px-4 py-2 rounded-lg text-sm font-semibold transition-all"
+                style={{
+                  fontFamily: 'Noto Sans JP, sans-serif',
+                  background: 'oklch(0.22 0.04 255)',
+                  color: 'oklch(0.75 0.008 250)',
+                  border: '1px solid oklch(0.35 0.04 255)',
+                }}
+              >
+                補正を解除する
+              </button>
+            ) : (
+              <button
+                onClick={() => setBaseline(baselineRange, data.timeseries_full)}
+                className="px-4 py-2 rounded-lg text-sm font-semibold transition-all"
+                style={{
+                  fontFamily: 'Noto Sans JP, sans-serif',
+                  background: 'rgba(0,180,216,0.15)',
+                  color: 'oklch(0.70 0.14 195)',
+                  border: '1px solid rgba(0,180,216,0.4)',
+                }}
+              >
+                ベースラインを適用する
+              </button>
+            )}
+            <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.58 0.015 255)', fontStyle: 'italic' }}>
+              補正はいつでも解除できます。元データは保持されます。
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Emotion Charts — Tab Switcher */}
@@ -509,12 +681,14 @@ export default function TimeseriesSection({ data }: Props) {
               複数の感情スコアを同一グラフ上に重ねて表示します。感情ボタンをクリックして表示/非表示を切り替えられます。
             </p>
             <ResponsiveContainer width="100%" height={280}>
-              <LineChart data={sampledData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
+              <LineChart data={displayData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" />
                 <XAxis dataKey="time" type="number" domain={['dataMin', 'dataMax']} tickFormatter={formatTime} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} />
                 <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} />
                 <Tooltip content={<CustomTooltip />} />
                 <Legend formatter={v => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem' }}>{v}</span>} />
+                {renderBaselineArea()}
+                {renderBaselineZeroLine()}
                 {renderEventAreas()}
                 {selectedEmotions.map(emotion => (
                   <Line
@@ -540,8 +714,8 @@ export default function TimeseriesSection({ data }: Props) {
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {NON_NEUTRAL_EMOTIONS.map(emotion => {
-                const maxVal = Math.max(...sampledData.map(d => (d as any)[emotion] || 0));
-                const meanVal = sampledData.reduce((acc, d) => acc + ((d as any)[emotion] || 0), 0) / sampledData.length;
+                const maxVal = Math.max(...displayData.map(d => (d as any)[emotion] || 0));
+                const meanVal = displayData.reduce((acc, d) => acc + ((d as any)[emotion] || 0), 0) / displayData.length;
                 return (
                   <div key={emotion} className="p-3 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', border: `1px solid ${EMOTION_HEX[emotion]}30` }}>
                     <div className="flex items-center justify-between mb-2">
@@ -561,7 +735,7 @@ export default function TimeseriesSection({ data }: Props) {
                       </div>
                     </div>
                     <ResponsiveContainer width="100%" height={80}>
-                      <AreaChart data={sampledData} margin={{ top: 2, right: 2, bottom: 2, left: 0 }}>
+                      <AreaChart data={displayData} margin={{ top: 2, right: 2, bottom: 2, left: 0 }}>
                         <defs>
                           <linearGradient id={`grad-${emotion}`} x1="0" y1="0" x2="0" y2="1">
                             <stop offset="5%" stopColor={EMOTION_HEX[emotion]} stopOpacity={0.4} />
@@ -849,7 +1023,7 @@ export default function TimeseriesSection({ data }: Props) {
           </div>
         </div>
         <ResponsiveContainer width="100%" height={200}>
-          <ComposedChart data={sampledData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
+          <ComposedChart data={displayData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
             <defs>
               <linearGradient id="engGrad" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor={SPECIAL_COLORS.engagement} stopOpacity={0.25} />
@@ -861,6 +1035,7 @@ export default function TimeseriesSection({ data }: Props) {
             <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} domain={[0, 100]} />
             <Tooltip content={<CustomTooltip />} />
             <Legend formatter={v => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem' }}>{v}</span>} />
+            {renderBaselineArea()}
             {renderEventAreas()}
             {showSpecial.includes('engagement') && (
               <Area type="monotone" dataKey="engagement" stroke={SPECIAL_COLORS.engagement} fill="url(#engGrad)" strokeWidth={1.5} dot={false} name="Engagement" />
