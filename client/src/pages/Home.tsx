@@ -8,6 +8,7 @@ import React, { useState, useCallback } from 'react';
 import type { DashboardData } from '@/lib/types';
 import { parseCSV, computeDashboardData, detectFaceIdColumn, groupRowsByFaceId } from '@/lib/csvAnalyzer';
 import { useFaceID } from '@/contexts/FaceIDContext';
+import { useCorrectedDashboardData } from '@/hooks/useCorrectedDashboardData';
 import DropZone from '@/components/DropZone';
 import Sidebar from '@/components/Sidebar';
 import FaceIDSelector from '@/components/FaceIDSelector';
@@ -132,7 +133,9 @@ export default function Home() {
   // こうすることで、セクション切り替え時にコンポーネントが破棄されず、
   // 各セクション内の状態（選択中の感情など）がリセットされない。
   // FaceID 選択中はその DashboardData、未選択/非マルチフェイスなら従来の data を使う
-  const displayData = (isMultiFace && activeDashboardData) ? activeDashboardData : data;
+  const baseData = (isMultiFace && activeDashboardData) ? activeDashboardData : data;
+  // ベースライン補正が有効なとき、感情統計を補正後の値で差し替える
+  const displayData = useCorrectedDashboardData(baseData)!
 
   const sectionIds = ['overview', 'timeseries', 'engagement', 'emotions', 'transitions', 'academic', 'actionunits'] as const;
   const sectionComponents: Record<string, React.ReactNode> = {
