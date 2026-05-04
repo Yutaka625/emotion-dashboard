@@ -30,6 +30,11 @@ export default function Home() {
   // マルチ FaceID の状態管理（Context 経由）
   const { activeDashboardData, setMultiFaceData, isMultiFace } = useFaceID();
 
+  // FaceID 選択中はその DashboardData、未選択/非マルチフェイスなら従来の data を使う
+  const baseData = (isMultiFace && activeDashboardData) ? activeDashboardData : data;
+  // ベースライン補正が有効なとき、感情統計を補正後の値で差し替える（hooks は early return より前に呼ぶ）
+  const displayData = useCorrectedDashboardData(baseData);
+
   // CSV テキストからマルチ FaceID データを構築するヘルパー
   const buildMultiFaceData = useCallback((csvText: string, fname: string, allCombined: DashboardData) => {
     try {
@@ -132,20 +137,19 @@ export default function Home() {
   // switch による条件レンダリングではなく CSS で show/hide する。
   // こうすることで、セクション切り替え時にコンポーネントが破棄されず、
   // 各セクション内の状態（選択中の感情など）がリセットされない。
-  // FaceID 選択中はその DashboardData、未選択/非マルチフェイスなら従来の data を使う
-  const baseData = (isMultiFace && activeDashboardData) ? activeDashboardData : data;
-  // ベースライン補正が有効なとき、感情統計を補正後の値で差し替える
-  const displayData = useCorrectedDashboardData(baseData)!
+
+  // data は early return 後に非 null 保証。displayData も非 null だが型上は null を許容するため ?? でフォールバック
+  const safeDisplayData = displayData ?? data;
 
   const sectionIds = ['overview', 'timeseries', 'engagement', 'emotions', 'transitions', 'academic', 'actionunits'] as const;
   const sectionComponents: Record<string, React.ReactNode> = {
-    overview:    <OverviewSection data={displayData} />,
-    timeseries:  <TimeseriesSection data={displayData} />,
-    engagement:  <EngagementValenceSection data={displayData} />,
-    emotions:    <EmotionsSection data={displayData} />,
-    transitions: <TransitionsSection data={displayData} />,
-    academic:    <AcademicSection data={displayData} />,
-    actionunits: <ActionUnitsSection data={displayData} />,
+    overview:    <OverviewSection data={safeDisplayData} />,
+    timeseries:  <TimeseriesSection data={safeDisplayData} />,
+    engagement:  <EngagementValenceSection data={safeDisplayData} />,
+    emotions:    <EmotionsSection data={safeDisplayData} />,
+    transitions: <TransitionsSection data={safeDisplayData} />,
+    academic:    <AcademicSection data={safeDisplayData} />,
+    actionunits: <ActionUnitsSection data={safeDisplayData} />,
   };
 
   return (
@@ -195,12 +199,12 @@ export default function Home() {
             <FaceIDSelector />
 
             <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.58 0.015 255)' }}>
-              {displayData.meta.total_frames.toLocaleString()} frames · {displayData.meta.duration_minutes.toFixed(2)} min
+              {safeDisplayData.meta.total_frames.toLocaleString()} frames · {safeDisplayData.meta.duration_minutes.toFixed(2)} min
             </div>
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: 'oklch(0.70 0.14 195 / 0.12)', border: '1px solid oklch(0.70 0.14 195 / 0.30)' }}>
               <div className="w-1.5 h-1.5 rounded-full" style={{ background: 'oklch(0.70 0.14 195)' }} />
               <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', color: 'oklch(0.70 0.14 195)' }}>
-                {displayData.meta.recording_date}
+                {safeDisplayData.meta.recording_date}
               </span>
             </div>
 
