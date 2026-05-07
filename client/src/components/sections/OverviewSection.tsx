@@ -7,6 +7,7 @@ import { useMemo } from 'react';
 import type { DashboardData } from '@/lib/types';
 import { EMOTION_LABELS_JA, EMOTION_COLORS } from '@/lib/types';
 import { Clock, Activity, Eye, Zap, TrendingUp, Brain } from 'lucide-react';
+import { useBaseline } from '@/contexts/BaselineContext';
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend,
   RadarChart, PolarGrid, PolarAngleAxis, Radar,
@@ -61,6 +62,7 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
 
 export default function OverviewSection({ data }: Props) {
   const { meta, special_stats, dominant_emotion_counts, dominant_emotion_pct, emotion_stats } = data;
+  const { isBaselineActive, baselineRange } = useBaseline();
   // attention is treated as a facial expression metric (in emotion_stats)
   const attentionStats = emotion_stats['attention'] || special_stats['attention'];
 
@@ -103,11 +105,22 @@ export default function OverviewSection({ data }: Props) {
             {meta.recording_date} {meta.recording_time} — 顔表情・感情・Engagement・Valenceの時系列分析
           </p>
         </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full" style={{ background: 'oklch(0.62 0.18 160 / 0.1)', border: '1px solid oklch(0.62 0.18 160 / 0.3)' }}>
-          <div className="w-1.5 h-1.5 rounded-full signal-pulse" style={{ background: 'oklch(0.62 0.18 160)' }} />
-          <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.42 0.12 160)' }}>
-            ANALYZED
-          </span>
+        <div className="flex items-center gap-2">
+          {/* ベースライン補正アクティブ表示 */}
+          {isBaselineActive && baselineRange && (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ background: 'oklch(0.75 0.18 60 / 0.12)', border: '1px solid oklch(0.75 0.18 60 / 0.4)' }}>
+              <div className="w-1.5 h-1.5 rounded-full" style={{ background: 'oklch(0.75 0.18 60)' }} />
+              <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.75 0.18 60)' }}>
+                BASELINE CORRECTED
+              </span>
+            </div>
+          )}
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full" style={{ background: 'oklch(0.62 0.18 160 / 0.1)', border: '1px solid oklch(0.62 0.18 160 / 0.3)' }}>
+            <div className="w-1.5 h-1.5 rounded-full signal-pulse" style={{ background: 'oklch(0.62 0.18 160)' }} />
+            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.42 0.12 160)' }}>
+              ANALYZED
+            </span>
+          </div>
         </div>
       </div>
 

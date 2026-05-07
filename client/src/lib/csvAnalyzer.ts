@@ -596,6 +596,53 @@ export function applyBaselineCorrection(
   });
 }
 
+/**
+ * スライディングウィンドウで感情の総活性量が最小の区間を検出してベースライン候補として返す。
+ * @param points     - timeseries_full 全体のデータ
+ * @param windowSec  - 検索するウィンドウ幅（秒）。デフォルト 30 秒
+ * @returns 最小活性区間の [開始秒, 終了秒]。データ不足時は先頭 windowSec 秒を返す
+ */
+export function detectBaselineWindow(
+  points: TimeseriesPoint[],
+  windowSec: number = 30
+): [number, number] {
+  if (points.length === 0) return [0, windowSec];
+
+  const startTime = points[0].time;
+  const endTime = points[points.length - 1].time;
+  const duration = endTime - startTime;
+
+  // データ長がウィンドウ未満の場合は全区間を返す
+  if (duration <= windowSec) return [round(startTime, 3), round(endTime, 3)];
+
+  // ウィンドウを 1 秒刻みでスライドさせ、各位置での感情合計平均を計算
+  let bestStart = startTime;
+  let bestScore = Infinity;
+
+  const step = Math.max(1, Math.floor((duration - windowSec) / 60)); // 最大60ステップ
+  for (let ws = startTime; ws <= endTime - windowSec; ws += step) {
+    const we = ws + windowSec;
+    const windowPoints = points.filter(p => p.time >= ws && p.time <= we);
+    if (windowPoints.length === 0) continue;
+
+    // 非ニュートラル感情の合計平均（小さいほど落ち着いている）
+    const score = mean(
+      windowPoints.map(p =>
+        BASELINE_EMOTION_COLS
+          .filter(e => e !== 'neutral')
+          .reduce((sum, e) => sum + p[e], 0)
+      )
+    );
+
+    if (score < bestScore) {
+      bestScore = score;
+      bestStart = ws;
+    }
+  }
+
+  return [round(bestStart, 1), round(Math.min(bestStart + windowSec, endTime), 1)];
+}
+
 // ============================================================
 // 頭部動作検知（うなづき・首振り・首傾げ）
 // ============================================================

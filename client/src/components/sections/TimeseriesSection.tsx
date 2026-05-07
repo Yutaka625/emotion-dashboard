@@ -13,9 +13,10 @@ import {
   ResponsiveContainer, Area, AreaChart, ComposedChart, BarChart, Bar,
   ReferenceArea, ReferenceLine,
 } from 'recharts';
-import { Plus, Trash2, ChevronDown, ChevronUp, Tag, Download, Target } from 'lucide-react';
+import { Plus, Trash2, ChevronDown, ChevronUp, Tag, Download, Target, Wand2 } from 'lucide-react';
 import { useBaseline } from '@/contexts/BaselineContext';
-import { applyBaselineCorrection } from '@/lib/csvAnalyzer';
+import { applyBaselineCorrection, detectBaselineWindow } from '@/lib/csvAnalyzer';
+import { toast } from 'sonner';
 
 interface Props {
   data: DashboardData;
@@ -305,7 +306,7 @@ export default function TimeseriesSection({ data }: Props) {
             ))}
           </div>
         )}
-        {payload.slice(0, 8).map((p: any) => (
+        {payload.map((p: any) => (
           <div key={p.dataKey} className="flex items-center gap-2 mb-1">
             <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: p.color }} />
             <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', color: 'oklch(0.75 0.005 80)' }}>
@@ -545,8 +546,32 @@ export default function TimeseriesSection({ data }: Props) {
 
         {/* STEP 1: ベースライン区間の状態表示 */}
         <div className="mb-4 p-3 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', border: '1px solid oklch(0.28 0.04 255)' }}>
-          <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.70 0.14 195)', letterSpacing: '0.08em', marginBottom: '8px' }}>
-            STEP 1 — ベースライン区間
+          <div className="flex items-center justify-between mb-2">
+            <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.70 0.14 195)', letterSpacing: '0.08em' }}>
+              STEP 1 — ベースライン区間
+            </div>
+            {/* 自動検出ボタン */}
+            <button
+              onClick={() => {
+                const detected = detectBaselineWindow(data.timeseries_full, 30);
+                setBaseline(detected, data.timeseries_full);
+                toast.success(`ベースライン区間を自動検出しました: ${detected[0]}s 〜 ${detected[1]}s`, {
+                  description: '感情活性量が最も低い 30 秒区間を選択しました。',
+                  duration: 4000,
+                });
+              }}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs transition-all"
+              style={{
+                fontFamily: 'Noto Sans JP, sans-serif',
+                background: 'oklch(0.70 0.14 195 / 0.12)',
+                color: 'oklch(0.70 0.14 195)',
+                border: '1px solid oklch(0.70 0.14 195 / 0.35)',
+              }}
+              title="感情が最も落ち着いている 30 秒区間を自動的に検出します"
+            >
+              <Wand2 size={12} />
+              自動検出
+            </button>
           </div>
           {baselineRange ? (
             <div className="flex items-center gap-3 flex-wrap">
