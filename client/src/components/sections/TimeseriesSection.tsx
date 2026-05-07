@@ -306,7 +306,7 @@ export default function TimeseriesSection({ data }: Props) {
             ))}
           </div>
         )}
-        {payload.slice(0, 8).map((p: any) => (
+        {payload.map((p: any) => (
           <div key={p.dataKey} className="flex items-center gap-2 mb-1">
             <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: p.color }} />
             <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', color: 'oklch(0.75 0.005 80)' }}>
