@@ -5,7 +5,7 @@
  */
 
 import { useState } from 'react';
-import { BarChart2, Brain, Clock, GitBranch, Grid, TrendingUp, Zap, ChevronRight, Activity } from 'lucide-react';
+import { BarChart2, Brain, Clock, GitBranch, Grid, Zap, ChevronRight, Activity, GitCompare } from 'lucide-react';
 import FaceScanIcon from '@/components/FaceScanIcon';
 
 interface NavItem {
@@ -13,9 +13,10 @@ interface NavItem {
   label: string;
   icon: React.ReactNode;
   description: string;
+  highlight?: boolean;
 }
 
-const navItems: NavItem[] = [
+const baseNavItems: NavItem[] = [
   { id: 'overview', label: '概要', icon: <Grid size={16} />, description: 'セッションサマリー' },
   { id: 'timeseries', label: '時系列分析', icon: <Activity size={16} />, description: '感情・指標の推移' },
   { id: 'engagement', label: '特殊指標', icon: <Zap size={16} />, description: '関与度・感情価の詳細分析' },
@@ -28,10 +29,16 @@ const navItems: NavItem[] = [
 interface SidebarProps {
   activeSection: string;
   onSectionChange: (id: string) => void;
+  hasComparison?: boolean;
 }
 
-export default function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
+export default function Sidebar({ activeSection, onSectionChange, hasComparison }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
+
+  const navItems: NavItem[] = [
+    ...baseNavItems,
+    ...(hasComparison ? [{ id: 'comparison', label: '比較分析', icon: <GitCompare size={16} />, description: 'セッション間比較', highlight: true }] : []),
+  ];
 
   return (
     <aside
@@ -93,8 +100,8 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
               className="w-full flex items-center gap-3 px-4 py-2.5 text-left transition-all duration-150"
               style={{
                 background: isActive ? 'oklch(0.20 0.04 255)' : 'transparent',
-                borderLeft: isActive ? `2px solid oklch(0.78 0.14 82)` : '2px solid transparent',
-                color: isActive ? 'oklch(0.92 0.005 250)' : 'oklch(0.60 0.015 255)',
+                borderLeft: isActive ? `2px solid ${item.highlight ? 'oklch(0.78 0.22 300)' : 'oklch(0.78 0.14 82)'}` : '2px solid transparent',
+                color: isActive ? 'oklch(0.92 0.005 250)' : item.highlight ? 'oklch(0.75 0.18 300)' : 'oklch(0.60 0.015 255)',
               }}
               onMouseEnter={e => {
                 if (!isActive) {
@@ -109,7 +116,7 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
                 }
               }}
             >
-              <span style={{ color: isActive ? 'oklch(0.78 0.14 82)' : 'oklch(0.55 0.015 255)', flexShrink: 0 }}>
+              <span style={{ color: isActive ? (item.highlight ? 'oklch(0.78 0.22 300)' : 'oklch(0.78 0.14 82)') : item.highlight ? 'oklch(0.65 0.18 300)' : 'oklch(0.55 0.015 255)', flexShrink: 0 }}>
                 {item.icon}
               </span>
               {!collapsed && (

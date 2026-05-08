@@ -152,6 +152,8 @@ export interface DashboardData {
   histograms: Record<string, { counts: number[]; bin_edges: number[] }>;
   /** 頭部動作検知イベント一覧（うなづき・首振り・首傾げ） */
   head_motion_events: HeadMotionEvent[];
+  /** 感情スコアの変化点一覧（上位20件） */
+  change_points: ChangePoint[];
 }
 
 export const EMOTION_COLORS: Record<string, string> = {
@@ -207,6 +209,18 @@ export interface MultiFaceData {
   rawRowsByFace: Map<string, Record<string, string>[]>;
   /** 元ファイル名 */
   filename: string;
+}
+
+/** 感情スコアの急激な変化（変化点）を表すイベント */
+export interface ChangePoint {
+  /** 変化が発生した時刻（秒） */
+  time: number;
+  /** 対象感情 */
+  emotion: string;
+  /** 変化量（正=上昇、負=下降） */
+  delta: number;
+  /** 変化方向 */
+  direction: 'rise' | 'fall';
 }
 
 export const NON_NEUTRAL_EMOTIONS = [

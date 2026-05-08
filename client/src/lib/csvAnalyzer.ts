@@ -4,7 +4,7 @@
  * Replicates Python analysis logic entirely in TypeScript
  */
 
-import type { DashboardData, EmotionStats, AffectDynamics, BaselineOffsets, TimeseriesPoint, HeadMotionEvent } from './types';
+import type { DashboardData, EmotionStats, AffectDynamics, BaselineOffsets, TimeseriesPoint, HeadMotionEvent, ChangePoint } from './types';
 
 const EMOTION_COLS = ['anger', 'contempt', 'disgust', 'fear', 'joy', 'sadness', 'surprise', 'sentimentality', 'confusion', 'neutral'];
 const NON_NEUTRAL = ['anger', 'contempt', 'disgust', 'fear', 'joy', 'sadness', 'surprise', 'sentimentality', 'confusion'];
@@ -477,6 +477,9 @@ export function computeDashboardData(rows: Record<string, string>[], filename: s
     roll: r.roll as number,
   })));
 
+  // ---- 23. Change point detection (感情スコアの急変点検出) ----
+  const change_points = detectChangePoints(timeseries_full);
+
   return {
     meta,
     emotion_stats,
@@ -501,7 +504,77 @@ export function computeDashboardData(rows: Record<string, string>[], filename: s
     engagement_emotion_profile,
     histograms,
     head_motion_events,
+    change_points,
   };
+}
+
+// ============================================================
+// 変化点検出（Change Point Detection）
+// ============================================================
+
+/**
+ * 感情スコアの急変点を検出する。
+ * 3秒窓の移動平均を計算し、連続する窓間の差分がグローバルstdの2.5倍を超えた
+ * タイミングを変化点として返す。同一感情の2秒以内の重複は除外。
+ * @param points - timeseries_full (ダウンサンプル済み)
+ * @returns 変化量の大きい順に上位20件の ChangePoint[]
+ */
+export function detectChangePoints(points: TimeseriesPoint[]): ChangePoint[] {
+  if (points.length < 10) return [];
+
+  const emotions = [
+    'anger', 'contempt', 'disgust', 'fear', 'joy',
+    'sadness', 'surprise', 'sentimentality', 'confusion',
+  ] as const;
+
+  const results: ChangePoint[] = [];
+
+  for (const emotion of emotions) {
+    const values = points.map(p => p[emotion]);
+    const times = points.map(p => p.time);
+
+    // フレームレートからウィンドウサイズを推定（約3秒分）
+    const totalTime = times[times.length - 1] - times[0];
+    const framesPerSec = points.length / (totalTime || 1);
+    const windowSize = Math.max(3, Math.round(framesPerSec * 3));
+
+    // グローバルstdで閾値を決定
+    const globalStd = std(values.filter(v => !isNaN(v)));
+    const threshold = globalStd * 2.5;
+    if (threshold === 0) continue;
+
+    // ウィンドウ移動平均の差分を計算
+    const lastEmotionEvent: number[] = []; // 直近イベントの時刻（重複除外用）
+
+    for (let i = windowSize; i < points.length - windowSize; i++) {
+      const prevWindow = values.slice(i - windowSize, i).filter(v => !isNaN(v));
+      const nextWindow = values.slice(i, i + windowSize).filter(v => !isNaN(v));
+      if (prevWindow.length === 0 || nextWindow.length === 0) continue;
+
+      const delta = mean(nextWindow) - mean(prevWindow);
+      if (Math.abs(delta) < threshold) continue;
+
+      const t = times[i];
+
+      // 同一感情で2秒以内の重複を除外
+      const isDuplicate = lastEmotionEvent.some(lt => Math.abs(t - lt) < 2.0);
+      if (isDuplicate) continue;
+
+      lastEmotionEvent.push(t);
+      results.push({
+        time: round(t, 2),
+        emotion,
+        delta: round(delta, 4),
+        direction: delta > 0 ? 'rise' : 'fall',
+      });
+    }
+  }
+
+  // 変化量の絶対値が大きい順に上位20件を返す
+  return results
+    .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))
+    .slice(0, 20)
+    .sort((a, b) => a.time - b.time); // 時刻順に並び直す
 }
 
 // ============================================================

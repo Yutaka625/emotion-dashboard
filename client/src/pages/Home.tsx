@@ -4,9 +4,9 @@
  * State: 'upload' → 'dashboard'
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import type { DashboardData } from '@/lib/types';
-import { parseCSV, computeDashboardData, detectFaceIdColumn, groupRowsByFaceId } from '@/lib/csvAnalyzer';
+import { parseCSV, computeDashboardData, detectFaceIdColumn, groupRowsByFaceId, analyzeCSV } from '@/lib/csvAnalyzer';
 import { useFaceID } from '@/contexts/FaceIDContext';
 import { useCorrectedDashboardData } from '@/hooks/useCorrectedDashboardData';
 import DropZone from '@/components/DropZone';
@@ -19,13 +19,36 @@ import EmotionsSection from '@/components/sections/EmotionsSection';
 import TransitionsSection from '@/components/sections/TransitionsSection';
 import AcademicSection from '@/components/sections/AcademicSection';
 import ActionUnitsSection from '@/components/sections/ActionUnitsSection';
-import { Upload, X } from 'lucide-react';
+import ComparisonSection from '@/components/sections/ComparisonSection';
+import { Upload, X, GitCompare } from 'lucide-react';
 
 export default function Home() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [filename, setFilename] = useState<string>('');
   const [activeSection, setActiveSection] = useState('overview');
   const [isDragOverDashboard, setIsDragOverDashboard] = useState(false);
+
+  // 第2CSV（比較用）
+  const [secondaryData, setSecondaryData] = useState<DashboardData | null>(null);
+  const [secondaryFilename, setSecondaryFilename] = useState<string>('');
+  const secondaryInputRef = useRef<HTMLInputElement>(null);
+
+  const handleSecondaryCSV = useCallback((file: File) => {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const text = ev.target?.result as string;
+      if (!text) return;
+      try {
+        const newData = analyzeCSV(text, file.name);
+        setSecondaryData(newData);
+        setSecondaryFilename(file.name);
+        setActiveSection('comparison');
+      } catch {
+        // ignore
+      }
+    };
+    reader.readAsText(file);
+  }, []);
 
   // マルチ FaceID の状態管理（Context 経由）
   const { activeDashboardData, setMultiFaceData, isMultiFace } = useFaceID();
@@ -82,6 +105,8 @@ export default function Home() {
     setFilename('');
     setActiveSection('overview');
     setMultiFaceData(null);
+    setSecondaryData(null);
+    setSecondaryFilename('');
   }, [setMultiFaceData]);
 
   // Allow re-uploading by dragging onto the dashboard
@@ -141,7 +166,7 @@ export default function Home() {
   // data は early return 後に非 null 保証。displayData も非 null だが型上は null を許容するため ?? でフォールバック
   const safeDisplayData = displayData ?? data;
 
-  const sectionIds = ['overview', 'timeseries', 'engagement', 'emotions', 'transitions', 'academic', 'actionunits'] as const;
+  const sectionIds = ['overview', 'timeseries', 'engagement', 'emotions', 'transitions', 'academic', 'actionunits', 'comparison'] as const;
   const sectionComponents: Record<string, React.ReactNode> = {
     overview:    <OverviewSection data={safeDisplayData} />,
     timeseries:  <TimeseriesSection data={safeDisplayData} />,
@@ -150,6 +175,9 @@ export default function Home() {
     transitions: <TransitionsSection data={safeDisplayData} />,
     academic:    <AcademicSection data={safeDisplayData} />,
     actionunits: <ActionUnitsSection data={safeDisplayData} />,
+    comparison:  secondaryData
+      ? <ComparisonSection dataA={safeDisplayData} dataB={secondaryData} labelA={filename || 'Session A'} labelB={secondaryFilename || 'Session B'} />
+      : <div className="flex items-center justify-center h-64" style={{ fontFamily: 'Noto Sans JP, sans-serif', color: 'oklch(0.55 0.015 255)' }}>比較用CSVを追加してください</div>,
   };
 
   return (
@@ -181,7 +209,7 @@ export default function Home() {
       )}
 
       {/* Sidebar */}
-      <Sidebar activeSection={activeSection} onSectionChange={setActiveSection} />
+      <Sidebar activeSection={activeSection} onSectionChange={setActiveSection} hasComparison={!!secondaryData} />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -249,6 +277,38 @@ export default function Home() {
                 別のファイル
               </span>
             </div>
+
+            {/* 比較CSV追加ボタン */}
+            <div
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg cursor-pointer transition-colors"
+              style={{
+                background: secondaryData ? 'oklch(0.25 0.08 300)' : 'oklch(0.27 0.04 255)',
+                border: `1px solid ${secondaryData ? 'oklch(0.45 0.16 300)' : 'oklch(0.32 0.04 255)'}`,
+              }}
+              onClick={() => secondaryInputRef.current?.click()}
+              title="比較用CSVを追加（セッション比較分析）"
+            >
+              <GitCompare size={12} style={{ color: secondaryData ? 'oklch(0.78 0.22 300)' : 'oklch(0.58 0.015 255)' }} />
+              <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', color: secondaryData ? 'oklch(0.78 0.22 300)' : 'oklch(0.72 0.008 250)' }}>
+                {secondaryData ? `比較中: ${secondaryFilename.length > 12 ? secondaryFilename.slice(0, 12) + '…' : secondaryFilename}` : '＋比較CSV'}
+              </span>
+              {secondaryData && (
+                <button
+                  onClick={e => { e.stopPropagation(); setSecondaryData(null); setSecondaryFilename(''); }}
+                  style={{ color: 'oklch(0.58 0.015 255)', lineHeight: 1 }}
+                  title="比較データを削除"
+                >
+                  <X size={10} />
+                </button>
+              )}
+            </div>
+            <input
+              ref={secondaryInputRef}
+              type="file"
+              accept=".csv"
+              className="hidden"
+              onChange={e => { const f = e.target.files?.[0]; if (f) handleSecondaryCSV(f); e.target.value = ''; }}
+            />
           </div>
         </header>
 

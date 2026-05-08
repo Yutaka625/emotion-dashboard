@@ -16,6 +16,8 @@ import {
 import { Plus, Trash2, ChevronDown, ChevronUp, Tag, Download, Target, Wand2 } from 'lucide-react';
 import { useBaseline } from '@/contexts/BaselineContext';
 import { applyBaselineCorrection, detectBaselineWindow } from '@/lib/csvAnalyzer';
+import { compareSegments, TESTABLE_EMOTIONS } from '@/lib/statisticsUtils';
+import type { TTestResult } from '@/lib/statisticsUtils';
 import { toast } from 'sonner';
 
 interface Props {
@@ -71,6 +73,12 @@ export default function TimeseriesSection({ data }: Props) {
   const [eventFormError, setEventFormError] = useState('');
   const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
   const [showEventForm, setShowEventForm] = useState(false);
+
+  // ---- 区間比較・統計検定 state ----
+  const [compSegA, setCompSegA] = useState<string>('');
+  const [compSegB, setCompSegB] = useState<string>('');
+  const [showComparison, setShowComparison] = useState(false);
+  const [comparisonResult, setComparisonResult] = useState<Record<string, TTestResult> | null>(null);
 
   // ベースライン補正 Context
   const { baselineRange, baselineOffsets, isBaselineActive, setBaseline, clearBaseline } = useBaseline();
@@ -380,6 +388,34 @@ export default function TimeseriesSection({ data }: Props) {
       <ReferenceLine key={`${ev.id}-s`} x={ev.startTime} stroke={ev.color} strokeWidth={1.5} strokeDasharray="4 2" />,
       <ReferenceLine key={`${ev.id}-e`} x={ev.endTime} stroke={ev.color} strokeWidth={1.5} strokeDasharray="4 2" />,
     ]);
+
+  // ---- Render ReferenceLine markers for change points ----
+  const visibleChangePoints = useMemo(() =>
+    (data.change_points || []).filter(cp => cp.time >= timeRange[0] && cp.time <= timeRange[1]),
+    [data.change_points, timeRange]
+  );
+
+  const [showChangePoints, setShowChangePoints] = useState(false);
+
+  const renderChangePointLines = () =>
+    showChangePoints
+      ? visibleChangePoints.map((cp, i) => (
+          <ReferenceLine
+            key={`cp-${i}`}
+            x={cp.time}
+            stroke={cp.direction === 'rise' ? 'oklch(0.75 0.22 140)' : 'oklch(0.68 0.24 24)'}
+            strokeWidth={1.5}
+            strokeOpacity={0.7}
+            strokeDasharray="3 3"
+            label={{
+              value: cp.direction === 'rise' ? '↑' : '↓',
+              position: 'insideTopRight',
+              fontSize: 11,
+              fill: cp.direction === 'rise' ? 'oklch(0.75 0.22 140)' : 'oklch(0.68 0.24 24)',
+            }}
+          />
+        ))
+      : [];
 
   return (
     <div className="space-y-6">
@@ -715,6 +751,7 @@ export default function TimeseriesSection({ data }: Props) {
                 {renderBaselineArea()}
                 {renderBaselineZeroLine()}
                 {renderEventAreas()}
+                {renderChangePointLines()}
                 {selectedEmotions.map(emotion => (
                   <Line
                     key={emotion}
@@ -728,6 +765,60 @@ export default function TimeseriesSection({ data }: Props) {
                 ))}
               </LineChart>
             </ResponsiveContainer>
+
+            {/* Change Point Toggle + List */}
+            <div className="mt-3">
+              <button
+                onClick={() => setShowChangePoints(p => !p)}
+                className="flex items-center gap-2 text-xs px-3 py-1.5 rounded transition-all"
+                style={{
+                  fontFamily: 'Roboto Mono, monospace',
+                  background: showChangePoints ? 'oklch(0.30 0.06 160)' : 'oklch(0.22 0.04 255)',
+                  color: showChangePoints ? 'oklch(0.75 0.22 140)' : 'oklch(0.58 0.015 255)',
+                  border: `1px solid ${showChangePoints ? 'oklch(0.45 0.18 140)' : 'oklch(0.28 0.04 255)'}`,
+                }}
+              >
+                <span>{showChangePoints ? '▲' : '▼'}</span>
+                変化点検出 ({visibleChangePoints.length}件)
+              </button>
+
+              {showChangePoints && visibleChangePoints.length > 0 && (
+                <div className="mt-2 rounded-lg overflow-hidden" style={{ border: '1px solid oklch(0.28 0.04 255)' }}>
+                  <div className="px-3 py-2" style={{ background: 'oklch(0.20 0.04 255)', borderBottom: '1px solid oklch(0.26 0.04 255)' }}>
+                    <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', color: 'oklch(0.50 0.015 255)', letterSpacing: '0.06em' }}>
+                      CHANGE POINTS — 感情スコアの急変タイミング（グローバルSD×2.5以上の変化）
+                    </span>
+                  </div>
+                  <div className="divide-y" style={{ borderColor: 'oklch(0.22 0.04 255)' }}>
+                    {visibleChangePoints.map((cp, i) => (
+                      <div key={i} className="flex items-center gap-3 px-3 py-2" style={{ background: 'oklch(0.185 0.04 255)' }}>
+                        <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.7rem', color: 'oklch(0.50 0.015 255)', minWidth: '52px' }}>
+                          {cp.time.toFixed(1)}s
+                        </span>
+                        <span
+                          className="px-2 py-0.5 rounded text-xs"
+                          style={{ background: EMOTION_HEX[cp.emotion] + '20', color: EMOTION_HEX[cp.emotion], fontFamily: 'Noto Sans JP, sans-serif', minWidth: '48px', textAlign: 'center' }}
+                        >
+                          {EMOTION_LABELS_JA[cp.emotion] || cp.emotion}
+                        </span>
+                        <span style={{ fontSize: '0.9rem' }}>{cp.direction === 'rise' ? '↑' : '↓'}</span>
+                        <span style={{
+                          fontFamily: 'Roboto Mono, monospace', fontSize: '0.7rem',
+                          color: cp.direction === 'rise' ? 'oklch(0.75 0.22 140)' : 'oklch(0.68 0.24 24)',
+                        }}>
+                          {cp.delta > 0 ? '+' : ''}{cp.delta.toFixed(4)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {showChangePoints && visibleChangePoints.length === 0 && (
+                <div className="mt-2 text-center py-3" style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.50 0.015 255)' }}>
+                  この時間範囲内に有意な変化点は検出されませんでした
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -1281,6 +1372,125 @@ export default function TimeseriesSection({ data }: Props) {
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {/* ---- 区間比較・統計的検定 ---- */}
+        {events.length >= 2 && (
+          <div className="mt-4 pt-4" style={{ borderTop: '1px solid oklch(0.25 0.04 255)' }}>
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <div className="section-label mb-1" style={{ color: 'oklch(0.65 0.20 270)' }}>STATISTICAL COMPARISON</div>
+                <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '0.9rem', color: 'oklch(0.88 0.005 250)' }}>
+                  区間比較・統計的検定
+                </div>
+                <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.58 0.015 255)', marginTop: '2px' }}>
+                  2つのイベント区間の感情スコアをWelchのt検定で比較します
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-end gap-3 mb-3">
+              <div>
+                <label style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', color: 'oklch(0.58 0.015 255)', display: 'block', marginBottom: '4px' }}>区間 A</label>
+                <select
+                  value={compSegA}
+                  onChange={e => { setCompSegA(e.target.value); setComparisonResult(null); }}
+                  className="rounded px-2 py-1 text-sm"
+                  style={{ background: 'oklch(0.22 0.04 255)', border: '1px solid oklch(0.32 0.06 255)', color: 'oklch(0.88 0.005 250)', fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem' }}
+                >
+                  <option value="">選択してください</option>
+                  {events.map(ev => (
+                    <option key={ev.id} value={ev.id}>{ev.name} ({ev.startTime}s–{ev.endTime}s)</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', color: 'oklch(0.58 0.015 255)', display: 'block', marginBottom: '4px' }}>区間 B</label>
+                <select
+                  value={compSegB}
+                  onChange={e => { setCompSegB(e.target.value); setComparisonResult(null); }}
+                  className="rounded px-2 py-1 text-sm"
+                  style={{ background: 'oklch(0.22 0.04 255)', border: '1px solid oklch(0.32 0.06 255)', color: 'oklch(0.88 0.005 250)', fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem' }}
+                >
+                  <option value="">選択してください</option>
+                  {events.map(ev => (
+                    <option key={ev.id} value={ev.id}>{ev.name} ({ev.startTime}s–{ev.endTime}s)</option>
+                  ))}
+                </select>
+              </div>
+              <button
+                disabled={!compSegA || !compSegB || compSegA === compSegB}
+                onClick={() => {
+                  const evA = events.find(e => e.id === compSegA);
+                  const evB = events.find(e => e.id === compSegB);
+                  if (!evA || !evB) return;
+                  const result = compareSegments(
+                    displayTimeseriesFull,
+                    { start: evA.startTime, end: evA.endTime, name: evA.name },
+                    { start: evB.startTime, end: evB.endTime, name: evB.name },
+                  );
+                  setComparisonResult(result);
+                  setShowComparison(true);
+                }}
+                className="px-4 py-2 rounded-lg text-sm font-semibold transition-all disabled:opacity-40"
+                style={{ background: 'oklch(0.45 0.18 270)', color: 'white', fontFamily: 'Noto Sans JP, sans-serif' }}
+              >
+                検定を実行
+              </button>
+            </div>
+
+            {showComparison && comparisonResult && (() => {
+              const evA = events.find(e => e.id === compSegA);
+              const evB = events.find(e => e.id === compSegB);
+              return (
+                <div className="rounded-lg overflow-hidden" style={{ border: '1px solid oklch(0.30 0.06 270)' }}>
+                  <div className="px-3 py-2 flex items-center justify-between" style={{ background: 'oklch(0.20 0.05 270)', borderBottom: '1px solid oklch(0.28 0.05 270)' }}>
+                    <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', color: 'oklch(0.65 0.20 270)', letterSpacing: '0.06em' }}>
+                      WELCH t-TEST RESULTS — {evA?.name} vs {evB?.name}
+                    </span>
+                    <div className="flex gap-3 text-xs" style={{ fontFamily: 'Roboto Mono, monospace', color: 'oklch(0.55 0.015 255)' }}>
+                      <span>*** p&lt;0.001</span><span>** p&lt;0.01</span><span>* p&lt;0.05</span><span>n.s. p≥0.05</span>
+                    </div>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr style={{ background: 'oklch(0.185 0.04 255)', borderBottom: '1px solid oklch(0.26 0.04 255)' }}>
+                          {['感情', `${evA?.name} 平均`, `${evB?.name} 平均`, 't値', 'df', 'p値', "Cohen's d", '効果量', '有意性'].map(h => (
+                            <th key={h} className="px-3 py-2 text-left" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.50 0.015 255)', whiteSpace: 'nowrap' }}>{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {TESTABLE_EMOTIONS.map(emotion => {
+                          const r = comparisonResult[emotion];
+                          if (!r) return null;
+                          const isSig = r.significance !== 'n.s.';
+                          return (
+                            <tr key={emotion} style={{ borderBottom: '1px solid oklch(0.22 0.04 255)', background: isSig ? 'oklch(0.22 0.06 270 / 0.4)' : 'transparent' }}>
+                              <td className="px-3 py-2">
+                                <span className="px-2 py-0.5 rounded text-xs" style={{ background: EMOTION_HEX[emotion] + '20', color: EMOTION_HEX[emotion], fontFamily: 'Noto Sans JP, sans-serif' }}>
+                                  {EMOTION_LABELS_JA[emotion]}
+                                </span>
+                              </td>
+                              <td className="px-3 py-2" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: evA ? evA.color : 'oklch(0.75 0.008 250)' }}>{r.meanA.toFixed(3)}</td>
+                              <td className="px-3 py-2" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: evB ? evB.color : 'oklch(0.75 0.008 250)' }}>{r.meanB.toFixed(3)}</td>
+                              <td className="px-3 py-2" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: 'oklch(0.75 0.008 250)' }}>{r.t.toFixed(3)}</td>
+                              <td className="px-3 py-2" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: 'oklch(0.55 0.015 255)' }}>{r.df.toFixed(1)}</td>
+                              <td className="px-3 py-2" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: isSig ? 'oklch(0.78 0.20 140)' : 'oklch(0.55 0.015 255)' }}>{r.p.toFixed(4)}</td>
+                              <td className="px-3 py-2" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: 'oklch(0.75 0.008 250)' }}>{r.cohensD.toFixed(3)}</td>
+                              <td className="px-3 py-2" style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.65 0.015 255)' }}>{r.effectSize}</td>
+                              <td className="px-3 py-2" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.85rem', fontWeight: 700, color: isSig ? 'oklch(0.85 0.22 95)' : 'oklch(0.50 0.015 255)' }}>{r.significance}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         )}
       </div>
