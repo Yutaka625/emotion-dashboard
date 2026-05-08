@@ -279,3 +279,40 @@
     background: linear-gradient(90deg, transparent, oklch(0.78 0.14 82), transparent);
   }
 }
+
+/* ── Print / PDF 出力用スタイル ─────────────────────────── */
+@media print {
+  /* サイドバーとヘッダーを非表示 */
+  aside,
+  header {
+    display: none !important;
+  }
+
+  /* ルートのheight/overflowを解除してコンテンツが切れないようにする */
+  .dashboard-root {
+    height: auto !important;
+    min-height: unset !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+
+  .dashboard-inner {
+    height: auto !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+
+  /* mainのスクロール制限を解除 */
+  main {
+    overflow: visible !important;
+    height: auto !important;
+    flex: none !important;
+    padding: 1.5rem !important;
+  }
+
+  /* 背景色・文字色をそのまま出力 */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

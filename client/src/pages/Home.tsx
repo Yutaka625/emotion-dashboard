@@ -182,7 +182,7 @@ export default function Home() {
 
   return (
     <div
-      className="flex h-screen overflow-hidden relative"
+      className="flex h-screen overflow-hidden relative dashboard-root"
       style={{ background: 'oklch(0.18 0.04 255)' }}
       onDragOver={handleDashboardDragOver}
       onDragLeave={handleDashboardDragLeave}
@@ -212,7 +212,7 @@ export default function Home() {
       <Sidebar activeSection={activeSection} onSectionChange={setActiveSection} hasComparison={!!secondaryData} />
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden dashboard-inner">
         {/* Top Bar */}
         <header
           className="flex items-center justify-between px-6 py-3 flex-shrink-0"
