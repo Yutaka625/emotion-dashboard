@@ -5,7 +5,7 @@
  */
 
 import { useState } from 'react';
-import { BarChart2, Brain, Clock, GitBranch, Grid, Zap, ChevronRight, Activity, GitCompare } from 'lucide-react';
+import { BarChart2, Brain, Clock, GitBranch, Grid, Zap, ChevronRight, Activity, GitCompare, FlaskConical } from 'lucide-react';
 import FaceScanIcon from '@/components/FaceScanIcon';
 
 interface NavItem {
@@ -24,6 +24,7 @@ const baseNavItems: NavItem[] = [
   { id: 'transitions', label: '感情遷移', icon: <GitBranch size={16} />, description: '状態遷移パターン' },
   { id: 'academic', label: '学術的分析', icon: <Brain size={16} />, description: 'Affect Dynamics等' },
   { id: 'actionunits', label: 'アクションユニット', icon: <Clock size={16} />, description: '表情筋動作分析' },
+  { id: 'uxresearch', label: 'UXリサーチ', icon: <FlaskConical size={16} />, description: 'フリクション・デライト分析', highlight: true },
 ];
 
 interface SidebarProps {

@@ -20,6 +20,7 @@ import TransitionsSection from '@/components/sections/TransitionsSection';
 import AcademicSection from '@/components/sections/AcademicSection';
 import ActionUnitsSection from '@/components/sections/ActionUnitsSection';
 import ComparisonSection from '@/components/sections/ComparisonSection';
+import UXResearchSection from '@/components/sections/UXResearchSection';
 import { Upload, X, GitCompare } from 'lucide-react';
 
 export default function Home() {
@@ -166,7 +167,7 @@ export default function Home() {
   // data は early return 後に非 null 保証。displayData も非 null だが型上は null を許容するため ?? でフォールバック
   const safeDisplayData = displayData ?? data;
 
-  const sectionIds = ['overview', 'timeseries', 'engagement', 'emotions', 'transitions', 'academic', 'actionunits', 'comparison'] as const;
+  const sectionIds = ['overview', 'timeseries', 'engagement', 'emotions', 'transitions', 'academic', 'actionunits', 'comparison', 'uxresearch'] as const;
   const sectionComponents: Record<string, React.ReactNode> = {
     overview:    <OverviewSection data={safeDisplayData} />,
     timeseries:  <TimeseriesSection data={safeDisplayData} />,
@@ -178,6 +179,7 @@ export default function Home() {
     comparison:  secondaryData
       ? <ComparisonSection dataA={safeDisplayData} dataB={secondaryData} labelA={filename || 'Session A'} labelB={secondaryFilename || 'Session B'} />
       : <div className="flex items-center justify-center h-64" style={{ fontFamily: 'Noto Sans JP, sans-serif', color: 'oklch(0.55 0.015 255)' }}>比較用CSVを追加してください</div>,
+    uxresearch: <UXResearchSection data={safeDisplayData} />,
   };
 
   return (

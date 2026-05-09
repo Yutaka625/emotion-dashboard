@@ -4,7 +4,7 @@
  * Replicates Python analysis logic entirely in TypeScript
  */
 
-import type { DashboardData, EmotionStats, AffectDynamics, BaselineOffsets, TimeseriesPoint, HeadMotionEvent, ChangePoint } from './types';
+import type { DashboardData, EmotionStats, AffectDynamics, BaselineOffsets, TimeseriesPoint, HeadMotionEvent, ChangePoint, UXScores } from './types';
 
 const EMOTION_COLS = ['anger', 'contempt', 'disgust', 'fear', 'joy', 'sadness', 'surprise', 'sentimentality', 'confusion', 'neutral'];
 const NON_NEUTRAL = ['anger', 'contempt', 'disgust', 'fear', 'joy', 'sadness', 'surprise', 'sentimentality', 'confusion'];
@@ -480,6 +480,9 @@ export function computeDashboardData(rows: Record<string, string>[], filename: s
   // ---- 23. Change point detection (感情スコアの急変点検出) ----
   const change_points = detectChangePoints(timeseries_full);
 
+  // ---- 24. UX Research scores ----
+  const ux_scores = computeUXScores(emotion_stats, special_stats, action_unit_stats);
+
   return {
     meta,
     emotion_stats,
@@ -505,7 +508,64 @@ export function computeDashboardData(rows: Record<string, string>[], filename: s
     histograms,
     head_motion_events,
     change_points,
+    ux_scores,
   };
+}
+
+// ============================================================
+// UX Research スコア計算
+// ============================================================
+
+/**
+ * 感情統計・エンゲージメント統計・アクションユニット統計から
+ * UXリサーチ向け複合指標を計算する。
+ */
+function computeUXScores(
+  emotion_stats: DashboardData['emotion_stats'],
+  special_stats: DashboardData['special_stats'],
+  action_unit_stats: DashboardData['action_unit_stats'],
+): UXScores {
+  const em = (col: string) => emotion_stats[col]?.mean ?? 0;
+  const sp = (col: string) => special_stats[col]?.mean ?? 0;
+
+  // Frustration Index: confusion×0.4 + anger×0.3 + sadness×0.2 + disgust×0.1
+  const frustration_index = round(
+    em('confusion') * 0.4 + em('anger') * 0.3 + em('sadness') * 0.2 + em('disgust') * 0.1,
+    4,
+  );
+
+  // Delight Index: joy×0.5 + surprise×0.3 + sentimentality×0.2
+  const delight_index = round(
+    em('joy') * 0.5 + em('surprise') * 0.3 + em('sentimentality') * 0.2,
+    4,
+  );
+
+  // Engagement Quality: engagement × max(0, 1 - confusion×2)
+  const engMean = sp('engagement');
+  const confMean = em('confusion');
+  const engagement_quality = round(
+    engMean * Math.max(0, 1 - confMean * 2),
+    4,
+  );
+
+  // Cognitive Load: confusion×0.6 + (brow_furrow_active_pct/100)×0.4
+  const browFurrowActive = (action_unit_stats['brow furrow']?.active_pct ?? 0) / 100;
+  const cognitive_load = round(
+    confMean * 0.6 + browFurrowActive * 0.4,
+    4,
+  );
+
+  // UX Score (0〜100): delight×0.35 + engagement_quality×0.35 + (1-frustration)×0.20 + (1-cognitive_load)×0.10
+  const ux_score = round(
+    (delight_index * 0.35
+      + engagement_quality * 0.35
+      + (1 - Math.min(1, frustration_index)) * 0.20
+      + (1 - Math.min(1, cognitive_load)) * 0.10
+    ) * 100,
+    1,
+  );
+
+  return { frustration_index, delight_index, engagement_quality, cognitive_load, ux_score };
 }
 
 // ============================================================

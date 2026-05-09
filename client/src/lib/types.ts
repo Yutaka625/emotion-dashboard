@@ -154,6 +154,8 @@ export interface DashboardData {
   head_motion_events: HeadMotionEvent[];
   /** 感情スコアの変化点一覧（上位20件） */
   change_points: ChangePoint[];
+  /** UXリサーチ向け複合指標 */
+  ux_scores: UXScores;
 }
 
 export const EMOTION_COLORS: Record<string, string> = {
@@ -209,6 +211,20 @@ export interface MultiFaceData {
   rawRowsByFace: Map<string, Record<string, string>[]>;
   /** 元ファイル名 */
   filename: string;
+}
+
+/** UXリサーチ向け複合指標スコア */
+export interface UXScores {
+  /** フラストレーション指数 (0〜1): confusion×0.4 + anger×0.3 + sadness×0.2 + disgust×0.1 */
+  frustration_index: number;
+  /** デライト指数 (0〜1): joy×0.5 + surprise×0.3 + sentimentality×0.2 */
+  delight_index: number;
+  /** エンゲージメント品質 (0〜1): engagement × max(0, 1 - confusion×2) */
+  engagement_quality: number;
+  /** 認知負荷推定 (0〜1): confusion×0.6 + brow_furrow_active_pct/100×0.4 */
+  cognitive_load: number;
+  /** 総合UXスコア (0〜100) */
+  ux_score: number;
 }
 
 /** 感情スコアの急激な変化（変化点）を表すイベント */

@@ -7,6 +7,7 @@ import BaselineBanner from "./components/BaselineBanner";
 import { BaselineProvider } from "./contexts/BaselineContext";
 import { FaceIDProvider } from "./contexts/FaceIDContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { EventsProvider } from "./contexts/EventsContext";
 import Home from "./pages/Home";
 
 function Router() {
@@ -25,12 +26,14 @@ function App() {
       <ThemeProvider defaultTheme="light">
         <BaselineProvider>
           <FaceIDProvider>
+            <EventsProvider>
             <TooltipProvider>
               <Toaster />
               {/* ベースライン補正中は画面上部にバナーを表示 */}
               <BaselineBanner />
               <Router />
             </TooltipProvider>
+            </EventsProvider>
           </FaceIDProvider>
         </BaselineProvider>
       </ThemeProvider>

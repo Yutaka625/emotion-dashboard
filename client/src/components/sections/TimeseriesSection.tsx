@@ -15,6 +15,9 @@ import {
 } from 'recharts';
 import { Plus, Trash2, ChevronDown, ChevronUp, Tag, Download, Target, Wand2 } from 'lucide-react';
 import { useBaseline } from '@/contexts/BaselineContext';
+import { useEvents } from '@/contexts/EventsContext';
+import type { EventAnnotation } from '@/contexts/EventsContext';
+import { EVENT_PALETTE } from '@/contexts/EventsContext';
 import { applyBaselineCorrection, detectBaselineWindow } from '@/lib/csvAnalyzer';
 import { compareSegments, TESTABLE_EMOTIONS } from '@/lib/statisticsUtils';
 import type { TTestResult } from '@/lib/statisticsUtils';
@@ -24,27 +27,7 @@ interface Props {
   data: DashboardData;
 }
 
-// ---- Event type ----
-interface EventAnnotation {
-  id: string;
-  name: string;
-  startTime: number;
-  endTime: number;
-  color: string;
-}
-
-const EVENT_PALETTE = [
-  'oklch(0.78 0.14 82)',   /* gold */
-  'oklch(0.70 0.14 195)', /* teal */
-  'oklch(0.78 0.22 340)', /* hot pink */
-  'oklch(0.80 0.18 160)', /* emerald */
-  'oklch(0.72 0.22 300)', /* magenta */
-  'oklch(0.82 0.22 195)', /* bright cyan */
-  'oklch(0.78 0.18 60)',  /* amber */
-  'oklch(0.68 0.26 22)',  /* vivid red */
-  'oklch(0.88 0.20 82)',  /* bright gold */
-  'oklch(0.68 0.20 280)', /* violet */
-];
+// EventAnnotation 型と EVENT_PALETTE は EventsContext からインポート済み
 
 const SPECIAL_COLORS: Record<string, string> = {
   engagement: 'oklch(0.78 0.14 82)',   /* ゴールド */
@@ -65,8 +48,8 @@ export default function TimeseriesSection({ data }: Props) {
   const [timeRange, setTimeRange] = useState<[number, number]>([0, Math.ceil(data.meta.duration_seconds)]);
   const [activeTab, setActiveTab] = useState<'overlay' | 'sparklines' | 'heatmap' | 'stacked' | 'dominant'>('overlay');
 
-  // ---- Event state ----
-  const [events, setEvents] = useState<EventAnnotation[]>([]);
+  // ---- Event state (EventsContext 経由で共有) ----
+  const { events, setEvents } = useEvents();
   const [newEventName, setNewEventName] = useState('');
   const [newEventStart, setNewEventStart] = useState('');
   const [newEventEnd, setNewEventEnd] = useState('');
