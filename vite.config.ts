@@ -153,6 +153,8 @@ function vitePluginManusDebugCollector(): Plugin {
 const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()];
 
 export default defineConfig({
+  // GitHub Pages の公開パス（リポジトリ名に合わせる）
+  base: process.env.GITHUB_ACTIONS ? '/emotion-dashboard/' : '/',
   plugins,
   resolve: {
     alias: {

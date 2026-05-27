@@ -1,0 +1,67 @@
+# emoSense — GitHub Pages 自動デプロイ
+# main ブランチへの push 時に自動でビルド＆公開する
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main          # main に push されたときだけ実行
+  workflow_dispatch:  # GitHub 画面から手動実行も可能
+
+# GitHub Pages への書き込み権限を付与
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同時デプロイは1つまで（古いデプロイはキャンセル）
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: ビルド
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. コードを取得
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      # 2. Node.js をセットアップ
+      - name: Node.js セットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # 3. 依存パッケージをインストール
+      - name: 依存パッケージのインストール
+        run: npm ci
+
+      # 4. フロントエンドをビルド（GitHub Actions 環境では base を /emotion-dashboard/ に設定）
+      - name: ビルド
+        run: npx vite build
+        env:
+          GITHUB_ACTIONS: true
+
+      # 5. ビルド成果物（dist/public）を Pages 用にアップロード
+      - name: GitHub Pages アーティファクトをアップロード
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/public
+
+  deploy:
+    name: デプロイ
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: GitHub Pages にデプロイ
+        id: deployment
+        uses: actions/deploy-pages@v4
