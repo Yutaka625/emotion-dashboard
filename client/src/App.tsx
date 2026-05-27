@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import { Route, Switch } from "wouter";
+import { Route, Router as WouterRouter, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import BaselineBanner from "./components/BaselineBanner";
 import { BaselineProvider } from "./contexts/BaselineContext";
@@ -10,7 +10,12 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { EventsProvider } from "./contexts/EventsContext";
 import Home from "./pages/Home";
 
-function Router() {
+// Viteのbase設定からwouterのベースパスを導出する
+// ローカル開発: BASE_URL = '/'              → basePath = ''（変換なし）
+// GitHub Pages: BASE_URL = '/emotion-dashboard/' → basePath = '/emotion-dashboard'
+const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+function AppRouter() {
   return (
     <Switch>
       <Route path={"/"} component={Home} />
@@ -31,7 +36,11 @@ function App() {
               <Toaster />
               {/* ベースライン補正中は画面上部にバナーを表示 */}
               <BaselineBanner />
-              <Router />
+              {/* WouterRouterのbaseにサブパスを渡すことで、
+                  GitHub Pages(/emotion-dashboard/)でもルートが正しく機能する */}
+              <WouterRouter base={basePath}>
+                <AppRouter />
+              </WouterRouter>
             </TooltipProvider>
             </EventsProvider>
           </FaceIDProvider>
