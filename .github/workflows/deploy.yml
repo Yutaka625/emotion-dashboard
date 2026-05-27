@@ -38,8 +38,9 @@ jobs:
           cache: 'npm'
 
       # 3. 依存パッケージをインストール
+      # --legacy-peer-deps: vite-plugin-jsx-loc が Vite 7 に未対応のためピア依存の競合を許容
       - name: 依存パッケージのインストール
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       # 4. フロントエンドをビルド（GitHub Actions 環境では base を /emotion-dashboard/ に設定）
       - name: ビルド
