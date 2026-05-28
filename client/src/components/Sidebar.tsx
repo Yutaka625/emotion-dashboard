@@ -58,10 +58,10 @@ export default function Sidebar({ activeSection, onSectionChange, hasComparison 
             <FaceScanIcon size={28} />
             <div>
               <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '0.85rem', color: 'oklch(0.92 0.005 250)', letterSpacing: '-0.01em' }}>
-                emoSense
+                KSDV
               </div>
               <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.52rem', color: 'oklch(0.70 0.14 195)', letterSpacing: '0.06em', lineHeight: 1.4 }}>
-                Facial Expression Analyzer
+                Kokoro Sensor Data Visualizer
               </div>
             </div>
           </div>

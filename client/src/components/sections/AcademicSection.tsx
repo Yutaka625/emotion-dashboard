@@ -99,7 +99,7 @@ export default function AcademicSection({ data }: Props) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `emosense_report_${meta.filename.replace(/\.[^.]+$/, '')}.csv`;
+    a.download = `ksdv_report_${meta.filename.replace(/\.[^.]+$/, '')}.csv`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

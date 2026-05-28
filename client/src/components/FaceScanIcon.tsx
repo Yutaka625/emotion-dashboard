@@ -1,5 +1,5 @@
 /*
- * DESIGN: emoSense Facial Expression Analyzer
+ * DESIGN: KSDV — Kokoro Sensor Data Visualizer
  * Animated face scan icon — scanning line sweeps across a stylized face outline
  */
 

@@ -1,4 +1,4 @@
-# emoSense — GitHub Pages 自動デプロイ
+# KSDV — GitHub Pages 自動デプロイ
 # main ブランチへの push 時に自動でビルド＆公開する
 
 name: Deploy to GitHub Pages

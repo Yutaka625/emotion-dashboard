@@ -1,4 +1,4 @@
-# TASK.md — emoSense 開発タスク管理
+# TASK.md — KSDV 開発タスク管理
 
 ## 完了済みタスク
 
@@ -18,12 +18,20 @@
 - アルファ（透過）ベース → 明度補間（oklch L: 0.22→0.72）方式に変更
 - 平方根スケールで低頻度セルの差異を視認しやすく改善
 
-### ✅ マルチ FaceID 対応（feature/multi-faceid ブランチ）
+### ✅ マルチ FaceID 対応（feature/multi-faceid ブランチ → main マージ済）
 - `FaceIDContext`：FaceID 選択状態のグローバル管理 + `activeDashboardData` 計算
 - `FaceIDSelector`：ヘッダーバー内チップ型セレクター UI
 - `csvAnalyzer.ts`：`parseCSV` export、`computeDashboardData` 分離、FaceID 検出・グルーピング関数追加
 - `types.ts`：`MultiFaceData` 型追加
 - FaceID 列なし CSV は従来と完全同一動作
+
+### ✅ Phase 2: ベースライン補正拡張（feature/phase2-baseline → main マージ済）
+- `useCorrectedDashboardData` フック：補正後の emotion_stats / dominant_emotion / transitions / duration_stats を再計算
+- `Home.tsx`：補正済みデータを全セクションに配信（hooks を early return より前に配置）
+- `OverviewSection`：BASELINE CORRECTED バッジ表示
+- `detectBaselineWindow()`：スライディングウィンドウでベースライン区間を自動検出
+- `TimeseriesSection`：「自動検出」ボタン + Sonner トースト通知
+- バグ修正：EMOTION TIME SERIES ツールチップに困惑（confusion）が表示されない問題を修正
 
 ---
 
@@ -35,11 +43,19 @@
 
 ## バックログ（次フェーズ候補）
 
-### Phase 2: ベースライン補正の拡張
-- [ ] 自動検知ロジック（スライディングウィンドウ）＋トースト通知
-- [ ] OverviewSection の感情カードに補正前後の値を並列表示
-- [ ] Engagement/Valence 特殊指標への補正適用
-- [ ] レンジ正規化（STEP 2 のラジオ選択機能）
+### Phase 3A: CSV エクスポート機能
+- [ ] `exportUtils.ts`：補正済み感情ログを CSV 生成・ダウンロードする関数
+- [ ] `TimeseriesSection`：「補正後データを出力」ボタンを BASELINE SETTINGS に追加
+- [ ] CSV 先頭にメタデータコメント行（ベースライン区間・オフセット値）を付与
+- [ ] ファイル名に補正有無・日時を含める（例: `session_corrected_20260508.csv`）
+
+### Phase 3B: Before/After AI 比較機能（Claude API）
+- [ ] `.env`：`ANTHROPIC_API_KEY` を設定
+- [ ] `@anthropic-ai/sdk` をインストール
+- [ ] `server/index.ts`：`POST /api/ai-compare` エンドポイント追加
+- [ ] `AiInsightSection.tsx`（新規）：AI 比較 UI（実行ボタン・ローディング・結果表示）
+- [ ] `Sidebar.tsx` / `Home.tsx`：AI INSIGHT セクションをナビに追加
+- [ ] ベースライン未設定時は案内メッセージを表示
 
 ### マルチ FaceID の拡張
 - [ ] FaceID が多い場合（10+）のドロップダウン表示
@@ -47,6 +63,5 @@
 - [ ] FaceID に任意のラベル名を付ける機能
 
 ### UI 改善
-- [ ] PDF/PNG エクスポート機能
 - [ ] セッション間比較機能
 - [ ] データ保存・読み込み（localStorage）

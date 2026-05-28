@@ -88,15 +88,15 @@ export default function DropZone({ onDataLoaded }: DropZoneProps) {
             </div>
             <div>
               <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.92 0.005 250)', letterSpacing: '-0.02em' }}>
-                emoSense
+                KSDV
               </div>
               <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.55rem', color: 'oklch(0.58 0.015 255)', letterSpacing: '0.1em' }}>
-                Facial Expression Analyzer
+                Kokoro Sensor Data Visualizer
               </div>
             </div>
         </div>
         <h1 style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1.75rem', color: 'oklch(0.92 0.005 250)', marginBottom: '0.5rem' }}>
-          感情分析ダッシュボード
+          KSDV — Kokoro Sensor Data Visualizer
         </h1>
         <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.9rem', color: 'oklch(0.58 0.015 255)' }}>
           心sensorの感情ログファイルをアップロードして分析を開始

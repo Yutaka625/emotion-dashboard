@@ -1,4 +1,4 @@
-# PLAN.md — emoSense アーキテクチャ・設計方針
+# PLAN.md — KSDV アーキテクチャ・設計方針
 
 ## プロジェクト概要
 
