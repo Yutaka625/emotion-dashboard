@@ -704,22 +704,30 @@ export default function TimeseriesSection({ data }: Props) {
         {activeTab === 'overlay' && (
           <div>
             <div className="flex flex-wrap gap-1.5 mb-4">
-              {NON_NEUTRAL_EMOTIONS.map(emotion => (
+              {NON_NEUTRAL_EMOTIONS.map(emotion => {
+                // 背景色が明るい感情（L > 0.70）は暗いテキストで視認性を確保
+                const LIGHT_EMOTIONS = new Set(['disgust', 'fear', 'joy', 'sadness', 'surprise', 'confusion', 'sentimentality', 'attention']);
+                const isActive = selectedEmotions.includes(emotion);
+                const textColor = isActive
+                  ? (LIGHT_EMOTIONS.has(emotion) ? 'oklch(0.15 0.02 250)' : 'white')
+                  : 'oklch(0.45 0.015 250)';
+                return (
                 <button
                   key={emotion}
                   onClick={() => toggleEmotion(emotion)}
                   className="px-2.5 py-0.5 rounded-full text-xs transition-all"
                   style={{
                     fontFamily: 'Noto Sans JP, sans-serif',
-                    background: selectedEmotions.includes(emotion) ? EMOTION_HEX[emotion] : 'oklch(0.20 0.04 255)',
-                    color: selectedEmotions.includes(emotion) ? 'white' : 'oklch(0.45 0.015 250)',
-                    border: `1px solid ${selectedEmotions.includes(emotion) ? EMOTION_HEX[emotion] : 'oklch(0.28 0.04 255)'}`,
+                    background: isActive ? EMOTION_HEX[emotion] : 'oklch(0.20 0.04 255)',
+                    color: textColor,
+                    border: `1px solid ${isActive ? EMOTION_HEX[emotion] : 'oklch(0.28 0.04 255)'}`,
                     fontSize: '0.72rem',
                   }}
                 >
                   {EMOTION_LABELS_JA[emotion]}
                 </button>
-              ))}
+                );
+              })}
             </div>
             <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.58 0.015 255)', marginBottom: '0.75rem' }}>
               複数の感情スコアを同一グラフ上に重ねて表示します。感情ボタンをクリックして表示/非表示を切り替えられます。

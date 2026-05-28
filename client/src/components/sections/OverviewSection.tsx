@@ -9,7 +9,7 @@ import { EMOTION_LABELS_JA, EMOTION_COLORS } from '@/lib/types';
 import { Clock, Activity, Eye, Zap, TrendingUp, Brain } from 'lucide-react';
 import { useBaseline } from '@/contexts/BaselineContext';
 import {
-  PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend,
+  PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend, Label,
   RadarChart, PolarGrid, PolarAngleAxis, Radar,
 } from 'recharts';
 
@@ -190,7 +190,7 @@ export default function OverviewSection({ data }: Props) {
                 cx="50%"
                 cy="50%"
                 outerRadius={90}
-                innerRadius={40}
+                innerRadius={55}
                 dataKey="value"
                 labelLine={false}
                 label={renderCustomizedLabel}
@@ -198,6 +198,29 @@ export default function OverviewSection({ data }: Props) {
                 {dominantPieData.map((entry, index) => (
                   <Cell key={index} fill={entry.color} />
                 ))}
+                {/* ドーナツ中央に最大感情を表示 */}
+                <Label
+                  content={({ viewBox }: any) => {
+                    const { cx, cy } = viewBox;
+                    const top = dominantPieData[0];
+                    if (!top) return null;
+                    const pct = ((top.value / meta.total_frames) * 100).toFixed(0);
+                    return (
+                      <g>
+                        <text x={cx} y={cy - 7} textAnchor="middle"
+                          fill={top.color} fontSize={20} fontWeight={700}
+                          fontFamily="Noto Sans JP, sans-serif">
+                          {pct}%
+                        </text>
+                        <text x={cx} y={cy + 13} textAnchor="middle"
+                          fill="oklch(0.62 0.015 255)" fontSize={10}
+                          fontFamily="Noto Sans JP, sans-serif">
+                          {top.name}
+                        </text>
+                      </g>
+                    );
+                  }}
+                />
               </Pie>
               <Tooltip
                 formatter={(value: number, name: string) => [

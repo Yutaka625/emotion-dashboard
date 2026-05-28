@@ -160,13 +160,13 @@ export interface DashboardData {
 
 export const EMOTION_COLORS: Record<string, string> = {
   anger:         'oklch(0.58 0.24 24)',    /* スカーレット（朱赤）— 怒り */
-  contempt:       'oklch(0.65 0.04 250)',   /* クールグレー — 軽蔑 */
+  contempt:       'oklch(0.62 0.10 258)',   /* ペリウィンクル — 軽蔑（視認性改善） */
   disgust:        'oklch(0.82 0.12 52)',    /* アプリコット — 嫌悪 */
   fear:           'oklch(0.78 0.13 135)',   /* ピスタチオグリーン — 恐怖 */
   joy:            'oklch(0.92 0.18 96)',    /* カナリアイエロー — 喜び */
   sadness:        'oklch(0.82 0.15 198)',   /* シアン — 悲しみ */
-  surprise:       'oklch(0.94 0.02 85)',    /* オフホワイト — 驚き */
-  sentimentality: 'oklch(0.84 0.08 355)',   /* シェルピンク — 感傷 */
+  surprise:       'oklch(0.76 0.18 68)',    /* アンバーオレンジ — 驚き（旧オフホワイトから視認性改善） */
+  sentimentality: 'oklch(0.66 0.22 350)',   /* ディープローズ — 感傷（旧シェルピンクから視認性改善） */
   confusion:      'oklch(0.73 0.07 228)',   /* フォグブルー（霧色）— 困惑 */
   neutral:        'oklch(0.58 0.03 255)',   /* ミッドグレーブルー — ニュートラル */
   attention:      'oklch(0.80 0.18 160)',   /* エメラルドグリーン — 注意 */
