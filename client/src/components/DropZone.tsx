@@ -95,9 +95,6 @@ export default function DropZone({ onDataLoaded }: DropZoneProps) {
               </div>
             </div>
         </div>
-        <h1 style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1.75rem', color: 'oklch(0.92 0.005 250)', marginBottom: '0.5rem' }}>
-          KSDV — Kokoro Sensor Data Visualizer
-        </h1>
         <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.9rem', color: 'oklch(0.58 0.015 255)' }}>
           心sensorの感情ログファイルをアップロードして分析を開始
         </p>
