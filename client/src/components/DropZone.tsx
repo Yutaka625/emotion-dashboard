@@ -207,40 +207,8 @@ export default function DropZone({ onDataLoaded }: DropZoneProps) {
         </div>
       )}
 
-      {/* Format guide */}
-      <div
-        className="mt-8 p-4 rounded-xl"
-        style={{
-          maxWidth: '560px',
-          width: '100%',
-          background: 'oklch(0.22 0.04 255)',
-          border: '1px solid oklch(0.28 0.04 255)',
-        }}
-      >
-        <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)', letterSpacing: '0.1em', marginBottom: '0.75rem' }}>
-          EXPECTED CSV FORMAT
-        </div>
-        <div className="grid grid-cols-3 gap-3">
-          {[
-            { label: '表情指標', items: ['anger', 'joy', 'sadness', 'attention', '...'] },
-            { label: '特殊指標', items: ['engagement', 'valence'] },
-            { label: 'アクションユニット', items: ['smile', 'brow raise', 'eye closure', '...'] },
-          ].map(group => (
-            <div key={group.label}>
-              <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', fontWeight: 600, color: 'oklch(0.78 0.14 82)', marginBottom: '0.3rem' }}>
-                {group.label}
-              </div>
-              {group.items.map(item => (
-                <div key={item} style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', color: 'oklch(0.58 0.015 255)', lineHeight: 1.8 }}>
-                  {item}
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
 
-      <style>{`
+<style>{`
         @keyframes signal-bar {
           from { transform: scaleY(0.4); opacity: 0.5; }
           to { transform: scaleY(1); opacity: 1; }
