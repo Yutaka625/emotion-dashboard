@@ -47,14 +47,16 @@ function MetricCard({ label, value, unit, icon, color, sub }: {
 }
 
 const RADIAN = Math.PI / 180;
-const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name }: any) => {
+const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
   if (percent < 0.03) return null;
   const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
   const y = cy + radius * Math.sin(-midAngle * RADIAN);
   return (
+    // stroke + paintOrder で背景色に関わらず文字を読みやすくする
     <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central"
-      style={{ fontSize: '0.65rem', fontFamily: 'Roboto Mono, monospace', fontWeight: 600 }}>
+      stroke="rgba(0,0,0,0.55)" strokeWidth={3} paintOrder="stroke"
+      style={{ fontSize: '0.68rem', fontFamily: 'Roboto Mono, monospace', fontWeight: 700 }}>
       {`${(percent * 100).toFixed(0)}%`}
     </text>
   );
