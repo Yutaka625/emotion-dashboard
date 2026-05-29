@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KSDV 使い方ガイド</title>
+<style>
+  :root {
+    --bg:        #0f1117;
+    --bg2:       #161b27;
+    --bg3:       #1e2535;
+    --border:    #2a3347;
+    --text:      #d8e0f0;
+    --text-dim:  #6b7a99;
+    --text-mute: #3d4a66;
+    --teal:      #38bdf8;
+    --teal-dim:  rgba(56,189,248,0.12);
+    --gold:      #fbbf24;
+    --gold-dim:  rgba(251,191,36,0.12);
+    --purple:    #c084fc;
+    --purple-dim:rgba(192,132,252,0.12);
+    --green:     #4ade80;
+    --green-dim: rgba(74,222,128,0.10);
+    --red:       #f87171;
+    --accent:    #38bdf8;
+    --radius:    10px;
+    --radius-sm: 6px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans JP', sans-serif;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  /* ─── LAYOUT ─── */
+  .layout { display: flex; min-height: 100vh; }
+
+  /* ─── SIDEBAR NAV ─── */
+  .sidenav {
+    width: 220px;
+    flex-shrink: 0;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .sidenav-logo {
+    padding: 20px 18px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sidenav-logo .app-name {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #f0f4ff;
+    letter-spacing: -.02em;
+  }
+  .sidenav-logo .app-sub {
+    font-size: 0.6rem;
+    color: var(--teal);
+    letter-spacing: .08em;
+    font-family: 'Courier New', monospace;
+    margin-top: 2px;
+  }
+  .sidenav-logo .guide-badge {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 0.62rem;
+    background: var(--teal-dim);
+    color: var(--teal);
+    border: 1px solid rgba(56,189,248,.3);
+    border-radius: 4px;
+    padding: 2px 8px;
+    letter-spacing: .06em;
+    font-family: 'Courier New', monospace;
+  }
+  .sidenav nav { padding: 10px 0; flex: 1; }
+  .sidenav nav a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 18px;
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    text-decoration: none;
+    border-left: 2px solid transparent;
+    transition: all .15s;
+  }
+  .sidenav nav a:hover,
+  .sidenav nav a.active {
+    background: var(--bg3);
+    color: var(--text);
+    border-left-color: var(--gold);
+  }
+  .sidenav nav .section-heading {
+    font-size: 0.58rem;
+    letter-spacing: .12em;
+    color: var(--text-mute);
+    padding: 14px 18px 4px;
+    font-family: 'Courier New', monospace;
+  }
+  .sidenav-footer {
+    padding: 12px 18px;
+    border-top: 1px solid var(--border);
+    font-size: 0.6rem;
+    color: var(--text-mute);
+    font-family: 'Courier New', monospace;
+  }
+
+  /* ─── MAIN ─── */
+  .main {
+    flex: 1;
+    padding: 48px 52px;
+    max-width: 900px;
+  }
+
+  /* ─── HERO ─── */
+  .hero {
+    margin-bottom: 48px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero-eyebrow {
+    font-size: 0.65rem;
+    letter-spacing: .14em;
+    color: var(--teal);
+    font-family: 'Courier New', monospace;
+    margin-bottom: 10px;
+  }
+  .hero h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #f0f4ff;
+    line-height: 1.2;
+    margin-bottom: 12px;
+    letter-spacing: -.02em;
+  }
+  .hero p {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    max-width: 580px;
+  }
+
+  /* ─── SECTIONS ─── */
+  .doc-section { margin-bottom: 56px; scroll-margin-top: 24px; }
+  .doc-section h2 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #f0f4ff;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .doc-section h2 .h2-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+  }
+  .doc-section h3 {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 24px 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .doc-section h3::before {
+    content: '';
+    display: inline-block;
+    width: 3px;
+    height: 14px;
+    background: var(--gold);
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  p { margin-bottom: 10px; color: var(--text-dim); font-size: 0.87rem; }
+
+  /* ─── STEPS ─── */
+  .steps { display: flex; flex-direction: column; gap: 12px; }
+  .step {
+    display: flex;
+    gap: 14px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    align-items: flex-start;
+  }
+  .step-num {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--teal-dim);
+    border: 1px solid rgba(56,189,248,.35);
+    color: var(--teal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+    margin-top: 1px;
+  }
+  .step-body { flex: 1; }
+  .step-body strong { color: var(--text); font-size: 0.88rem; }
+  .step-body p { margin: 4px 0 0; font-size: 0.82rem; }
+
+  /* ─── FEATURE CARDS ─── */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(248px, 1fr));
+    gap: 12px;
+  }
+  .feature-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    transition: border-color .2s;
+  }
+  .feature-card:hover { border-color: rgba(56,189,248,.4); }
+  .feature-card .fc-icon {
+    font-size: 1.3rem;
+    margin-bottom: 8px;
+    display: block;
+  }
+  .feature-card .fc-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .feature-card .fc-desc {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+  .feature-card .fc-tag {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 0.62rem;
+    border-radius: 4px;
+    padding: 2px 7px;
+    font-family: 'Courier New', monospace;
+    letter-spacing: .04em;
+  }
+  .tag-teal   { background: var(--teal-dim);   color: var(--teal);   border: 1px solid rgba(56,189,248,.25); }
+  .tag-gold   { background: var(--gold-dim);   color: var(--gold);   border: 1px solid rgba(251,191,36,.25); }
+  .tag-purple { background: var(--purple-dim); color: var(--purple); border: 1px solid rgba(192,132,252,.25); }
+  .tag-green  { background: var(--green-dim);  color: var(--green);  border: 1px solid rgba(74,222,128,.25); }
+
+  /* ─── HOW-TO BLOCKS ─── */
+  .howto {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    margin-bottom: 14px;
+  }
+  .howto-title {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .howto-badge {
+    font-size: 0.6rem;
+    border-radius: 4px;
+    padding: 2px 7px;
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+    letter-spacing: .04em;
+  }
+  .howto ol, .howto ul { padding-left: 18px; }
+  .howto li {
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    margin-bottom: 5px;
+    line-height: 1.6;
+  }
+  .howto li strong { color: var(--text); }
+  .howto .note {
+    margin-top: 10px;
+    font-size: 0.76rem;
+    color: var(--teal);
+    background: var(--teal-dim);
+    border-left: 2px solid var(--teal);
+    padding: 7px 10px;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  }
+  .howto .warn {
+    margin-top: 10px;
+    font-size: 0.76rem;
+    color: var(--gold);
+    background: var(--gold-dim);
+    border-left: 2px solid var(--gold);
+    padding: 7px 10px;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  }
+
+  /* ─── TAB TABLE ─── */
+  .tab-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  .tab-table th {
+    text-align: left;
+    padding: 9px 14px;
+    background: var(--bg3);
+    color: var(--text-dim);
+    font-size: 0.7rem;
+    letter-spacing: .06em;
+    font-family: 'Courier New', monospace;
+    border-bottom: 1px solid var(--border);
+  }
+  .tab-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-dim);
+    vertical-align: top;
+    line-height: 1.6;
+  }
+  .tab-table tr:hover td { background: var(--bg3); }
+  .tab-table td:first-child { color: var(--text); font-weight: 600; white-space: nowrap; }
+  .tab-table td:nth-child(2) { color: var(--teal); font-size: 0.75rem; font-family: 'Courier New', monospace; white-space: nowrap; }
+
+  /* ─── METRIC PILL LIST ─── */
+  .pill-list { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 14px; }
+  .pill {
+    font-size: 0.72rem;
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-family: 'Courier New', monospace;
+    border: 1px solid;
+  }
+
+  /* ─── TAB DETAIL CARDS ─── */
+  .tab-cards { display: flex; flex-direction: column; gap: 14px; }
+  .tab-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .tab-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg3);
+  }
+  .tab-card-num {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+    flex-shrink: 0;
+  }
+  .tab-card-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .tab-card-sub {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    font-family: 'Courier New', monospace;
+    margin-left: auto;
+  }
+  .tab-card-body { padding: 14px 18px; }
+  .tab-card-body p { margin-bottom: 8px; font-size: 0.82rem; }
+  .tab-card-body .metrics-label {
+    font-size: 0.65rem;
+    letter-spacing: .1em;
+    color: var(--text-mute);
+    font-family: 'Courier New', monospace;
+    margin-bottom: 6px;
+  }
+
+  /* ─── INLINE CODE ─── */
+  code {
+    font-family: 'Courier New', monospace;
+    font-size: 0.8em;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 5px;
+    color: var(--teal);
+  }
+
+  /* ─── DIVIDER ─── */
+  hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+  /* ─── SCROLLBAR ─── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg2); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @media (max-width: 760px) {
+    .sidenav { display: none; }
+    .main { padding: 28px 20px; }
+    .feature-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- ─── SIDEBAR ─── -->
+  <div class="sidenav">
+    <div class="sidenav-logo">
+      <div class="app-name">KSDV</div>
+      <div class="app-sub">KOKORO SENSOR DATA VISUALIZER</div>
+      <div class="guide-badge">USER GUIDE</div>
+    </div>
+    <nav>
+      <div class="section-heading">はじめに</div>
+      <a href="#quickstart">クイックスタート</a>
+      <a href="#features">できること</a>
+
+      <div class="section-heading">操作方法</div>
+      <a href="#upload">ファイルのアップロード</a>
+      <a href="#timerange">タイムレンジ指定</a>
+      <a href="#events">イベント登録</a>
+      <a href="#baseline">ベースライン補正</a>
+      <a href="#faceid">FaceID別表示</a>
+      <a href="#compare">CSV比較</a>
+
+      <div class="section-heading">タブ別ガイド</div>
+      <a href="#tab-overview">概要</a>
+      <a href="#tab-timeseries">時系列分析</a>
+      <a href="#tab-engagement">特殊指標</a>
+      <a href="#tab-emotions">感情分布</a>
+      <a href="#tab-transitions">感情遷移</a>
+      <a href="#tab-academic">学術的分析</a>
+      <a href="#tab-actionunits">アクションユニット</a>
+      <a href="#tab-uxresearch">UXリサーチ</a>
+      <a href="#tab-comparison">比較分析</a>
+    </nav>
+    <div class="sidenav-footer">KSDV v2.0 · 2026-05</div>
+  </div>
+
+  <!-- ─── MAIN CONTENT ─── -->
+  <div class="main">
+
+    <!-- HERO -->
+    <div class="hero">
+      <div class="hero-eyebrow">KSDV · KOKORO SENSOR DATA VISUALIZER</div>
+      <h1>使い方ガイド</h1>
+      <p>心sensorの感情ログ（AFFDEX形式CSV）をブラウザにドロップするだけで、10種類の感情スコアを多角的に可視化・分析できます。このガイドでは基本操作から高度な機能まで解説します。</p>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════
+         クイックスタート
+    ═══════════════════════════════════════ -->
+    <div class="doc-section" id="quickstart">
+      <h2>
+        <span class="h2-icon" style="background:var(--teal-dim); color:var(--teal);">▶</span>
+        クイックスタート
+      </h2>
+      <p>初めてお使いの場合は、以下の4ステップで分析を開始できます。</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>CSVファイルをドロップ</strong>
+            <p>心sensorから書き出したAFFDEX形式の<code>.csv</code>ファイルを、アップロードエリアにドラッグ＆ドロップ（またはクリックして選択）します。</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>自動解析を待つ</strong>
+            <p>ブラウザ内で統計計算が実行されます（データはサーバーに送信されません）。処理は通常数秒で完了します。</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>「概要」タブを確認</strong>
+            <p>セッション全体のサマリー（記録時間・支配的感情・Engagement平均など）が自動表示されます。</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <strong>左サイドバーでタブを切り替え</strong>
+            <p>「時系列分析」「感情分布」「UXリサーチ」など目的に応じたタブに移動して詳細を確認します。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════
+         できること
+    ═══════════════════════════════════════ -->
+    <div class="doc-section" id="features">
+      <h2>
+        <span class="h2-icon" style="background:var(--gold-dim); color:var(--gold);">✦</span>
+        できること
+      </h2>
+      <p>KSDVが提供する主な機能の一覧です。</p>
+
+      <div class="feature-grid">
+        <div class="feature-card">
+          <span class="fc-icon">📂</span>
+          <div class="fc-title">ファイルドロップで即時解析</div>
+          <div class="fc-desc">CSVをドロップするだけで10種の感情スコア・Engagement・Valence・アクションユニットを全自動で計算・可視化。</div>
+          <span class="fc-tag tag-teal">ドロップ解析</span>
+        </div>
+        <div class="feature-card">
+          <span class="fc-icon">🔍</span>
+          <div class="fc-title">タイムレンジ指定</div>
+          <div class="fc-desc">開始秒・終了秒を指定して、注目したい区間だけを全グラフ・統計に反映。絞り込んだデータのCSV出力も可能。</div>
+          <span class="fc-tag tag-teal">時間フィルター</span>
+        </div>
+        <div class="feature-card">
+          <span class="fc-icon">📌</span>
+          <div class="fc-title">イベント登録</div>
+          <div class="fc-desc">タスク区間に名前と時間を付けてグラフ上に可視化。区間ごとの感情統計とt検定による有意差判定が自動生成。</div>
+          <span class="fc-tag tag-gold">イベント</span>
+        </div>
+        <div class="feature-card">
+          <span class="fc-icon">⚖️</span>
+          <div class="fc-title">ベースライン補正</div>
+          <div class="fc-desc">安静時区間を指定すると、全感情スコアからベースライン値を差し引いた補正済みスコアで全タブを再表示。</div>
+          <span class="fc-tag tag-gold">補正</span>
+        </div>
+        <div class="feature-card">
+          <span class="fc-icon">👥</span>
+          <div class="fc-title">FaceID別データ表示</div>
+          <div class="fc-desc">複数人のデータが混在するCSVを自動検出し、被験者ごとに切り替え表示。Ctrl+クリックで複数人の合算も可能。</div>
+          <span class="fc-tag tag-purple">マルチFaceID</span>
+        </div>
+        <div class="feature-card">
+          <span class="fc-icon">🆚</span>
+          <div class="fc-title">CSV比較（A/B分析）</div>
+          <div class="fc-desc">2つのセッションを並列比較。感情スコア差分・レーダーチャート・時系列オーバーレイで違いを一目で把握。</div>
+          <span class="fc-tag tag-purple">比較</span>
+        </div>
+        <div class="feature-card">
+          <span class="fc-icon">🧪</span>
+          <div class="fc-title">UXスコア自動計算</div>
+          <div class="fc-desc">フラストレーション指数・デライト指数・認知負荷・総合UXスコアを複合感情スコアから自動算出。</div>
+          <span class="fc-tag tag-green">UXリサーチ</span>
+        </div>
+        <div class="feature-card">
+          <span class="fc-icon">🎓</span>
+          <div class="fc-title">学術的分析</div>
+          <div class="fc-desc">Affect Dynamics（変動性・慣性・不安定性）、Russell円環モデル、相関行列ヒートマップを自動生成。</div>
+          <span class="fc-tag tag-green">学術</span>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════
+         操作方法
+    ═══════════════════════════════════════ -->
+    <div class="doc-section" id="upload">
+      <h2>
+        <span class="h2-icon" style="background:var(--teal-dim); color:var(--teal);">📂</span>
+        ファイルのアップロード
+      </h2>
+
+      <div class="howto">
+        <div class="howto-title">
+          基本的なアップロード手順
+          <span class="howto-badge tag-teal">必須</span>
+        </div>
+        <ol>
+          <li>ブラウザでKSDVを開くと、中央にアップロードエリアが表示されます。</li>
+          <li>心sensorから出力したAFFDEX形式の<strong>.csvファイル</strong>をエリアにドラッグ＆ドロップします。</li>
+          <li>クリックしてファイルダイアログから選択することもできます。</li>
+          <li>「ファイルを読み込み中…」→「データを解析中…」→「統計を計算中…」と進行し、自動でダッシュボードが表示されます。</li>
+        </ol>
+        <div class="note">💡 データはすべてブラウザ内で処理されます。外部サーバーへの送信はありません。</div>
+      </div>
+
+      <div class="howto">
+        <div class="howto-title">
+          別のファイルを再読み込みするには
+        </div>
+        <ul>
+          <li>ダッシュボード右上の<strong>ファイル名表示エリア</strong>をクリックすると、新しいCSVをドロップして解析をリセットできます。</li>
+        </ul>
+      </div>
+    </div>
+
+
+    <div class="doc-section" id="timerange">
+      <h2>
+        <span class="h2-icon" style="background:var(--teal-dim); color:var(--teal);">🔍</span>
+        タイムレンジ指定
+      </h2>
+      <p>「時系列分析」タブ内の <strong>TIME RANGE FILTER</strong> で、分析対象の時間範囲を秒単位で絞り込めます。</p>
+
+      <div class="howto">
+        <div class="howto-title">操作手順</div>
+        <ol>
+          <li>左サイドバーから<strong>「時系列分析」</strong>タブを開きます。</li>
+          <li><strong>TIME RANGE FILTER</strong> セクションで「開始秒」「終了秒」を入力します。</li>
+          <li>プリセットボタン（全体 / 0-60s / 60-120s …）で素早く切り替えることもできます。</li>
+          <li>指定後、グラフとすべての統計が選択範囲のデータに絞られます。</li>
+          <li><strong>「CSV出力」ボタン</strong>を押すと、絞り込んだ範囲のデータを <code>emotion_data_○-○s.csv</code> としてダウンロードできます（全感情スコア・Engagement・Valence・Attention・アクションユニット22種を含む）。</li>
+        </ol>
+        <div class="note">💡 ベースライン補正と組み合わせる場合は、先にタイムレンジを安静時区間に合わせて「ベースラインとして設定」を押します。</div>
+      </div>
+    </div>
+
+
+    <div class="doc-section" id="events">
+      <h2>
+        <span class="h2-icon" style="background:var(--gold-dim); color:var(--gold);">📌</span>
+        イベント登録
+      </h2>
+      <p>タスクや刺激の区間に名前と時間帯を登録すると、グラフ上に色付き縦線が表示され、区間ごとの感情統計が自動生成されます。</p>
+
+      <div class="howto">
+        <div class="howto-title">イベントを追加する</div>
+        <ol>
+          <li>「時系列分析」タブ内の <strong>EVENT ANNOTATIONS</strong> セクションを開きます。</li>
+          <li>「＋イベント追加」ボタンをクリックしてフォームを表示します。</li>
+          <li><strong>イベント名</strong>（例：「タスクA」「広告視聴」）・<strong>開始秒</strong>・<strong>終了秒</strong>を入力して「追加」をクリックします。</li>
+          <li>グラフに色付き縦線が引かれ、その区間の感情統計（<strong>EVENT EMOTION STATS</strong>）が表示されます。</li>
+          <li>複数イベントを登録して区間間の反応を比較できます。</li>
+        </ol>
+        <div class="note">💡 登録したイベントは「UXリサーチ」タブの「タスク別サマリー」にも自動連携されます。</div>
+      </div>
+
+      <div class="howto">
+        <div class="howto-title">区間間の統計比較（t検定）</div>
+        <ul>
+          <li>複数イベントを登録したあと、<strong>「区間を比較」</strong>機能で2つの区間を選ぶと、各感情スコアのt検定結果（p値・有意差フラグ）が自動表示されます。</li>
+        </ul>
+      </div>
+    </div>
+
+
+    <div class="doc-section" id="baseline">
+      <h2>
+        <span class="h2-icon" style="background:var(--gold-dim); color:var(--gold);">⚖️</span>
+        ベースライン補正
+      </h2>
+      <p>刺激なしの安静時区間をベースラインとして設定すると、すべての感情スコアから安静時の平均値が差し引かれた「補正済みスコア」でダッシュボード全体が再表示されます。</p>
+
+      <div class="howto">
+        <div class="howto-title">
+          手動でベースライン区間を設定する
+          <span class="howto-badge tag-gold">推奨手順</span>
+        </div>
+        <ol>
+          <li>「時系列分析」タブで<strong>TIME RANGE FILTER</strong>を使い、安静時に相当する区間を選択します（例：実験開始前の0〜30秒）。</li>
+          <li><strong>「ベースラインとして設定」ボタン</strong>を押します。</li>
+          <li>BASELINE SETTINGSパネルに選択した区間と計算されたオフセット値が表示されます。</li>
+          <li>「ベースライン補正を適用」を有効にすると、画面上部に青いバナーが出現し、全タブのグラフ・統計が補正済みに切り替わります。</li>
+        </ol>
+        <div class="note">💡 自動検出ボタン（<strong>「自動検出」</strong>）を使うと、CSVデータ内で最も感情変動が少ない区間を自動的に候補として提示します。</div>
+      </div>
+
+      <div class="howto">
+        <div class="howto-title">補正を解除するには</div>
+        <ul>
+          <li>画面上部のバナー右端にある<strong>「解除」ボタン</strong>をクリックすると、元の未補正スコアに戻ります。</li>
+        </ul>
+        <div class="warn">⚠️ ベースライン補正中はすべてのグラフの縦軸が0を中心とした差分値になります。スコアがマイナスになる場合があります（安静時より低い状態を意味します）。</div>
+      </div>
+    </div>
+
+
+    <div class="doc-section" id="faceid">
+      <h2>
+        <span class="h2-icon" style="background:var(--purple-dim); color:var(--purple);">👥</span>
+        FaceID別データ表示
+      </h2>
+      <p>複数の被験者データが1つのCSVに含まれている場合（FaceID列あり）、自動で人物ごとに分離して切り替えられます。</p>
+
+      <div class="howto">
+        <div class="howto-title">FaceID切り替えUI</div>
+        <ul>
+          <li>複数FaceIDが検出されると、ダッシュボード上部に<strong>FaceIDセレクター</strong>が表示されます。</li>
+          <li><strong>「全員」ボタン</strong>：すべての被験者を合算したデータを表示します。</li>
+          <li><strong>個別チップ</strong>（FaceID名）：クリックするとその1人のデータに切り替わります。</li>
+          <li><strong>Ctrl/Cmd＋クリック</strong>：複数人を選択して合算表示できます。</li>
+        </ul>
+        <div class="note">💡 FaceID列がない、または1人分のデータのみの場合は通常モードで動作し、このUIは表示されません。</div>
+      </div>
+    </div>
+
+
+    <div class="doc-section" id="compare">
+      <h2>
+        <span class="h2-icon" style="background:var(--purple-dim); color:var(--purple);">🆚</span>
+        CSV比較（A/B分析）
+      </h2>
+      <p>2つの異なるセッションのCSVを読み込んで並列比較できます。A/Bテスト・条件比較・before/afterの検証に使います。</p>
+
+      <div class="howto">
+        <div class="howto-title">比較CSVを追加する</div>
+        <ol>
+          <li>メインCSVを読み込んでダッシュボードを表示します。</li>
+          <li>ヘッダー右上の<strong>「＋比較CSV」ボタン</strong>をクリックします。</li>
+          <li>比較用のCSVファイルを選択します。</li>
+          <li>自動で<strong>「比較分析」タブ</strong>に切り替わり、2セッションの並列比較が表示されます。</li>
+        </ol>
+        <div class="note">💡 比較データを削除するには「比較中: ○○」ボタン右の × をクリックします。</div>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════
+         タブ別ガイド
+    ═══════════════════════════════════════ -->
+    <hr>
+
+    <div class="doc-section" id="tab-overview">
+      <h2>
+        <span class="h2-icon" style="background:var(--teal-dim); color:var(--teal);">⊞</span>
+        タブ①：概要（Overview）
+      </h2>
+      <p>CSVを読み込んだ直後に表示される全体サマリーです。セッションの「顔」を確認するのに使います。</p>
+
+      <div class="pill-list">
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">総フレーム数</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">記録時間</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">平均Engagement</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">平均Attention</span>
+        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(251,191,36,.25);">支配的感情</span>
+        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(251,191,36,.25);">感情多様性</span>
+        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(192,132,252,.25);">感情分布ドーナツチャート</span>
+        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(192,132,252,.25);">感情プロファイル（レーダー）</span>
+        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">KEY INSIGHTS（自動コメント）</span>
+        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">DATA QUALITY（顔検出率・fps）</span>
+      </div>
+
+      <p><strong>支配的感情</strong>はそのフレームで最もスコアが高かった感情です。ドーナツチャートで全体に占める割合が確認できます。<br>
+      <strong>KEY INSIGHTS</strong>はアルゴリズムが自動生成する3〜5個のサマリーコメントです。</p>
+    </div>
+
+
+    <div class="doc-section" id="tab-timeseries">
+      <h2>
+        <span class="h2-icon" style="background:var(--teal-dim); color:var(--teal);">〜</span>
+        タブ②：時系列分析（Timeseries）
+      </h2>
+      <p>「いつ、どの感情が、どのくらい強かったか」を時間軸で確認するタブです。イベント登録・タイムレンジ指定・ベースライン補正の操作もここで行います。</p>
+
+      <div class="pill-list">
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">EVENT ANNOTATIONS（イベント登録）</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">TIME RANGE FILTER</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">CSV出力</span>
+        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(251,191,36,.25);">BASELINE SETTINGS</span>
+        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(251,191,36,.25);">自動検出</span>
+        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(192,132,252,.25);">感情時系列グラフ（10感情）</span>
+        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(192,132,252,.25);">支配的感情タイムライン</span>
+        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">10秒ウィンドウ集計表</span>
+        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">感情ヒートマップ（5秒区間）</span>
+        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">区間t検定</span>
+      </div>
+
+      <p>グラフ上部のチェックボックスで表示する感情を絞り込めます。「支配的感情タイムライン」は各フレームで最も強かった感情を色帯で一覧できます。</p>
+    </div>
+
+
+    <div class="doc-section" id="tab-engagement">
+      <h2>
+        <span class="h2-icon" style="background:var(--gold-dim); color:var(--gold);">⚡</span>
+        タブ③：特殊指標（Engagement / Valence）
+      </h2>
+      <p><strong>Engagement（関与度）</strong>と<strong>Valence（感情価）</strong>をタブで切り替えながら深掘り分析するセクションです。</p>
+
+      <div class="howto">
+        <div class="howto-title">Engagement タブ</div>
+        <ul>
+          <li><strong>基本統計量</strong>：平均・最大・中央値・標準偏差の4カード</li>
+          <li><strong>レベル分布</strong>：5段階（Very Low〜Very High）のフレーム数分布</li>
+          <li><strong>感情との相関係数</strong>：Engagementと各感情のPearson相関を横棒グラフで表示。+1.0に近いほど同時に高くなる傾向</li>
+          <li><strong>Engagement × Valence 散布図</strong>：各フレームを2次元空間にプロット。右上＝積極的かつポジティブ</li>
+          <li><strong>感情プロファイル比較</strong>：Engagement高時 vs 低時の感情スコア比較棒グラフ</li>
+          <li><strong>Affect Dynamics</strong>：変動性(SD)・不安定性(MSSD)・慣性(AR1)・レンジ・平均絶対変化量</li>
+        </ul>
+      </div>
+
+      <div class="howto">
+        <div class="howto-title">Valence タブ</div>
+        <ul>
+          <li>Valenceの基本統計量・レベル分布・感情との相関係数</li>
+          <li><strong>Circumplex Model（Russell 1980）</strong>：Valence × 覚醒度（Engagement代理）で4象限分類。高覚醒×高Valence＝興奮、低覚醒×高Valence＝リラックスなど</li>
+          <li>Affect Dynamics（Valence版）</li>
+        </ul>
+      </div>
+    </div>
+
+
+    <div class="doc-section" id="tab-emotions">
+      <h2>
+        <span class="h2-icon" style="background:var(--teal-dim); color:var(--teal);">📊</span>
+        タブ④：感情分布（Emotions）
+      </h2>
+      <p>10種類の感情スコアの統計的分布と出現パターンを横断的に分析します。</p>
+
+      <div class="pill-list">
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">感情カード × 10枚（平均・最大・支配率）</span>
+        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(251,191,36,.25);">感情出現率（Prevalence）</span>
+        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(192,132,252,.25);">記述統計表（全感情×平均・SD・最大・中央値）</span>
+        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">Affect Dynamics 比較棒グラフ</span>
+      </div>
+
+      <p><strong>感情出現率</strong>は「その感情が有意に出現した時間の割合」で、平均スコアとは異なる指標です。例：喜び 68% → セッションの68%の時間で喜びスコアが閾値以上だった。</p>
+
+      <table class="tab-table" style="margin-top:12px">
+        <thead>
+          <tr><th>感情</th><th>英語名</th><th>イメージ</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>怒り</td><td>anger</td><td>スカーレット（朱赤）</td></tr>
+          <tr><td>軽蔑</td><td>contempt</td><td>ペリウィンクル</td></tr>
+          <tr><td>嫌悪</td><td>disgust</td><td>アプリコット</td></tr>
+          <tr><td>恐怖</td><td>fear</td><td>ピスタチオグリーン</td></tr>
+          <tr><td>喜び</td><td>joy</td><td>カナリアイエロー</td></tr>
+          <tr><td>悲しみ</td><td>sadness</td><td>シアン</td></tr>
+          <tr><td>驚き</td><td>surprise</td><td>アンバーオレンジ</td></tr>
+          <tr><td>感傷</td><td>sentimentality</td><td>ディープローズ</td></tr>
+          <tr><td>困惑</td><td>confusion</td><td>フォグブルー</td></tr>
+          <tr><td>ニュートラル</td><td>neutral</td><td>ミッドグレーブルー</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+
+    <div class="doc-section" id="tab-transitions">
+      <h2>
+        <span class="h2-icon" style="background:var(--purple-dim); color:var(--purple);">⇄</span>
+        タブ⑤：感情遷移（Transitions）
+      </h2>
+      <p>感情が「どの感情からどの感情へ」移り変わったかのパターンを分析します。</p>
+
+      <div class="pill-list">
+        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(192,132,252,.25);">遷移行列（10×10 ヒートマップ）</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">主要遷移パターン上位10件</span>
+        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(251,191,36,.25);">持続時間分析（平均・最大・合計）</span>
+        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">持続時間統計表</span>
+      </div>
+
+      <p><strong>遷移行列</strong>は行が「遷移元」、列が「遷移先」です。セルの色が濃いほど遷移回数が多いことを示します（明度補間方式で視認性を確保）。対角線は同じ感情が連続したフレームです。</p>
+    </div>
+
+
+    <div class="doc-section" id="tab-academic">
+      <h2>
+        <span class="h2-icon" style="background:var(--green-dim); color:var(--green);">🧠</span>
+        タブ⑥：学術的分析（Academic）
+      </h2>
+      <p>感情心理学の研究手法に基づいた高度な指標を提供します。研究論文・学術レポートの作成に活用できます。</p>
+
+      <div class="pill-list">
+        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">Affect Dynamics 変動性比較</span>
+        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">Affect Dynamics 慣性比較</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">相関行列ヒートマップ（全感情×Engagement×Valence）</span>
+        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(251,191,36,.25);">Circumplex Model 象限分析</span>
+        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(192,132,252,.25);">学術的解釈コメント（自動生成）</span>
+      </div>
+
+      <table class="tab-table" style="margin-top:12px">
+        <thead><tr><th>理論</th><th>提唱者</th><th>概要</th></tr></thead>
+        <tbody>
+          <tr><td>Affect Dynamics</td><td>Kuppens et al. (2010)</td><td>感情の変動性・不安定性・慣性を定量化。AR1が高い感情は一度出現すると長く持続する</td></tr>
+          <tr><td>Circumplex Model</td><td>Russell (1980)</td><td>感情を「覚醒度 × 感情価」の2次元で分類。Engagementを覚醒度の代理指標として使用</td></tr>
+          <tr><td>FACS</td><td>Ekman & Friesen (1978)</td><td>顔の筋肉動作をAction Unitで体系化。アクションユニットタブと連携</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+
+    <div class="doc-section" id="tab-actionunits">
+      <h2>
+        <span class="h2-icon" style="background:var(--teal-dim); color:var(--teal);">😶</span>
+        タブ⑦：アクションユニット（Action Units）
+      </h2>
+      <p>顔の表情筋（アクションユニット、AU）の動きを詳細に分析します。FACSシステムに基づき22種類のAUを追跡します。</p>
+
+      <div class="pill-list">
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">AU別平均活性化値（棒グラフ）</span>
+        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(251,191,36,.25);">AU活動率（有意に動いていた時間の割合）</span>
+        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(192,132,252,.25);">AUリファレンス表</span>
+        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">頭部姿勢分析（Pitch / Yaw / Roll）</span>
+        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">頭部動作検知イベント（nod / shake / tilt）</span>
+      </div>
+
+      <p>追跡するAU：<code>smile</code> / <code>blink</code> / <code>brow raise</code> / <code>brow furrow</code> / <code>eye widen</code> / <code>nose wrinkle</code> / <code>mouth open</code> / <code>jaw drop</code> / <code>smirk</code> など22種類。</p>
+      <p><strong>頭部動作検知</strong>ではうなづき（nod）・首振り（shake）・首傾げ（tilt）が自動検出され、発生時刻・継続時間・最大変化量（度）が一覧で表示されます。</p>
+    </div>
+
+
+    <div class="doc-section" id="tab-uxresearch">
+      <h2>
+        <span class="h2-icon" style="background:var(--green-dim); color:var(--green);">🧪</span>
+        タブ⑧：UXリサーチ（UX Research）
+      </h2>
+      <p>製品・UXリサーチ向けに設計された複合スコアと感情パターン分析を提供します。定量的なUX評価に活用できます。</p>
+
+      <div class="howto">
+        <div class="howto-title">UX複合スコア（5指標）</div>
+        <table class="tab-table" style="margin-top:4px">
+          <thead><tr><th>指標</th><th>計算式（概要）</th><th>高い場合の意味</th></tr></thead>
+          <tbody>
+            <tr><td>フラストレーション指数</td><td>confusion×0.4 + anger×0.3 + …</td><td>ユーザーが困難・ストレスを感じている</td></tr>
+            <tr><td>デライト指数</td><td>joy×0.5 + surprise×0.3 + …</td><td>ユーザーが喜び・驚きを感じている</td></tr>
+            <tr><td>エンゲージメント品質</td><td>engagement × (1 - confusion×2)</td><td>混乱を除いた純粋な関与度が高い</td></tr>
+            <tr><td>認知負荷推定</td><td>confusion×0.6 + brow_furrow/100×0.4</td><td>思考の重さ・情報処理負荷が高い</td></tr>
+            <tr><td>総合UXスコア</td><td>上記の合成（0〜100）</td><td>セッション全体のUX品質が高い</td></tr>
+          </tbody>
+        </table>
+        <div class="note">💡 各スコアにはLOW / MED / HIGHの段階評価バッジが表示されます。</div>
+      </div>
+
+      <div class="pill-list">
+        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">感情ヒートマップ（10秒×感情の2D）</span>
+        <span class="pill" style="background:var(--red);color:#fff;border-color:rgba(248,113,113,.25);background:rgba(248,113,113,.1);">フリクション（ネガティブ急変）タイムライン</span>
+        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(251,191,36,.25);">デライト（ポジティブ急変）タイムライン</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">タスク別サマリー（イベント連携）</span>
+      </div>
+
+      <p><strong>タスク別サマリー</strong>には「時系列分析」タブで登録したイベント（タスク区間）ごとの感情スコアとUXスコアが集計されます。「どのタスクで最もフラストレーションが高かったか」を比較できます。</p>
+    </div>
+
+
+    <div class="doc-section" id="tab-comparison">
+      <h2>
+        <span class="h2-icon" style="background:var(--purple-dim); color:var(--purple);">⊞⊞</span>
+        タブ⑨：比較分析（Comparison）
+      </h2>
+      <p>2つのCSVセッションを並べてA/B比較するタブです。ヘッダー右上の「＋比較CSV」ボタンで第2CSVを追加したときのみ表示されます。</p>
+
+      <div class="pill-list">
+        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(192,132,252,.25);">感情スコア並列棒グラフ（A vs B）</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">差分テーブル（|B−A| 降順）</span>
+        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(251,191,36,.25);">時系列オーバーレイ</span>
+        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">感情プロファイル レーダーチャート（A vs B）</span>
+      </div>
+
+      <p><strong>差分テーブル</strong>は |B−A| の絶対差が大きい順に感情を並べます。どの感情で2セッションの差が最も顕著かを一目で把握できます。</p>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════
+         指標クイックリファレンス
+    ═══════════════════════════════════════ -->
+    <hr>
+    <div class="doc-section" id="reference">
+      <h2>
+        <span class="h2-icon" style="background:var(--teal-dim); color:var(--teal);">📖</span>
+        指標クイックリファレンス
+      </h2>
+      <table class="tab-table">
+        <thead>
+          <tr><th>指標</th><th>単位/範囲</th><th>説明</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Engagement</td><td>0〜100%</td><td>関与度・集中度。顔の動き・表情の複雑さ・目の動きを総合して算出</td></tr>
+          <tr><td>Valence</td><td>0〜100%（50=中立）</td><td>感情の快/不快の度合い。50超がポジティブ、50未満がネガティブ</td></tr>
+          <tr><td>Attention</td><td>0〜100%</td><td>視線・注意の向き</td></tr>
+          <tr><td>AR1（慣性）</td><td>0〜1</td><td>前のフレームの状態が次に引き継がれる度合い。1に近いほど感情が持続しやすい</td></tr>
+          <tr><td>SD（変動性）</td><td>—</td><td>標準偏差。感情スコアのばらつきの大きさ</td></tr>
+          <tr><td>MSSD（不安定性）</td><td>—</td><td>隣接フレーム間の変化の平均二乗。急激な変動の頻度を示す</td></tr>
+          <tr><td>支配的感情</td><td>感情名</td><td>そのフレームで最もスコアが高かった感情</td></tr>
+          <tr><td>Pitch / Yaw / Roll</td><td>度（°）</td><td>頭部姿勢の角度。Pitch=上下、Yaw=左右、Roll=傾き</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div><!-- /.main -->
+</div><!-- /.layout -->
+
+<script>
+  // アクティブリンクのハイライト
+  const links = document.querySelectorAll('.sidenav nav a');
+  const sections = document.querySelectorAll('.doc-section[id], .hero');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`.sidenav nav a[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { threshold: 0.3 });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

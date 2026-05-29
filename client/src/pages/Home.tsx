@@ -312,6 +312,35 @@ export default function Home() {
               onChange={e => { const f = e.target.files?.[0]; if (f) handleSecondaryCSV(f); e.target.value = ''; }}
             />
           </div>
+
+          {/* ガイドリンク（右端） */}
+          <a
+            href="KSDV_guide.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-colors"
+            style={{
+              background: 'oklch(0.27 0.04 255)',
+              border: '1px solid oklch(0.32 0.04 255)',
+              color: 'oklch(0.72 0.008 250)',
+              textDecoration: 'none',
+              flexShrink: 0,
+            }}
+            onMouseEnter={e => {
+              (e.currentTarget as HTMLAnchorElement).style.borderColor = 'oklch(0.70 0.14 195 / 0.5)';
+              (e.currentTarget as HTMLAnchorElement).style.color = 'oklch(0.70 0.14 195)';
+            }}
+            onMouseLeave={e => {
+              (e.currentTarget as HTMLAnchorElement).style.borderColor = 'oklch(0.32 0.04 255)';
+              (e.currentTarget as HTMLAnchorElement).style.color = 'oklch(0.72 0.008 250)';
+            }}
+            title="使い方ガイドを開く"
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+            </svg>
+            <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem' }}>使い方</span>
+          </a>
         </header>
 
         {/* Scrollable Content */}

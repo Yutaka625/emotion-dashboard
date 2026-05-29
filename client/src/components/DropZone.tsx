@@ -189,6 +189,42 @@ export default function DropZone({ onDataLoaded }: DropZoneProps) {
         )}
       </div>
 
+      {/* ガイドリンク */}
+      <a
+        href="KSDV_guide.html"
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={e => e.stopPropagation()}
+        style={{
+          marginTop: '20px',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '6px',
+          fontFamily: 'Noto Sans JP, sans-serif',
+          fontSize: '0.75rem',
+          color: 'oklch(0.58 0.015 255)',
+          textDecoration: 'none',
+          padding: '5px 12px',
+          borderRadius: '6px',
+          border: '1px solid oklch(0.28 0.04 255)',
+          background: 'oklch(0.22 0.04 255)',
+          transition: 'color .15s, border-color .15s',
+        }}
+        onMouseEnter={e => {
+          (e.currentTarget as HTMLAnchorElement).style.color = 'oklch(0.70 0.14 195)';
+          (e.currentTarget as HTMLAnchorElement).style.borderColor = 'oklch(0.70 0.14 195 / 0.4)';
+        }}
+        onMouseLeave={e => {
+          (e.currentTarget as HTMLAnchorElement).style.color = 'oklch(0.58 0.015 255)';
+          (e.currentTarget as HTMLAnchorElement).style.borderColor = 'oklch(0.28 0.04 255)';
+        }}
+      >
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+        </svg>
+        使い方ガイドを見る
+      </a>
+
       {/* Error message */}
       {error && (
         <div
