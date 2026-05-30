@@ -95,14 +95,14 @@
 > 現状: `OverviewSection` の `keyInsights` は固定3テーマにデータを差し込むだけ。
 > 改善: ルールベースのインサイトエンジン（`lib/insightEngine.ts`）に作り替える。
 
-- [ ] **Phase 1: インサイトエンジン（標準セット）**（計画確定済み・着手待ち）
-  - `lib/insightEngine.ts`（新規・純粋関数）: `generateInsights(data, baselineState) → Insight[]`
+- [x] **Phase 1: インサイトエンジン（標準セット）**（2026-05-30 完了）
+  - `lib/insightEngine.ts`（新規・純粋関数／AI・API不使用）: `generateInsights(data, baselineState, limit) → Insight[]`
   - `Insight = { id, title, body, color, tone, score }`（tone: positive/neutral/caution/alert）
-  - ルール群を score 降順で評価 → 上位4枚を固定表示（コア指標はフォールバック確保）
-  - 標準ルール: 感情の偏り/多様性・変動性(affect_dynamics)・急変点(change_points)・最長持続(duration)
-    ・Engagement/Valence/Attention・UX指標(ux_scores)・検出品質の警告(detection_rate)・補正状態の注記
-  - signed/ベースライン補正時は文言を自動切替（負値の誤読防止）
-  - `OverviewSection.tsx` をエンジン呼び出しに置換＋tone別の色/アイコン付与
+  - 9ルールを score 降順で評価 → 上位4枚を固定表示（Engagement/Valence/支配感情はフォールバック確保）
+  - 標準ルール: 検出品質警告・支配感情の偏り/多様性・急変点・最長持続・Engagement・Valence
+    ・Attention低下・UX指標(フラスト/デライト/認知負荷)・感情の慣性(affect_dynamics AR1)
+  - signed/ベースライン補正時は文言を自動切替（負値は「平常時比」で表現）
+  - `OverviewSection.tsx` をエンジン呼び出しに置換、tone別アイコン（✓/ⓘ/△/⛔）と左ボーダー色を付与
 
 - [ ] **Phase 2（将来）: フルセット・ルール拡張**
   - 遷移パターン(emotion_transitions の最頻ペア)・circumplex 象限の偏り・相関(correlation_matrix)

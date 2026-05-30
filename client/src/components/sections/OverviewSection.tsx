@@ -6,8 +6,9 @@
 import { useMemo } from 'react';
 import type { DashboardData } from '@/lib/types';
 import { EMOTION_LABELS_JA, EMOTION_COLORS } from '@/lib/types';
-import { Clock, Activity, Eye, Zap, TrendingUp, Brain } from 'lucide-react';
+import { Clock, Activity, Eye, Zap, TrendingUp, Brain, CheckCircle2, Info, AlertTriangle, AlertOctagon } from 'lucide-react';
 import { useBaseline } from '@/contexts/BaselineContext';
+import { generateInsights, type InsightTone } from '@/lib/insightEngine';
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend, Label,
   RadarChart, PolarGrid, PolarAngleAxis, Radar,
@@ -46,6 +47,17 @@ function MetricCard({ label, value, unit, icon, color, sub }: {
   );
 }
 
+// トーン（良好/中立/注意/警告）に対応するアイコンを返す
+function toneIcon(tone: InsightTone, color: string) {
+  const size = 15;
+  switch (tone) {
+    case 'positive': return <CheckCircle2 size={size} style={{ color }} />;
+    case 'caution':  return <AlertTriangle size={size} style={{ color }} />;
+    case 'alert':    return <AlertOctagon size={size} style={{ color }} />;
+    default:         return <Info size={size} style={{ color }} />;
+  }
+}
+
 const RADIAN = Math.PI / 180;
 const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
   if (percent < 0.03) return null;
@@ -63,8 +75,8 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
 };
 
 export default function OverviewSection({ data }: Props) {
-  const { meta, special_stats, dominant_emotion_counts, dominant_emotion_pct, emotion_stats, engagement_distribution } = data;
-  const { isBaselineActive, baselineRange } = useBaseline();
+  const { meta, special_stats, dominant_emotion_counts, dominant_emotion_pct, emotion_stats } = data;
+  const { isBaselineActive, baselineRange, clampNegatives } = useBaseline();
   // attention is treated as a facial expression metric (in emotion_stats)
   const attentionStats = emotion_stats['attention'] || special_stats['attention'];
 
@@ -96,48 +108,12 @@ export default function OverviewSection({ data }: Props) {
 
   const topEmotion = Object.entries(dominant_emotion_counts).sort((a, b) => b[1] - a[1])[0];
 
-  // KEY INSIGHTS をデータから動的生成
-  const keyInsights = useMemo(() => {
-    // 上位2感情を取得
-    const sorted = Object.entries(dominant_emotion_counts).sort((a, b) => b[1] - a[1]);
-    const [top1Key] = sorted[0] ?? ['', 0];
-    const [top2Key] = sorted[1] ?? ['', 0];
-    const top1Label = EMOTION_LABELS_JA[top1Key] || top1Key;
-    const top2Label = EMOTION_LABELS_JA[top2Key] || top2Key;
-    const top1Pct = dominant_emotion_pct[top1Key]?.toFixed(1) ?? '0.0';
-    const top2Pct = dominant_emotion_pct[top2Key]?.toFixed(1) ?? '0.0';
-
-    // Engagement レベル判定
-    const engMedian = special_stats.engagement?.median ?? 0;
-    const engHighFrames =
-      (engagement_distribution?.['High (60-80)'] ?? 0) +
-      (engagement_distribution?.['Very High (80-100)'] ?? 0);
-    const engLevel = engMean >= 60 ? '高い' : engMean >= 30 ? '中程度' : '低い';
-
-    // Valence 傾向判定
-    const valMedian = special_stats.valence?.median ?? 0;
-    const valMin = special_stats.valence?.min ?? 0;
-    const hasNegativeValence = valMin < 0 || valMean < 0;
-    const valTrend = valMean >= 50 ? 'ポジティブ' : valMean >= 20 ? '中立〜ポジティブ' : hasNegativeValence ? 'ネガティブ寄り' : '中立的';
-
-    return [
-      {
-        title: '感情状態の安定性',
-        body: `全フレームの${top1Pct}%で「${top1Label}」が支配的感情として検出されました。${top2Key ? `次いで「${top2Label}」が${top2Pct}%を占めています。` : ''}`,
-        color: EMOTION_COLORS[top1Key] || '#999',
-      },
-      {
-        title: 'Engagementのパターン',
-        body: `Engagementの平均${engMean.toFixed(1)}%・中央値${engMedian.toFixed(1)}%は${engLevel}覚醒状態を示します。高エンゲージメント（60%以上）の瞬間が${engHighFrames.toLocaleString()}フレーム検出されています。`,
-        color: 'oklch(0.72 0.18 80)',
-      },
-      {
-        title: 'Valenceの傾向',
-        body: `Valenceの平均${valMean.toFixed(1)}%・中央値${valMedian.toFixed(1)}%は${valTrend}の感情価を示します。${hasNegativeValence ? 'ネガティブな感情価が一部検出されています。' : 'セッション全体でポジティブな感情価が維持されていました。'}`,
-        color: 'oklch(0.62 0.18 25)',
-      },
-    ];
-  }, [dominant_emotion_counts, dominant_emotion_pct, engMean, special_stats, valMean, engagement_distribution]);
+  // KEY INSIGHTS をルールベースのエンジンから生成（AI・API不使用の純粋関数）
+  // ベースライン補正の状態を渡し、補正中／signed モードでは文言を自動で切り替える
+  const keyInsights = useMemo(
+    () => generateInsights(data, { isBaselineActive, clampNegatives }, 4),
+    [data, isBaselineActive, clampNegatives],
+  );
 
   return (
     <div className="space-y-6">
@@ -319,16 +295,16 @@ export default function OverviewSection({ data }: Props) {
         <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
           主要な発見
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {keyInsights.map((insight, i) => (
-            <div key={i} className="p-4 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', border: `1px solid ${insight.color}30` }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {keyInsights.map(insight => (
+            <div key={insight.id} className="p-4 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', borderLeft: `3px solid ${insight.color}`, border: `1px solid ${insight.color}30`, borderLeftWidth: '3px' }}>
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-2 h-2 rounded-full" style={{ background: insight.color }} />
+                {toneIcon(insight.tone, insight.color)}
                 <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600, fontSize: '0.85rem', color: 'oklch(0.88 0.005 250)' }}>
                   {insight.title}
                 </span>
               </div>
-              <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.45 0.015 250)', lineHeight: 1.6 }}>
+              <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.55 0.015 250)', lineHeight: 1.6 }}>
                 {insight.body}
               </p>
             </div>
