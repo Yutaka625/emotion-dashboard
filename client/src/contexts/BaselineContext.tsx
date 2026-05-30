@@ -17,6 +17,13 @@ interface BaselineContextType {
   /** 補正がグラフに適用されているかどうか */
   isBaselineActive: boolean;
   /**
+   * true: マイナスを0に丸める（一般向けデフォルト）
+   * false: マイナス値をそのまま表示（研究者向け signed モード）
+   */
+  clampNegatives: boolean;
+  /** clampNegatives を切り替える */
+  setClampNegatives: (v: boolean) => void;
+  /**
    * ベースライン区間を設定してオフセットを計算し、補正を有効にする
    * @param range - ベースライン区間 [開始秒, 終了秒]
    * @param data  - timeseries_full 全体のデータ（計算に使用）
@@ -37,6 +44,8 @@ export function BaselineProvider({ children }: BaselineProviderProps) {
   const [baselineRange, setBaselineRange] = useState<[number, number] | null>(null);
   const [baselineOffsets, setBaselineOffsets] = useState<BaselineOffsets | null>(null);
   const [isBaselineActive, setIsBaselineActive] = useState(false);
+  // デフォルト true = 0に丸める（一般向け）。ユーザー設定として補正解除時もリセットしない
+  const [clampNegatives, setClampNegatives] = useState(true);
 
   // ベースライン区間を設定してオフセットを計算し、補正を有効にする
   const setBaseline = useCallback((range: [number, number], data: TimeseriesPoint[]) => {
@@ -46,7 +55,7 @@ export function BaselineProvider({ children }: BaselineProviderProps) {
     setIsBaselineActive(true);
   }, []);
 
-  // 補正を解除して全状態を初期値に戻す
+  // 補正を解除して全状態を初期値に戻す（clampNegatives はユーザー設定として維持）
   const clearBaseline = useCallback(() => {
     setBaselineRange(null);
     setBaselineOffsets(null);
@@ -58,6 +67,8 @@ export function BaselineProvider({ children }: BaselineProviderProps) {
       baselineRange,
       baselineOffsets,
       isBaselineActive,
+      clampNegatives,
+      setClampNegatives,
       setBaseline,
       clearBaseline,
     }}>

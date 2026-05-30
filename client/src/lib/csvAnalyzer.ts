@@ -709,21 +709,26 @@ export function computeBaselineOffsets(
 
 /**
  * 全タイムスタンプにオフセット補正を適用した新しい配列を返す（元データは変更しない）
- * 補正後にマイナスになった値は 0 に丸める（「発現なし」として扱う）
  * @param points - 補正対象の TimeseriesPoint[]
  * @param offsets - computeBaselineOffsets で計算したオフセット
+ * @param clampNegatives - true のときのみ補正後マイナス値を 0 に丸める（デフォルト true）
+ *   false（研究者向け signed モード）にするとマイナスをそのまま保持し、
+ *   「ベースライン以下の感情抑制」を表現できる
  * @returns 補正後の新しい TimeseriesPoint[]
  */
 export function applyBaselineCorrection(
   points: TimeseriesPoint[],
-  offsets: BaselineOffsets
+  offsets: BaselineOffsets,
+  clampNegatives: boolean = true
 ): TimeseriesPoint[] {
   return points.map(p => {
     // time / engagement / valence / attention / dominant_emotion は変更しない
     const corrected = { ...p };
     for (const col of BASELINE_EMOTION_COLS) {
-      // 元スコア − オフセット、マイナスは 0 に丸める
-      corrected[col] = Math.max(0, p[col] - offsets[col]);
+      // 元スコア − オフセット = ベースラインからの変化量
+      const v = p[col] - offsets[col];
+      // clampNegatives=true のときのみマイナスを 0 に丸める
+      corrected[col] = clampNegatives ? Math.max(0, v) : v;
     }
     return corrected;
   });

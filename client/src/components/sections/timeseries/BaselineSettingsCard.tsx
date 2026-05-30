@@ -16,7 +16,7 @@ interface Props {
 }
 
 export default function BaselineSettingsCard({ timeseriesFull }: Props) {
-  const { baselineRange, baselineOffsets, isBaselineActive, setBaseline, clearBaseline } = useBaseline();
+  const { baselineRange, baselineOffsets, isBaselineActive, setBaseline, clearBaseline, clampNegatives, setClampNegatives } = useBaseline();
 
   return (
     <div className="metric-card" style={{ borderLeft: '3px solid oklch(0.70 0.14 195)' }}>
@@ -147,6 +147,55 @@ export default function BaselineSettingsCard({ timeseriesFull }: Props) {
           <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.58 0.015 255)', fontStyle: 'italic' }}>
             補正はいつでも解除できます。元データは保持されます。
           </span>
+        </div>
+      )}
+
+      {/* BASELINE CORRECTION MODE トグル（補正適用中のみ表示） */}
+      {isBaselineActive && (
+        <div className="mt-4 p-3 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', border: '1px solid oklch(0.28 0.04 255)' }}>
+          <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.70 0.14 195)', letterSpacing: '0.08em', marginBottom: '8px' }}>
+            BASELINE CORRECTION MODE
+          </div>
+          <div className="flex gap-2">
+            {/* 0に丸めるボタン（一般向け・デフォルト） */}
+            <button
+              onClick={() => setClampNegatives(true)}
+              className="flex-1 px-3 py-2 rounded-lg text-xs font-semibold transition-all"
+              style={{
+                fontFamily: 'Noto Sans JP, sans-serif',
+                background: clampNegatives ? 'rgba(0,180,216,0.2)' : 'oklch(0.20 0.04 255)',
+                color: clampNegatives ? 'oklch(0.70 0.14 195)' : 'oklch(0.55 0.015 255)',
+                border: `1px solid ${clampNegatives ? 'rgba(0,180,216,0.5)' : 'oklch(0.30 0.04 255)'}`,
+              }}
+            >
+              {clampNegatives ? '✓ ' : ''}0に丸める（一般）
+              <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', marginTop: '2px', opacity: 0.7 }}>
+                値域: 0〜100
+              </div>
+            </button>
+            {/* マイナスも表示ボタン（研究者向け） */}
+            <button
+              onClick={() => setClampNegatives(false)}
+              className="flex-1 px-3 py-2 rounded-lg text-xs font-semibold transition-all"
+              style={{
+                fontFamily: 'Noto Sans JP, sans-serif',
+                background: !clampNegatives ? 'rgba(0,180,216,0.2)' : 'oklch(0.20 0.04 255)',
+                color: !clampNegatives ? 'oklch(0.70 0.14 195)' : 'oklch(0.55 0.015 255)',
+                border: `1px solid ${!clampNegatives ? 'rgba(0,180,216,0.5)' : 'oklch(0.30 0.04 255)'}`,
+              }}
+            >
+              {!clampNegatives ? '✓ ' : ''}マイナスも表示
+              <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', marginTop: '2px', opacity: 0.7 }}>
+                研究者向け
+              </div>
+            </button>
+          </div>
+          {/* signed モード選択時の補足説明 */}
+          {!clampNegatives && (
+            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.68 0.12 195)', marginTop: '8px' }}>
+              ℹ マイナス＝平常時より感情が抑制された状態を示します
+            </p>
+          )}
         </div>
       )}
     </div>

@@ -78,7 +78,7 @@ function recomputeDominantEmotion(p: TimeseriesPoint): string {
 // ---- メインフック ----
 
 export function useCorrectedDashboardData(data: DashboardData | null): DashboardData | null {
-  const { isBaselineActive, baselineOffsets } = useBaseline();
+  const { isBaselineActive, baselineOffsets, clampNegatives } = useBaseline();
 
   return useMemo(() => {
     // 補正無効 or データなし → そのまま返す
@@ -87,7 +87,8 @@ export function useCorrectedDashboardData(data: DashboardData | null): Dashboard
     // timeseries_full に補正を適用し、支配感情を再判定
     const correctedTimeseries: TimeseriesPoint[] = applyBaselineCorrection(
       data.timeseries_full,
-      baselineOffsets
+      baselineOffsets,
+      clampNegatives  // ← signed モード対応
     ).map(p => ({
       ...p,
       dominant_emotion: recomputeDominantEmotion(p),
@@ -155,5 +156,5 @@ export function useCorrectedDashboardData(data: DashboardData | null): Dashboard
       emotion_transitions,
       emotion_duration_stats,
     };
-  }, [data, isBaselineActive, baselineOffsets]);
+  }, [data, isBaselineActive, baselineOffsets, clampNegatives]);
 }

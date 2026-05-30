@@ -83,8 +83,9 @@ export default function OverviewSection({ data }: Props) {
     return emotions.map(e => ({
       emotion: EMOTION_LABELS_JA[e] || e,
       // 生の平均値をそのまま使用（×10スケール廃止）
-      value: emotion_stats[e]?.mean || 0,
-      max: emotion_stats[e]?.max || 0,
+      // signed モード時に mean がマイナスになっても RadarChart が崩れないよう 0 でクリップ（表示用のみ）
+      value: Math.max(0, emotion_stats[e]?.mean ?? 0),
+      max: Math.max(0, emotion_stats[e]?.max ?? 0),
     }));
   }, [emotion_stats]);
 

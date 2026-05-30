@@ -66,9 +66,12 @@ export default function EmotionChartsCard({
   selectedEmotions, toggleEmotion, showSpecial, toggleSpecial,
   activeTab, setActiveTab,
 }: Props) {
-  const { baselineRange, isBaselineActive } = useBaseline();
+  const { baselineRange, isBaselineActive, clampNegatives } = useBaseline();
   const { events } = useEvents();
   const [showChangePoints, setShowChangePoints] = useState(false);
+
+  // ベースライン補正適用中かつ signed モード（マイナス表示）のとき true
+  const isSignedMode = isBaselineActive && !clampNegatives;
 
   // ---- ベースライン区間ハイライト ----
   const renderBaselineArea = () => {
@@ -161,7 +164,9 @@ export default function EmotionChartsCard({
       <div className="metric-card">
         <div className="section-label mb-3">EMOTION TIME SERIES</div>
         <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
-          感情スコアの時系列グラフ
+          {isSignedMode
+            ? '感情スコアのベースラインからの変化（0=平常時 / 正=増加 / 負=抑制）'
+            : '感情スコアの時系列グラフ'}
         </div>
 
         {/* タブバー */}
