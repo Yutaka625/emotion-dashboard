@@ -91,6 +91,24 @@
 
 ## バックログ（次フェーズ候補）
 
+### ⭐ KEY INSIGHTS（インサイト）強化
+> 現状: `OverviewSection` の `keyInsights` は固定3テーマにデータを差し込むだけ。
+> 改善: ルールベースのインサイトエンジン（`lib/insightEngine.ts`）に作り替える。
+
+- [ ] **Phase 1: インサイトエンジン（標準セット）**（計画確定済み・着手待ち）
+  - `lib/insightEngine.ts`（新規・純粋関数）: `generateInsights(data, baselineState) → Insight[]`
+  - `Insight = { id, title, body, color, tone, score }`（tone: positive/neutral/caution/alert）
+  - ルール群を score 降順で評価 → 上位4枚を固定表示（コア指標はフォールバック確保）
+  - 標準ルール: 感情の偏り/多様性・変動性(affect_dynamics)・急変点(change_points)・最長持続(duration)
+    ・Engagement/Valence/Attention・UX指標(ux_scores)・検出品質の警告(detection_rate)・補正状態の注記
+  - signed/ベースライン補正時は文言を自動切替（負値の誤読防止）
+  - `OverviewSection.tsx` をエンジン呼び出しに置換＋tone別の色/アイコン付与
+
+- [ ] **Phase 2（将来）: フルセット・ルール拡張**
+  - 遷移パターン(emotion_transitions の最頻ペア)・circumplex 象限の偏り・相関(correlation_matrix)
+    ・頭部動作イベント(head_motion_events)など全データ活用
+  - 「もっと見る」で全インサイト展開、各カードから該当セクションへのジャンプ導線
+
 ### Phase 3A: CSV エクスポート機能
 - [ ] `exportUtils.ts`：補正済み感情ログを CSV 生成・ダウンロードする関数
 - [ ] `TimeseriesSection`：「補正後データを出力」ボタンを BASELINE SETTINGS に追加
