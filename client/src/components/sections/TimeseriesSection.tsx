@@ -18,6 +18,7 @@ import { useEvents } from '@/contexts/EventsContext';
 import { applyBaselineCorrection } from '@/lib/csvAnalyzer';
 import { applySmoothing, type SmoothingMethod } from '@/lib/smoothingUtils';
 
+import CollapsibleCard       from '@/components/ui/CollapsibleCard';
 import BaselineSettingsCard  from './timeseries/BaselineSettingsCard';
 import SmoothingSettingsCard from './timeseries/SmoothingSettingsCard';
 import EmotionChartsCard     from './timeseries/EmotionChartsCard';
@@ -211,11 +212,13 @@ export default function TimeseriesSection({ data }: Props) {
       </div>
 
       {/* ---- TIME RANGE FILTER ---- */}
-      <div className="metric-card">
-        {/* ヘッダー行: ラベル + リセットボタン */}
-        <div className="flex items-center justify-between mb-2">
-          <div className="section-label">TIME RANGE FILTER</div>
-          {/* リセット: 全範囲 [0, 録画長] に戻す。範囲が初期状態のときは無効化 */}
+      <CollapsibleCard
+        label="TIME RANGE FILTER"
+        title="表示範囲フィルタ"
+        info="つまみで分析対象の時間範囲を絞り込みます。左つまみ＝開始・右つまみ＝終了（0.1秒単位）。"
+        storageKey="ksdv.collapse.timerange"
+        badge={
+          /* リセット: 全範囲 [0, 録画長] に戻す。範囲が初期状態のときは無効化 */
           <button
             onClick={() => setTimeRange([0, maxTime])}
             disabled={timeRange[0] === 0 && timeRange[1] === maxTime}
@@ -226,7 +229,8 @@ export default function TimeseriesSection({ data }: Props) {
             <RotateCcw size={12} />
             リセット
           </button>
-        </div>
+        }
+      >
         <div className="flex items-center gap-3 mb-2">
           <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: 'oklch(0.45 0.015 250)', minWidth: '32px' }}>
             {timeRange[0].toFixed(1)}s
@@ -318,7 +322,7 @@ export default function TimeseriesSection({ data }: Props) {
             {sampledData.length} pts表示中
           </span>
         </div>
-      </div>
+      </CollapsibleCard>
 
       {/* ---- BASELINE SETTINGS カード ---- */}
       <BaselineSettingsCard timeseriesFull={data.timeseries_full} />

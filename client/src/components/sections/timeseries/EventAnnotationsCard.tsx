@@ -12,6 +12,7 @@ import type { EventAnnotation } from '@/contexts/EventsContext';
 import { EVENT_PALETTE } from '@/contexts/EventsContext';
 import { compareSegments, TESTABLE_EMOTIONS } from '@/lib/statisticsUtils';
 import type { TTestResult } from '@/lib/statisticsUtils';
+import CollapsibleCard from '@/components/ui/CollapsibleCard';
 
 const SPECIAL_COLORS: Record<string, string> = {
   engagement: 'oklch(0.78 0.14 82)',
@@ -76,17 +77,24 @@ export default function EventAnnotationsCard({ eventStats, maxTime, displayTimes
   };
 
   return (
-    <div className="metric-card" style={{ borderLeft: '3px solid oklch(0.55 0.18 250)' }}>
-      <div className="flex items-center justify-between mb-3">
-        <div>
-          <div className="section-label mb-1">EVENT ANNOTATIONS</div>
-          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)' }}>
-            イベント（介入）登録
-          </div>
-          <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.58 0.015 255)', marginTop: '2px' }}>
-            イベント名・開始・終了時間を登録するとグラフに反映されます
-          </p>
-        </div>
+    <CollapsibleCard
+      label="EVENT ANNOTATIONS"
+      title="イベント（介入）登録"
+      info="イベント名・開始・終了時間を登録するとグラフに反映されます"
+      borderLeftColor="oklch(0.55 0.18 250)"
+      storageKey="ksdv.collapse.events"
+      badge={events.length > 0 ? (
+        <span style={{
+          fontFamily: 'Roboto Mono, monospace', fontSize: '0.7rem',
+          background: 'oklch(0.55 0.18 250 / 0.15)', border: '1px solid oklch(0.55 0.18 250 / 0.4)',
+          color: 'oklch(0.72 0.16 250)', padding: '3px 10px', borderRadius: '4px',
+        }}>
+          {events.length}件
+        </span>
+      ) : null}
+    >
+      {/* イベントを追加ボタン（本体先頭。折りたたみ時は本体ごと隠れる） */}
+      <div className="flex justify-end mb-3">
         <button
           onClick={() => setShowEventForm(v => !v)}
           className="flex items-center gap-1.5 px-3 py-2 rounded-lg transition-all"
@@ -380,6 +388,6 @@ export default function EventAnnotationsCard({ eventStats, maxTime, displayTimes
           })()}
         </div>
       )}
-    </div>
+    </CollapsibleCard>
   );
 }

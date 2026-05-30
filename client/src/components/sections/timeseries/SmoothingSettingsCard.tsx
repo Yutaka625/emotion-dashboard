@@ -5,6 +5,7 @@
 
 import { Activity } from 'lucide-react';
 import type { SmoothingMethod } from '@/lib/smoothingUtils';
+import CollapsibleCard from '@/components/ui/CollapsibleCard';
 
 interface Props {
   smoothingMethod: SmoothingMethod;
@@ -24,28 +25,23 @@ export default function SmoothingSettingsCard({
   fpsAvg,
 }: Props) {
   return (
-    <div className="metric-card" style={{ borderLeft: '3px solid oklch(0.68 0.18 140)' }}>
-      <div className="flex items-center justify-between mb-3">
-        <div>
-          <div className="section-label mb-1" style={{ color: 'oklch(0.68 0.18 140)' }}>SMOOTHING SETTINGS</div>
-          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)' }}>
-            時系列スムージング（平滑化）
-          </div>
-          <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.58 0.015 255)', marginTop: '2px' }}>
-            フレーム間のノイズを低減してトレンドを見やすくします。元データは保持されます。
-          </p>
-        </div>
-        {smoothingMethod !== 'none' && (
-          <span style={{
-            fontFamily: 'Roboto Mono, monospace', fontSize: '0.7rem',
-            background: 'oklch(0.68 0.18 140 / 0.15)', border: '1px solid oklch(0.68 0.18 140 / 0.4)',
-            color: 'oklch(0.68 0.18 140)', padding: '3px 10px', borderRadius: '4px',
-          }}>
-            ⚡ 平滑化適用中
-          </span>
-        )}
-      </div>
-
+    <CollapsibleCard
+      label="SMOOTHING SETTINGS"
+      labelColor="oklch(0.68 0.18 140)"
+      title="時系列スムージング（平滑化）"
+      info="フレーム間のノイズを低減してトレンドを見やすくします。元データは保持されます。"
+      borderLeftColor="oklch(0.68 0.18 140)"
+      storageKey="ksdv.collapse.smoothing"
+      badge={smoothingMethod !== 'none' ? (
+        <span style={{
+          fontFamily: 'Roboto Mono, monospace', fontSize: '0.7rem',
+          background: 'oklch(0.68 0.18 140 / 0.15)', border: '1px solid oklch(0.68 0.18 140 / 0.4)',
+          color: 'oklch(0.68 0.18 140)', padding: '3px 10px', borderRadius: '4px',
+        }}>
+          ⚡ 平滑化適用中
+        </span>
+      ) : null}
+    >
       {/* 手法選択ボタン */}
       <div className="mb-4">
         <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.58 0.015 255)', marginBottom: '8px', letterSpacing: '0.06em' }}>
@@ -142,6 +138,6 @@ export default function SmoothingSettingsCard({
           </p>
         </div>
       )}
-    </div>
+    </CollapsibleCard>
   );
 }

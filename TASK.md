@@ -156,15 +156,18 @@
   - 「UXリサーチ」項目のみ、非選択時にも `oklch(0.65 0.18 300)` の紫色がアイコンに付いている
   - `highlight` フラグはテキスト色に留め、アイコン色は他項目と同様に非選択時は `oklch(0.55 0.015 255)`（グレー）に統一する
 
-- [ ] **説明文をツールチップに格納**（各セクション・カード）
-  - 各カード下部・ラベル横の説明文がレイアウトを圧迫している
-  - `title` 属性またはカスタムツールチップコンポーネントに格納し、デフォルト非表示にする
-  - 対象: SmoothingSettingsCard の説明段落、BaselineSettingsCard のステップ説明など
+- [x] **説明文をツールチップに格納**（時系列分析タブ・2026-05-30 完了）
+  - `ui/InfoTooltip.tsx`（Radix ベース）を新規作成。ⓘアイコンにホバーで説明表示
+  - `CollapsibleCard` の `info` prop でタイトル横に自動表示
+  - 適用: TIME RANGE FILTER / BASELINE / SMOOTHING / EVENT の各説明文
+  - ※ カード内補助説明（SMA/EMA解説・各グラフタブ説明）と他セクションは Phase 2 で横展開予定
 
-- [ ] **セクション／カードの折りたたみトグル追加**（各セクション・`Home.tsx`）
-  - 使用頻度の低い設定カード（BASELINE SETTINGS・SMOOTHING SETTINGS 等）を折りたたんで画面を広く使いたい
-  - 各カードヘッダー右端に `ChevronDown/Up` ボタンを追加し、`useState` で本体 `div` を show/hide
-  - 折りたたみ状態は `localStorage` に保存して再訪時も維持する（任意）
+- [x] **セクション／カードの折りたたみトグル追加**（時系列分析タブ・2026-05-30 完了）
+  - `ui/CollapsibleCard.tsx` を新規作成（ヘッダー＋折りたたみ本体を共通化、D・Eを統合）
+  - ヘッダー右端の `ChevronUp/Down` で本体を開閉。折りたたみ中もバッジ（補正適用中・件数等）は表示
+  - 開閉状態を `localStorage`（`ksdv.collapse.*`）に保存し再訪時も維持
+  - 適用: TIME RANGE FILTER / BASELINE / SMOOTHING / EVENT の4カード
+  - ※ 他セクションへの横展開は Phase 2 で対応予定
 
 ### 🟡 中優先度（一貫性・洗練度）
 

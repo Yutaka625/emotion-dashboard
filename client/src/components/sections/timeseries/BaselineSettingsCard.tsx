@@ -9,6 +9,7 @@ import { Wand2 } from 'lucide-react';
 import { useBaseline } from '@/contexts/BaselineContext';
 import { detectBaselineWindow } from '@/lib/csvAnalyzer';
 import { toast } from 'sonner';
+import CollapsibleCard from '@/components/ui/CollapsibleCard';
 
 interface Props {
   /** ベースライン自動検出・適用に使う全フレームデータ */
@@ -19,28 +20,23 @@ export default function BaselineSettingsCard({ timeseriesFull }: Props) {
   const { baselineRange, baselineOffsets, isBaselineActive, setBaseline, clearBaseline, clampNegatives, setClampNegatives } = useBaseline();
 
   return (
-    <div className="metric-card" style={{ borderLeft: '3px solid oklch(0.70 0.14 195)' }}>
-      <div className="flex items-center justify-between mb-3">
-        <div>
-          <div className="section-label mb-1" style={{ color: 'oklch(0.70 0.14 195)' }}>BASELINE SETTINGS</div>
-          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)' }}>
-            ベースライン補正設定
-          </div>
-          <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.58 0.015 255)', marginTop: '2px' }}>
-            セッション冒頭の無表情区間を差し引いて、感情変化を相対値で比較します
-          </p>
-        </div>
-        {isBaselineActive && (
-          <span style={{
-            fontFamily: 'Roboto Mono, monospace', fontSize: '0.7rem',
-            background: 'rgba(0,180,216,0.15)', border: '1px solid rgba(0,180,216,0.4)',
-            color: 'oklch(0.70 0.14 195)', padding: '3px 10px', borderRadius: '4px',
-          }}>
-            ⚡ 補正適用中
-          </span>
-        )}
-      </div>
-
+    <CollapsibleCard
+      label="BASELINE SETTINGS"
+      labelColor="oklch(0.70 0.14 195)"
+      title="ベースライン補正設定"
+      info="セッション冒頭の無表情区間を差し引いて、感情変化を相対値で比較します"
+      borderLeftColor="oklch(0.70 0.14 195)"
+      storageKey="ksdv.collapse.baseline"
+      badge={isBaselineActive ? (
+        <span style={{
+          fontFamily: 'Roboto Mono, monospace', fontSize: '0.7rem',
+          background: 'rgba(0,180,216,0.15)', border: '1px solid rgba(0,180,216,0.4)',
+          color: 'oklch(0.70 0.14 195)', padding: '3px 10px', borderRadius: '4px',
+        }}>
+          ⚡ 補正適用中
+        </span>
+      ) : null}
+    >
       {/* STEP 1: ベースライン区間の状態表示 */}
       <div className="mb-4 p-3 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', border: '1px solid oklch(0.28 0.04 255)' }}>
         <div className="flex items-center justify-between mb-2">
@@ -198,6 +194,6 @@ export default function BaselineSettingsCard({ timeseriesFull }: Props) {
           )}
         </div>
       )}
-    </div>
+    </CollapsibleCard>
   );
 }
