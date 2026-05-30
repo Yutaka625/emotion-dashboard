@@ -212,7 +212,7 @@ export default function AcademicSection({ data }: Props) {
                 </div>
               </div>
             </div>
-            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.58 0.015 250)', lineHeight: 1.6 }}>
+            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.68 0.015 250)', lineHeight: 1.6 }}>
               {f.desc}
             </p>
           </div>

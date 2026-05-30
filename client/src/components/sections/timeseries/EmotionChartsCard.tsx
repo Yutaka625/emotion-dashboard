@@ -193,7 +193,7 @@ export default function EmotionChartsCard({
             <div className="flex flex-wrap gap-1.5 mb-4">
               {NON_NEUTRAL_EMOTIONS.map(emotion => {
                 const isActive = selectedEmotions.includes(emotion);
-                const textColor = isActive ? (LIGHT_EMOTIONS.has(emotion) ? 'oklch(0.15 0.02 250)' : 'white') : 'oklch(0.58 0.015 250)';
+                const textColor = isActive ? (LIGHT_EMOTIONS.has(emotion) ? 'oklch(0.15 0.02 250)' : 'white') : 'oklch(0.68 0.015 250)';
                 return (
                   <button key={emotion} onClick={() => toggleEmotion(emotion)}
                     className="px-2.5 py-0.5 rounded-full text-xs transition-all"
@@ -357,7 +357,7 @@ export default function EmotionChartsCard({
                           const isInEvent = events.some(ev => d.time >= ev.startTime && d.time <= ev.endTime);
                           return (
                             <div key={i} className="flex-1 rounded-sm"
-                              style={{ height: '22px', background: `${EMOTION_HEX[emotion]}`, opacity: Math.max(0.04, intensity), minWidth: '4px', outline: isInEvent ? '1px solid oklch(0.58 0.015 250)' : 'none' }}
+                              style={{ height: '22px', background: `${EMOTION_HEX[emotion]}`, opacity: Math.max(0.04, intensity), minWidth: '4px', outline: isInEvent ? '1px solid oklch(0.68 0.015 250)' : 'none' }}
                               title={`t=${d.time}s: ${val.toFixed(3)}`}
                             />
                           );
@@ -493,7 +493,7 @@ export default function EmotionChartsCard({
                 style={{
                   fontFamily: 'Roboto Mono, monospace',
                   background: showSpecial.includes(key) ? SPECIAL_COLORS[key] : 'oklch(0.20 0.04 255)',
-                  color: showSpecial.includes(key) ? 'white' : 'oklch(0.58 0.015 250)',
+                  color: showSpecial.includes(key) ? 'white' : 'oklch(0.68 0.015 250)',
                   border: `1px solid ${showSpecial.includes(key) ? SPECIAL_COLORS[key] : 'oklch(0.28 0.04 255)'}`,
                   opacity: showSpecial.includes(key) ? 1 : 0.6,
                 }}

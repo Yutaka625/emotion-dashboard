@@ -270,7 +270,7 @@ export default function OverviewSection({ data }: Props) {
               <PolarGrid stroke="oklch(0.28 0.04 255)" />
               <PolarAngleAxis
                 dataKey="emotion"
-                tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', fill: 'oklch(0.58 0.015 250)' }}
+                tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fill: 'oklch(0.80 0.01 250)' }}
               />
               <Radar
                 name="平均値"

@@ -232,7 +232,7 @@ export default function TimeseriesSection({ data }: Props) {
         }
       >
         <div className="flex items-center gap-3 mb-2">
-          <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: 'oklch(0.58 0.015 250)', minWidth: '32px' }}>
+          <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: 'oklch(0.68 0.015 250)', minWidth: '32px' }}>
             {timeRange[0].toFixed(1)}s
           </span>
           <div className="flex-1 relative h-6 flex items-center">
@@ -262,7 +262,7 @@ export default function TimeseriesSection({ data }: Props) {
               aria-label="終了時間"
             />
           </div>
-          <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: 'oklch(0.58 0.015 250)', minWidth: '32px', textAlign: 'right' }}>
+          <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: 'oklch(0.68 0.015 250)', minWidth: '32px', textAlign: 'right' }}>
             {timeRange[1].toFixed(1)}s
           </span>
         </div>
@@ -270,7 +270,7 @@ export default function TimeseriesSection({ data }: Props) {
           {/* 数値入力 */}
           {(['開始', '終了'] as const).map((label, idx) => (
             <div key={label} className="flex gap-2 items-center">
-              <label style={{ fontSize: '0.75rem', color: 'oklch(0.58 0.015 250)' }}>{label}:</label>
+              <label style={{ fontSize: '0.75rem', color: 'oklch(0.68 0.015 250)' }}>{label}:</label>
               <input
                 type="number" min={0} max={maxTime} step={0.1}
                 value={timeRange[idx]}
@@ -282,7 +282,7 @@ export default function TimeseriesSection({ data }: Props) {
                 className="w-16 px-2 py-1 rounded text-xs"
                 style={{ fontFamily: 'Roboto Mono, monospace', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.85 0.005 65)', border: '1px solid oklch(0.28 0.04 255)' }}
               />
-              <span style={{ fontSize: '0.75rem', color: 'oklch(0.58 0.015 250)' }}>秒</span>
+              <span style={{ fontSize: '0.75rem', color: 'oklch(0.68 0.015 250)' }}>秒</span>
             </div>
           ))}
 
@@ -388,7 +388,7 @@ export default function TimeseriesSection({ data }: Props) {
                     onMouseEnter={e => (e.currentTarget.style.background = rowEvents.length > 0 ? `${rowEvents[0].color}15` : 'oklch(0.22 0.04 255)')}
                     onMouseLeave={e => (e.currentTarget.style.background = rowEvents.length > 0 ? `${rowEvents[0].color}08` : 'transparent')}
                   >
-                    <td className="py-1.5 pr-2" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.68rem', color: 'oklch(0.58 0.015 250)', whiteSpace: 'nowrap' }}>
+                    <td className="py-1.5 pr-2" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.68rem', color: 'oklch(0.68 0.015 250)', whiteSpace: 'nowrap' }}>
                       {row.time_start}–{row.time_end}s
                     </td>
                     <td className="py-1.5 pr-2">

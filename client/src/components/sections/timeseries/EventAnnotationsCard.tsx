@@ -196,7 +196,7 @@ export default function EventAnnotationsCard({ eventStats, maxTime, displayTimes
                     <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '0.88rem', color: 'oklch(0.88 0.005 250)' }}>
                       {ev.name}
                     </div>
-                    <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.68rem', color: 'oklch(0.58 0.015 250)' }}>
+                    <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.68rem', color: 'oklch(0.68 0.015 250)' }}>
                       {ev.startTime}s — {ev.endTime}s &nbsp;|&nbsp; {(ev.endTime - ev.startTime).toFixed(1)}秒間 &nbsp;|&nbsp; {stat?.frameCount || 0} フレーム
                     </div>
                   </div>
@@ -253,7 +253,7 @@ export default function EventAnnotationsCard({ eventStats, maxTime, displayTimes
                         return (
                           <div key={e} className="flex items-center gap-2">
                             <div className="flex-shrink-0 text-right" style={{ width: '52px' }}>
-                              <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', color: isDom ? EMOTION_COLORS[e] : 'oklch(0.58 0.015 250)', fontWeight: isDom ? 700 : 400 }}>
+                              <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', color: isDom ? EMOTION_COLORS[e] : 'oklch(0.68 0.015 250)', fontWeight: isDom ? 700 : 400 }}>
                                 {EMOTION_LABELS_JA[e]}
                               </span>
                             </div>
