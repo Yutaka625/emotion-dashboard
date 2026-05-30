@@ -33,13 +33,13 @@ function MetricCard({ label, value, unit, icon, color, sub }: {
           {value}
         </span>
         {unit && (
-          <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.75rem', color: 'oklch(0.58 0.015 255)' }}>
+          <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.75rem', color: 'oklch(0.68 0.015 255)' }}>
             {unit}
           </span>
         )}
       </div>
       {sub && (
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.58 0.015 255)' }}>
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.68 0.015 255)' }}>
           {sub}
         </div>
       )}
@@ -124,7 +124,7 @@ export default function OverviewSection({ data }: Props) {
           <h1 style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.75rem', color: 'oklch(0.88 0.005 250)', lineHeight: 1.1 }}>
             感情分析レポート
           </h1>
-          <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.58 0.015 255)', marginTop: '0.5rem' }}>
+          <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.68 0.015 255)', marginTop: '0.5rem' }}>
             {meta.recording_date} {meta.recording_time} — 顔表情・感情・Engagement・Valenceの時系列分析
           </p>
         </div>
@@ -270,7 +270,7 @@ export default function OverviewSection({ data }: Props) {
               <PolarGrid stroke="oklch(0.28 0.04 255)" />
               <PolarAngleAxis
                 dataKey="emotion"
-                tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', fill: 'oklch(0.45 0.015 250)' }}
+                tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', fill: 'oklch(0.58 0.015 250)' }}
               />
               <Radar
                 name="平均値"
@@ -304,7 +304,7 @@ export default function OverviewSection({ data }: Props) {
                   {insight.title}
                 </span>
               </div>
-              <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.55 0.015 250)', lineHeight: 1.6 }}>
+              <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.66 0.015 250)', lineHeight: 1.6 }}>
                 {insight.body}
               </p>
             </div>
@@ -331,7 +331,7 @@ export default function OverviewSection({ data }: Props) {
                 {item.value}
               </div>
               {'note' in item && (
-                <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.65rem', color: 'oklch(0.58 0.015 255)', marginTop: '2px' }}>
+                <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.65rem', color: 'oklch(0.68 0.015 255)', marginTop: '2px' }}>
                   {(item as { note: string }).note}
                 </div>
               )}

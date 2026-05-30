@@ -25,9 +25,9 @@ export default function InfoTooltip({ text, size = 13 }: Props) {
         <button
           type="button"
           className="inline-flex items-center justify-center rounded-full transition-colors"
-          style={{ color: 'oklch(0.55 0.015 255)', cursor: 'help' }}
+          style={{ color: 'oklch(0.66 0.015 255)', cursor: 'help' }}
           onMouseEnter={e => (e.currentTarget.style.color = 'oklch(0.75 0.10 255)')}
-          onMouseLeave={e => (e.currentTarget.style.color = 'oklch(0.55 0.015 255)')}
+          onMouseLeave={e => (e.currentTarget.style.color = 'oklch(0.66 0.015 255)')}
           aria-label="説明を表示"
         >
           <Info size={size} />

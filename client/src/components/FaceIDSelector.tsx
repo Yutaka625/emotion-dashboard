@@ -48,7 +48,7 @@ export default function FaceIDSelector() {
       {/* アイコンラベル */}
       <Users
         size={12}
-        style={{ color: 'oklch(0.58 0.015 255)', flexShrink: 0, marginRight: '2px' }}
+        style={{ color: 'oklch(0.68 0.015 255)', flexShrink: 0, marginRight: '2px' }}
       />
 
       {/* 「全員」ボタン */}
@@ -60,7 +60,7 @@ export default function FaceIDSelector() {
           border: isAllSelected
             ? '1px solid oklch(0.70 0.14 195 / 0.50)'
             : '1px solid oklch(0.35 0.03 255)',
-          color: isAllSelected ? 'oklch(0.70 0.14 195)' : 'oklch(0.55 0.015 255)',
+          color: isAllSelected ? 'oklch(0.70 0.14 195)' : 'oklch(0.66 0.015 255)',
           fontFamily: 'Noto Sans JP, sans-serif',
           fontSize: '0.6rem',
           fontWeight: isAllSelected ? 600 : 400,
@@ -85,7 +85,7 @@ export default function FaceIDSelector() {
               border: isSelected
                 ? '1px solid oklch(0.70 0.14 195 / 0.50)'
                 : '1px solid oklch(0.35 0.03 255)',
-              color: isSelected ? 'oklch(0.70 0.14 195)' : 'oklch(0.55 0.015 255)',
+              color: isSelected ? 'oklch(0.70 0.14 195)' : 'oklch(0.66 0.015 255)',
               fontFamily: 'Roboto Mono, monospace',
               fontSize: '0.6rem',
               fontWeight: isSelected ? 600 : 400,

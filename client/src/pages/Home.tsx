@@ -185,7 +185,7 @@ export default function Home() {
     actionunits: <ActionUnitsSection data={safeDisplayData} />,
     comparison:  secondaryData
       ? <ComparisonSection dataA={safeDisplayData} dataB={secondaryData} labelA={filename || 'Session A'} labelB={secondaryFilename || 'Session B'} />
-      : <div className="flex items-center justify-center h-64" style={{ fontFamily: 'Noto Sans JP, sans-serif', color: 'oklch(0.55 0.015 255)' }}>比較用CSVを追加してください</div>,
+      : <div className="flex items-center justify-center h-64" style={{ fontFamily: 'Noto Sans JP, sans-serif', color: 'oklch(0.66 0.015 255)' }}>比較用CSVを追加してください</div>,
     uxresearch: <UXResearchSection data={safeDisplayData} />,
   };
 
@@ -235,7 +235,7 @@ export default function Home() {
             {/* マルチ FaceID セレクター（複数人データの場合のみ表示） */}
             <FaceIDSelector />
 
-            <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.58 0.015 255)' }}>
+            <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.68 0.015 255)' }}>
               {safeDisplayData.meta.total_frames.toLocaleString()} frames · {safeDisplayData.meta.duration_minutes.toFixed(2)} min
             </div>
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: 'oklch(0.70 0.14 195 / 0.12)', border: '1px solid oklch(0.70 0.14 195 / 0.30)' }}>
@@ -252,7 +252,7 @@ export default function Home() {
               onClick={handleReset}
               title="別のCSVファイルを読み込む"
             >
-              <Upload size={12} style={{ color: 'oklch(0.58 0.015 255)', flexShrink: 0 }} />
+              <Upload size={12} style={{ color: 'oklch(0.68 0.015 255)', flexShrink: 0 }} />
               <span
                 style={{
                   fontFamily: 'Roboto Mono, monospace',
@@ -267,7 +267,7 @@ export default function Home() {
               >
                 {filename}
               </span>
-              <X size={12} style={{ color: 'oklch(0.58 0.015 255)', flexShrink: 0 }} />
+              <X size={12} style={{ color: 'oklch(0.68 0.015 255)', flexShrink: 0 }} />
             </div>
 
             {/* 比較CSV追加ボタン */}
@@ -280,14 +280,14 @@ export default function Home() {
               onClick={() => secondaryInputRef.current?.click()}
               title="比較用CSVを追加（セッション比較分析）"
             >
-              <GitCompare size={12} style={{ color: secondaryData ? 'oklch(0.78 0.22 300)' : 'oklch(0.58 0.015 255)' }} />
+              <GitCompare size={12} style={{ color: secondaryData ? 'oklch(0.78 0.22 300)' : 'oklch(0.68 0.015 255)' }} />
               <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', color: secondaryData ? 'oklch(0.78 0.22 300)' : 'oklch(0.72 0.008 250)' }}>
                 {secondaryData ? `比較中: ${secondaryFilename.length > 12 ? secondaryFilename.slice(0, 12) + '…' : secondaryFilename}` : '＋比較CSV'}
               </span>
               {secondaryData && (
                 <button
                   onClick={e => { e.stopPropagation(); setSecondaryData(null); setSecondaryFilename(''); }}
-                  style={{ color: 'oklch(0.58 0.015 255)', lineHeight: 1 }}
+                  style={{ color: 'oklch(0.68 0.015 255)', lineHeight: 1 }}
                   title="比較データを削除"
                 >
                   <X size={10} />

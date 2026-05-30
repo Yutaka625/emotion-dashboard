@@ -70,7 +70,7 @@ export default function Sidebar({ activeSection, onSectionChange, hasComparison,
         <button
           onClick={() => setCollapsed(!collapsed)}
           className="p-1.5 rounded transition-colors"
-          style={{ color: 'oklch(0.58 0.015 255)', background: 'transparent' }}
+          style={{ color: 'oklch(0.68 0.015 255)', background: 'transparent' }}
           onMouseEnter={e => (e.currentTarget.style.background = 'oklch(0.22 0.02 250)')}
           onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
         >
@@ -121,7 +121,7 @@ export default function Sidebar({ activeSection, onSectionChange, hasComparison,
               >
                 {/* アイコン色: 選択時のみアクセント色（highlight=紫 / 通常=金）。
                     非選択時は highlight に関わらず全項目グレーで統一（テキストも同様にグレー） */}
-                <span style={{ color: isActive ? (item.highlight ? 'oklch(0.78 0.22 300)' : 'oklch(0.78 0.14 82)') : 'oklch(0.55 0.015 255)', flexShrink: 0 }}>
+                <span style={{ color: isActive ? (item.highlight ? 'oklch(0.78 0.22 300)' : 'oklch(0.78 0.14 82)') : 'oklch(0.66 0.015 255)', flexShrink: 0 }}>
                   {item.icon}
                 </span>
                 {!collapsed && (
@@ -129,7 +129,7 @@ export default function Sidebar({ activeSection, onSectionChange, hasComparison,
                     <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 500, fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
                       {item.label}
                     </div>
-                    <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.50 0.01 255)', whiteSpace: 'nowrap', marginTop: '1px' }}>
+                    <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.62 0.01 255)', whiteSpace: 'nowrap', marginTop: '1px' }}>
                       {item.description}
                     </div>
                   </div>
@@ -148,7 +148,7 @@ export default function Sidebar({ activeSection, onSectionChange, hasComparison,
                   <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600, fontSize: '0.78rem', color: 'oklch(0.90 0.005 250)' }}>
                     {item.label}
                   </div>
-                  <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.58rem', color: 'oklch(0.52 0.01 255)', marginTop: '1px' }}>
+                  <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.58rem', color: 'oklch(0.64 0.01 255)', marginTop: '1px' }}>
                     {item.description}
                   </div>
                 </div>
@@ -161,7 +161,7 @@ export default function Sidebar({ activeSection, onSectionChange, hasComparison,
       {/* Footer */}
       {!collapsed && (
         <div className="px-4 py-3" style={{ borderTop: '1px solid oklch(0.22 0.02 250)' }}>
-          <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.45 0.01 255)', lineHeight: 1.6 }}>
+          <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.01 255)', lineHeight: 1.6 }}>
             {meta ? (
               <>
                 <div>REC: {meta.recording_date}</div>

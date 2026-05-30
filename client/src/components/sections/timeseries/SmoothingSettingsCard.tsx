@@ -44,7 +44,7 @@ export default function SmoothingSettingsCard({
     >
       {/* 手法選択ボタン */}
       <div className="mb-4">
-        <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.58 0.015 255)', marginBottom: '8px', letterSpacing: '0.06em' }}>
+        <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.68 0.015 255)', marginBottom: '8px', letterSpacing: '0.06em' }}>
           SMOOTHING METHOD
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -62,7 +62,7 @@ export default function SmoothingSettingsCard({
                 fontFamily: 'Noto Sans JP, sans-serif',
                 fontWeight: smoothingMethod === opt.id ? 700 : 400,
                 background: smoothingMethod === opt.id ? 'oklch(0.68 0.18 140 / 0.18)' : 'oklch(0.22 0.04 255)',
-                color: smoothingMethod === opt.id ? 'oklch(0.78 0.20 140)' : 'oklch(0.58 0.015 255)',
+                color: smoothingMethod === opt.id ? 'oklch(0.78 0.20 140)' : 'oklch(0.68 0.015 255)',
                 border: `1px solid ${smoothingMethod === opt.id ? 'oklch(0.68 0.18 140 / 0.5)' : 'oklch(0.28 0.04 255)'}`,
               }}
             >
@@ -82,7 +82,7 @@ export default function SmoothingSettingsCard({
             </span>
             <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.82rem', fontWeight: 700, color: 'oklch(0.88 0.005 250)' }}>
               {smoothingWindow} フレーム
-              <span style={{ fontSize: '0.65rem', color: 'oklch(0.58 0.015 255)', marginLeft: '6px' }}>
+              <span style={{ fontSize: '0.65rem', color: 'oklch(0.68 0.015 255)', marginLeft: '6px' }}>
                 (約 {(smoothingWindow / fpsAvg).toFixed(1)}秒)
               </span>
             </span>
@@ -96,11 +96,11 @@ export default function SmoothingSettingsCard({
             style={{ accentColor: 'oklch(0.68 0.18 140)' }}
           />
           <div className="flex justify-between mt-1">
-            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.48 0.015 255)' }}>3 (弱)</span>
-            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.48 0.015 255)' }}>31</span>
-            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.48 0.015 255)' }}>61 (強)</span>
+            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.60 0.015 255)' }}>3 (弱)</span>
+            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.60 0.015 255)' }}>31</span>
+            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.60 0.015 255)' }}>61 (強)</span>
           </div>
-          <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.55 0.015 255)', marginTop: '8px' }}>
+          <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.66 0.015 255)', marginTop: '8px' }}>
             前後のフレームを平均します。値が大きいほど滑らかになりますが、ピークが低くなります。
           </p>
         </div>
@@ -115,7 +115,7 @@ export default function SmoothingSettingsCard({
             </span>
             <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.82rem', fontWeight: 700, color: 'oklch(0.88 0.005 250)' }}>
               α = {smoothingAlpha.toFixed(2)}
-              <span style={{ fontSize: '0.65rem', color: 'oklch(0.58 0.015 255)', marginLeft: '6px' }}>
+              <span style={{ fontSize: '0.65rem', color: 'oklch(0.68 0.015 255)', marginLeft: '6px' }}>
                 {smoothingAlpha < 0.2 ? '（強平滑）' : smoothingAlpha < 0.5 ? '（中程度）' : '（弱平滑）'}
               </span>
             </span>
@@ -129,11 +129,11 @@ export default function SmoothingSettingsCard({
             style={{ accentColor: 'oklch(0.68 0.18 140)' }}
           />
           <div className="flex justify-between mt-1">
-            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.48 0.015 255)' }}>0.05 (強)</span>
-            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.48 0.015 255)' }}>0.45</span>
-            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.48 0.015 255)' }}>0.90 (弱)</span>
+            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.60 0.015 255)' }}>0.05 (強)</span>
+            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.60 0.015 255)' }}>0.45</span>
+            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.60 0.015 255)' }}>0.90 (弱)</span>
           </div>
-          <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.55 0.015 255)', marginTop: '8px' }}>
+          <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.66 0.015 255)', marginTop: '8px' }}>
             αが小さいほど平滑度が高くなります。EMAは時系列の「流れ」を重視した平滑化です。
           </p>
         </div>

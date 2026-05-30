@@ -178,7 +178,7 @@ export default function EmotionChartsCard({
                 fontFamily: 'Noto Sans JP, sans-serif',
                 fontWeight: activeTab === tab.id ? 600 : 400,
                 background: activeTab === tab.id ? 'white' : 'transparent',
-                color: activeTab === tab.id ? 'oklch(0.22 0.04 255)' : 'oklch(0.58 0.015 255)',
+                color: activeTab === tab.id ? 'oklch(0.22 0.04 255)' : 'oklch(0.68 0.015 255)',
                 boxShadow: activeTab === tab.id ? '0 1px 3px oklch(0.15 0.02 250 / 0.1)' : 'none',
               }}
             >
@@ -193,7 +193,7 @@ export default function EmotionChartsCard({
             <div className="flex flex-wrap gap-1.5 mb-4">
               {NON_NEUTRAL_EMOTIONS.map(emotion => {
                 const isActive = selectedEmotions.includes(emotion);
-                const textColor = isActive ? (LIGHT_EMOTIONS.has(emotion) ? 'oklch(0.15 0.02 250)' : 'white') : 'oklch(0.45 0.015 250)';
+                const textColor = isActive ? (LIGHT_EMOTIONS.has(emotion) ? 'oklch(0.15 0.02 250)' : 'white') : 'oklch(0.58 0.015 250)';
                 return (
                   <button key={emotion} onClick={() => toggleEmotion(emotion)}
                     className="px-2.5 py-0.5 rounded-full text-xs transition-all"
@@ -204,14 +204,14 @@ export default function EmotionChartsCard({
                 );
               })}
             </div>
-            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.58 0.015 255)', marginBottom: '0.75rem' }}>
+            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.68 0.015 255)', marginBottom: '0.75rem' }}>
               複数の感情スコアを同一グラフ上に重ねて表示します。感情ボタンをクリックして表示/非表示を切り替えられます。
             </p>
             <ResponsiveContainer width="100%" height={280}>
               <LineChart data={displayData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" />
-                <XAxis dataKey="time" type="number" domain={['dataMin', 'dataMax']} tickFormatter={formatTime} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} />
-                <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} />
+                <XAxis dataKey="time" type="number" domain={['dataMin', 'dataMax']} tickFormatter={formatTime} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} />
+                <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} />
                 <Tooltip content={<CustomTooltip />} />
                 <Legend formatter={v => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem' }}>{v}</span>} />
                 {renderBaselineArea()}
@@ -228,7 +228,7 @@ export default function EmotionChartsCard({
             <div className="mt-3">
               <button onClick={() => setShowChangePoints(p => !p)}
                 className="flex items-center gap-2 text-xs px-3 py-1.5 rounded transition-all"
-                style={{ fontFamily: 'Roboto Mono, monospace', background: showChangePoints ? 'oklch(0.30 0.06 160)' : 'oklch(0.22 0.04 255)', color: showChangePoints ? 'oklch(0.75 0.22 140)' : 'oklch(0.58 0.015 255)', border: `1px solid ${showChangePoints ? 'oklch(0.45 0.18 140)' : 'oklch(0.28 0.04 255)'}` }}
+                style={{ fontFamily: 'Roboto Mono, monospace', background: showChangePoints ? 'oklch(0.30 0.06 160)' : 'oklch(0.22 0.04 255)', color: showChangePoints ? 'oklch(0.75 0.22 140)' : 'oklch(0.68 0.015 255)', border: `1px solid ${showChangePoints ? 'oklch(0.45 0.18 140)' : 'oklch(0.28 0.04 255)'}` }}
               >
                 <span>{showChangePoints ? '▲' : '▼'}</span>
                 変化点検出 ({visibleChangePoints.length}件)
@@ -236,14 +236,14 @@ export default function EmotionChartsCard({
               {showChangePoints && visibleChangePoints.length > 0 && (
                 <div className="mt-2 rounded-lg overflow-hidden" style={{ border: '1px solid oklch(0.28 0.04 255)' }}>
                   <div className="px-3 py-2" style={{ background: 'oklch(0.20 0.04 255)', borderBottom: '1px solid oklch(0.26 0.04 255)' }}>
-                    <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', color: 'oklch(0.50 0.015 255)', letterSpacing: '0.06em' }}>
+                    <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', color: 'oklch(0.62 0.015 255)', letterSpacing: '0.06em' }}>
                       CHANGE POINTS — 感情スコアの急変タイミング（グローバルSD×2.5以上の変化）
                     </span>
                   </div>
                   <div className="divide-y" style={{ borderColor: 'oklch(0.22 0.04 255)' }}>
                     {visibleChangePoints.map((cp, i) => (
                       <div key={i} className="flex items-center gap-3 px-3 py-2" style={{ background: 'oklch(0.185 0.04 255)' }}>
-                        <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.7rem', color: 'oklch(0.50 0.015 255)', minWidth: '52px' }}>{cp.time.toFixed(1)}s</span>
+                        <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.7rem', color: 'oklch(0.62 0.015 255)', minWidth: '52px' }}>{cp.time.toFixed(1)}s</span>
                         <span className="px-2 py-0.5 rounded text-xs" style={{ background: EMOTION_HEX[cp.emotion] + '20', color: EMOTION_HEX[cp.emotion], fontFamily: 'Noto Sans JP, sans-serif', minWidth: '48px', textAlign: 'center' }}>
                           {EMOTION_LABELS_JA[cp.emotion] || cp.emotion}
                         </span>
@@ -257,7 +257,7 @@ export default function EmotionChartsCard({
                 </div>
               )}
               {showChangePoints && visibleChangePoints.length === 0 && (
-                <div className="mt-2 text-center py-3" style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.50 0.015 255)' }}>
+                <div className="mt-2 text-center py-3" style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.62 0.015 255)' }}>
                   この時間範囲内に有意な変化点は検出されませんでした
                 </div>
               )}
@@ -268,7 +268,7 @@ export default function EmotionChartsCard({
         {/* TAB: 個別波形（スパークライン） */}
         {activeTab === 'sparklines' && (
           <div>
-            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.58 0.015 255)', marginBottom: '1rem' }}>
+            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.68 0.015 255)', marginBottom: '1rem' }}>
               各感情スコアを独立したチャートで表示します。微細な変動パターンを個別に確認できます。
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -284,7 +284,7 @@ export default function EmotionChartsCard({
                       </div>
                       <div className="text-right">
                         <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: EMOTION_HEX[emotion] }}>max {maxVal.toFixed(2)}</div>
-                        <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)' }}>avg {meanVal.toFixed(3)}</div>
+                        <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.68 0.015 255)' }}>avg {meanVal.toFixed(3)}</div>
                       </div>
                     </div>
                     <ResponsiveContainer width="100%" height={80}>
@@ -314,7 +314,7 @@ export default function EmotionChartsCard({
         {/* TAB: ヒートマップ */}
         {activeTab === 'heatmap' && (
           <div>
-            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.58 0.015 255)', marginBottom: '1rem' }}>
+            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.68 0.015 255)', marginBottom: '1rem' }}>
               5秒区間ごとの感情スコア平均値をヒートマップで表示します。横軸が時間、縦軸が感情種別、色の濃さがスコアの強度を示します。
             </p>
             <div className="overflow-x-auto">
@@ -322,7 +322,7 @@ export default function EmotionChartsCard({
                 {events.length > 0 && (
                   <div className="flex items-center gap-2 mb-2">
                     <div className="flex-shrink-0 text-right" style={{ width: '60px' }}>
-                      <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)' }}>EVENT</span>
+                      <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.68 0.015 255)' }}>EVENT</span>
                     </div>
                     <div className="flex-1 relative" style={{ height: '16px' }}>
                       {events.map(ev => {
@@ -357,7 +357,7 @@ export default function EmotionChartsCard({
                           const isInEvent = events.some(ev => d.time >= ev.startTime && d.time <= ev.endTime);
                           return (
                             <div key={i} className="flex-1 rounded-sm"
-                              style={{ height: '22px', background: `${EMOTION_HEX[emotion]}`, opacity: Math.max(0.04, intensity), minWidth: '4px', outline: isInEvent ? '1px solid oklch(0.45 0.015 250)' : 'none' }}
+                              style={{ height: '22px', background: `${EMOTION_HEX[emotion]}`, opacity: Math.max(0.04, intensity), minWidth: '4px', outline: isInEvent ? '1px solid oklch(0.58 0.015 250)' : 'none' }}
                               title={`t=${d.time}s: ${val.toFixed(3)}`}
                             />
                           );
@@ -370,19 +370,19 @@ export default function EmotionChartsCard({
                   <div style={{ width: '60px' }} />
                   <div className="flex justify-between flex-1">
                     {[0, 50, 100, 150, 200, 250].map(t => (
-                      <span key={t} style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)' }}>{t}s</span>
+                      <span key={t} style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.68 0.015 255)' }}>{t}s</span>
                     ))}
                   </div>
                 </div>
                 <div className="flex items-center gap-3 mt-3">
-                  <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)' }}>低</span>
+                  <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.68 0.015 255)' }}>低</span>
                   <div className="flex gap-0.5">
                     {[0.05, 0.15, 0.3, 0.5, 0.7, 0.85, 1.0].map((op, i) => (
                       <div key={i} className="w-6 h-3 rounded-sm" style={{ background: 'oklch(0.68 0.18 235)', opacity: op }} />
                     ))}
                   </div>
-                  <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)' }}>高</span>
-                  <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.65rem', color: 'oklch(0.58 0.015 255)', marginLeft: '8px' }}>※各感情内での相対スケール（5秒区間平均値）</span>
+                  <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.68 0.015 255)' }}>高</span>
+                  <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.65rem', color: 'oklch(0.68 0.015 255)', marginLeft: '8px' }}>※各感情内での相対スケール（5秒区間平均値）</span>
                 </div>
               </div>
             </div>
@@ -392,14 +392,14 @@ export default function EmotionChartsCard({
         {/* TAB: スタック面グラフ */}
         {activeTab === 'stacked' && (
           <div>
-            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.58 0.015 255)', marginBottom: '1rem' }}>
+            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.68 0.015 255)', marginBottom: '1rem' }}>
               10秒区間ごとの感情スコア平均値を積み上げ面グラフで表示します。各感情の相対的な変化パターンを把握できます。
             </p>
             <ResponsiveContainer width="100%" height={300}>
               <AreaChart data={stackedData} margin={{ top: 5, right: 10, bottom: 20, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" />
-                <XAxis dataKey="time" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} angle={-30} textAnchor="end" />
-                <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} />
+                <XAxis dataKey="time" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} angle={-30} textAnchor="end" />
+                <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} />
                 <Tooltip contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
                   formatter={(v: number, name: string) => [v.toFixed(3), EMOTION_LABELS_JA[name] || name]} />
                 <Legend formatter={v => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem' }}>{EMOTION_LABELS_JA[v] || v}</span>} />
@@ -414,7 +414,7 @@ export default function EmotionChartsCard({
         {/* TAB: 支配的感情タイムライン */}
         {activeTab === 'dominant' && (
           <div>
-            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.58 0.015 255)', marginBottom: '1rem' }}>
+            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.68 0.015 255)', marginBottom: '1rem' }}>
               10秒区間ごとに最も高いスコアを示した「支配的感情」の推移を表示します。感情状態の遷移パターンを視覚的に把握できます。
             </p>
             <div className="mb-4">
@@ -447,16 +447,16 @@ export default function EmotionChartsCard({
                 ))}
               </div>
               <div className="flex justify-between mt-1">
-                <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)' }}>0s</span>
-                <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)' }}>{maxTime}s</span>
+                <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.68 0.015 255)' }}>0s</span>
+                <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.68 0.015 255)' }}>{maxTime}s</span>
               </div>
             </div>
             <div className="section-label mb-2">10-SECOND WINDOW EMOTION SCORES</div>
             <ResponsiveContainer width="100%" height={280}>
               <BarChart data={stackedData} margin={{ top: 5, right: 10, bottom: 20, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" vertical={false} />
-                <XAxis dataKey="time" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', fill: 'oklch(0.58 0.015 255)' }} angle={-30} textAnchor="end" />
-                <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} />
+                <XAxis dataKey="time" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', fill: 'oklch(0.68 0.015 255)' }} angle={-30} textAnchor="end" />
+                <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} />
                 <Tooltip contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
                   formatter={(v: number, name: string) => [v.toFixed(3), EMOTION_LABELS_JA[name] || name]} />
                 <Legend formatter={v => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem' }}>{EMOTION_LABELS_JA[v] || v}</span>} />
@@ -493,7 +493,7 @@ export default function EmotionChartsCard({
                 style={{
                   fontFamily: 'Roboto Mono, monospace',
                   background: showSpecial.includes(key) ? SPECIAL_COLORS[key] : 'oklch(0.20 0.04 255)',
-                  color: showSpecial.includes(key) ? 'white' : 'oklch(0.45 0.015 250)',
+                  color: showSpecial.includes(key) ? 'white' : 'oklch(0.58 0.015 250)',
                   border: `1px solid ${showSpecial.includes(key) ? SPECIAL_COLORS[key] : 'oklch(0.28 0.04 255)'}`,
                   opacity: showSpecial.includes(key) ? 1 : 0.6,
                 }}
@@ -512,8 +512,8 @@ export default function EmotionChartsCard({
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" />
-            <XAxis dataKey="time" type="number" domain={['dataMin', 'dataMax']} tickFormatter={formatTime} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} />
-            <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} domain={[0, 100]} />
+            <XAxis dataKey="time" type="number" domain={['dataMin', 'dataMax']} tickFormatter={formatTime} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} />
+            <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} domain={[0, 100]} />
             <Tooltip content={<CustomTooltip />} />
             <Legend formatter={v => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem' }}>{v}</span>} />
             {renderBaselineArea()}

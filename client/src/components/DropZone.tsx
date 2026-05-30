@@ -90,12 +90,12 @@ export default function DropZone({ onDataLoaded }: DropZoneProps) {
               <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.92 0.005 250)', letterSpacing: '-0.02em' }}>
                 KSDV
               </div>
-              <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.55rem', color: 'oklch(0.58 0.015 255)', letterSpacing: '0.1em' }}>
+              <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.55rem', color: 'oklch(0.68 0.015 255)', letterSpacing: '0.1em' }}>
                 Kokoro Sensor Data Visualizer
               </div>
             </div>
         </div>
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.9rem', color: 'oklch(0.58 0.015 255)' }}>
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.9rem', color: 'oklch(0.68 0.015 255)' }}>
           心sensorの感情ログファイルをアップロードして分析を開始
         </p>
       </div>
@@ -151,7 +151,7 @@ export default function DropZone({ onDataLoaded }: DropZoneProps) {
             <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600, fontSize: '1rem', color: 'oklch(0.88 0.005 250)' }}>
               {progress}
             </div>
-            <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.7rem', color: 'oklch(0.58 0.015 255)' }}>
+            <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.7rem', color: 'oklch(0.68 0.015 255)' }}>
               ANALYZING NEURAL SIGNAL DATA...
             </div>
           </div>
@@ -174,7 +174,7 @@ export default function DropZone({ onDataLoaded }: DropZoneProps) {
               <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1.1rem', color: 'oklch(0.92 0.005 250)', marginBottom: '0.4rem' }}>
                 {isDragging ? 'ここにドロップ' : 'CSVファイルをドラッグ＆ドロップ'}
               </div>
-              <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.58 0.015 255)' }}>
+              <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.68 0.015 255)' }}>
                 または{' '}
                 <span style={{ color: 'oklch(0.70 0.14 195)', fontWeight: 600, textDecoration: 'underline' }}>
                   クリックしてファイルを選択
@@ -202,7 +202,7 @@ export default function DropZone({ onDataLoaded }: DropZoneProps) {
           gap: '6px',
           fontFamily: 'Noto Sans JP, sans-serif',
           fontSize: '0.75rem',
-          color: 'oklch(0.58 0.015 255)',
+          color: 'oklch(0.68 0.015 255)',
           textDecoration: 'none',
           padding: '5px 12px',
           borderRadius: '6px',
@@ -215,7 +215,7 @@ export default function DropZone({ onDataLoaded }: DropZoneProps) {
           (e.currentTarget as HTMLAnchorElement).style.borderColor = 'oklch(0.70 0.14 195 / 0.4)';
         }}
         onMouseLeave={e => {
-          (e.currentTarget as HTMLAnchorElement).style.color = 'oklch(0.58 0.015 255)';
+          (e.currentTarget as HTMLAnchorElement).style.color = 'oklch(0.68 0.015 255)';
           (e.currentTarget as HTMLAnchorElement).style.borderColor = 'oklch(0.28 0.04 255)';
         }}
       >

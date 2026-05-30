@@ -74,12 +74,12 @@ export default function BaselineSettingsCard({ timeseriesFull }: Props) {
             }}>
               {baselineRange[0]}s 〜 {baselineRange[1]}s
             </div>
-            <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.58 0.015 255)' }}>
+            <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.68 0.015 255)' }}>
               （{(baselineRange[1] - baselineRange[0]).toFixed(1)}秒区間）
             </span>
           </div>
         ) : (
-          <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.58 0.015 255)' }}>
+          <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.68 0.015 255)' }}>
             未設定 — TIME RANGE FILTERで無表情区間を選択し、「ベースラインとして設定」を押してください
           </p>
         )}
@@ -140,7 +140,7 @@ export default function BaselineSettingsCard({ timeseriesFull }: Props) {
               ベースラインを適用する
             </button>
           )}
-          <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.58 0.015 255)', fontStyle: 'italic' }}>
+          <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.68 0.015 255)', fontStyle: 'italic' }}>
             補正はいつでも解除できます。元データは保持されます。
           </span>
         </div>
@@ -160,7 +160,7 @@ export default function BaselineSettingsCard({ timeseriesFull }: Props) {
               style={{
                 fontFamily: 'Noto Sans JP, sans-serif',
                 background: clampNegatives ? 'rgba(0,180,216,0.2)' : 'oklch(0.20 0.04 255)',
-                color: clampNegatives ? 'oklch(0.70 0.14 195)' : 'oklch(0.55 0.015 255)',
+                color: clampNegatives ? 'oklch(0.70 0.14 195)' : 'oklch(0.66 0.015 255)',
                 border: `1px solid ${clampNegatives ? 'rgba(0,180,216,0.5)' : 'oklch(0.30 0.04 255)'}`,
               }}
             >
@@ -176,7 +176,7 @@ export default function BaselineSettingsCard({ timeseriesFull }: Props) {
               style={{
                 fontFamily: 'Noto Sans JP, sans-serif',
                 background: !clampNegatives ? 'rgba(0,180,216,0.2)' : 'oklch(0.20 0.04 255)',
-                color: !clampNegatives ? 'oklch(0.70 0.14 195)' : 'oklch(0.55 0.015 255)',
+                color: !clampNegatives ? 'oklch(0.70 0.14 195)' : 'oklch(0.66 0.015 255)',
                 border: `1px solid ${!clampNegatives ? 'rgba(0,180,216,0.5)' : 'oklch(0.30 0.04 255)'}`,
               }}
             >

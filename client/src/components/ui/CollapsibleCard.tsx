@@ -52,7 +52,7 @@ function readInitialOpen(storageKey: string | undefined, defaultOpen: boolean): 
 
 export default function CollapsibleCard({
   label,
-  labelColor = 'oklch(0.58 0.015 255)',
+  labelColor = 'oklch(0.68 0.015 255)',
   title,
   titleColor = 'oklch(0.88 0.005 250)',
   info,
@@ -97,7 +97,7 @@ export default function CollapsibleCard({
             type="button"
             onClick={() => setOpen(o => !o)}
             className="p-1 rounded transition-colors"
-            style={{ color: 'oklch(0.58 0.015 255)', background: 'transparent' }}
+            style={{ color: 'oklch(0.68 0.015 255)', background: 'transparent' }}
             onMouseEnter={e => (e.currentTarget.style.background = 'oklch(0.26 0.04 255)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
             aria-label={open ? '折りたたむ' : '展開する'}

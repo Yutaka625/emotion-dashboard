@@ -53,7 +53,7 @@ export default function TransitionsSection({ data }: Props) {
         <h2 style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.88 0.005 250)' }}>
           感情遷移分析
         </h2>
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.58 0.015 255)', marginTop: '0.25rem' }}>
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.68 0.015 255)', marginTop: '0.25rem' }}>
           感情状態間の遷移パターンと持続時間の分析
         </p>
       </div>
@@ -66,14 +66,14 @@ export default function TransitionsSection({ data }: Props) {
         <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '0.5rem' }}>
           感情遷移行列
         </div>
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.58 0.015 255)', marginBottom: '1rem' }}>
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.68 0.015 255)', marginBottom: '1rem' }}>
           行：遷移元の感情、列：遷移先の感情。セルの色の濃さは遷移頻度を示します。
         </p>
         <div className="overflow-x-auto">
           <table className="text-xs">
             <thead>
               <tr>
-                <th className="w-16 pb-2" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)' }}>
+                <th className="w-16 pb-2" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.68 0.015 255)' }}>
                   FROM↓ TO→
                 </th>
                 {NON_NEUTRAL_EMOTIONS.map(e => (
@@ -109,13 +109,13 @@ export default function TransitionsSection({ data }: Props) {
                                 ? `oklch(${L.toFixed(2)} ${C.toFixed(2)} 160)`
                                 : 'oklch(0.19 0.01 255)',
                             border: isDiag
-                              ? '1px dashed oklch(0.40 0.01 255)'
+                              ? '1px dashed oklch(0.55 0.01 255)'
                               : count > 0
                                 ? `1px solid oklch(${(L + 0.08).toFixed(2)} ${C.toFixed(2)} 160 / 0.6)`
                                 : '1px solid oklch(0.25 0.02 255)',
                           }}
                         >
-                          <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: scaledIntensity > 0.45 ? 'oklch(0.98 0.005 250)' : 'oklch(0.52 0.015 250)', fontWeight: count > 0 ? 600 : 400 }}>
+                          <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: scaledIntensity > 0.45 ? 'oklch(0.98 0.005 250)' : 'oklch(0.64 0.015 250)', fontWeight: count > 0 ? 600 : 400 }}>
                             {isDiag ? '—' : count > 0 ? count : '·'}
                           </span>
                         </div>
@@ -138,13 +138,13 @@ export default function TransitionsSection({ data }: Props) {
         <div className="space-y-2">
           {top10.map((t, i) => (
             <div key={i} className="flex items-center gap-3">
-              <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.58 0.015 255)', width: '20px' }}>
+              <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.68 0.015 255)', width: '20px' }}>
                 #{i + 1}
               </span>
               <span className="px-2 py-0.5 rounded text-xs" style={{ background: EMOTION_COLORS[t.from] + '20', color: EMOTION_COLORS[t.from], fontFamily: 'Noto Sans JP, sans-serif', minWidth: '60px', textAlign: 'center' }}>
                 {EMOTION_LABELS_JA[t.from]}
               </span>
-              <span style={{ color: 'oklch(0.58 0.015 255)', fontSize: '0.8rem' }}>→</span>
+              <span style={{ color: 'oklch(0.68 0.015 255)', fontSize: '0.8rem' }}>→</span>
               <span className="px-2 py-0.5 rounded text-xs" style={{ background: EMOTION_COLORS[t.to] + '20', color: EMOTION_COLORS[t.to], fontFamily: 'Noto Sans JP, sans-serif', minWidth: '60px', textAlign: 'center' }}>
                 {EMOTION_LABELS_JA[t.to]}
               </span>
@@ -170,7 +170,7 @@ export default function TransitionsSection({ data }: Props) {
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={durationData} layout="vertical" margin={{ top: 5, right: 30, bottom: 5, left: 55 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" horizontal={false} />
-              <XAxis type="number" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.58 0.015 255)' }} unit="s" />
+              <XAxis type="number" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.68 0.015 255)' }} unit="s" />
               <YAxis type="category" dataKey="name" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fill: 'oklch(0.75 0.008 250)' }} width={50} />
               <Tooltip
                 formatter={(v: number) => [`${v.toFixed(3)}秒`, '平均持続時間']}
@@ -193,7 +193,7 @@ export default function TransitionsSection({ data }: Props) {
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={durationData} layout="vertical" margin={{ top: 5, right: 30, bottom: 5, left: 55 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" horizontal={false} />
-              <XAxis type="number" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.58 0.015 255)' }} unit="s" />
+              <XAxis type="number" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.68 0.015 255)' }} unit="s" />
               <YAxis type="category" dataKey="name" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fill: 'oklch(0.75 0.008 250)' }} width={50} />
               <Tooltip
                 formatter={(v: number) => [`${v.toFixed(2)}秒`, '累積時間']}
@@ -220,7 +220,7 @@ export default function TransitionsSection({ data }: Props) {
             <thead>
               <tr style={{ borderBottom: '2px solid oklch(0.28 0.04 255)' }}>
                 {['感情', '出現回数', '平均持続時間', '最大持続時間', '累積時間', '支配的割合'].map(h => (
-                  <th key={h} className="text-left pb-2 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.58 0.015 255)', letterSpacing: '0.05em' }}>
+                  <th key={h} className="text-left pb-2 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.68 0.015 255)', letterSpacing: '0.05em' }}>
                     {h}
                   </th>
                 ))}

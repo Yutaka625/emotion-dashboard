@@ -103,7 +103,7 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
         <h2 style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.88 0.005 250)' }}>
           セッション比較分析
         </h2>
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.58 0.015 255)', marginTop: '0.25rem' }}>
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.68 0.015 255)', marginTop: '0.25rem' }}>
           2つのCSVセッションの感情反応を多角的に比較します
         </p>
         {/* Legend */}
@@ -132,7 +132,7 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
                 { k: '顔検出率', v: `${meta.face_detection_rate.toFixed(1)}%` },
               ].map(({ k, v }) => (
                 <div key={k}>
-                  <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.50 0.015 255)' }}>{k}</div>
+                  <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.62 0.015 255)' }}>{k}</div>
                   <div style={{ fontFamily: 'Roboto Mono, monospace', fontWeight: 700, fontSize: '0.85rem', color: 'oklch(0.88 0.005 250)' }}>{v}</div>
                 </div>
               ))}
@@ -151,7 +151,7 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
           <BarChart data={emotionBarData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" />
             <XAxis dataKey="name" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.65rem', fill: 'oklch(0.65 0.015 255)' }} />
-            <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} />
+            <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} />
             <Tooltip {...tooltipStyle} />
             <Legend formatter={v => <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem' }}>{v}</span>} />
             <Bar dataKey="A" name={labelA} fill={COLOR_A} radius={[3, 3, 0, 0]} opacity={0.85} />
@@ -171,7 +171,7 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
             <BarChart data={specialBarData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" />
               <XAxis dataKey="name" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.65 0.015 255)' }} />
-              <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} />
+              <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} />
               <Tooltip {...tooltipStyle} />
               <Bar dataKey="A" name={labelA} fill={COLOR_A} radius={[3, 3, 0, 0]} opacity={0.85} />
               <Bar dataKey="B" name={labelB} fill={COLOR_B} radius={[3, 3, 0, 0]} opacity={0.85} />
@@ -187,7 +187,7 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={quadrantData} layout="vertical" margin={{ top: 5, right: 20, bottom: 5, left: 100 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" horizontal={false} />
-              <XAxis type="number" unit="%" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} />
+              <XAxis type="number" unit="%" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} />
               <YAxis type="category" dataKey="name" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.62rem', fill: 'oklch(0.65 0.015 255)' }} width={98} />
               <Tooltip {...tooltipStyle} formatter={(v: number) => `${v}%`} />
               <Bar dataKey="A" name={labelA} fill={COLOR_A} radius={[0, 3, 3, 0]} opacity={0.85} />
@@ -221,14 +221,14 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
         <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '4px' }}>
           Engagement 時系列の重ね合わせ（時間正規化）
         </div>
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.58 0.015 255)', marginBottom: '1rem' }}>
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.68 0.015 255)', marginBottom: '1rem' }}>
           各セッションの時間を0-100%に正規化して比較。Bは破線で表示。
         </p>
         <ResponsiveContainer width="100%" height={200}>
           <LineChart data={overlayData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" />
-            <XAxis dataKey="pct" unit="%" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} />
-            <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} />
+            <XAxis dataKey="pct" unit="%" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} />
+            <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} />
             <Tooltip {...tooltipStyle} labelFormatter={v => `進行率 ${v}%`} />
             <Legend formatter={v => <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem' }}>{v}</span>} />
             <Line type="monotone" dataKey="engA" name={`Eng ${labelA}`} stroke={COLOR_A} strokeWidth={1.5} dot={false} />
@@ -243,7 +243,7 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
         <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '0.5rem' }}>
           感情差分ランキング（|B − A|の大きい順）
         </div>
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.58 0.015 255)', marginBottom: '1rem' }}>
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.68 0.015 255)', marginBottom: '1rem' }}>
           正の差（B &gt; A）はB優勢、負の差（A &gt; B）はA優勢を示します。
         </p>
         <div className="overflow-x-auto">
@@ -251,7 +251,7 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
             <thead>
               <tr style={{ borderBottom: '2px solid oklch(0.28 0.04 255)' }}>
                 {['感情', `${labelA} 平均`, `${labelB} 平均`, '差分 (B−A)', 'バー'].map(h => (
-                  <th key={h} className="text-left pb-2 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', color: 'oklch(0.58 0.015 255)', letterSpacing: '0.04em' }}>{h}</th>
+                  <th key={h} className="text-left pb-2 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', color: 'oklch(0.68 0.015 255)', letterSpacing: '0.04em' }}>{h}</th>
                 ))}
               </tr>
             </thead>

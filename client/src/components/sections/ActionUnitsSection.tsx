@@ -91,7 +91,7 @@ export default function ActionUnitsSection({ data }: Props) {
         <h2 style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.88 0.005 250)' }}>
           アクションユニット分析
         </h2>
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.58 0.015 255)', marginTop: '0.25rem' }}>
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.68 0.015 255)', marginTop: '0.25rem' }}>
           FACS（顔面動作符号化システム）に基づく表情筋活動の定量分析
         </p>
       </div>
@@ -105,8 +105,8 @@ export default function ActionUnitsSection({ data }: Props) {
         <ResponsiveContainer width="100%" height={280}>
           <BarChart data={auData} margin={{ top: 5, right: 10, bottom: 60, left: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" vertical={false} />
-            <XAxis dataKey="label" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.58 0.015 255)' }} angle={-45} textAnchor="end" />
-            <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.58 0.015 255)' }} />
+            <XAxis dataKey="label" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} angle={-45} textAnchor="end" />
+            <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.68 0.015 255)' }} />
             <Tooltip
               formatter={(v: number, _: string, props: any) => [
                 `${v.toFixed(4)} (最大: ${props.payload.max.toFixed(2)})`,
@@ -129,13 +129,13 @@ export default function ActionUnitsSection({ data }: Props) {
         <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '0.5rem' }}>
           アクションユニット活性率（閾値5%超の割合）
         </div>
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.58 0.015 255)', marginBottom: '1rem' }}>
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.68 0.015 255)', marginBottom: '1rem' }}>
           各AUが5%以上の活性化を示したフレームの割合
         </p>
         <ResponsiveContainer width="100%" height={Math.max(220, topActive.length * 28 + 20)}>
           <BarChart data={topActive} layout="vertical" margin={{ top: 5, right: 60, bottom: 5, left: 130 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" horizontal={false} />
-            <XAxis type="number" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.58 0.015 255)' }} unit="%" />
+            <XAxis type="number" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.68 0.015 255)' }} unit="%" />
             <YAxis type="category" dataKey="desc" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fill: 'oklch(0.75 0.008 250)' }} width={125} />
             <Tooltip
               formatter={(v: number, _: string, props: any) => [`${v.toFixed(2)}%`, `${props.payload.label}: ${props.payload.desc}`]}
@@ -161,7 +161,7 @@ export default function ActionUnitsSection({ data }: Props) {
             <thead>
               <tr style={{ borderBottom: '2px solid oklch(0.28 0.04 255)' }}>
                 {['AU番号', '動作', '筋肉', '平均値', '最大値', '活性率'].map(h => (
-                  <th key={h} className="text-left pb-2 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.58 0.015 255)', letterSpacing: '0.05em' }}>
+                  <th key={h} className="text-left pb-2 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.68 0.015 255)', letterSpacing: '0.05em' }}>
                     {h}
                   </th>
                 ))}
@@ -183,7 +183,7 @@ export default function ActionUnitsSection({ data }: Props) {
                     <td className="py-2 pr-4" style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', color: 'oklch(0.88 0.005 250)' }}>
                       {info?.desc || row.name}
                     </td>
-                    <td className="py-2 pr-4" style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.58 0.015 255)' }}>
+                    <td className="py-2 pr-4" style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.68 0.015 255)' }}>
                       {info?.muscle || '—'}
                     </td>
                     <td className="py-2 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.75rem' }}>
@@ -221,7 +221,7 @@ export default function ActionUnitsSection({ data }: Props) {
               <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'oklch(0.88 0.005 250)', lineHeight: 1 }}>
                 {pose.mean.toFixed(2)}°
               </div>
-              <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', color: 'oklch(0.58 0.015 255)', marginTop: '4px' }}>
+              <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', color: 'oklch(0.68 0.015 255)', marginTop: '4px' }}>
                 平均値
               </div>
               <div className="mt-3 space-y-1">
@@ -231,7 +231,7 @@ export default function ActionUnitsSection({ data }: Props) {
                   { label: 'Max', value: pose.max.toFixed(2) + '°' },
                 ].map((item, j) => (
                   <div key={j} className="flex justify-between">
-                    <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.58 0.015 255)' }}>{item.label}</span>
+                    <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.68 0.015 255)' }}>{item.label}</span>
                     <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.75 0.008 250)', fontWeight: 600 }}>{item.value}</span>
                   </div>
                 ))}
@@ -240,7 +240,7 @@ export default function ActionUnitsSection({ data }: Props) {
           ))}
         </div>
         <div className="mt-4 p-3 rounded" style={{ background: 'oklch(0.95 0.005 250 / 0.5)', border: '1px solid oklch(0.88 0.008 250)' }}>
-          <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.42 0.015 250)', lineHeight: 1.6 }}>
+          <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.56 0.015 250)', lineHeight: 1.6 }}>
             <strong>解釈：</strong>Pitch（上下方向の傾き）の平均{headPoseData.find(p => p.key === 'pitch')?.mean.toFixed(2)}°は、わずかに下を向いた姿勢を示します。Yaw（左右方向）の平均{headPoseData.find(p => p.key === 'yaw')?.mean.toFixed(2)}°は正面からのわずかな左向きを示します。これらの値は自然な会話・視聴時の典型的な頭部姿勢の範囲内です。
           </p>
         </div>
@@ -252,7 +252,7 @@ export default function ActionUnitsSection({ data }: Props) {
         <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '0.5rem' }}>
           頭部動作検知イベント
         </div>
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.58 0.015 255)', marginBottom: '1rem' }}>
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.68 0.015 255)', marginBottom: '1rem' }}>
           明確なうなづき（Pitch ≥8°）・首振り（Yaw ≥12°）・首傾げ（Roll ≥15°）を検知した時刻一覧
         </p>
 
@@ -275,9 +275,9 @@ export default function ActionUnitsSection({ data }: Props) {
         </div>
 
         {head_motion_events.length === 0 ? (
-          <div className="py-8 text-center" style={{ color: 'oklch(0.48 0.015 255)', fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.82rem' }}>
+          <div className="py-8 text-center" style={{ color: 'oklch(0.60 0.015 255)', fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.82rem' }}>
             明確な頭部動作は検知されませんでした
-            <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.40 0.01 255)', marginTop: '4px' }}>
+            <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.55 0.01 255)', marginTop: '4px' }}>
               （CSV に pitch / yaw / roll 列がない場合も表示されません）
             </div>
           </div>
@@ -287,7 +287,7 @@ export default function ActionUnitsSection({ data }: Props) {
               <thead>
                 <tr style={{ borderBottom: '2px solid oklch(0.28 0.04 255)' }}>
                   {['動作', '開始時刻', '終了時刻', '持続時間', '変化量'].map(h => (
-                    <th key={h} className="text-left pb-2 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.58 0.015 255)', letterSpacing: '0.05em' }}>
+                    <th key={h} className="text-left pb-2 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.68 0.015 255)', letterSpacing: '0.05em' }}>
                       {h}
                     </th>
                   ))}

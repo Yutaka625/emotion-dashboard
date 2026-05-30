@@ -177,7 +177,7 @@ export default function UXResearchSection({ data }: Props) {
     fontSize: '0.62rem',
     fontWeight: 500,
     letterSpacing: '0.12em',
-    color: 'oklch(0.58 0.015 255)',
+    color: 'oklch(0.68 0.015 255)',
     textTransform: 'uppercase' as const,
   };
 
@@ -197,7 +197,7 @@ export default function UXResearchSection({ data }: Props) {
         <h1 style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.75rem', color: 'oklch(0.88 0.005 250)', lineHeight: 1.1 }}>
           UXリサーチ分析
         </h1>
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.58 0.015 255)', marginTop: '0.5rem' }}>
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.68 0.015 255)', marginTop: '0.5rem' }}>
           フラストレーション・デライト・認知負荷など、UX改善に直結する感情指標を可視化します
         </p>
       </div>
@@ -219,7 +219,7 @@ export default function UXResearchSection({ data }: Props) {
             <div style={{ fontFamily: 'Roboto Mono, monospace', fontWeight: 900, fontSize: '3rem', color: uxRating.color, lineHeight: 1 }}>
               {Math.round(ux_scores.ux_score)}
             </div>
-            <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.58 0.015 255)', marginTop: '4px' }}>/ 100</div>
+            <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.68 0.015 255)', marginTop: '4px' }}>/ 100</div>
             <div
               className="mt-3 px-3 py-1 rounded-full text-xs font-bold"
               style={{ background: `${uxRating.color}20`, color: uxRating.color, border: `1px solid ${uxRating.color}50`, fontFamily: 'Noto Sans JP, sans-serif' }}
@@ -279,7 +279,7 @@ export default function UXResearchSection({ data }: Props) {
                 <div className="mt-2">
                   <GaugeBar value={m.value} color={m.color} />
                 </div>
-                <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.65rem', color: 'oklch(0.50 0.01 255)', marginTop: '6px', lineHeight: 1.4 }}>
+                <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.65rem', color: 'oklch(0.62 0.01 255)', marginTop: '6px', lineHeight: 1.4 }}>
                   {m.description}
                 </div>
                 {m.alert && (
@@ -299,7 +299,7 @@ export default function UXResearchSection({ data }: Props) {
       <div style={cardStyle}>
         <div style={sectionLabel} className="mb-3">EMOTION HEATMAP</div>
         <div style={cardTitle}>感情強度ヒートマップ（時間 × 感情）</div>
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.55 0.015 255)', marginBottom: '1rem' }}>
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.66 0.015 255)', marginBottom: '1rem' }}>
           色が明るいほど感情強度が高い。横軸=時間、縦軸=感情種別。
         </p>
 
@@ -357,7 +357,7 @@ export default function UXResearchSection({ data }: Props) {
                     style={{
                       fontFamily: 'Roboto Mono, monospace',
                       fontSize: '0.55rem',
-                      color: 'oklch(0.45 0.01 255)',
+                      color: 'oklch(0.58 0.01 255)',
                       flex: Math.max(1, Math.floor(heatmapBins.length / 8)),
                     }}
                   >
@@ -417,7 +417,7 @@ export default function UXResearchSection({ data }: Props) {
                 fontFamily: 'Noto Sans JP, sans-serif',
                 background: frictionFilter === f ? 'oklch(0.28 0.04 255)' : 'transparent',
                 border: `1px solid ${frictionFilter === f ? 'oklch(0.40 0.06 255)' : 'oklch(0.28 0.04 255)'}`,
-                color: frictionFilter === f ? 'oklch(0.88 0.005 250)' : 'oklch(0.55 0.015 255)',
+                color: frictionFilter === f ? 'oklch(0.88 0.005 250)' : 'oklch(0.66 0.015 255)',
               }}
             >
               <Filter size={11} />
@@ -428,11 +428,11 @@ export default function UXResearchSection({ data }: Props) {
 
         {/* タイムライン */}
         {change_points.length === 0 ? (
-          <div className="text-center py-8" style={{ color: 'oklch(0.45 0.01 255)', fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem' }}>
+          <div className="text-center py-8" style={{ color: 'oklch(0.58 0.01 255)', fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem' }}>
             変化点が検出されていません。感情の変動が少ないセッションです。
           </div>
         ) : filteredItems.length === 0 ? (
-          <div className="text-center py-8" style={{ color: 'oklch(0.45 0.01 255)', fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem' }}>
+          <div className="text-center py-8" style={{ color: 'oklch(0.58 0.01 255)', fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem' }}>
             該当するイベントがありません。
           </div>
         ) : (
@@ -442,7 +442,7 @@ export default function UXResearchSection({ data }: Props) {
               const isDelight  = item.kind === 'delight';
               const kindColor = isFriction ? 'oklch(0.62 0.22 25)'
                 : isDelight ? 'oklch(0.78 0.14 82)'
-                : 'oklch(0.55 0.015 255)';
+                : 'oklch(0.66 0.015 255)';
               const kindLabel = isFriction ? 'フリクション' : isDelight ? 'デライト' : '中立変化';
 
               return (
@@ -452,7 +452,7 @@ export default function UXResearchSection({ data }: Props) {
                   style={{ background: 'oklch(0.18 0.04 255)', border: `1px solid ${kindColor}25` }}
                 >
                   {/* 時刻 */}
-                  <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.7rem', color: 'oklch(0.55 0.015 255)', width: '38px', flexShrink: 0 }}>
+                  <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.7rem', color: 'oklch(0.66 0.015 255)', width: '38px', flexShrink: 0 }}>
                     {item.time.toFixed(0)}s
                   </div>
                   {/* 種別バッジ */}
@@ -477,7 +477,7 @@ export default function UXResearchSection({ data }: Props) {
                   {/* Severity */}
                   <SeverityBadge level={item.severity} />
                   {/* Delta */}
-                  <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.50 0.01 255)', marginLeft: 'auto' }}>
+                  <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.62 0.01 255)', marginLeft: 'auto' }}>
                     Δ{item.delta > 0 ? '+' : ''}{item.delta.toFixed(4)}
                   </div>
                 </div>
@@ -503,7 +503,7 @@ export default function UXResearchSection({ data }: Props) {
             <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600, fontSize: '0.95rem', color: 'oklch(0.60 0.015 255)', marginBottom: '0.5rem' }}>
               タスクがまだ登録されていません
             </div>
-            <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', color: 'oklch(0.45 0.01 255)', textAlign: 'center', lineHeight: 1.6 }}>
+            <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', color: 'oklch(0.58 0.01 255)', textAlign: 'center', lineHeight: 1.6 }}>
               「時系列分析」セクションの EVENT ANNOTATIONS パネルで<br />
               タスク区間（開始〜終了時間）を登録すると、<br />
               ここにタスク別のUX指標が表示されます。
@@ -526,17 +526,17 @@ export default function UXResearchSection({ data }: Props) {
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.55 0.015 255)' }}>
+                    <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.66 0.015 255)' }}>
                       {ts.ev.startTime}s → {ts.ev.endTime}s
                     </span>
-                    <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.45 0.01 255)' }}>
+                    <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.58 0.01 255)' }}>
                       ({ts.frameCount}frames)
                     </span>
                   </div>
                 </div>
 
                 {ts.frameCount === 0 ? (
-                  <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', color: 'oklch(0.45 0.01 255)' }}>
+                  <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', color: 'oklch(0.58 0.01 255)' }}>
                     この区間にデータがありません
                   </div>
                 ) : (
@@ -550,7 +550,7 @@ export default function UXResearchSection({ data }: Props) {
                         <div className="flex items-center justify-between mb-1">
                           <div className="flex items-center gap-1" style={{ color: m.color }}>
                             {m.icon}
-                            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', color: 'oklch(0.55 0.015 255)' }}>
+                            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', color: 'oklch(0.66 0.015 255)' }}>
                               {m.label}
                             </span>
                           </div>
@@ -567,7 +567,7 @@ export default function UXResearchSection({ data }: Props) {
                 {/* 支配的感情 */}
                 {ts.frameCount > 0 && ts.dominantEmotion !== '-' && (
                   <div className="flex items-center gap-2 mt-3 pt-3" style={{ borderTop: '1px solid oklch(0.25 0.04 255)' }}>
-                    <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', color: 'oklch(0.50 0.01 255)' }}>支配的感情:</span>
+                    <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', color: 'oklch(0.62 0.01 255)' }}>支配的感情:</span>
                     <div className="flex items-center gap-1.5">
                       <div className="w-2 h-2 rounded-full" style={{ background: EMOTION_COLORS[ts.dominantEmotion] ?? '#999' }} />
                       <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: EMOTION_COLORS[ts.dominantEmotion] ?? '#999', fontWeight: 600 }}>

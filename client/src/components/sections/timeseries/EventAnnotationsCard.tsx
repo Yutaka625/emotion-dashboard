@@ -176,7 +176,7 @@ export default function EventAnnotationsCard({ eventStats, maxTime, displayTimes
       {events.length === 0 ? (
         <div className="py-6 text-center" style={{ border: '1px dashed oklch(0.28 0.04 255)', borderRadius: '12px' }}>
           <Tag size={20} style={{ color: 'oklch(0.72 0.015 250)', margin: '0 auto 8px' }} />
-          <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.82rem', color: 'oklch(0.58 0.015 255)' }}>
+          <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.82rem', color: 'oklch(0.68 0.015 255)' }}>
             まだイベントが登録されていません
           </p>
           <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.68 0.015 250)', marginTop: '4px' }}>
@@ -196,7 +196,7 @@ export default function EventAnnotationsCard({ eventStats, maxTime, displayTimes
                     <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '0.88rem', color: 'oklch(0.88 0.005 250)' }}>
                       {ev.name}
                     </div>
-                    <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.68rem', color: 'oklch(0.45 0.015 250)' }}>
+                    <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.68rem', color: 'oklch(0.58 0.015 250)' }}>
                       {ev.startTime}s — {ev.endTime}s &nbsp;|&nbsp; {(ev.endTime - ev.startTime).toFixed(1)}秒間 &nbsp;|&nbsp; {stat?.frameCount || 0} フレーム
                     </div>
                   </div>
@@ -240,7 +240,7 @@ export default function EventAnnotationsCard({ eventStats, maxTime, displayTimes
                           <div style={{ fontFamily: 'Roboto Mono, monospace', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)' }}>
                             {stat.stats[key]?.mean.toFixed(1)}
                           </div>
-                          <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.015 255)' }}>
+                          <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.68 0.015 255)' }}>
                             max {stat.stats[key]?.max.toFixed(1)}
                           </div>
                         </div>
@@ -253,14 +253,14 @@ export default function EventAnnotationsCard({ eventStats, maxTime, displayTimes
                         return (
                           <div key={e} className="flex items-center gap-2">
                             <div className="flex-shrink-0 text-right" style={{ width: '52px' }}>
-                              <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', color: isDom ? EMOTION_COLORS[e] : 'oklch(0.45 0.015 250)', fontWeight: isDom ? 700 : 400 }}>
+                              <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', color: isDom ? EMOTION_COLORS[e] : 'oklch(0.58 0.015 250)', fontWeight: isDom ? 700 : 400 }}>
                                 {EMOTION_LABELS_JA[e]}
                               </span>
                             </div>
                             <div className="flex-1 h-3 rounded-full overflow-hidden" style={{ background: 'oklch(0.22 0.04 255)' }}>
                               <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(100, mean * 2)}%`, background: EMOTION_COLORS[e], opacity: isDom ? 1 : 0.7 }} />
                             </div>
-                            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: isDom ? EMOTION_COLORS[e] : 'oklch(0.58 0.015 255)', minWidth: '36px', fontWeight: isDom ? 700 : 400 }}>
+                            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: isDom ? EMOTION_COLORS[e] : 'oklch(0.68 0.015 255)', minWidth: '36px', fontWeight: isDom ? 700 : 400 }}>
                               {mean.toFixed(2)}
                             </span>
                             {isDom && <span className="px-1 py-0.5 rounded text-xs" style={{ background: EMOTION_COLORS[e] + '20', color: EMOTION_COLORS[e], fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.6rem' }}>主要</span>}
@@ -285,7 +285,7 @@ export default function EventAnnotationsCard({ eventStats, maxTime, displayTimes
               <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '0.9rem', color: 'oklch(0.88 0.005 250)' }}>
                 区間比較・統計的検定
               </div>
-              <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.58 0.015 255)', marginTop: '2px' }}>
+              <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.68 0.015 255)', marginTop: '2px' }}>
                 2つのイベント区間の感情スコアをWelchのt検定で比較します
               </p>
             </div>
@@ -299,7 +299,7 @@ export default function EventAnnotationsCard({ eventStats, maxTime, displayTimes
                 : (v: string) => { setCompSegB(v); setComparisonResult(null); };
               return (
                 <div key={seg}>
-                  <label style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', color: 'oklch(0.58 0.015 255)', display: 'block', marginBottom: '4px' }}>区間 {seg}</label>
+                  <label style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', color: 'oklch(0.68 0.015 255)', display: 'block', marginBottom: '4px' }}>区間 {seg}</label>
                   <select
                     value={val}
                     onChange={e => setVal(e.target.value)}
@@ -344,7 +344,7 @@ export default function EventAnnotationsCard({ eventStats, maxTime, displayTimes
                   <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', color: 'oklch(0.65 0.20 270)', letterSpacing: '0.06em' }}>
                     WELCH t-TEST RESULTS — {evA?.name} vs {evB?.name}
                   </span>
-                  <div className="flex gap-3 text-xs" style={{ fontFamily: 'Roboto Mono, monospace', color: 'oklch(0.55 0.015 255)' }}>
+                  <div className="flex gap-3 text-xs" style={{ fontFamily: 'Roboto Mono, monospace', color: 'oklch(0.66 0.015 255)' }}>
                     <span>*** p&lt;0.001</span><span>** p&lt;0.01</span><span>* p&lt;0.05</span><span>n.s. p≥0.05</span>
                   </div>
                 </div>
@@ -353,7 +353,7 @@ export default function EventAnnotationsCard({ eventStats, maxTime, displayTimes
                     <thead>
                       <tr style={{ background: 'oklch(0.185 0.04 255)', borderBottom: '1px solid oklch(0.26 0.04 255)' }}>
                         {['感情', `${evA?.name} 平均`, `${evB?.name} 平均`, 't値', 'df', 'p値', "Cohen's d", '効果量', '有意性'].map(h => (
-                          <th key={h} style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.50 0.015 255)', padding: '6px 10px', textAlign: 'left', whiteSpace: 'nowrap' }}>{h}</th>
+                          <th key={h} style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.62 0.015 255)', padding: '6px 10px', textAlign: 'left', whiteSpace: 'nowrap' }}>{h}</th>
                         ))}
                       </tr>
                     </thead>
@@ -372,11 +372,11 @@ export default function EventAnnotationsCard({ eventStats, maxTime, displayTimes
                             <td style={{ fontFamily: 'Roboto Mono, monospace', padding: '5px 10px', color: evA ? evA.color : 'oklch(0.75 0.008 250)', fontSize: '0.72rem' }}>{r.meanA.toFixed(3)}</td>
                             <td style={{ fontFamily: 'Roboto Mono, monospace', padding: '5px 10px', color: evB ? evB.color : 'oklch(0.75 0.008 250)', fontSize: '0.72rem' }}>{r.meanB.toFixed(3)}</td>
                             <td style={{ fontFamily: 'Roboto Mono, monospace', padding: '5px 10px', color: 'oklch(0.75 0.008 250)', fontSize: '0.72rem' }}>{r.t.toFixed(3)}</td>
-                            <td style={{ fontFamily: 'Roboto Mono, monospace', padding: '5px 10px', color: 'oklch(0.55 0.015 255)', fontSize: '0.72rem' }}>{r.df.toFixed(1)}</td>
-                            <td style={{ fontFamily: 'Roboto Mono, monospace', padding: '5px 10px', color: isSig ? 'oklch(0.78 0.20 140)' : 'oklch(0.55 0.015 255)', fontSize: '0.72rem' }}>{r.p.toFixed(4)}</td>
+                            <td style={{ fontFamily: 'Roboto Mono, monospace', padding: '5px 10px', color: 'oklch(0.66 0.015 255)', fontSize: '0.72rem' }}>{r.df.toFixed(1)}</td>
+                            <td style={{ fontFamily: 'Roboto Mono, monospace', padding: '5px 10px', color: isSig ? 'oklch(0.78 0.20 140)' : 'oklch(0.66 0.015 255)', fontSize: '0.72rem' }}>{r.p.toFixed(4)}</td>
                             <td style={{ fontFamily: 'Roboto Mono, monospace', padding: '5px 10px', color: 'oklch(0.75 0.008 250)', fontSize: '0.72rem' }}>{r.cohensD.toFixed(3)}</td>
                             <td style={{ fontFamily: 'Noto Sans JP, sans-serif', padding: '5px 10px', color: 'oklch(0.65 0.015 255)', fontSize: '0.72rem' }}>{r.effectSize}</td>
-                            <td style={{ fontFamily: 'Roboto Mono, monospace', padding: '5px 10px', fontSize: '0.85rem', fontWeight: 700, color: isSig ? 'oklch(0.85 0.22 95)' : 'oklch(0.50 0.015 255)' }}>{r.significance}</td>
+                            <td style={{ fontFamily: 'Roboto Mono, monospace', padding: '5px 10px', fontSize: '0.85rem', fontWeight: 700, color: isSig ? 'oklch(0.85 0.22 95)' : 'oklch(0.62 0.015 255)' }}>{r.significance}</td>
                           </tr>
                         );
                       })}
