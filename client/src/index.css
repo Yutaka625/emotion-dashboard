@@ -196,6 +196,59 @@
     text-transform: uppercase;
   }
 
+  /* ── デュアルレンジスライダー（TIME RANGE FILTER）────────────────
+   * 開始・終了の range 入力を2本重ねて使う。素の実装だと上に重なった
+   * 入力がバー全幅を覆い、下のつまみ（開始側）を掴めなくなる。
+   * 対策: トラックは pointer-events:none で無反応にし、「つまみ」だけ
+   * pointer-events:auto で反応させる。つまみは別の位置にあるので、
+   * 左のつまみ＝開始・右のつまみ＝終了が確実に掴み分けられる。
+   * あわせてつまみを緑の丸で可視化し、掴む位置を明確にする。
+   * ──────────────────────────────────────────────────────────── */
+  .range-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;     /* トラックは見せない（下地の色バーを使う） */
+    pointer-events: none;        /* トラック部分はクリックを透過 */
+    margin: 0;
+    cursor: pointer;
+  }
+  /* つまみ（WebKit/Chrome/Edge/Safari） */
+  .range-thumb::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    pointer-events: auto;        /* つまみだけ掴める */
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: oklch(0.62 0.18 160);
+    border: 2px solid oklch(0.16 0.04 255);
+    box-shadow: 0 1px 3px oklch(0.10 0.04 255 / 0.6);
+    cursor: grab;
+  }
+  .range-thumb::-webkit-slider-thumb:active {
+    cursor: grabbing;
+    background: oklch(0.70 0.20 160);
+  }
+  /* つまみ（Firefox） */
+  .range-thumb::-moz-range-thumb {
+    pointer-events: auto;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: oklch(0.62 0.18 160);
+    border: 2px solid oklch(0.16 0.04 255);
+    box-shadow: 0 1px 3px oklch(0.10 0.04 255 / 0.6);
+    cursor: grab;
+  }
+  .range-thumb::-moz-range-track {
+    background: transparent;
+  }
+  /* キーボードフォーカス時につまみを強調（アクセシビリティ） */
+  .range-thumb:focus-visible::-webkit-slider-thumb {
+    outline: 2px solid oklch(0.78 0.14 195);
+    outline-offset: 1px;
+  }
+
   @keyframes signal-pulse {
     0%, 100% { opacity: 1; transform: scale(1); }
     50% { opacity: 0.5; transform: scale(0.85); }

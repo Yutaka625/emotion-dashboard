@@ -12,7 +12,7 @@
 import { useState, useMemo } from 'react';
 import type { DashboardData } from '@/lib/types';
 import { EMOTION_LABELS_JA, EMOTION_COLORS, NON_NEUTRAL_EMOTIONS } from '@/lib/types';
-import { Target, Download } from 'lucide-react';
+import { Target, Download, RotateCcw } from 'lucide-react';
 import { useBaseline } from '@/contexts/BaselineContext';
 import { useEvents } from '@/contexts/EventsContext';
 import { applyBaselineCorrection } from '@/lib/csvAnalyzer';
@@ -212,7 +212,21 @@ export default function TimeseriesSection({ data }: Props) {
 
       {/* ---- TIME RANGE FILTER ---- */}
       <div className="metric-card">
-        <div className="section-label mb-2">TIME RANGE FILTER</div>
+        {/* ヘッダー行: ラベル + リセットボタン */}
+        <div className="flex items-center justify-between mb-2">
+          <div className="section-label">TIME RANGE FILTER</div>
+          {/* リセット: 全範囲 [0, 録画長] に戻す。範囲が初期状態のときは無効化 */}
+          <button
+            onClick={() => setTimeRange([0, maxTime])}
+            disabled={timeRange[0] === 0 && timeRange[1] === maxTime}
+            className="flex items-center gap-1 px-2.5 py-1 rounded text-xs transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{ fontFamily: 'Noto Sans JP, sans-serif', background: 'oklch(0.22 0.04 255)', color: 'oklch(0.72 0.008 250)', border: '1px solid oklch(0.32 0.04 255)' }}
+            title="表示範囲を全区間にリセットする"
+          >
+            <RotateCcw size={12} />
+            リセット
+          </button>
+        </div>
         <div className="flex items-center gap-3 mb-2">
           <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: 'oklch(0.45 0.015 250)', minWidth: '32px' }}>
             {timeRange[0]}s
@@ -220,13 +234,20 @@ export default function TimeseriesSection({ data }: Props) {
           <div className="flex-1 relative h-6 flex items-center">
             <div className="absolute w-full h-1 rounded-full" style={{ background: 'oklch(0.28 0.04 255)' }} />
             <div className="absolute h-1 rounded-full" style={{ left: `${(timeRange[0] / maxTime) * 100}%`, right: `${100 - (timeRange[1] / maxTime) * 100}%`, background: 'oklch(0.62 0.18 160)' }} />
+            {/* 開始ハンドル: つまみ（左）をドラッグすると開始時間が変わる。
+                開始つまみが中央より右にあるときは終了ハンドルより前面に出し、重なっても掴めるようにする */}
             <input type="range" min={0} max={maxTime} step={5} value={timeRange[0]}
               onChange={e => setTimeRange([Math.min(Number(e.target.value), timeRange[1] - 10), timeRange[1]])}
-              className="absolute w-full opacity-0 cursor-pointer h-6" style={{ zIndex: 2 }}
+              className="range-thumb absolute w-full h-6"
+              style={{ zIndex: timeRange[0] > maxTime / 2 ? 4 : 2 }}
+              aria-label="開始時間"
             />
+            {/* 終了ハンドル: つまみ（右）をドラッグすると終了時間が変わる */}
             <input type="range" min={0} max={maxTime} step={5} value={timeRange[1]}
               onChange={e => setTimeRange([timeRange[0], Math.max(Number(e.target.value), timeRange[0] + 10)])}
-              className="absolute w-full opacity-0 cursor-pointer h-6" style={{ zIndex: 3 }}
+              className="range-thumb absolute w-full h-6"
+              style={{ zIndex: 3 }}
+              aria-label="終了時間"
             />
           </div>
           <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: 'oklch(0.45 0.015 250)', minWidth: '32px', textAlign: 'right' }}>
