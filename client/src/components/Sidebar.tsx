@@ -104,7 +104,7 @@ export default function Sidebar({ activeSection, onSectionChange, hasComparison,
                 style={{
                   background: isActive ? 'oklch(0.20 0.04 255)' : 'transparent',
                   borderLeft: isActive ? `2px solid ${item.highlight ? 'oklch(0.78 0.22 300)' : 'oklch(0.78 0.14 82)'}` : '2px solid transparent',
-                  color: isActive ? 'oklch(0.92 0.005 250)' : item.highlight ? 'oklch(0.75 0.18 300)' : 'oklch(0.60 0.015 255)',
+                  color: isActive ? 'oklch(0.92 0.005 250)' : 'oklch(0.60 0.015 255)',
                 }}
                 onMouseEnter={e => {
                   if (!isActive) {
@@ -120,7 +120,7 @@ export default function Sidebar({ activeSection, onSectionChange, hasComparison,
                 }}
               >
                 {/* アイコン色: 選択時のみアクセント色（highlight=紫 / 通常=金）。
-                    非選択時は highlight に関わらず全項目グレーで統一（紫はテキスト色のみに留める） */}
+                    非選択時は highlight に関わらず全項目グレーで統一（テキストも同様にグレー） */}
                 <span style={{ color: isActive ? (item.highlight ? 'oklch(0.78 0.22 300)' : 'oklch(0.78 0.14 82)') : 'oklch(0.55 0.015 255)', flexShrink: 0 }}>
                   {item.icon}
                 </span>
