@@ -229,29 +229,37 @@ export default function TimeseriesSection({ data }: Props) {
         </div>
         <div className="flex items-center gap-3 mb-2">
           <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: 'oklch(0.45 0.015 250)', minWidth: '32px' }}>
-            {timeRange[0]}s
+            {timeRange[0].toFixed(1)}s
           </span>
           <div className="flex-1 relative h-6 flex items-center">
             <div className="absolute w-full h-1 rounded-full" style={{ background: 'oklch(0.28 0.04 255)' }} />
             <div className="absolute h-1 rounded-full" style={{ left: `${(timeRange[0] / maxTime) * 100}%`, right: `${100 - (timeRange[1] / maxTime) * 100}%`, background: 'oklch(0.62 0.18 160)' }} />
             {/* 開始ハンドル: つまみ（左）をドラッグすると開始時間が変わる。
                 開始つまみが中央より右にあるときは終了ハンドルより前面に出し、重なっても掴めるようにする */}
-            <input type="range" min={0} max={maxTime} step={5} value={timeRange[0]}
-              onChange={e => setTimeRange([Math.min(Number(e.target.value), timeRange[1] - 10), timeRange[1]])}
+            <input type="range" min={0} max={maxTime} step={0.1} value={timeRange[0]}
+              onChange={e => {
+                // 0.1秒刻み。終了との最小間隔は0.1秒。小数1桁に丸めて浮動小数の誤差を防ぐ
+                const v = Math.round(Math.min(Number(e.target.value), timeRange[1] - 0.1) * 10) / 10;
+                setTimeRange([v, timeRange[1]]);
+              }}
               className="range-thumb absolute w-full h-6"
               style={{ zIndex: timeRange[0] > maxTime / 2 ? 4 : 2 }}
               aria-label="開始時間"
             />
             {/* 終了ハンドル: つまみ（右）をドラッグすると終了時間が変わる */}
-            <input type="range" min={0} max={maxTime} step={5} value={timeRange[1]}
-              onChange={e => setTimeRange([timeRange[0], Math.max(Number(e.target.value), timeRange[0] + 10)])}
+            <input type="range" min={0} max={maxTime} step={0.1} value={timeRange[1]}
+              onChange={e => {
+                // 0.1秒刻み。開始との最小間隔は0.1秒。小数1桁に丸めて浮動小数の誤差を防ぐ
+                const v = Math.round(Math.max(Number(e.target.value), timeRange[0] + 0.1) * 10) / 10;
+                setTimeRange([timeRange[0], v]);
+              }}
               className="range-thumb absolute w-full h-6"
               style={{ zIndex: 3 }}
               aria-label="終了時間"
             />
           </div>
           <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: 'oklch(0.45 0.015 250)', minWidth: '32px', textAlign: 'right' }}>
-            {timeRange[1]}s
+            {timeRange[1].toFixed(1)}s
           </span>
         </div>
         <div className="flex gap-2 flex-wrap items-center">
