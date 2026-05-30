@@ -154,7 +154,20 @@ export default function AcademicSection({ data }: Props) {
             CSV出力
           </button>
           <button
-            onClick={() => window.print()}
+            onClick={() => {
+              // 印刷直前に document.title をセッション名へ変更し、
+              // PDF保存時のデフォルトファイル名を分かりやすくする。
+              // 印刷後（afterprint）に元のタイトルへ戻す。
+              const originalTitle = document.title;
+              const baseName = (meta.filename || 'session').replace(/\.[^.]+$/, ''); // 拡張子を除去
+              document.title = `学術的分析_${baseName}`;
+              const restore = () => {
+                document.title = originalTitle;
+                window.removeEventListener('afterprint', restore);
+              };
+              window.addEventListener('afterprint', restore);
+              window.print();
+            }}
             className="flex items-center gap-1.5 px-3 py-2 rounded-lg transition-all"
             style={{ background: 'oklch(0.22 0.04 255)', border: '1px solid oklch(0.32 0.04 255)', color: 'oklch(0.65 0.015 255)', fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem' }}
             title="ブラウザの印刷 → PDFとして保存"

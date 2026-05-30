@@ -119,7 +119,9 @@ export default function Sidebar({ activeSection, onSectionChange, hasComparison,
                   }
                 }}
               >
-                <span style={{ color: isActive ? (item.highlight ? 'oklch(0.78 0.22 300)' : 'oklch(0.78 0.14 82)') : item.highlight ? 'oklch(0.65 0.18 300)' : 'oklch(0.55 0.015 255)', flexShrink: 0 }}>
+                {/* アイコン色: 選択時のみアクセント色（highlight=紫 / 通常=金）。
+                    非選択時は highlight に関わらず全項目グレーで統一（紫はテキスト色のみに留める） */}
+                <span style={{ color: isActive ? (item.highlight ? 'oklch(0.78 0.22 300)' : 'oklch(0.78 0.14 82)') : 'oklch(0.55 0.015 255)', flexShrink: 0 }}>
                   {item.icon}
                 </span>
                 {!collapsed && (

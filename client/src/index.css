@@ -280,15 +280,38 @@
   }
 }
 
-/* ── Print / PDF 出力用スタイル ─────────────────────────── */
+/* ── Print / PDF 出力用スタイル ─────────────────────────────
+ * 画面はダークテーマ（濃紺背景＋ほぼ白文字）だが、印刷時は
+ * 「白背景＋濃い文字」のライトテーマに反転する。
+ *
+ * 理由: 印刷ダイアログの「背景のグラフィック」は既定でOFFのため、
+ * ダーク背景を紙に出そうとすると背景が消え、白に近い文字が白い紙に
+ * 乗って“真っ白＝何も見えない”状態になる。ライト反転なら背景OFFでも
+ * 確実に読め、インク消費も少なく学術配布物として自然。
+ * ────────────────────────────────────────────────────────── */
 @media print {
-  /* サイドバーとヘッダーを非表示 */
+  /* 色を意図通り出力する（背景グラフィックONの場合に効く） */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* サイドバーとヘッダーは印刷しない */
   aside,
   header {
     display: none !important;
   }
 
-  /* ルートのheight/overflowを解除してコンテンツが切れないようにする */
+  /* ページ全体を白背景にする（ダーク背景を解除） */
+  html,
+  body,
+  .dashboard-root,
+  .dashboard-inner,
+  main {
+    background: #ffffff !important;
+  }
+
+  /* ルートの height/overflow を解除してコンテンツが切れないようにする */
   .dashboard-root {
     height: auto !important;
     min-height: unset !important;
@@ -302,17 +325,39 @@
     display: block !important;
   }
 
-  /* mainのスクロール制限を解除 */
+  /* main のスクロール制限を解除 */
   main {
     overflow: visible !important;
     height: auto !important;
     flex: none !important;
-    padding: 1.5rem !important;
+    padding: 1.25rem !important;
   }
 
-  /* 背景色・文字色をそのまま出力 */
-  * {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
+  /* 本文テキストを既定で濃いグレー（≒黒）にする。
+     ダークテーマの淡い文字色（白に近い inline color）を上書きして読めるようにする。
+     ※ recharts のグラフ線・塗りは SVG の stroke/fill（color ではない）ため影響を受けず色が残る */
+  main,
+  main * {
+    color: #1a1a1a !important;
+  }
+
+  /* カードを白い紙面に。影は不要、境界は薄いグレーに */
+  .metric-card {
+    background: #ffffff !important;
+    border: 1px solid #cccccc !important;
+    box-shadow: none !important;
+    /* カードが用紙の途中で分断されないようにする */
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* セクション見出しラベルも濃いグレーに */
+  .section-label {
+    color: #555555 !important;
+  }
+
+  /* グラフが用紙幅を超えて右端で切れないように、最大幅を用紙内に収める */
+  .recharts-responsive-container {
+    max-width: 100% !important;
   }
 }
