@@ -33,6 +33,29 @@
 - `TimeseriesSection`：「自動検出」ボタン + Sonner トースト通知
 - バグ修正：EMOTION TIME SERIES ツールチップに困惑（confusion）が表示されない問題を修正
 
+### ✅ 時系列スムージング機能（feature/timeseries-smoothing → main マージ済）
+- `smoothingUtils.ts`：SMA（単純移動平均）/ EMA（指数移動平均）実装
+- `TimeseriesSection`：SMOOTHING SETTINGS UI（手法選択・ウィンドウサイズ・αスライダー）
+- 元データは保持したまま表示のみ平滑化
+
+### ✅ UI/UX 改善バッチ（2026-05-30 / main マージ済）
+
+**🔴 高優先度（完了）**
+- `OverviewSection.tsx`：KEY INSIGHTS カードを実データから動的生成（主要感情・Engagement・Valence）
+- `Sidebar.tsx`：フッターの録音日時を `meta.recording_date / recording_time` から動的表示
+- `Sidebar.tsx`：「LIVE DATA」→「SESSION DATA」に変更、OverviewSection バッジを「ANALYZED」に変更
+
+**🟠 中〜高優先度（完了）**
+- `Home.tsx`：「ファイル名＋×」と「別のファイル」ボタンを Upload+ファイル名+× の1ボタンに統合
+- `Home.tsx`：`mainRef` + `handleSectionChange` でセクション切り替え時に `scrollTo(0, 0)` を実行
+- `TimeseriesSection.tsx`：1,573行 → 約250行に削減、4サブコンポーネントに分割
+  - `BaselineSettingsCard.tsx`：ベースライン設定UI
+  - `SmoothingSettingsCard.tsx`：スムージング設定UI
+  - `EmotionChartsCard.tsx`：感情チャート（5タブ）＋特殊指標
+  - `EventAnnotationsCard.tsx`：イベントアノテーション＋統計比較
+- `Sidebar.tsx`：アクションユニットアイコン `Clock` → `Scan` に変更、折りたたみ時ホバーツールチップ追加
+- `OverviewSection.tsx`：RadarChart の `mean × 10` スケールを廃止し生の平均値を表示
+
 ---
 
 ## 進行中タスク
@@ -68,45 +91,8 @@
 
 ---
 
-## UI/UX 改善バックログ
-> 2026-05-30 全コンポーネントレビューで洗い出し。優先度順に記載。
-
-### 🔴 高優先度（データ正確性・誤解招くUI）
-
-- [ ] **KEY INSIGHTS の動的化**（`OverviewSection.tsx`）
-  - 「困惑が支配的感情」「ネガティブなValenceは検出されず」などの文章がハードコードされており、どのCSVを読み込んでも変わらない
-  - 実際の `dominant_emotion_counts` / `special_stats` から動的に生成する
-  - 例: 主要感情・Valenceの傾向・Engagementピーク時刻などをデータドリブンに記述
-
-- [ ] **サイドバーフッターの日時をデータから取得**（`Sidebar.tsx`）
-  - `REC: 2025-12-17 / 16:14:31 JST` がハードコード
-  - Props 経由でメタデータ（`meta.recording_date` / `meta.recording_time`）を受け取り表示する
-
-- [ ] **「LIVE DATA」バッジの文言修正**（`Sidebar.tsx`）
-  - CSVの事後分析ツールなのに「LIVE DATA」は誤解を招く
-  - 「ANALYZED」「SESSION DATA」など分析済みを示す表現に変更
-
-### 🟠 中〜高優先度（UX の摩擦）
-
-- [ ] **ヘッダーの重複UIを整理**（`Home.tsx`）
-  - 「ファイル名 + ×ボタン」と「別のファイルボタン」が両方 `handleReset` を呼ぶ重複
-  - どちらか一方に統合し、ヘッダー左側の要素数を削減する
-
-- [ ] **TimeseriesSection のセクション切り替え後スクロール位置リセット**（`Home.tsx`）
-  - セクション切り替え時に `main` のスクロール位置を先頭に戻す
-  - `setActiveSection` 呼び出し時に `mainRef.current?.scrollTo(0, 0)` を追加
-
-- [ ] **TimeseriesSection を子コンポーネントに分割**（`TimeseriesSection.tsx`）
-  - 現在 1,573 行の巨大コンポーネント
-  - `BaselineSettingsCard` / `SmoothingSettingsCard` / `EmotionChartsCard` / `EventAnnotationsCard` に分割
-
-- [ ] **サイドバーアイコンの見直し**（`Sidebar.tsx`）
-  - 「アクションユニット」の `Clock` → `Target` または `Scan` などに変更
-  - 折りたたみ時にホバーでラベルが出るツールチップを追加
-
-- [ ] **RadarChart のスケール表示を改善**（`OverviewSection.tsx`）
-  - `mean * 10` スケールの意図が不明確
-  - 軸に実際の値範囲を明示するか、スケーリングをやめて生の値を表示する
+## UI/UX 改善バックログ（残タスク）
+> 🔴高優先・🟠中〜高優先は 2026-05-30 に完了済み。以下は未着手分。
 
 ### 🟡 中優先度（一貫性・洗練度）
 
@@ -126,7 +112,7 @@
   - `display: none → block` が瞬時切り替えで唐突
   - `@keyframes fade-in` + `animation: fade-in 0.15s ease-out` で自然なトランジション
 
-- [ ] **スムージング設定のα値スライダーを反転**（`TimeseriesSection.tsx`）
+- [ ] **スムージング設定のα値スライダーを反転**（`SmoothingSettingsCard.tsx`）
   - 現在: 左=0.05（強）/ 右=0.90（弱）で直感と逆
   - スライダーを「スムージング強度（0〜100%）」として内部でαに逆算、または左右を反転
 
