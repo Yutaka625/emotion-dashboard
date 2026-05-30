@@ -63,7 +63,7 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
 };
 
 export default function OverviewSection({ data }: Props) {
-  const { meta, special_stats, dominant_emotion_counts, dominant_emotion_pct, emotion_stats } = data;
+  const { meta, special_stats, dominant_emotion_counts, dominant_emotion_pct, emotion_stats, engagement_distribution } = data;
   const { isBaselineActive, baselineRange } = useBaseline();
   // attention is treated as a facial expression metric (in emotion_stats)
   const attentionStats = emotion_stats['attention'] || special_stats['attention'];
@@ -82,7 +82,8 @@ export default function OverviewSection({ data }: Props) {
     const emotions = ['anger', 'contempt', 'disgust', 'fear', 'joy', 'sadness', 'surprise', 'sentimentality', 'confusion'];
     return emotions.map(e => ({
       emotion: EMOTION_LABELS_JA[e] || e,
-      value: Math.min(100, emotion_stats[e]?.mean * 10 || 0),
+      // 生の平均値をそのまま使用（×10スケール廃止）
+      value: emotion_stats[e]?.mean || 0,
       max: emotion_stats[e]?.max || 0,
     }));
   }, [emotion_stats]);
@@ -93,6 +94,49 @@ export default function OverviewSection({ data }: Props) {
   const engMax = special_stats.engagement?.max || 0;
 
   const topEmotion = Object.entries(dominant_emotion_counts).sort((a, b) => b[1] - a[1])[0];
+
+  // KEY INSIGHTS をデータから動的生成
+  const keyInsights = useMemo(() => {
+    // 上位2感情を取得
+    const sorted = Object.entries(dominant_emotion_counts).sort((a, b) => b[1] - a[1]);
+    const [top1Key] = sorted[0] ?? ['', 0];
+    const [top2Key] = sorted[1] ?? ['', 0];
+    const top1Label = EMOTION_LABELS_JA[top1Key] || top1Key;
+    const top2Label = EMOTION_LABELS_JA[top2Key] || top2Key;
+    const top1Pct = dominant_emotion_pct[top1Key]?.toFixed(1) ?? '0.0';
+    const top2Pct = dominant_emotion_pct[top2Key]?.toFixed(1) ?? '0.0';
+
+    // Engagement レベル判定
+    const engMedian = special_stats.engagement?.median ?? 0;
+    const engHighFrames =
+      (engagement_distribution?.['High (60-80)'] ?? 0) +
+      (engagement_distribution?.['Very High (80-100)'] ?? 0);
+    const engLevel = engMean >= 60 ? '高い' : engMean >= 30 ? '中程度' : '低い';
+
+    // Valence 傾向判定
+    const valMedian = special_stats.valence?.median ?? 0;
+    const valMin = special_stats.valence?.min ?? 0;
+    const hasNegativeValence = valMin < 0 || valMean < 0;
+    const valTrend = valMean >= 50 ? 'ポジティブ' : valMean >= 20 ? '中立〜ポジティブ' : hasNegativeValence ? 'ネガティブ寄り' : '中立的';
+
+    return [
+      {
+        title: '感情状態の安定性',
+        body: `全フレームの${top1Pct}%で「${top1Label}」が支配的感情として検出されました。${top2Key ? `次いで「${top2Label}」が${top2Pct}%を占めています。` : ''}`,
+        color: EMOTION_COLORS[top1Key] || '#999',
+      },
+      {
+        title: 'Engagementのパターン',
+        body: `Engagementの平均${engMean.toFixed(1)}%・中央値${engMedian.toFixed(1)}%は${engLevel}覚醒状態を示します。高エンゲージメント（60%以上）の瞬間が${engHighFrames.toLocaleString()}フレーム検出されています。`,
+        color: 'oklch(0.72 0.18 80)',
+      },
+      {
+        title: 'Valenceの傾向',
+        body: `Valenceの平均${valMean.toFixed(1)}%・中央値${valMedian.toFixed(1)}%は${valTrend}の感情価を示します。${hasNegativeValence ? 'ネガティブな感情価が一部検出されています。' : 'セッション全体でポジティブな感情価が維持されていました。'}`,
+        color: 'oklch(0.62 0.18 25)',
+      },
+    ];
+  }, [dominant_emotion_counts, dominant_emotion_pct, engMean, special_stats, valMean, engagement_distribution]);
 
   return (
     <div className="space-y-6">
@@ -242,7 +286,7 @@ export default function OverviewSection({ data }: Props) {
         <div className="metric-card">
           <div className="section-label mb-3">EMOTION PROFILE</div>
           <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
-            感情プロファイル（平均値×10スケール）
+            感情プロファイル（平均値）
           </div>
           <ResponsiveContainer width="100%" height={240}>
             <RadarChart data={radarData}>
@@ -261,7 +305,7 @@ export default function OverviewSection({ data }: Props) {
               />
               <Tooltip
                 contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
-                formatter={(v: number) => [`${(v / 10).toFixed(3)}`, '平均値']}
+                formatter={(v: number) => [v.toFixed(3), '平均値']}
               />
             </RadarChart>
           </ResponsiveContainer>
@@ -275,23 +319,7 @@ export default function OverviewSection({ data }: Props) {
           主要な発見
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[
-            {
-              title: '感情状態の安定性',
-              body: `全フレームの${dominant_emotion_pct['confusion']?.toFixed(1)}%で「困惑」が支配的感情として検出されました。これは顔の表情が明確な感情表出を示さない「中立的な認知状態」を反映しています。`,
-              color: EMOTION_COLORS['confusion'],
-            },
-            {
-              title: 'Engagementのパターン',
-              body: `Engagementの中央値は${special_stats.engagement?.median.toFixed(1)}%と低く、大部分の時間は低覚醒状態でした。最大値${engMax.toFixed(1)}%の高エンゲージメント瞬間が${data.engagement_distribution?.very_high || 0}フレーム検出されています。`,
-              color: 'oklch(0.72 0.18 80)',
-            },
-            {
-              title: 'Valenceの傾向',
-              body: `Valenceの平均${valMean.toFixed(1)}%・中央値${special_stats.valence?.median.toFixed(1)}%は高い正の感情価を示します。ネガティブなValenceは検出されず、全体的にポジティブな感情状態が維持されていました。`,
-              color: 'oklch(0.62 0.18 25)',
-            },
-          ].map((insight, i) => (
+          {keyInsights.map((insight, i) => (
             <div key={i} className="p-4 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', border: `1px solid ${insight.color}30` }}>
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-2 h-2 rounded-full" style={{ background: insight.color }} />

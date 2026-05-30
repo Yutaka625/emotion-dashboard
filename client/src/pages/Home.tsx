@@ -29,6 +29,13 @@ export default function Home() {
   const [activeSection, setActiveSection] = useState('overview');
   const [isDragOverDashboard, setIsDragOverDashboard] = useState(false);
 
+  // セクション切り替え時にメインエリアをスクロール先頭に戻す
+  const mainRef = useRef<HTMLElement>(null);
+  const handleSectionChange = useCallback((id: string) => {
+    setActiveSection(id);
+    mainRef.current?.scrollTo(0, 0);
+  }, []);
+
   // 第2CSV（比較用）
   const [secondaryData, setSecondaryData] = useState<DashboardData | null>(null);
   const [secondaryFilename, setSecondaryFilename] = useState<string>('');
@@ -211,7 +218,7 @@ export default function Home() {
       )}
 
       {/* Sidebar */}
-      <Sidebar activeSection={activeSection} onSectionChange={setActiveSection} hasComparison={!!secondaryData} />
+      <Sidebar activeSection={activeSection} onSectionChange={handleSectionChange} hasComparison={!!secondaryData} meta={displayData?.meta} />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden dashboard-inner">
@@ -238,11 +245,14 @@ export default function Home() {
               </span>
             </div>
 
-            {/* File info + reset button */}
+            {/* ファイル名 + 別のファイルを読み込むボタン（統合済み） */}
             <div
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg cursor-pointer transition-colors"
               style={{ background: 'oklch(0.27 0.04 255)', border: '1px solid oklch(0.32 0.04 255)' }}
+              onClick={handleReset}
+              title="別のCSVファイルを読み込む"
             >
+              <Upload size={12} style={{ color: 'oklch(0.58 0.015 255)', flexShrink: 0 }} />
               <span
                 style={{
                   fontFamily: 'Roboto Mono, monospace',
@@ -257,27 +267,7 @@ export default function Home() {
               >
                 {filename}
               </span>
-              <button
-                onClick={handleReset}
-                className="flex items-center gap-1 transition-colors"
-                style={{ color: 'oklch(0.58 0.015 255)' }}
-                title="別のファイルを読み込む"
-              >
-                <X size={12} />
-              </button>
-            </div>
-
-            {/* Upload new file hint */}
-            <div
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg cursor-pointer transition-colors"
-              style={{ background: 'oklch(0.27 0.04 255)', border: '1px solid oklch(0.32 0.04 255)' }}
-              onClick={handleReset}
-              title="新しいCSVファイルをアップロード"
-            >
-              <Upload size={12} style={{ color: 'oklch(0.58 0.015 255)' }} />
-              <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', color: 'oklch(0.72 0.008 250)' }}>
-                別のファイル
-              </span>
+              <X size={12} style={{ color: 'oklch(0.58 0.015 255)', flexShrink: 0 }} />
             </div>
 
             {/* 比較CSV追加ボタン */}
@@ -346,7 +336,7 @@ export default function Home() {
         {/* Scrollable Content */}
         {/* 各セクションを常時マウントし、非アクティブ時は display:none で隠す。
             これによりセクション切り替えで内部状態がリセットされなくなる。 */}
-        <main className="flex-1 overflow-y-auto p-6">
+        <main ref={mainRef} className="flex-1 overflow-y-auto p-6">
           {sectionIds.map(id => (
             <div key={id} style={{ display: activeSection === id ? 'block' : 'none' }}>
               {sectionComponents[id]}
