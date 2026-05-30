@@ -80,6 +80,46 @@
 - [ ] `Sidebar.tsx` / `Home.tsx`：AI INSIGHT セクションをナビに追加
 - [ ] ベースライン未設定時は案内メッセージを表示
 
+### ⭐ ベースライン補正の再設計（研究妥当性の改善）
+> 2026-05-30 調査。実際の感情研究（Affectiva/AFFDEX系）の標準手法を踏まえた再設計。
+> 詳細な背景は本セクション末尾の「調査メモ」を参照。
+
+**現状の問題点**
+- `applyBaselineCorrection` が `Math.max(0, x − offset)` で**マイナス値を0に丸めている**
+- 文献上、ベースライン以下の値（＝感情の抑制・減少）は意味のある情報であり、signed（符号付き）で保持するのが鉄則
+- 0クランプは「平常時より感情が下がった」という方向情報を破壊し、統計のフロア効果も招く
+- 補正方式が「平均減算」1種類のみ／engagement・valence・attention は補正対象外
+
+**設計方針：3つの表示モードをユーザーが切り替えられるようにする**
+| モード | 計算 | 値域 | 対象ユーザー |
+|--------|------|------|------------|
+| ① 絶対値（現状） | 補正なし | 0〜100 | 一般ユーザー（デフォルト） |
+| ② ベースライン偏差（signed） | `x − μ` | 負値あり | 研究者 |
+| ③ 変化率（lift %） | `(x − μ) / μ × 100` | ±% | マーケター |
+
+- [ ] **Phase 1（最優先）: 0クランプを廃止し signed 値を保持**（`csvAnalyzer.ts`）
+  - `applyBaselineCorrection`：`Math.max(0, …)` → `x − offset`（符号付き）に変更
+  - 「ベースライン以下を0に丸める」トグルを `BaselineSettingsCard` に追加（簡易モードはON・研究モードはOFF）
+  - グラフのY軸を負値対応に調整（`domain` に負値を含める・ゼロ基準線を表示）
+  - **補正後グラフの軸ラベルを「○○のベースラインからの変化（0=平常時／正=増加／負=抑制）」に言い換える**（誤読防止に必須）
+
+- [ ] **Phase 2: 補正方式の選択UI**（`BaselineSettingsCard.tsx` / `csvAnalyzer.ts`）
+  - 平均減算（デフォルト）／中央値減算（外れ値に頑健）／Zスコア `(x−μ)/σ`（被験者間比較）
+  - `computeBaselineOffsets` を `{ method, offset, sd }` を返す形に拡張
+
+- [ ] **Phase 3: 表示モード切り替え（絶対値／偏差／変化率）**（`TimeseriesSection.tsx` ほか）
+  - 上表の3モードをトグルで切り替え、軸ラベル・凡例を連動して変更
+
+- [ ] **Phase 4（要仕様検討）: engagement / valence / attention への補正拡張**
+  - 特に valence（−100〜100の感情価）のベースライン相対化は研究の中心的分析
+  - valence は元々 signed なので二重符号化に注意。仕様を固めてから着手
+
+**調査メモ（根拠）**
+- 標準手法はKSDV同様「ベースライン区間の平均（or 中央値）を減算」で一致
+- ただし負値は signed 保持が鉄則：「正=刺激への活動増加／負=活動減少」（facial EMG文献）
+- 補正の効果は実証済み：Valenceと自己申告の相関 r=0.71（補正なし）→ r=0.87（補正あり）、anger は補正時のみ行動と相関
+- 出典: Frontiers/PMC 2026「Facial obstructions and baseline correction shape affective computing's detection of emotion–behavior relationships」(PMC12935594) ほか
+
 ### マルチ FaceID の拡張
 - [ ] FaceID が多い場合（10+）のドロップダウン表示
 - [ ] FaceID ごとの感情比較グラフ（オーバーレイ表示）
