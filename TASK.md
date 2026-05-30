@@ -56,6 +56,31 @@
 - `Sidebar.tsx`：アクションユニットアイコン `Clock` → `Scan` に変更、折りたたみ時ホバーツールチップ追加
 - `OverviewSection.tsx`：RadarChart の `mean × 10` スケールを廃止し生の平均値を表示
 
+### ✅ ベースライン補正 Phase 1: signed モード（2026-05-30 / main マージ済）
+- `applyBaselineCorrection`：`Math.max(0, …)` の0クランプを `clampNegatives` 引数で切替可能に
+- `BaselineContext`：`clampNegatives`（デフォルト true）+ `setClampNegatives` を追加
+- `BaselineSettingsCard`：「0に丸める（一般）／マイナスも表示（研究者向け）」トグルUIを追加
+- `EmotionChartsCard`：signed時にサブタイトルを「ベースラインからの変化（0=平常時/正=増加/負=抑制）」に変更
+- `OverviewSection`：RadarChart に `Math.max(0, …)` ガードを追加（表示崩れ防止）
+- ※ Y軸負値対応・ゼロ基準線は既存実装で対応済み
+
+### ✅ UI/UX 改善バッチ②（2026-05-30 / main マージ済）
+- **サイドバー アイコン・テキスト色の統一**（`Sidebar.tsx`）
+  - 「UXリサーチ」のみ非選択時にアイコン・テキストが紫になる問題を修正
+  - 非選択時は全項目グレーに統一、紫アクセントは選択時のみに
+- **印刷／PDF 出力のライトテーマ対応**（`index.css` / `AcademicSection.tsx`）
+  - ダーク背景強制で「背景グラフィックOFF時に白文字が白紙に乗り空白化」する問題を解消
+  - `@media print` を白背景＋濃い文字に全面書き換え、カードの改ページ分断防止を追加
+  - 印刷前に `document.title` をセッション名へ変更しPDFデフォルト名を整える
+- **TIME RANGE FILTER スライダーの操作感修正**（`TimeseriesSection.tsx` / `index.css`）
+  - トラック無反応・つまみのみ反応方式（`.range-thumb`）で「左＝開始・右＝終了」を確実に分離
+  - つまみを緑の丸で可視化、リセットボタンを追加、刻みを5秒→0.1秒に変更
+- **設定カードの折りたたみトグル + 説明ツールチップ**（タスクD/E・時系列分析タブ）
+  - `ui/CollapsibleCard.tsx`（新規）：ヘッダー＋折りたたみ本体を共通化、開閉状態を localStorage 保存
+  - `ui/InfoTooltip.tsx`（新規）：ⓘアイコン＋ホバーで説明表示（Radix ベース）
+  - 適用4カード: TIME RANGE FILTER / BASELINE / SMOOTHING / EVENT
+  - ヘッダーのラベル/タイトル/バッジ書式も共通化され、カード間の体裁が統一された
+
 ---
 
 ## 進行中タスク
@@ -97,11 +122,8 @@
 | ② ベースライン偏差（signed） | `x − μ` | 負値あり | 研究者 |
 | ③ 変化率（lift %） | `(x − μ) / μ × 100` | ±% | マーケター |
 
-- [ ] **Phase 1（最優先）: 0クランプを廃止し signed 値を保持**（`csvAnalyzer.ts`）
-  - `applyBaselineCorrection`：`Math.max(0, …)` → `x − offset`（符号付き）に変更
-  - 「ベースライン以下を0に丸める」トグルを `BaselineSettingsCard` に追加（簡易モードはON・研究モードはOFF）
-  - グラフのY軸を負値対応に調整（`domain` に負値を含める・ゼロ基準線を表示）
-  - **補正後グラフの軸ラベルを「○○のベースラインからの変化（0=平常時／正=増加／負=抑制）」に言い換える**（誤読防止に必須）
+- [x] **Phase 1（最優先）: 0クランプを廃止し signed 値を保持**（2026-05-30 完了）
+  - 完了内容は「完了済みタスク › ベースライン補正 Phase 1」を参照
 
 - [ ] **Phase 2: 補正方式の選択UI**（`BaselineSettingsCard.tsx` / `csvAnalyzer.ts`）
   - 平均減算（デフォルト）／中央値減算（外れ値に頑健）／Zスコア `(x−μ)/σ`（被験者間比較）
@@ -132,42 +154,15 @@
 ---
 
 ## UI/UX 改善バックログ（残タスク）
-> 🔴高優先・🟠中〜高優先は 2026-05-30 に完了済み。以下は未着手分。
+> 🔴高優先は完了済み。🟠中〜高優先の大半（印刷/PDF・スライダー操作感・サイドバー色・折りたたみ・ツールチップ）も
+> 2026-05-30 に完了。完了分は「完了済みタスク」を参照。以下は未着手・部分対応分。
 
 ### 🟠 中〜高優先度（UX の摩擦）
 
-- [ ] **学術的分析セクションの印刷／PDF 出力修正**（`AcademicSection.tsx` / `index.css`）
-  - 「印刷 / PDF」ボタンをクリックするとブラウザのプリンター画面が開くが、プレビューが空白またはレイアウト崩れになる
-  - 原因候補: `overflow: hidden` / `display: none` の印刷時未解除、oklch カラーの印刷非対応、recharts SVG の印刷描画タイミング
-  - `@media print` スタイルを追加し、サイドバー非表示・グラフ可視・余白調整を行う
-  - `window.print()` 前に `document.title` をセッション名に変更してデフォルトファイル名を整える
-
-- [ ] **TIME RANGE FILTER スライダーの操作感修正**（`TimeseriesSection.tsx`）
-  - 現在: range input が2本独立しており、左ハンドルが右ハンドルを追い越せる・ドラッグ感が重い
-  - デュアルハンドル対応の単一スライダー（`rc-slider` 等）に置き換えるか、min/max の相互制約ロジックを追加
-  - ドラッグ中リアルタイムプレビュー・数値入力欄との双方向同期を維持すること
-
-- [ ] **TIME RANGE FILTER / BASELINE SETTINGS / SMOOTHING SETTINGS / EVENT ANNOTATIONS のレイアウト・UI/UX 改善**（`TimeseriesSection.tsx` 配下の各カード）
-  - 各カードの情報密度・余白・フォントサイズが不均一
-  - グループ内でヘッダー高さ・ラベルスタイル・ボタンサイズを統一する
-  - カード間の視覚的な優先順位（よく使う操作が上・詳細設定は下）を整理する
-
-- [ ] **サイドバー ナビアイコンカラーの統一**（`Sidebar.tsx`）
-  - 「UXリサーチ」項目のみ、非選択時にも `oklch(0.65 0.18 300)` の紫色がアイコンに付いている
-  - `highlight` フラグはテキスト色に留め、アイコン色は他項目と同様に非選択時は `oklch(0.55 0.015 255)`（グレー）に統一する
-
-- [x] **説明文をツールチップに格納**（時系列分析タブ・2026-05-30 完了）
-  - `ui/InfoTooltip.tsx`（Radix ベース）を新規作成。ⓘアイコンにホバーで説明表示
-  - `CollapsibleCard` の `info` prop でタイトル横に自動表示
-  - 適用: TIME RANGE FILTER / BASELINE / SMOOTHING / EVENT の各説明文
-  - ※ カード内補助説明（SMA/EMA解説・各グラフタブ説明）と他セクションは Phase 2 で横展開予定
-
-- [x] **セクション／カードの折りたたみトグル追加**（時系列分析タブ・2026-05-30 完了）
-  - `ui/CollapsibleCard.tsx` を新規作成（ヘッダー＋折りたたみ本体を共通化、D・Eを統合）
-  - ヘッダー右端の `ChevronUp/Down` で本体を開閉。折りたたみ中もバッジ（補正適用中・件数等）は表示
-  - 開閉状態を `localStorage`（`ksdv.collapse.*`）に保存し再訪時も維持
-  - 適用: TIME RANGE FILTER / BASELINE / SMOOTHING / EVENT の4カード
-  - ※ 他セクションへの横展開は Phase 2 で対応予定
+- [ ] **設定カード レイアウト統一の仕上げ**（`TimeseriesSection.tsx` 配下の各カード）
+  - ⚠️ 部分対応済み: `CollapsibleCard` 導入でヘッダー（ラベル/タイトル/バッジ書式）は統一済み
+  - 残: カード本体内の情報密度・余白・フォントサイズの微調整、操作の優先順位整理
+  - 横展開: 折りたたみ／ツールチップを他セクション（Overview/Academic 等）へ展開（Phase 2）
 
 ### 🟡 中優先度（一貫性・洗練度）
 
