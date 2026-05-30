@@ -66,6 +66,89 @@
 - [ ] セッション間比較機能
 - [ ] データ保存・読み込み（localStorage）
 
+---
+
+## UI/UX 改善バックログ
+> 2026-05-30 全コンポーネントレビューで洗い出し。優先度順に記載。
+
+### 🔴 高優先度（データ正確性・誤解招くUI）
+
+- [ ] **KEY INSIGHTS の動的化**（`OverviewSection.tsx`）
+  - 「困惑が支配的感情」「ネガティブなValenceは検出されず」などの文章がハードコードされており、どのCSVを読み込んでも変わらない
+  - 実際の `dominant_emotion_counts` / `special_stats` から動的に生成する
+  - 例: 主要感情・Valenceの傾向・Engagementピーク時刻などをデータドリブンに記述
+
+- [ ] **サイドバーフッターの日時をデータから取得**（`Sidebar.tsx`）
+  - `REC: 2025-12-17 / 16:14:31 JST` がハードコード
+  - Props 経由でメタデータ（`meta.recording_date` / `meta.recording_time`）を受け取り表示する
+
+- [ ] **「LIVE DATA」バッジの文言修正**（`Sidebar.tsx`）
+  - CSVの事後分析ツールなのに「LIVE DATA」は誤解を招く
+  - 「ANALYZED」「SESSION DATA」など分析済みを示す表現に変更
+
+### 🟠 中〜高優先度（UX の摩擦）
+
+- [ ] **ヘッダーの重複UIを整理**（`Home.tsx`）
+  - 「ファイル名 + ×ボタン」と「別のファイルボタン」が両方 `handleReset` を呼ぶ重複
+  - どちらか一方に統合し、ヘッダー左側の要素数を削減する
+
+- [ ] **TimeseriesSection のセクション切り替え後スクロール位置リセット**（`Home.tsx`）
+  - セクション切り替え時に `main` のスクロール位置を先頭に戻す
+  - `setActiveSection` 呼び出し時に `mainRef.current?.scrollTo(0, 0)` を追加
+
+- [ ] **TimeseriesSection を子コンポーネントに分割**（`TimeseriesSection.tsx`）
+  - 現在 1,573 行の巨大コンポーネント
+  - `BaselineSettingsCard` / `SmoothingSettingsCard` / `EmotionChartsCard` / `EventAnnotationsCard` に分割
+
+- [ ] **サイドバーアイコンの見直し**（`Sidebar.tsx`）
+  - 「アクションユニット」の `Clock` → `Target` または `Scan` などに変更
+  - 折りたたみ時にホバーでラベルが出るツールチップを追加
+
+- [ ] **RadarChart のスケール表示を改善**（`OverviewSection.tsx`）
+  - `mean * 10` スケールの意図が不明確
+  - 軸に実際の値範囲を明示するか、スケーリングをやめて生の値を表示する
+
+### 🟡 中優先度（一貫性・洗練度）
+
+- [ ] **ホバー実装をCSSに統一**（`Sidebar.tsx` / `Home.tsx` ほか）
+  - `onMouseEnter/Leave` でDOM直接操作するパターンをTailwindの `hover:` クラスまたはCSS変数ベースに統一
+
+- [ ] **EMOTION_COLORS と CSS `.emotion-*` クラスの色を統一**（`types.ts` / `index.css`）
+  - 同じ感情に異なるOKLCH値が2箇所で定義されている
+  - `types.ts` を Single Source of Truth にして CSS側を削除または同期する
+
+- [ ] **数値フォーマットの統一**（全セクション）
+  - 感情スコア: `.toFixed(3)` に統一
+  - Engagement / Valence / Attention: `.toFixed(1)` に統一
+  - 共通のフォーマッタ関数 `formatScore()` / `formatPct()` を `utils.ts` に追加
+
+- [ ] **セクション切り替え時のフェードイン追加**（`Home.tsx` / `index.css`）
+  - `display: none → block` が瞬時切り替えで唐突
+  - `@keyframes fade-in` + `animation: fade-in 0.15s ease-out` で自然なトランジション
+
+- [ ] **スムージング設定のα値スライダーを反転**（`TimeseriesSection.tsx`）
+  - 現在: 左=0.05（強）/ 右=0.90（弱）で直感と逆
+  - スライダーを「スムージング強度（0〜100%）」として内部でαに逆算、または左右を反転
+
+- [ ] **ComparisonSection の空状態に導線を追加**（`ComparisonSection.tsx` / `Home.tsx`）
+  - 「比較用CSVを追加してください」だけで追加方法が不明
+  - ヘッダーの「＋比較CSV」ボタンを指し示す説明または矢印を追加
+
+### 🟢 低優先度（後回し可）
+
+- [ ] **モバイル対応**（全体）
+  - サイドバーをモバイル幅でオーバーレイ型ドロワーに切り替え
+  - 主要なグリッドのレスポンシブ対応確認
+
+- [ ] **アクセシビリティ（a11y）対応**（全体）
+  - 全アイコンボタンに `aria-label` を追加
+  - キーボードフォーカスリングをデザインに合わせてカスタム
+  - recharts グラフに `role="img"` と `aria-label` を追加
+
+- [ ] **未使用アニメーションクラスの活用または削除**（`index.css`）
+  - `count-up` / `scan-line` クラスが定義されているが未使用
+  - 数値カードのマウントアニメーションなどに活用するか、不要なら削除
+
 ### Phase 4: 学術研究者向け機能
 > 複数参加者データの集計・統計処理・論文執筆への接続を想定
 - [ ] **参加者間の感情平均グラフ** — 複数人のCSVをまとめて読み込み、感情指標の群平均±SDを時系列で表示
