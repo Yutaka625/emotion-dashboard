@@ -11,13 +11,37 @@ import { detectBaselineWindow } from '@/lib/csvAnalyzer';
 import { toast } from 'sonner';
 import CollapsibleCard from '@/components/ui/CollapsibleCard';
 
+import type { BaselineCenter, BaselineDisplayMode } from '@/lib/types';
+
 interface Props {
   /** ベースライン自動検出・適用に使う全フレームデータ */
   timeseriesFull: TimeseriesPoint[];
 }
 
+// 補正方式（中心値）の選択肢
+const CENTER_OPTIONS: { value: BaselineCenter; label: string; note: string }[] = [
+  { value: 'mean',   label: '平均',   note: '標準' },
+  { value: 'median', label: '中央値', note: '外れ値に頑健' },
+];
+
+// 表示モードの選択肢（絶対値＝補正なし、それ以外は補正後の見せ方）
+const DISPLAY_MODE_OPTIONS: { value: BaselineDisplayMode; label: string; note: string }[] = [
+  { value: 'absolute',  label: '絶対値',  note: '補正なし 0〜100' },
+  { value: 'deviation', label: '偏差',    note: 'x − 平常時' },
+  { value: 'lift',      label: '変化率',  note: '平常時比 %' },
+  { value: 'zscore',    label: 'Zスコア', note: '標準化 SD' },
+];
+
+// 表示モード選択時の補足説明（モード別）
+const MODE_DESCRIPTIONS: Record<BaselineDisplayMode, string> = {
+  absolute:  '補正を適用せず、生の感情スコア（0〜100）をそのまま表示します。',
+  deviation: 'マイナス＝平常時より感情が抑制された状態を示します（符号付き偏差）。',
+  lift:      '平常時を基準とした増減率（%）です。平常時の値が極めて小さい感情は算出されません。',
+  zscore:    '平常時のばらつき（SD）を1単位とした標準化スコアです。被験者間の比較に向きます。',
+};
+
 export default function BaselineSettingsCard({ timeseriesFull }: Props) {
-  const { baselineRange, baselineOffsets, isBaselineActive, setBaseline, clearBaseline, clampNegatives, setClampNegatives } = useBaseline();
+  const { baselineRange, baselineOffsets, isBaselineActive, setBaseline, clearBaseline, centerMethod, setCenterMethod, displayMode, setDisplayMode } = useBaseline();
 
   return (
     <CollapsibleCard
@@ -89,11 +113,11 @@ export default function BaselineSettingsCard({ timeseriesFull }: Props) {
       {baselineOffsets && (
         <div className="mb-4 p-3 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', border: '1px solid oklch(0.28 0.04 255)' }}>
           <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.70 0.14 195)', letterSpacing: '0.08em', marginBottom: '8px' }}>
-            STEP 2 — オフセット値（ベースライン平均）
+            STEP 2 — オフセット値（ベースライン{centerMethod === 'median' ? '中央値' : '平均'}）
           </div>
           <div className="flex flex-wrap gap-2">
             {NON_NEUTRAL_EMOTIONS
-              .map(e => ({ emotion: e, offset: baselineOffsets[e as keyof typeof baselineOffsets] ?? 0 }))
+              .map(e => ({ emotion: e, offset: baselineOffsets[e]?.offset ?? 0 }))
               .sort((a, b) => b.offset - a.offset)
               .map(({ emotion, offset }) => (
                 <div key={emotion} className="flex items-center gap-1.5 px-2 py-1 rounded" style={{ background: EMOTION_COLORS[emotion] + '18', border: `1px solid ${EMOTION_COLORS[emotion]}40` }}>
@@ -110,10 +134,72 @@ export default function BaselineSettingsCard({ timeseriesFull }: Props) {
         </div>
       )}
 
-      {/* STEP 3: 適用/解除 */}
+      {/* STEP 3: 補正方式（中心値）・表示モードの選択（区間設定済みのみ表示） */}
       {baselineRange && (
-        <div className="flex items-center gap-3">
-          {isBaselineActive ? (
+        <div className="mt-4 p-3 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', border: '1px solid oklch(0.28 0.04 255)' }}>
+          {/* 補正方式（中心値） */}
+          <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.70 0.14 195)', letterSpacing: '0.08em', marginBottom: '8px' }}>
+            STEP 3 — 補正方式（中心値）
+          </div>
+          <div className="flex gap-2 mb-4">
+            {CENTER_OPTIONS.map(opt => {
+              const active = centerMethod === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  onClick={() => setCenterMethod(opt.value)}
+                  className="flex-1 px-3 py-2 rounded-lg text-xs font-semibold transition-all"
+                  style={{
+                    fontFamily: 'Noto Sans JP, sans-serif',
+                    background: active ? 'rgba(0,180,216,0.2)' : 'oklch(0.20 0.04 255)',
+                    color: active ? 'oklch(0.70 0.14 195)' : 'oklch(0.66 0.015 255)',
+                    border: `1px solid ${active ? 'rgba(0,180,216,0.5)' : 'oklch(0.30 0.04 255)'}`,
+                  }}
+                >
+                  {active ? '✓ ' : ''}{opt.label}
+                  <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', marginTop: '2px', opacity: 0.7 }}>
+                    {opt.note}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* 表示モード */}
+          <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.70 0.14 195)', letterSpacing: '0.08em', marginBottom: '8px' }}>
+            表示モード
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            {DISPLAY_MODE_OPTIONS.map(opt => {
+              const active = displayMode === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  onClick={() => setDisplayMode(opt.value)}
+                  className="px-3 py-2 rounded-lg text-xs font-semibold transition-all"
+                  style={{
+                    fontFamily: 'Noto Sans JP, sans-serif',
+                    background: active ? 'rgba(0,180,216,0.2)' : 'oklch(0.20 0.04 255)',
+                    color: active ? 'oklch(0.70 0.14 195)' : 'oklch(0.66 0.015 255)',
+                    border: `1px solid ${active ? 'rgba(0,180,216,0.5)' : 'oklch(0.30 0.04 255)'}`,
+                  }}
+                >
+                  {active ? '✓ ' : ''}{opt.label}
+                  <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', marginTop: '2px', opacity: 0.7 }}>
+                    {opt.note}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* 選択中モードの補足説明 */}
+          <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.68 0.12 195)', marginTop: '10px' }}>
+            ℹ {MODE_DESCRIPTIONS[displayMode]}
+          </p>
+
+          {/* 解除 */}
+          <div className="flex items-center gap-3 mt-4">
             <button
               onClick={clearBaseline}
               className="px-4 py-2 rounded-lg text-sm font-semibold transition-all"
@@ -124,74 +210,12 @@ export default function BaselineSettingsCard({ timeseriesFull }: Props) {
                 border: '1px solid oklch(0.35 0.04 255)',
               }}
             >
-              補正を解除する
+              ベースライン設定を解除する
             </button>
-          ) : (
-            <button
-              onClick={() => setBaseline(baselineRange, timeseriesFull)}
-              className="px-4 py-2 rounded-lg text-sm font-semibold transition-all"
-              style={{
-                fontFamily: 'Noto Sans JP, sans-serif',
-                background: 'rgba(0,180,216,0.15)',
-                color: 'oklch(0.70 0.14 195)',
-                border: '1px solid rgba(0,180,216,0.4)',
-              }}
-            >
-              ベースラインを適用する
-            </button>
-          )}
-          <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.68 0.015 255)', fontStyle: 'italic' }}>
-            補正はいつでも解除できます。元データは保持されます。
-          </span>
-        </div>
-      )}
-
-      {/* BASELINE CORRECTION MODE トグル（補正適用中のみ表示） */}
-      {isBaselineActive && (
-        <div className="mt-4 p-3 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', border: '1px solid oklch(0.28 0.04 255)' }}>
-          <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.70 0.14 195)', letterSpacing: '0.08em', marginBottom: '8px' }}>
-            BASELINE CORRECTION MODE
+            <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.68 0.015 255)', fontStyle: 'italic' }}>
+              「絶対値」で補正なし表示に戻せます。元データは常に保持されます。
+            </span>
           </div>
-          <div className="flex gap-2">
-            {/* 0に丸めるボタン（一般向け・デフォルト） */}
-            <button
-              onClick={() => setClampNegatives(true)}
-              className="flex-1 px-3 py-2 rounded-lg text-xs font-semibold transition-all"
-              style={{
-                fontFamily: 'Noto Sans JP, sans-serif',
-                background: clampNegatives ? 'rgba(0,180,216,0.2)' : 'oklch(0.20 0.04 255)',
-                color: clampNegatives ? 'oklch(0.70 0.14 195)' : 'oklch(0.66 0.015 255)',
-                border: `1px solid ${clampNegatives ? 'rgba(0,180,216,0.5)' : 'oklch(0.30 0.04 255)'}`,
-              }}
-            >
-              {clampNegatives ? '✓ ' : ''}0に丸める（一般）
-              <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', marginTop: '2px', opacity: 0.7 }}>
-                値域: 0〜100
-              </div>
-            </button>
-            {/* マイナスも表示ボタン（研究者向け） */}
-            <button
-              onClick={() => setClampNegatives(false)}
-              className="flex-1 px-3 py-2 rounded-lg text-xs font-semibold transition-all"
-              style={{
-                fontFamily: 'Noto Sans JP, sans-serif',
-                background: !clampNegatives ? 'rgba(0,180,216,0.2)' : 'oklch(0.20 0.04 255)',
-                color: !clampNegatives ? 'oklch(0.70 0.14 195)' : 'oklch(0.66 0.015 255)',
-                border: `1px solid ${!clampNegatives ? 'rgba(0,180,216,0.5)' : 'oklch(0.30 0.04 255)'}`,
-              }}
-            >
-              {!clampNegatives ? '✓ ' : ''}マイナスも表示
-              <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', marginTop: '2px', opacity: 0.7 }}>
-                研究者向け
-              </div>
-            </button>
-          </div>
-          {/* signed モード選択時の補足説明 */}
-          {!clampNegatives && (
-            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.68 0.12 195)', marginTop: '8px' }}>
-              ℹ マイナス＝平常時より感情が抑制された状態を示します
-            </p>
-          )}
         </div>
       )}
     </CollapsibleCard>

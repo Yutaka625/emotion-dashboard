@@ -15,7 +15,7 @@
  * 新しい着眼点を増やしたいときは、RULES 配列にルール関数を1つ追加するだけ。
  */
 
-import type { DashboardData } from '@/lib/types';
+import type { DashboardData, BaselineDisplayMode } from '@/lib/types';
 import { EMOTION_LABELS_JA, EMOTION_COLORS } from '@/lib/types';
 
 /** インサイトのトーン（重要度の種類）。表示側でアイコン・色分けに使う */
@@ -40,7 +40,8 @@ export interface Insight {
 /** ベースライン補正の状態（文言の出し分けに使う） */
 export interface BaselineState {
   isBaselineActive: boolean;
-  clampNegatives: boolean;
+  /** 補正後の表示モード（absolute/deviation/lift/zscore） */
+  displayMode: BaselineDisplayMode;
 }
 
 /** トーンごとの代表色（ルールが色を指定しない場合のフォールバック） */

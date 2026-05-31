@@ -51,7 +51,7 @@ export default function TimeseriesSection({ data }: Props) {
   const [showChangePoints, _setShowChangePoints] = useState(false);
 
   const { events } = useEvents();
-  const { baselineOffsets, isBaselineActive } = useBaseline();
+  const { baselineOffsets, isBaselineActive, displayMode } = useBaseline();
   const { timeseries_full, time_summary_10s } = data;
 
   const TIME_PRESETS: [number, number, string][] = useMemo(() => [
@@ -72,17 +72,17 @@ export default function TimeseriesSection({ data }: Props) {
   // ベースライン補正 → スムージング の順で処理
   const displayData = useMemo(() => {
     const corrected = isBaselineActive && baselineOffsets
-      ? applyBaselineCorrection(sampledData, baselineOffsets)
+      ? applyBaselineCorrection(sampledData, baselineOffsets, displayMode)
       : sampledData;
     const smoothParam = smoothingMethod === 'ema' ? smoothingAlpha : smoothingWindow;
     return applySmoothing(corrected, smoothingMethod, smoothParam);
-  }, [sampledData, isBaselineActive, baselineOffsets, smoothingMethod, smoothingWindow, smoothingAlpha]);
+  }, [sampledData, isBaselineActive, baselineOffsets, displayMode, smoothingMethod, smoothingWindow, smoothingAlpha]);
 
   // ヒートマップ・イベント統計用の全件補正済みデータ
   const displayTimeseriesFull = useMemo(() => {
     if (!isBaselineActive || !baselineOffsets) return timeseries_full;
-    return applyBaselineCorrection(timeseries_full, baselineOffsets);
-  }, [timeseries_full, isBaselineActive, baselineOffsets]);
+    return applyBaselineCorrection(timeseries_full, baselineOffsets, displayMode);
+  }, [timeseries_full, isBaselineActive, baselineOffsets, displayMode]);
 
   // ヒートマップ用データ（5秒区間）
   const heatmapData = useMemo(() => {

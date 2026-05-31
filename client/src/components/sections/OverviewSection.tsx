@@ -76,7 +76,7 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
 
 export default function OverviewSection({ data }: Props) {
   const { meta, special_stats, dominant_emotion_counts, dominant_emotion_pct, emotion_stats } = data;
-  const { isBaselineActive, baselineRange, clampNegatives } = useBaseline();
+  const { isBaselineActive, baselineRange, displayMode } = useBaseline();
   // attention is treated as a facial expression metric (in emotion_stats)
   const attentionStats = emotion_stats['attention'] || special_stats['attention'];
 
@@ -111,8 +111,8 @@ export default function OverviewSection({ data }: Props) {
   // KEY INSIGHTS をルールベースのエンジンから生成（AI・API不使用の純粋関数）
   // ベースライン補正の状態を渡し、補正中／signed モードでは文言を自動で切り替える
   const keyInsights = useMemo(
-    () => generateInsights(data, { isBaselineActive, clampNegatives }, 4),
-    [data, isBaselineActive, clampNegatives],
+    () => generateInsights(data, { isBaselineActive, displayMode }, 4),
+    [data, isBaselineActive, displayMode],
   );
 
   return (

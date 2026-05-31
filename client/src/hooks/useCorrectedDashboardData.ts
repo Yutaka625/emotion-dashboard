@@ -66,11 +66,12 @@ function computeStats(values: number[]): EmotionStats {
 }
 
 // 補正後の timeseries から各フレームの支配感情を再判定する
+// （lift モードでは NaN が混じり得るため、NaN は比較から除外する）
 function recomputeDominantEmotion(p: TimeseriesPoint): string {
   let maxVal = -Infinity, maxEmo = 'confusion';
   for (const e of NON_NEUTRAL) {
     const v = p[e];
-    if (v > maxVal) { maxVal = v; maxEmo = e; }
+    if (!isNaN(v) && v > maxVal) { maxVal = v; maxEmo = e; }
   }
   return maxEmo;
 }
@@ -78,7 +79,7 @@ function recomputeDominantEmotion(p: TimeseriesPoint): string {
 // ---- メインフック ----
 
 export function useCorrectedDashboardData(data: DashboardData | null): DashboardData | null {
-  const { isBaselineActive, baselineOffsets, clampNegatives } = useBaseline();
+  const { isBaselineActive, baselineOffsets, displayMode } = useBaseline();
 
   return useMemo(() => {
     // 補正無効 or データなし → そのまま返す
@@ -88,7 +89,7 @@ export function useCorrectedDashboardData(data: DashboardData | null): Dashboard
     const correctedTimeseries: TimeseriesPoint[] = applyBaselineCorrection(
       data.timeseries_full,
       baselineOffsets,
-      clampNegatives  // ← signed モード対応
+      displayMode  // ← absolute/deviation/lift/zscore
     ).map(p => ({
       ...p,
       dominant_emotion: recomputeDominantEmotion(p),
@@ -156,5 +157,5 @@ export function useCorrectedDashboardData(data: DashboardData | null): Dashboard
       emotion_transitions,
       emotion_duration_stats,
     };
-  }, [data, isBaselineActive, baselineOffsets, clampNegatives]);
+  }, [data, isBaselineActive, baselineOffsets, displayMode]);
 }

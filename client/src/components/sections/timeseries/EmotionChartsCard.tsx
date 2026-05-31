@@ -11,11 +11,23 @@ import {
   ReferenceArea, ReferenceLine,
 } from 'recharts';
 import { EMOTION_COLORS, EMOTION_LABELS_JA, NON_NEUTRAL_EMOTIONS } from '@/lib/types';
-import type { TimeseriesPoint, ChangePoint } from '@/lib/types';
+import type { TimeseriesPoint, ChangePoint, BaselineDisplayMode } from '@/lib/types';
 import { useBaseline } from '@/contexts/BaselineContext';
 import { useEvents } from '@/contexts/EventsContext';
 
 const EMOTION_HEX = EMOTION_COLORS;
+
+// 補正モード時のY軸ラベル（absolute は補正なしなので空）
+const AXIS_LABEL: Record<BaselineDisplayMode, string> = {
+  absolute:  '',
+  deviation: 'Δ ベースライン比',
+  lift:      '変化率 (%)',
+  zscore:    'Zスコア (SD)',
+};
+// ツールチップ等の値に付ける単位サフィックス
+const VALUE_SUFFIX: Record<BaselineDisplayMode, string> = {
+  absolute: '', deviation: '', lift: '%', zscore: ' SD',
+};
 
 const SPECIAL_COLORS: Record<string, string> = {
   engagement: 'oklch(0.78 0.14 82)',
@@ -66,12 +78,20 @@ export default function EmotionChartsCard({
   selectedEmotions, toggleEmotion, showSpecial, toggleSpecial,
   activeTab, setActiveTab,
 }: Props) {
-  const { baselineRange, isBaselineActive, clampNegatives } = useBaseline();
+  const { baselineRange, isBaselineActive, displayMode } = useBaseline();
   const { events } = useEvents();
   const [showChangePoints, setShowChangePoints] = useState(false);
 
-  // ベースライン補正適用中かつ signed モード（マイナス表示）のとき true
-  const isSignedMode = isBaselineActive && !clampNegatives;
+  // 値フォーマッタ: NaN（変化率の算出不能）は「—」、それ以外は小数3桁＋補正中のみ単位を付与
+  const fmtValue = (v: number) =>
+    Number.isNaN(v) ? '—' : v.toFixed(3) + (isBaselineActive ? VALUE_SUFFIX[displayMode] : '');
+
+  // 補正適用中（absolute 以外）に表示モード別のグラフ説明文を返す
+  const correctedSubtitle =
+    displayMode === 'deviation' ? '感情スコアのベースラインからの変化（0=平常時 / 正=増加 / 負=抑制）'
+    : displayMode === 'lift'    ? '感情スコアのベースライン比の変化率（%・平常時=0／平常時の値が小さい感情は「—」）'
+    : displayMode === 'zscore'  ? '感情スコアのZスコア（平常時=0 / 単位=標準偏差SD）'
+    : '感情スコアの時系列グラフ';
 
   // ---- ベースライン区間ハイライト ----
   const renderBaselineArea = () => {
@@ -150,10 +170,16 @@ export default function EmotionChartsCard({
           <div key={p.dataKey} className="flex items-center gap-2 mb-1">
             <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: p.color }} />
             <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', color: 'oklch(0.75 0.005 80)' }}>
-              {p.name}: <span style={{ fontFamily: 'Roboto Mono, monospace', fontWeight: 600 }}>{Number(p.value).toFixed(3)}</span>
+              {p.name}: <span style={{ fontFamily: 'Roboto Mono, monospace', fontWeight: 600 }}>{fmtValue(Number(p.value))}</span>
             </span>
           </div>
         ))}
+        {/* 変化率モードで算出不能（—）の系列があるときの補足 */}
+        {displayMode === 'lift' && payload.some((p: any) => Number.isNaN(Number(p.value))) && (
+          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.6rem', color: 'oklch(0.62 0.015 255)', marginTop: '4px' }}>
+            ℹ「—」は平常時の値が小さく変化率を算出できません
+          </div>
+        )}
       </div>
     );
   };
@@ -164,9 +190,7 @@ export default function EmotionChartsCard({
       <div className="metric-card">
         <div className="section-label mb-3">EMOTION TIME SERIES</div>
         <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
-          {isSignedMode
-            ? '感情スコアのベースラインからの変化（0=平常時 / 正=増加 / 負=抑制）'
-            : '感情スコアの時系列グラフ'}
+          {isBaselineActive ? correctedSubtitle : '感情スコアの時系列グラフ'}
         </div>
 
         {/* タブバー */}
@@ -208,10 +232,15 @@ export default function EmotionChartsCard({
               複数の感情スコアを同一グラフ上に重ねて表示します。感情ボタンをクリックして表示/非表示を切り替えられます。
             </p>
             <ResponsiveContainer width="100%" height={280}>
-              <LineChart data={displayData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
+              <LineChart data={displayData} margin={{ top: 5, right: 10, bottom: 5, left: isBaselineActive && AXIS_LABEL[displayMode] ? 12 : 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" />
                 <XAxis dataKey="time" type="number" domain={['dataMin', 'dataMax']} tickFormatter={formatTime} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} />
-                <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} />
+                <YAxis
+                  tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }}
+                  label={isBaselineActive && AXIS_LABEL[displayMode]
+                    ? { value: AXIS_LABEL[displayMode], angle: -90, position: 'insideLeft', style: { fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.66rem', fill: 'oklch(0.68 0.015 255)', textAnchor: 'middle' } }
+                    : undefined}
+                />
                 <Tooltip content={<CustomTooltip />} />
                 <Legend formatter={v => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem' }}>{v}</span>} />
                 {renderBaselineArea()}
@@ -273,8 +302,13 @@ export default function EmotionChartsCard({
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {NON_NEUTRAL_EMOTIONS.map(emotion => {
-                const maxVal  = Math.max(...displayData.map(d => (d as any)[emotion] || 0));
-                const meanVal = displayData.reduce((acc, d) => acc + ((d as any)[emotion] || 0), 0) / (displayData.length || 1);
+                // NaN（変化率で算出不能）を除外して統計を計算。全フレーム算出不能なら「—」
+                const vals = displayData.map(d => (d as any)[emotion] as number).filter(v => !Number.isNaN(v));
+                const hasVals = vals.length > 0;
+                const maxVal  = hasVals ? Math.max(...vals) : 0;
+                const meanVal = hasVals ? vals.reduce((a, b) => a + b, 0) / vals.length : 0;
+                const maxLabel = hasVals ? maxVal.toFixed(2) : '—';
+                const avgLabel = hasVals ? meanVal.toFixed(3) : '—';
                 return (
                   <div key={emotion} className="p-3 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', border: `1px solid ${EMOTION_HEX[emotion]}30` }}>
                     <div className="flex items-center justify-between mb-2">
@@ -283,8 +317,8 @@ export default function EmotionChartsCard({
                         <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600, fontSize: '0.82rem', color: 'oklch(0.88 0.005 250)' }}>{EMOTION_LABELS_JA[emotion]}</span>
                       </div>
                       <div className="text-right">
-                        <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: EMOTION_HEX[emotion] }}>max {maxVal.toFixed(2)}</div>
-                        <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.68 0.015 255)' }}>avg {meanVal.toFixed(3)}</div>
+                        <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: EMOTION_HEX[emotion] }}>max {maxLabel}</div>
+                        <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.68 0.015 255)' }}>avg {avgLabel}</div>
                       </div>
                     </div>
                     <ResponsiveContainer width="100%" height={80}>
@@ -296,8 +330,9 @@ export default function EmotionChartsCard({
                           </linearGradient>
                         </defs>
                         <XAxis dataKey="time" type="number" domain={['dataMin', 'dataMax']} hide />
-                        <YAxis hide domain={[0, Math.max(maxVal * 1.1, 0.01)]} />
-                        <Tooltip formatter={(v: number) => [v.toFixed(3), EMOTION_LABELS_JA[emotion]]} labelFormatter={(l: number) => `t=${Number(l).toFixed(1)}s`}
+                        {/* 補正中は偏差/Zで負値が出るため自動レンジに切替 */}
+                        <YAxis hide domain={isBaselineActive ? ['auto', 'auto'] : [0, Math.max(maxVal * 1.1, 0.01)]} />
+                        <Tooltip formatter={(v: number) => [fmtValue(Number(v)), EMOTION_LABELS_JA[emotion]]} labelFormatter={(l: number) => `t=${Number(l).toFixed(1)}s`}
                           contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', border: `1px solid ${EMOTION_HEX[emotion]}50`, borderRadius: '6px', padding: '4px 8px' }}
                         />
                         {renderEventLines()}
@@ -343,7 +378,7 @@ export default function EmotionChartsCard({
                 )}
                 {NON_NEUTRAL_EMOTIONS.map(emotion => {
                   const emotionMax = emotion === 'confusion'
-                    ? Math.max(...heatmapData.map(d => d[emotion] as number))
+                    ? Math.max(0, ...heatmapData.map(d => d[emotion] as number).filter(v => !Number.isNaN(v)))
                     : heatmapMax;
                   return (
                     <div key={emotion} className="flex items-center gap-2 mb-1">
@@ -353,12 +388,16 @@ export default function EmotionChartsCard({
                       <div className="flex gap-0.5 flex-1">
                         {heatmapData.map((d, i) => {
                           const val = d[emotion] as number;
-                          const intensity = emotionMax > 0 ? val / emotionMax : 0;
+                          // 変化率で算出不能（NaN）のセルは「データなし」表示にする
+                          const isNaNCell = Number.isNaN(val);
+                          const intensity = !isNaNCell && emotionMax > 0 ? val / emotionMax : 0;
                           const isInEvent = events.some(ev => d.time >= ev.startTime && d.time <= ev.endTime);
                           return (
                             <div key={i} className="flex-1 rounded-sm"
-                              style={{ height: '22px', background: `${EMOTION_HEX[emotion]}`, opacity: Math.max(0.04, intensity), minWidth: '4px', outline: isInEvent ? '1px solid oklch(0.68 0.015 250)' : 'none' }}
-                              title={`t=${d.time}s: ${val.toFixed(3)}`}
+                              style={isNaNCell
+                                ? { height: '22px', background: 'transparent', border: '1px dashed oklch(0.34 0.02 255)', minWidth: '4px', outline: isInEvent ? '1px solid oklch(0.68 0.015 250)' : 'none' }
+                                : { height: '22px', background: `${EMOTION_HEX[emotion]}`, opacity: Math.max(0.04, intensity), minWidth: '4px', outline: isInEvent ? '1px solid oklch(0.68 0.015 250)' : 'none' }}
+                              title={`t=${d.time}s: ${isNaNCell ? '—（平常時の値が小さく算出不可）' : val.toFixed(3)}`}
                             />
                           );
                         })}

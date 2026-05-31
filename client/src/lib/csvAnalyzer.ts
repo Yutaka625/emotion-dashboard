@@ -4,7 +4,7 @@
  * Replicates Python analysis logic entirely in TypeScript
  */
 
-import type { DashboardData, EmotionStats, AffectDynamics, BaselineOffsets, TimeseriesPoint, HeadMotionEvent, ChangePoint, UXScores } from './types';
+import type { DashboardData, EmotionStats, AffectDynamics, BaselineOffsets, BaselineCenter, BaselineDisplayMode, TimeseriesPoint, HeadMotionEvent, ChangePoint, UXScores } from './types';
 
 const EMOTION_COLS = ['anger', 'contempt', 'disgust', 'fear', 'joy', 'sadness', 'surprise', 'sentimentality', 'confusion', 'neutral'];
 const NON_NEUTRAL = ['anger', 'contempt', 'disgust', 'fear', 'joy', 'sadness', 'surprise', 'sentimentality', 'confusion'];
@@ -184,6 +184,15 @@ export function computeDashboardData(rows: Record<string, string>[], filename: s
 
   const n = df.length;
   if (n === 0) throw new Error('有効なデータが見つかりませんでした');
+
+  // 時刻を 0 基点に正規化する。
+  // CSV の「time stamp」列が絶対時刻（Unix秒など）でも、時間軸を必ず 0 始まりにそろえる。
+  // これをしないと timeseries_full の time が巨大なまま残り、
+  // 時系列セクションの時間フィルタ（0〜duration秒前提）に一致せずグラフが空になる。
+  const rawStartTime = df[0].time;
+  if (rawStartTime !== 0) {
+    for (const r of df) r.time -= rawStartTime;
+  }
 
   const times = df.map(r => r.time);
   const durationSec = times[n - 1] - times[0];
@@ -679,56 +688,86 @@ const BASELINE_EMOTION_COLS = [
 ] as const;
 
 /**
- * ベースライン区間内の各感情スコアの平均値（オフセット）を計算する
+ * 変化率(lift%)を「意味のある値」として算出できる最小ベースライン中心値。
+ * 感情スコア(0〜1)は多くの時間ほぼ0でスパースなため、μが小さいと (x−μ)/μ が桁外れに発散する。
+ * μ がこの値未満の感情は変化率を信頼できないものとして NaN（＝「—」表示）にする。
+ */
+const LIFT_MIN_BASELINE = 0.1;
+
+/**
+ * ベースライン区間内の各感情スコアの統計（中心値 offset とばらつき sd）を計算する
  * @param points - timeseries_full 全体のデータ
  * @param rangeStart - ベースライン区間の開始秒
  * @param rangeEnd   - ベースライン区間の終了秒
- * @returns 各感情のオフセット平均値（区間にデータがない場合は全て 0）
+ * @param center - 中心値の計算方式（'mean'=平均減算 / 'median'=中央値減算）。デフォルト 'mean'
+ * @returns 各感情の { offset, sd }（区間にデータがない場合は全て 0）
  */
 export function computeBaselineOffsets(
   points: TimeseriesPoint[],
   rangeStart: number,
-  rangeEnd: number
+  rangeEnd: number,
+  center: BaselineCenter = 'mean'
 ): BaselineOffsets {
   // ベースライン区間内のデータだけを取り出す
   const baselinePoints = points.filter(p => p.time >= rangeStart && p.time <= rangeEnd);
 
-  // 区間内にデータがなければオフセット 0（補正なし）として返す
+  const offsets = {} as BaselineOffsets;
+
+  // 区間内にデータがなければ全感情 { offset: 0, sd: 0 }（補正なし）として返す
   if (baselinePoints.length === 0) {
-    return { anger: 0, contempt: 0, disgust: 0, fear: 0, joy: 0, sadness: 0, surprise: 0, sentimentality: 0, confusion: 0, neutral: 0 };
+    for (const col of BASELINE_EMOTION_COLS) offsets[col] = { offset: 0, sd: 0 };
+    return offsets;
   }
 
-  // 各感情フィールドの平均値を計算してオフセットとする
-  const offsets = {} as BaselineOffsets;
+  // 各感情フィールドの中心値（平均 or 中央値）と標準偏差を計算する
   for (const col of BASELINE_EMOTION_COLS) {
     const values = baselinePoints.map(p => p[col]).filter(v => !isNaN(v));
-    offsets[col] = values.length > 0 ? mean(values) : 0;
+    if (values.length === 0) {
+      offsets[col] = { offset: 0, sd: 0 };
+      continue;
+    }
+    // 中央値は昇順ソート後に quantile(0.5) で求める
+    const offset = center === 'median'
+      ? quantile([...values].sort((a, b) => a - b), 0.5)
+      : mean(values);
+    offsets[col] = { offset, sd: std(values) };
   }
   return offsets;
 }
 
 /**
- * 全タイムスタンプにオフセット補正を適用した新しい配列を返す（元データは変更しない）
+ * 全タイムスタンプに表示モードに応じた補正を適用した新しい配列を返す（元データは変更しない）
  * @param points - 補正対象の TimeseriesPoint[]
- * @param offsets - computeBaselineOffsets で計算したオフセット
- * @param clampNegatives - true のときのみ補正後マイナス値を 0 に丸める（デフォルト true）
- *   false（研究者向け signed モード）にするとマイナスをそのまま保持し、
- *   「ベースライン以下の感情抑制」を表現できる
- * @returns 補正後の新しい TimeseriesPoint[]
+ * @param offsets - computeBaselineOffsets で計算した各感情の { offset, sd }
+ * @param mode - 表示モード（'absolute' のときは補正なしで原データを返す）
+ *   - deviation: x − μ（符号付き偏差）
+ *   - lift:      (x − μ)/μ × 100（変化率%。|μ| が LIFT_MIN_BASELINE 未満なら NaN として無効化）
+ *   - zscore:    (x − μ)/σ（標準化。σ=0 のときは 0）
+ * @returns 補正後の新しい TimeseriesPoint[]。0 クランプは行わない（負値は意味のある情報）
  */
 export function applyBaselineCorrection(
   points: TimeseriesPoint[],
   offsets: BaselineOffsets,
-  clampNegatives: boolean = true
+  mode: BaselineDisplayMode = 'deviation'
 ): TimeseriesPoint[] {
+  // absolute は補正不要 — 原データをそのまま返す
+  if (mode === 'absolute') return points;
+
   return points.map(p => {
     // time / engagement / valence / attention / dominant_emotion は変更しない
     const corrected = { ...p };
     for (const col of BASELINE_EMOTION_COLS) {
-      // 元スコア − オフセット = ベースラインからの変化量
-      const v = p[col] - offsets[col];
-      // clampNegatives=true のときのみマイナスを 0 に丸める
-      corrected[col] = clampNegatives ? Math.max(0, v) : v;
+      const { offset, sd } = offsets[col] ?? { offset: 0, sd: 0 };
+      const dev = p[col] - offset; // ベースラインからの偏差
+      if (mode === 'lift') {
+        // 平常時の値が小さい感情は変化率が発散し信頼できないため NaN（=「—」表示）にする
+        corrected[col] = Math.abs(offset) >= LIFT_MIN_BASELINE ? (dev / offset) * 100 : NaN;
+      } else if (mode === 'zscore') {
+        corrected[col] = sd > 0 ? dev / sd : 0;
+      } else {
+        // deviation
+        corrected[col] = dev;
+      }
     }
     return corrected;
   });

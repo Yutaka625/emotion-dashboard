@@ -143,12 +143,38 @@
 - [x] **Phase 1（最優先）: 0クランプを廃止し signed 値を保持**（2026-05-30 完了）
   - 完了内容は「完了済みタスク › ベースライン補正 Phase 1」を参照
 
-- [ ] **Phase 2: 補正方式の選択UI**（`BaselineSettingsCard.tsx` / `csvAnalyzer.ts`）
-  - 平均減算（デフォルト）／中央値減算（外れ値に頑健）／Zスコア `(x−μ)/σ`（被験者間比較）
-  - `computeBaselineOffsets` を `{ method, offset, sd }` を返す形に拡張
+- [x] **Phase 2: 補正方式の選択UI + 統合表示モード**（2026-05-31 完了）
+  - `computeBaselineOffsets` を `center`(平均/中央値) 引数 + per-emotion `{ offset, sd }` 返却に拡張
+  - `applyBaselineCorrection` を `clampNegatives` 撤廃 → `mode`(absolute/deviation/lift/zscore) ベースに
+    （0クランプ完全撤廃／変化率は近ゼロμのεガード付き）
+  - `BaselineContext`：`clampNegatives` を削除し `centerMethod` + `displayMode`（派生 `isBaselineActive`）に刷新
+  - `BaselineSettingsCard`：補正方式（平均/中央値）+ 表示モード（絶対値/偏差/変化率/Zスコア）セレクターに置換
+  - **バグ修正**: `TimeseriesSection` の `displayData`/`displayTimeseriesFull` が `applyBaselineCorrection` を
+    第3引数なしで呼び常時0クランプしていた問題を修正（signed モードで負値が描画されない不具合）
+  - `EmotionChartsCard`（モード別サブタイトル）・`insightEngine`（BaselineState）・`OverviewSection` も追随
+  - ※ Phase 3 の「変化率」モードも統合セレクターに含めて先行実装（モデル統合のため）
 
-- [ ] **Phase 3: 表示モード切り替え（絶対値／偏差／変化率）**（`TimeseriesSection.tsx` ほか）
-  - 上表の3モードをトグルで切り替え、軸ラベル・凡例を連動して変更
+- [x] **Phase 3 仕上げ①: Y軸単位ラベル + 変化率の「—」表示**（2026-05-31 完了）
+  - `EmotionChartsCard`：モード別Y軸ラベル（Δベースライン比／変化率(%)／Zスコア(SD)）、
+    ツールチップ単位サフィックス、NaN→「—」フォーマッタ（`fmtValue`）を追加
+  - スパークラインの max/avg を NaN 除外で算出（全フレーム算出不能なら「—」）、補正中はY軸を auto レンジに
+  - ヒートマップの NaN セルを「データなし」（透明＋点線）表示に、`emotionMax` の NaN 伝播も防止
+
+- [x] **Phase 3 仕上げ②: 変化率(lift%)の実用安定化 — 案①採用**（2026-05-31 完了）
+  - 実データ検証で判明：感情のベースライン平均は 0.02〜0.43 と小さく、旧εガード(0.01)では NaN にならず
+    巨大な % 値（例: avg 13,737% / max 611,664%）が出ていた（小さなμで割るため）
+  - 対応：`LIFT_EPSILON(0.01)` を `LIFT_MIN_BASELINE(0.1)` に変更。μ<0.1 の感情は「—」表示に。
+    モジュール検証で joy(μ0.43)・感傷(μ0.12) は％表示、他7感情は「—」になることを確認
+  - 「—」セル/系列に「平常時の値が小さく変化率を算出できません」の補足を追加（サブタイトル・ツールチップ・ヒートマップ）
+
+### ✅ 既存バグ修正（Phase 3 検証中に発見）: 時系列の time が絶対タイムスタンプだとグラフが空になる（2026-05-31 完了）
+> `csvAnalyzer.computeDashboardData`：`timeseries_full[].time` が生のタイムスタンプ（Unix秒 例 1705282200〜）を
+> 保持していたため、`TimeseriesSection` の `timeRange=[0, ceil(duration)]` でフィルタすると該当0件となり、
+> オーバーレイ/個別波形/ヒートマップが空になっていた（スタック面/支配感情は0基点の10s要約参照のため表示されていた）。
+- [x] `computeDashboardData`：ソート直後に `df` の time を `time − rawStartTime` で 0 基点へ正規化。
+  これにより timeseries_full・scatter・head_motion・change_points・time_summary・detectBaselineWindow が
+  すべて 0 始まりで整合。meta.start_time/end_time は未使用のため 0/duration となるが影響なし。
+- [x] 検証：モジュールテストで sampledData が 0件→600件に回復。UI でもオーバーレイが描画され X軸 0s〜120s を確認。
 
 - [ ] **Phase 4（要仕様検討）: engagement / valence / attention への補正拡張**
   - 特に valence（−100〜100の感情価）のベースライン相対化は研究の中心的分析

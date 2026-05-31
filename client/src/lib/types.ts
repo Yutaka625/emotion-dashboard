@@ -185,19 +185,35 @@ export const EMOTION_LABELS_JA: Record<string, string> = {
   neutral: 'ニュートラル',
 };
 
-// ベースライン補正で使う「各感情のオフセット平均値」の型
-export interface BaselineOffsets {
-  anger: number;
-  contempt: number;
-  disgust: number;
-  fear: number;
-  joy: number;
-  sadness: number;
-  surprise: number;
-  sentimentality: number;
-  confusion: number;
-  neutral: number;
+/**
+ * ベースライン補正の「中心値」の計算方式
+ * - mean:   平均減算（標準）
+ * - median: 中央値減算（外れ値に頑健）
+ */
+export type BaselineCenter = 'mean' | 'median';
+
+/**
+ * 補正後の感情スコアをどう見せるかの表示モード
+ * - absolute:  補正なし（生スコア 0〜100）
+ * - deviation: ベースライン偏差 x − μ（符号付き）
+ * - lift:      変化率 (x − μ)/μ × 100（%・近ゼロ baseline ではεガード）
+ * - zscore:    標準化 (x − μ)/σ（単位=SD）
+ */
+export type BaselineDisplayMode = 'absolute' | 'deviation' | 'lift' | 'zscore';
+
+/** ベースライン区間における1感情あたりの統計（中心値とばらつき） */
+export interface BaselineStat {
+  /** 中心値（平均 or 中央値）。減算オフセットとして使う */
+  offset: number;
+  /** 標準偏差（Zスコア計算に使う） */
+  sd: number;
 }
+
+/**
+ * ベースライン補正で使う「各感情の統計」の型。
+ * キーは BASELINE_EMOTION_COLS（anger〜neutral）。
+ */
+export type BaselineOffsets = Record<string, BaselineStat>;
 
 // マルチ FaceID 対応: 複数の顔を含む CSV データの管理構造
 export interface MultiFaceData {
