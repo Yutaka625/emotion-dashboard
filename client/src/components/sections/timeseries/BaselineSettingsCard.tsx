@@ -1,6 +1,9 @@
 /**
  * BaselineSettingsCard
- * ベースライン補正の設定UI（区間設定・自動検出・適用/解除）
+ * ベースライン補正の設定UI（区間設定・自動検出・補正方式・解除）
+ *
+ * 表示モード（偏差/変化率/Zスコア等）の切替は画面上部の
+ * ベースラインバナーから行えます（全タブ共通）。
  */
 
 import type { TimeseriesPoint } from '@/lib/types';
@@ -11,7 +14,7 @@ import { detectBaselineWindow } from '@/lib/csvAnalyzer';
 import { toast } from 'sonner';
 import CollapsibleCard from '@/components/ui/CollapsibleCard';
 
-import type { BaselineCenter, BaselineDisplayMode } from '@/lib/types';
+import type { BaselineCenter } from '@/lib/types';
 
 interface Props {
   /** ベースライン自動検出・適用に使う全フレームデータ */
@@ -24,24 +27,16 @@ const CENTER_OPTIONS: { value: BaselineCenter; label: string; note: string }[] =
   { value: 'median', label: '中央値', note: '外れ値に頑健' },
 ];
 
-// 表示モードの選択肢（絶対値＝補正なし、それ以外は補正後の見せ方）
-const DISPLAY_MODE_OPTIONS: { value: BaselineDisplayMode; label: string; note: string }[] = [
-  { value: 'absolute',  label: '絶対値',  note: '補正なし 0〜100' },
-  { value: 'deviation', label: '偏差',    note: 'x − 平常時' },
-  { value: 'lift',      label: '変化率',  note: '平常時比 %' },
-  { value: 'zscore',    label: 'Zスコア', note: '標準化 SD' },
-];
-
-// 表示モード選択時の補足説明（モード別）
-const MODE_DESCRIPTIONS: Record<BaselineDisplayMode, string> = {
-  absolute:  '補正を適用せず、生の感情スコア（0〜100）をそのまま表示します。',
-  deviation: 'マイナス＝平常時より感情が抑制された状態を示します（符号付き偏差）。',
-  lift:      '平常時を基準とした増減率（%）です。平常時の値が極めて小さい感情は算出されません。',
-  zscore:    '平常時のばらつき（SD）を1単位とした標準化スコアです。被験者間の比較に向きます。',
-};
-
 export default function BaselineSettingsCard({ timeseriesFull }: Props) {
-  const { baselineRange, baselineOffsets, isBaselineActive, setBaseline, clearBaseline, centerMethod, setCenterMethod, displayMode, setDisplayMode } = useBaseline();
+  const {
+    baselineRange,
+    baselineOffsets,
+    isBaselineActive,
+    setBaseline,
+    clearBaseline,
+    centerMethod,
+    setCenterMethod,
+  } = useBaseline();
 
   return (
     <CollapsibleCard
@@ -134,14 +129,14 @@ export default function BaselineSettingsCard({ timeseriesFull }: Props) {
         </div>
       )}
 
-      {/* STEP 3: 補正方式（中心値）・表示モードの選択（区間設定済みのみ表示） */}
+      {/* STEP 3: 補正方式（中心値）の選択（区間設定済みのみ表示） */}
       {baselineRange && (
         <div className="mt-4 p-3 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', border: '1px solid oklch(0.28 0.04 255)' }}>
           {/* 補正方式（中心値） */}
           <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.70 0.14 195)', letterSpacing: '0.08em', marginBottom: '8px' }}>
             STEP 3 — 補正方式（中心値）
           </div>
-          <div className="flex gap-2 mb-4">
+          <div className="flex gap-2">
             {CENTER_OPTIONS.map(opt => {
               const active = centerMethod === opt.value;
               return (
@@ -165,39 +160,6 @@ export default function BaselineSettingsCard({ timeseriesFull }: Props) {
             })}
           </div>
 
-          {/* 表示モード */}
-          <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.70 0.14 195)', letterSpacing: '0.08em', marginBottom: '8px' }}>
-            表示モード
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            {DISPLAY_MODE_OPTIONS.map(opt => {
-              const active = displayMode === opt.value;
-              return (
-                <button
-                  key={opt.value}
-                  onClick={() => setDisplayMode(opt.value)}
-                  className="px-3 py-2 rounded-lg text-xs font-semibold transition-all"
-                  style={{
-                    fontFamily: 'Noto Sans JP, sans-serif',
-                    background: active ? 'rgba(0,180,216,0.2)' : 'oklch(0.20 0.04 255)',
-                    color: active ? 'oklch(0.70 0.14 195)' : 'oklch(0.66 0.015 255)',
-                    border: `1px solid ${active ? 'rgba(0,180,216,0.5)' : 'oklch(0.30 0.04 255)'}`,
-                  }}
-                >
-                  {active ? '✓ ' : ''}{opt.label}
-                  <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', marginTop: '2px', opacity: 0.7 }}>
-                    {opt.note}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* 選択中モードの補足説明 */}
-          <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.68 0.12 195)', marginTop: '10px' }}>
-            ℹ {MODE_DESCRIPTIONS[displayMode]}
-          </p>
-
           {/* 解除 */}
           <div className="flex items-center gap-3 mt-4">
             <button
@@ -213,7 +175,7 @@ export default function BaselineSettingsCard({ timeseriesFull }: Props) {
               ベースライン設定を解除する
             </button>
             <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.68 0.015 255)', fontStyle: 'italic' }}>
-              「絶対値」で補正なし表示に戻せます。元データは常に保持されます。
+              元データは常に保持されます。上部バナーからも解除できます。
             </span>
           </div>
         </div>
