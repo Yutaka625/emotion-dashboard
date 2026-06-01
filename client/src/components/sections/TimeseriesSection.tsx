@@ -337,6 +337,14 @@ export default function TimeseriesSection({ data }: Props) {
         />
       </div>
 
+      {/* ---- EVENT ANNOTATIONS カード ---- */}
+      <EventAnnotationsCard
+        eventStats={eventStats}
+        maxTime={maxTime}
+        displayTimeseriesFull={displayTimeseriesFull}
+        onZoomEvent={(start, end) => setTimeRange([Math.max(0, start - 5), Math.min(maxTime, end + 5)])}
+      />
+
       {/* ---- EMOTION CHARTS + SPECIAL METRICS カード ---- */}
       <EmotionChartsCard
         displayData={displayData}
@@ -354,14 +362,6 @@ export default function TimeseriesSection({ data }: Props) {
         toggleSpecial={toggleSpecial}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-      />
-
-      {/* ---- EVENT ANNOTATIONS カード ---- */}
-      <EventAnnotationsCard
-        eventStats={eventStats}
-        maxTime={maxTime}
-        displayTimeseriesFull={displayTimeseriesFull}
-        onZoomEvent={(start, end) => setTimeRange([Math.max(0, start - 5), Math.min(maxTime, end + 5)])}
       />
 
       {/* ---- 10秒区間サマリーテーブル ---- */}
