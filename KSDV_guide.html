@@ -449,6 +449,7 @@
       <a href="#timerange">タイムレンジ指定</a>
       <a href="#events">イベント登録</a>
       <a href="#baseline">ベースライン補正</a>
+      <a href="#smoothing">スムージング</a>
       <a href="#faceid">FaceID別表示</a>
       <a href="#compare">CSV比較</a>
 
@@ -552,8 +553,14 @@
         <div class="feature-card">
           <span class="fc-icon">⚖️</span>
           <div class="fc-title">ベースライン補正</div>
-          <div class="fc-desc">安静時区間を指定すると、全感情スコアからベースライン値を差し引いた補正済みスコアで全タブを再表示。</div>
+          <div class="fc-desc">安静時区間を基準に4つの表示モード（absolute / deviation / lift / zscore）で全タブを再表示。研究者向けのz得点モードも搭載。</div>
           <span class="fc-tag tag-gold">補正</span>
+        </div>
+        <div class="feature-card">
+          <span class="fc-icon">〜</span>
+          <div class="fc-title">スムージング（ノイズ除去）</div>
+          <div class="fc-desc">SMA（単純移動平均）またはEMA（指数移動平均）で時系列グラフを平滑化。フレームノイズを除去して感情の大きなトレンドを把握しやすくなる。</div>
+          <span class="fc-tag tag-teal">SMA / EMA</span>
         </div>
         <div class="feature-card">
           <span class="fc-icon">👥</span>
@@ -622,7 +629,7 @@
         <span class="h2-icon" style="background:var(--teal-dim); color:var(--teal);">🔍</span>
         タイムレンジ指定
       </h2>
-      <p>「時系列分析」タブ内の <strong>TIME RANGE FILTER</strong> で、分析対象の時間範囲を秒単位で絞り込めます。</p>
+      <p>「時系列分析」タブ内の <strong>TIME RANGE FILTER</strong> で、分析対象の時間範囲を<strong>0.1秒単位</strong>で絞り込めます。</p>
 
       <div class="howto">
         <div class="howto-title">操作手順</div>
@@ -671,28 +678,101 @@
         <span class="h2-icon" style="background:var(--gold-dim); color:var(--gold);">⚖️</span>
         ベースライン補正
       </h2>
-      <p>刺激なしの安静時区間をベースラインとして設定すると、すべての感情スコアから安静時の平均値が差し引かれた「補正済みスコア」でダッシュボード全体が再表示されます。</p>
+      <p>刺激なしの安静時区間を「ベースライン」として登録することで、感情スコアを安静時との相対値で見られるようになります。被験者間比較や研究レポート作成に有効です。</p>
 
       <div class="howto">
         <div class="howto-title">
-          手動でベースライン区間を設定する
+          ベースライン区間を設定する
           <span class="howto-badge tag-gold">推奨手順</span>
         </div>
         <ol>
-          <li>「時系列分析」タブで<strong>TIME RANGE FILTER</strong>を使い、安静時に相当する区間を選択します（例：実験開始前の0〜30秒）。</li>
-          <li><strong>「ベースラインとして設定」ボタン</strong>を押します。</li>
-          <li>BASELINE SETTINGSパネルに選択した区間と計算されたオフセット値が表示されます。</li>
-          <li>「ベースライン補正を適用」を有効にすると、画面上部に青いバナーが出現し、全タブのグラフ・統計が補正済みに切り替わります。</li>
+          <li>「時系列分析」タブで <strong>BASELINE SETTINGS</strong> カードを開きます。</li>
+          <li>開始秒・終了秒を手動入力するか、<strong>「自動検出」</strong>ボタンで最も感情変動が少ない30秒区間を自動特定します。</li>
+          <li>「ベースラインとして設定」を押すと、区間ごとの平均/中央値が計算されます。</li>
+          <li>画面上部の<strong>グローバルバナー</strong>に表示モード切替ボタンが現れます。目的に合わせてモードを選択します（下表参照）。</li>
         </ol>
-        <div class="note">💡 自動検出ボタン（<strong>「自動検出」</strong>）を使うと、CSVデータ内で最も感情変動が少ない区間を自動的に候補として提示します。</div>
+        <div class="note">💡 中心統計量は <strong>平均（mean）</strong> と <strong>中央値（median）</strong> から選べます。外れ値が多いデータには中央値が安定します。</div>
+      </div>
+
+      <div class="howto">
+        <div class="howto-title">4つの表示モード</div>
+        <table class="tab-table" style="margin-top:4px">
+          <thead><tr><th>モード</th><th>計算式</th><th>向いている用途</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>absolute</strong></td>
+              <td>補正なし（生スコア）</td>
+              <td>一般閲覧・ベースライン設定前の確認</td>
+            </tr>
+            <tr>
+              <td><strong>deviation</strong></td>
+              <td>スコア − ベースライン平均</td>
+              <td>before/after比較・研究発表スライド</td>
+            </tr>
+            <tr>
+              <td><strong>lift</strong></td>
+              <td>(スコア − ベースライン) ÷ ベースライン × 100%</td>
+              <td>変化率での被験者間比較</td>
+            </tr>
+            <tr>
+              <td><strong>zscore</strong> <span class="howto-badge tag-purple" style="margin-left:4px">研究者向け</span></td>
+              <td>(スコア − ベースライン平均) ÷ SD</td>
+              <td>論文・統計的有意性の検討</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="warn">⚠️ deviation / lift / zscore モードではスコアがマイナスになる場合があります（安静時より感情が低下した状態を意味します）。</div>
       </div>
 
       <div class="howto">
         <div class="howto-title">補正を解除するには</div>
         <ul>
-          <li>画面上部のバナー右端にある<strong>「解除」ボタン</strong>をクリックすると、元の未補正スコアに戻ります。</li>
+          <li>画面上部のグローバルバナーで <strong>「absolute」</strong> を選択、またはバナー右端の<strong>「解除」ボタン</strong>をクリックすると元のスコアに戻ります。</li>
         </ul>
-        <div class="warn">⚠️ ベースライン補正中はすべてのグラフの縦軸が0を中心とした差分値になります。スコアがマイナスになる場合があります（安静時より低い状態を意味します）。</div>
+      </div>
+    </div>
+
+
+    <div class="doc-section" id="smoothing">
+      <h2>
+        <span class="h2-icon" style="background:var(--teal-dim); color:var(--teal);">〜</span>
+        スムージング（ノイズ除去）
+      </h2>
+      <p>フレーム単位のノイズを平滑化して、感情の大きなトレンドを見やすくする機能です。「時系列分析」タブの <strong>SMOOTHING SETTINGS</strong> カードで設定します。</p>
+
+      <div class="howto">
+        <div class="howto-title">3つのスムージングモード</div>
+        <table class="tab-table" style="margin-top:4px">
+          <thead><tr><th>モード</th><th>特徴</th><th>設定パラメータ</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>none</strong></td>
+              <td>平滑化なし。生の計測値をそのまま表示</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td><strong>SMA</strong>（単純移動平均）</td>
+              <td>直近Nフレームの平均値を表示。ノイズを均等に除去</td>
+              <td>ウィンドウサイズ 5〜60 フレーム</td>
+            </tr>
+            <tr>
+              <td><strong>EMA</strong>（指数移動平均）</td>
+              <td>直近フレームを重視しつつ平滑化。変化への追従が速い</td>
+              <td>alpha 0.01〜0.5（大きいほど追従速度が上がる）</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="note">💡 スムージングは<strong>グラフ表示のみ</strong>に影響します。統計カード（平均・SD・中央値など）は常に生データから計算されます。</div>
+        <div class="note">💡 有効にすると画面上部のグローバルバナーにスムージングバッジが表示されます。</div>
+      </div>
+
+      <div class="howto">
+        <div class="howto-title">使い分けの目安</div>
+        <ul>
+          <li><strong>プレゼン・スクリーンショット用</strong>：SMA ウィンドウ 15〜30 フレームが見やすい</li>
+          <li><strong>リアルタイム性を重視</strong>：EMA alpha 0.3〜0.5 で急変を追いながら平滑化</li>
+          <li><strong>学術分析・統計検定</strong>：none（生データのまま）を推奨</li>
+        </ul>
       </div>
     </div>
 
@@ -762,8 +842,8 @@
         <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">DATA QUALITY（顔検出率・fps）</span>
       </div>
 
-      <p><strong>支配的感情</strong>はそのフレームで最もスコアが高かった感情です。ドーナツチャートで全体に占める割合が確認できます。<br>
-      <strong>KEY INSIGHTS</strong>はアルゴリズムが自動生成する3〜5個のサマリーコメントです。</p>
+      <p><strong>支配的感情</strong>はそのフレームで最もスコアが高かった感情です。ドーナツチャートで全体に占める割合が確認できます。</p>
+      <p><strong>KEY INSIGHTS</strong> はルールベースのインサイトエンジンが重要度スコアで順位付けし、上位4件を自動表示します。各インサイントには <span style="color:var(--green)">positive</span> / <span style="color:var(--text-dim)">neutral</span> / <span style="color:var(--gold)">caution</span> / <span style="color:var(--red)">alert</span> のトーンバッジが付与され、セッションの状態を一目で把握できます。</p>
     </div>
 
 
@@ -772,22 +852,43 @@
         <span class="h2-icon" style="background:var(--teal-dim); color:var(--teal);">〜</span>
         タブ②：時系列分析（Timeseries）
       </h2>
-      <p>「いつ、どの感情が、どのくらい強かったか」を時間軸で確認するタブです。イベント登録・タイムレンジ指定・ベースライン補正の操作もここで行います。</p>
+      <p>「いつ、どの感情が、どのくらい強かったか」を時間軸で確認するタブです。ベースライン補正・スムージング・イベント登録・タイムレンジ指定の操作もここで行います。</p>
+
+      <div class="howto">
+        <div class="howto-title">カードレイアウト</div>
+        <ul>
+          <li>上段：<strong>BASELINE SETTINGS</strong> と <strong>SMOOTHING SETTINGS</strong> が横並びで表示されます。</li>
+          <li>中段：<strong>EVENT ANNOTATIONS</strong>（イベント登録・t検定）</li>
+          <li>下段：<strong>TIME RANGE FILTER</strong> と感情グラフカード</li>
+          <li>各カードの見出し右端の <strong>▾ / ▸ ボタン</strong> で折りたたみ／展開が可能です。カード右上の <strong>?</strong> アイコンで機能の説明ツールチップが表示されます。</li>
+        </ul>
+      </div>
+
+      <div class="howto">
+        <div class="howto-title">感情グラフの5種チャートタイプ</div>
+        <table class="tab-table" style="margin-top:4px">
+          <thead><tr><th>タイプ</th><th>概要</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Overlay</strong></td><td>10感情の折れ線グラフを重ね表示。全体の動きを一覧</td></tr>
+            <tr><td><strong>Sparklines</strong></td><td>感情ごとに小さなグラフを並べてコンパクトに比較</td></tr>
+            <tr><td><strong>Heatmap</strong></td><td>5秒区間×感情の2Dヒートマップ。時間帯ごとの強度を色で把握</td></tr>
+            <tr><td><strong>Stacked</strong></td><td>面グラフの積み上げ。感情の構成比の推移を確認</td></tr>
+            <tr><td><strong>Dominant</strong></td><td>各フレームで最も強かった感情を色帯で表示</td></tr>
+          </tbody>
+        </table>
+      </div>
 
       <div class="pill-list">
+        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(251,191,36,.25);">BASELINE SETTINGS</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">SMOOTHING SETTINGS</span>
         <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">EVENT ANNOTATIONS（イベント登録）</span>
         <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">TIME RANGE FILTER</span>
         <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">CSV出力</span>
-        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(251,191,36,.25);">BASELINE SETTINGS</span>
-        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(251,191,36,.25);">自動検出</span>
-        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(192,132,252,.25);">感情時系列グラフ（10感情）</span>
-        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(192,132,252,.25);">支配的感情タイムライン</span>
+        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(192,132,252,.25);">5種チャートタイプ</span>
+        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(192,132,252,.25);">特殊指標オーバーレイ（Engagement / Valence / Attention）</span>
         <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">10秒ウィンドウ集計表</span>
-        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">感情ヒートマップ（5秒区間）</span>
         <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">区間t検定</span>
       </div>
-
-      <p>グラフ上部のチェックボックスで表示する感情を絞り込めます。「支配的感情タイムライン」は各フレームで最も強かった感情を色帯で一覧できます。</p>
     </div>
 
 
