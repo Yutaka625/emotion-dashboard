@@ -324,16 +324,18 @@ export default function TimeseriesSection({ data }: Props) {
         </div>
       </CollapsibleCard>
 
-      {/* ---- BASELINE SETTINGS カード ---- */}
-      <BaselineSettingsCard timeseriesFull={data.timeseries_full} />
-
-      {/* ---- SMOOTHING SETTINGS カード ---- */}
-      <SmoothingSettingsCard
-        smoothingMethod={smoothingMethod} setSmoothingMethod={setSmoothingMethod}
-        smoothingWindow={smoothingWindow} setSmoothingWindow={setSmoothingWindow}
-        smoothingAlpha={smoothingAlpha}   setSmoothingAlpha={setSmoothingAlpha}
-        fpsAvg={data.meta.fps_avg}
-      />
+      {/* ---- BASELINE + SMOOTHING: 2列グリッド ----
+          補正系の2カードを横並びに。片方だけ展開しても高さが独立するよう items-start を指定。
+          1024px 未満（lg ブレークポイント以下）では自動的に1列スタックに戻る。 */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        <BaselineSettingsCard timeseriesFull={data.timeseries_full} />
+        <SmoothingSettingsCard
+          smoothingMethod={smoothingMethod} setSmoothingMethod={setSmoothingMethod}
+          smoothingWindow={smoothingWindow} setSmoothingWindow={setSmoothingWindow}
+          smoothingAlpha={smoothingAlpha}   setSmoothingAlpha={setSmoothingAlpha}
+          fpsAvg={data.meta.fps_avg}
+        />
+      </div>
 
       {/* ---- EMOTION CHARTS + SPECIAL METRICS カード ---- */}
       <EmotionChartsCard
