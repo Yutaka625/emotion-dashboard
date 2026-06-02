@@ -177,7 +177,7 @@ export default function Home() {
   const sectionIds = ['overview', 'timeseries', 'engagement', 'emotions', 'transitions', 'academic', 'actionunits', 'comparison', 'uxresearch'] as const;
   const sectionComponents: Record<string, React.ReactNode> = {
     overview:    <OverviewSection data={safeDisplayData} />,
-    timeseries:  <TimeseriesSection data={safeDisplayData} />,
+    timeseries:  <TimeseriesSection data={safeDisplayData} rawTimeseries={(baseData ?? safeDisplayData).timeseries_full} />,
     engagement:  <EngagementValenceSection data={safeDisplayData} />,
     emotions:    <EmotionsSection data={safeDisplayData} />,
     transitions: <TransitionsSection data={safeDisplayData} />,

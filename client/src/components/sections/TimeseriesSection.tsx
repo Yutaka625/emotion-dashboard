@@ -10,7 +10,7 @@
  */
 
 import { useState, useMemo } from 'react';
-import type { DashboardData } from '@/lib/types';
+import type { DashboardData, TimeseriesPoint } from '@/lib/types';
 import { EMOTION_LABELS_JA, EMOTION_COLORS, NON_NEUTRAL_EMOTIONS } from '@/lib/types';
 import { Target, Download, RotateCcw } from 'lucide-react';
 import { useBaseline } from '@/contexts/BaselineContext';
@@ -25,14 +25,20 @@ import EmotionChartsCard     from './timeseries/EmotionChartsCard';
 import EventAnnotationsCard  from './timeseries/EventAnnotationsCard';
 
 interface Props {
+  /** 表示用データ（ベースライン補正が有効なら補正後の値） */
   data: DashboardData;
+  /**
+   * 補正前の生の時系列データ。
+   * ベースライン区間の設定・自動検出は、補正後ではなく必ず生データから計算する必要があるため別途受け取る。
+   */
+  rawTimeseries: TimeseriesPoint[];
 }
 
 type TabId = 'overlay' | 'sparklines' | 'heatmap' | 'stacked' | 'dominant';
 
 const EMOTION_HEX = EMOTION_COLORS;
 
-export default function TimeseriesSection({ data }: Props) {
+export default function TimeseriesSection({ data, rawTimeseries }: Props) {
   // ---- 感情グラフ選択 state ----
   const [selectedEmotions, setSelectedEmotions] = useState<string[]>(['anger', 'sadness', 'surprise', 'fear', 'joy']);
   const [showSpecial, setShowSpecial]           = useState<string[]>(['engagement', 'valence', 'attention']);
@@ -196,7 +202,7 @@ export default function TimeseriesSection({ data }: Props) {
     document.body.removeChild(link);
   };
 
-  const { setBaseline, baselineRange } = useBaseline();
+  const { setBaseline, clearBaseline, baselineRange } = useBaseline();
 
   // 現在の表示範囲が、設定済みのベースライン区間と一致しているか（0.1秒刻みの丸め誤差を許容）。
   // ボタンのハイライトはこれで判定する。「ベースラインが有効か」ではなく
@@ -309,17 +315,26 @@ export default function TimeseriesSection({ data }: Props) {
             </button>
           ))}
 
-          {/* ベースラインとして設定 */}
+          {/* ベースライン設定トグル:
+              現在範囲が既にベースラインなら「解除」、そうでなければ生データから「設定」する。
+              点灯=設定済み（押すと解除）/ 消灯=未設定（押すと現在範囲を設定）と直感的に対応する。 */}
           <button
-            onClick={() => setBaseline(timeRange, data.timeseries_full)}
+            onClick={() => {
+              if (isCurrentRangeBaseline) {
+                clearBaseline();
+              } else {
+                // 必ず補正前の生データから計算する（補正後データだとオフセットが0付近になり誤った値になる）
+                setBaseline(timeRange, rawTimeseries);
+              }
+            }}
             className="px-3 py-1 rounded text-xs transition-all flex items-center gap-1"
             style={{ fontFamily: 'Noto Sans JP, sans-serif', background: isCurrentRangeBaseline ? 'rgba(0,180,216,0.20)' : 'oklch(0.22 0.04 255)', color: isCurrentRangeBaseline ? 'oklch(0.70 0.14 195)' : 'oklch(0.72 0.008 250)', border: `1px solid ${isCurrentRangeBaseline ? 'rgba(0,180,216,0.5)' : 'oklch(0.32 0.04 255)'}` }}
             title={isCurrentRangeBaseline
-              ? '現在の表示範囲がベースライン区間に設定されています'
+              ? '現在の表示範囲がベースラインに設定されています。クリックで解除します'
               : '現在の表示範囲をベースライン区間として設定する'}
           >
-            <Target size={14} />
-            ベースラインとして設定
+            {isCurrentRangeBaseline ? <RotateCcw size={14} /> : <Target size={14} />}
+            {isCurrentRangeBaseline ? 'ベースライン解除' : 'ベースラインとして設定'}
           </button>
 
           {/* CSV エクスポート */}
@@ -341,7 +356,7 @@ export default function TimeseriesSection({ data }: Props) {
           補正系の2カードを横並びに。片方だけ展開しても高さが独立するよう items-start を指定。
           1024px 未満（lg ブレークポイント以下）では自動的に1列スタックに戻る。 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        <BaselineSettingsCard timeseriesFull={data.timeseries_full} />
+        <BaselineSettingsCard timeseriesFull={rawTimeseries} />
         <SmoothingSettingsCard
           smoothingMethod={smoothingMethod} setSmoothingMethod={setSmoothingMethod}
           smoothingWindow={smoothingWindow} setSmoothingWindow={setSmoothingWindow}
