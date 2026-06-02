@@ -9,6 +9,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   Cell, RadarChart, PolarGrid, PolarAngleAxis, Radar,
 } from 'recharts';
+import { rechartsTooltip } from '@/lib/chartTooltip';
 
 interface Props {
   data: DashboardData;
@@ -68,7 +69,7 @@ export default function EmotionsSection({ data }: Props) {
           const stats = emotion_stats[e];
           const pct = dominant_emotion_pct[e] || 0;
           return (
-            <div key={e} className="metric-card" style={{ borderLeft: `3px solid ${EMOTION_COLORS[e]}` }}>
+            <div key={e} className="metric-card">
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-2 h-2 rounded-full" style={{ background: EMOTION_COLORS[e] }} />
                 <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600, fontSize: '0.8rem', color: 'oklch(0.88 0.005 250)' }}>
@@ -116,7 +117,7 @@ export default function EmotionsSection({ data }: Props) {
                 `${v.toFixed(2)}% (${props.payload.count.toLocaleString()} フレーム)`,
                 '出現率'
               ]}
-              contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
+              {...rechartsTooltip}
             />
             <Bar dataKey="pct" radius={[4, 4, 0, 0]} activeBar={{ fill: 'oklch(0.55 0.04 255 / 0.6)', stroke: 'none' }}>
               {prevalenceData.map((entry, i) => (
@@ -191,7 +192,7 @@ export default function EmotionsSection({ data }: Props) {
             <XAxis dataKey="emotion" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', fill: 'oklch(0.68 0.015 255)' }} />
             <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.68 0.015 255)' }} />
             <Tooltip
-              contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
+              {...rechartsTooltip}
             />
             <Bar dataKey="variability" name="変動性(SD)" fill="oklch(0.62 0.18 160)" radius={[4, 4, 0, 0]} opacity={0.85} activeBar={{ fill: "oklch(0.55 0.04 255 / 0.6)", stroke: "none" }} />
             <Bar dataKey="instability" name="不安定性(√MSSD)" fill="oklch(0.62 0.18 25)" radius={[4, 4, 0, 0]} opacity={0.85} activeBar={{ fill: "oklch(0.55 0.04 255 / 0.6)", stroke: "none" }} />

@@ -9,6 +9,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   ScatterChart, Scatter, Cell, AreaChart, Area, Legend, ReferenceLine,
 } from 'recharts';
+import { rechartsTooltip } from '@/lib/chartTooltip';
 
 interface Props {
   data: DashboardData;
@@ -109,7 +110,7 @@ export default function EngagementValenceSection({ data }: Props) {
                 <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.68 0.015 255)' }} />
                 <Tooltip
                   formatter={(v: number) => [`${v.toLocaleString()} フレーム`, 'フレーム数']}
-                  contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
+                  {...rechartsTooltip}
                 />
                 <Bar dataKey="value" radius={[4, 4, 0, 0]} activeBar={{ fill: 'oklch(0.55 0.04 255 / 0.6)', stroke: 'none' }}>
                   {engDistData.map((entry, i) => (
@@ -133,7 +134,7 @@ export default function EngagementValenceSection({ data }: Props) {
                 <YAxis type="category" dataKey="name" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fill: 'oklch(0.75 0.008 250)' }} width={55} />
                 <Tooltip
                   formatter={(v: number) => [v.toFixed(4), '相関係数']}
-                  contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
+                  {...rechartsTooltip}
                 />
                 <Bar dataKey="value" radius={[0, 4, 4, 0]} activeBar={{ fill: 'oklch(0.55 0.04 255 / 0.6)', stroke: 'none' }}>
                   {engCorrData.map((entry, i) => (
@@ -174,7 +175,11 @@ export default function EngagementValenceSection({ data }: Props) {
                     <div style={{ background: 'oklch(0.20 0.04 255)', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '4px', padding: '8px', fontFamily: 'Roboto Mono, monospace', fontSize: '0.75rem', color: 'oklch(0.88 0.005 250)' }}>
                       <p>Engagement: {d?.engagement?.toFixed(1)}%</p>
                       <p>Valence: {d?.valence?.toFixed(1)}%</p>
-                      <p style={{ color: d?.color || 'oklch(0.88 0.005 250)' }}>{d?.emotion || 'N/A'}</p>
+                      {/* 感情名は色ドット＋明るい文字色にする（感情色のままだと暗背景で読めないため） */}
+                      <p className="flex items-center gap-1.5" style={{ color: 'oklch(0.90 0.005 250)' }}>
+                        <span className="w-2 h-2 rounded-full" style={{ background: d?.color || 'oklch(0.70 0.14 195)' }} />
+                        {d?.emotion || 'N/A'}
+                      </p>
                     </div>
                   );
                 }}
@@ -201,7 +206,7 @@ export default function EngagementValenceSection({ data }: Props) {
               <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.68 0.015 255)' }} />
               <Tooltip
                 formatter={(v: number) => [v.toFixed(2), '割合']}
-                contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
+                {...rechartsTooltip}
               />
               <Legend wrapperStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem' }} />
               <Bar dataKey="high" fill="oklch(0.68 0.26 22)" name="高レベル時" radius={[4, 4, 0, 0]} />

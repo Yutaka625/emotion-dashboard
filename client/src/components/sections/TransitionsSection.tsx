@@ -8,6 +8,7 @@ import { EMOTION_LABELS_JA, EMOTION_COLORS, NON_NEUTRAL_EMOTIONS } from '@/lib/t
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
 } from 'recharts';
+import { rechartsTooltip } from '@/lib/chartTooltip';
 
 interface Props {
   data: DashboardData;
@@ -174,7 +175,7 @@ export default function TransitionsSection({ data }: Props) {
               <YAxis type="category" dataKey="name" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fill: 'oklch(0.75 0.008 250)' }} width={50} />
               <Tooltip
                 formatter={(v: number) => [`${v.toFixed(3)}秒`, '平均持続時間']}
-                contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
+                {...rechartsTooltip}
               />
               <Bar dataKey="mean_duration" radius={[0, 4, 4, 0]} activeBar={{ fill: 'oklch(0.55 0.04 255 / 0.6)', stroke: 'none' }}>
                 {durationData.map((entry, i) => (
@@ -197,7 +198,7 @@ export default function TransitionsSection({ data }: Props) {
               <YAxis type="category" dataKey="name" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fill: 'oklch(0.75 0.008 250)' }} width={50} />
               <Tooltip
                 formatter={(v: number) => [`${v.toFixed(2)}秒`, '累積時間']}
-                contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
+                {...rechartsTooltip}
               />
               <Bar dataKey="total_duration" radius={[0, 4, 4, 0]} activeBar={{ fill: 'oklch(0.55 0.04 255 / 0.6)', stroke: 'none' }}>
                 {durationData.map((entry, i) => (

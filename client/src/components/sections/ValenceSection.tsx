@@ -9,6 +9,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   Cell, AreaChart, Area, ReferenceLine,
 } from 'recharts';
+import { rechartsTooltip } from '@/lib/chartTooltip';
 
 interface Props {
   data: DashboardData;
@@ -107,7 +108,7 @@ export default function ValenceSection({ data }: Props) {
             <YAxis domain={[25, 100]} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.68 0.015 255)' }} />
             <Tooltip
               formatter={(v: number) => [v.toFixed(2), 'Valence']}
-              contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
+              {...rechartsTooltip}
             />
             <ReferenceLine y={90} stroke="oklch(0.62 0.18 160)" strokeDasharray="4 4" label={{ value: '90%', style: { fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', fill: 'oklch(0.42 0.12 160)' } }} />
             <Area type="monotone" dataKey="valence" stroke="oklch(0.62 0.18 25)" fill="url(#valGrad)" strokeWidth={1.5} dot={false} />
@@ -129,7 +130,7 @@ export default function ValenceSection({ data }: Props) {
               <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.68 0.015 255)' }} />
               <Tooltip
                 formatter={(v: number) => [`${v.toLocaleString()} フレーム`, 'フレーム数']}
-                contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
+                {...rechartsTooltip}
               />
               <Bar dataKey="value" radius={[4, 4, 0, 0]} activeBar={{ fill: 'oklch(0.55 0.04 255 / 0.6)', stroke: 'none' }}>
                 {distData.map((entry, i) => (
@@ -152,7 +153,7 @@ export default function ValenceSection({ data }: Props) {
               <YAxis type="category" dataKey="name" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fill: 'oklch(0.75 0.008 250)' }} width={55} />
               <Tooltip
                 formatter={(v: number) => [v.toFixed(4), '相関係数']}
-                contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
+                {...rechartsTooltip}
               />
               <Bar dataKey="value" radius={[0, 4, 4, 0]} activeBar={{ fill: 'oklch(0.55 0.04 255 / 0.6)', stroke: 'none' }}>
                 {corrData.map((entry, i) => (
