@@ -237,7 +237,7 @@ export default function UXResearchSection({ data }: Props) {
                 value: ux_scores.frustration_index,
                 icon: <AlertTriangle size={16} />,
                 color: 'oklch(0.62 0.22 25)',
-                description: 'confusion×0.4 + anger×0.3 + sadness×0.2',
+                description: '困惑・怒り・悲しみ・嫌悪の合計。高いほど体験にストレスや不満がある',
                 alert: ux_scores.frustration_index >= 0.3 ? '要注意' : null,
               },
               {
@@ -246,7 +246,7 @@ export default function UXResearchSection({ data }: Props) {
                 value: ux_scores.delight_index,
                 icon: <Star size={16} />,
                 color: 'oklch(0.78 0.14 82)',
-                description: 'joy×0.5 + surprise×0.3 + sentimentality×0.2',
+                description: '喜び・驚き・感傷の合計。高いほどポジティブな反応や感動があった',
                 alert: null,
               },
               {
@@ -255,7 +255,7 @@ export default function UXResearchSection({ data }: Props) {
                 value: ux_scores.engagement_quality,
                 icon: <Zap size={16} />,
                 color: 'oklch(0.70 0.14 195)',
-                description: 'engagement × (1 − confusion×2)',
+                description: '混乱が少ない状態での集中度。高いほど良質な注意・没頭が起きている',
                 alert: null,
               },
               {
@@ -264,7 +264,7 @@ export default function UXResearchSection({ data }: Props) {
                 value: ux_scores.cognitive_load,
                 icon: <Brain size={16} />,
                 color: 'oklch(0.78 0.18 60)',
-                description: 'confusion×0.6 + brow_furrow×0.4',
+                description: '困惑と眉のしかめから推定。高いほど理解・操作が難しく頭に負荷がかかっている',
                 alert: ux_scores.cognitive_load >= 0.35 ? '高負荷' : null,
               },
             ].map(m => (
