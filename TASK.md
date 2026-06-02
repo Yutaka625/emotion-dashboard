@@ -1,269 +1,138 @@
 # TASK.md — KSDV 開発タスク管理
 
-## 完了済みタスク
+> 2026-06-03 更新: **未完了タスクを上部に集約**し、完了タスクを下部にまとめました。
+> 状態は実コードを確認して判定しています。
 
-### ✅ ベースライン補正機能（feature/baseline ブランチ）
-- `BaselineContext`：ベースライン状態のグローバル管理
-- `BaselineBanner`：補正中を画面上部にバナー表示
-- `TimeseriesSection`：BASELINE SETTINGS UI・ゼロライン・区間ハイライト
-- `csvAnalyzer.ts`：`computeBaselineOffsets` / `applyBaselineCorrection` 追加
-- `App.tsx`・`Home.tsx`：プロバイダー配置
+---
 
-### ✅ EMOTION TIME SERIES ラベル選択のリセット防止
-- セクション切り替え時に選択中感情がリセットされる問題を修正
-- `Home.tsx`：`switch` 条件レンダリング → CSS show/hide（`display: none/block`）に変更
-- デフォルト選択感情：怒り・悲しみ・驚き・嫌悪・恐怖・喜びに変更
+# 🔲 未完了タスク（これから対応するもの）
 
-### ✅ TRANSITION MATRIX セル色コントラスト改善
-- アルファ（透過）ベース → 明度補間（oklch L: 0.22→0.72）方式に変更
-- 平方根スケールで低頻度セルの差異を視認しやすく改善
+## 🟠 中〜高優先度（UX の摩擦）
+- [ ] **設定カードの折りたたみ／ツールチップを他セクションへ横展開**（Overview / Academic 等）
+  - ※ 設定4カードの本体レイアウト統一（共通部品化）は完了済み
+- [ ] **ComparisonSection の空状態に導線を追加**（`ComparisonSection.tsx` / `Home.tsx`）
+  - 「比較用CSVを追加してください」だけで追加方法が不明 → ＋比較CSVボタンへの案内・矢印を追加
+- [ ] **スムージング設定のα値スライダーを反転**（`SmoothingSettingsCard.tsx`）
+  - 現在: 左=0.05（強）/ 右=0.90（弱）で直感と逆。「スムージング強度0〜100%」表記に
 
-### ✅ マルチ FaceID 対応（feature/multi-faceid ブランチ → main マージ済）
-- `FaceIDContext`：FaceID 選択状態のグローバル管理 + `activeDashboardData` 計算
-- `FaceIDSelector`：ヘッダーバー内チップ型セレクター UI
-- `csvAnalyzer.ts`：`parseCSV` export、`computeDashboardData` 分離、FaceID 検出・グルーピング関数追加
-- `types.ts`：`MultiFaceData` 型追加
+## 🟡 中優先度（一貫性・洗練度）
+- [ ] **ホバー実装をCSSに統一**（`Sidebar.tsx` / `Home.tsx` ほか）
+  - `onMouseEnter/Leave` のDOM直接操作を Tailwind `hover:` / CSS変数ベースへ
+- [ ] **EMOTION_COLORS と CSS `.emotion-*` クラスの色を統一**（`types.ts` / `index.css`）
+  - 同じ感情に異なるOKLCH値が2箇所で定義。`types.ts` を Single Source of Truth に
+- [ ] **数値フォーマットの統一**（全セクション）
+  - 感情スコア `.toFixed(3)` / Engagement・Valence・Attention `.toFixed(1)` に統一
+  - 共通フォーマッタ `formatScore()` / `formatPct()` を `utils.ts` に追加
+- [ ] **セクション切り替え時のフェードイン追加**（`Home.tsx` / `index.css`）
+  - `display: none → block` の瞬時切替が唐突 → `@keyframes fade-in` で自然に
+
+## 🟢 低優先度（後回し可）
+- [ ] **モバイル対応**（サイドバーのドロワー化・グリッドのレスポンシブ確認）
+- [ ] **アクセシビリティ（a11y）対応**（aria-label・フォーカスリング・グラフの role）
+- [ ] **未使用アニメーションクラスの活用または削除**（`index.css` の `count-up` / `scan-line`）
+
+## 機能拡張（次フェーズ候補）
+- [ ] **KEY INSIGHTS Phase 2: フルセット・ルール拡張**
+  - 遷移パターン・circumplex 象限の偏り・相関・頭部動作イベントの活用
+  - 「もっと見る」で全インサイト展開、各カードから該当セクションへのジャンプ導線
+- [ ] **CSV エクスポート Phase 3A（残）**
+  - ※ TIME RANGE FILTER の「範囲CSV出力」は実装済み
+  - 残: BASELINE SETTINGS に「補正後データを出力」ボタン、先頭にメタデータ行（区間・オフセット）、補正有無・日時を含むファイル名
+- [ ] **Before/After AI 比較機能 Phase 3B（Claude API）**
+  - `.env` に `ANTHROPIC_API_KEY`、`@anthropic-ai/sdk`、`POST /api/ai-compare`、`AiInsightSection.tsx`、ナビ追加
+- [ ] **ベースライン補正 Phase 4: engagement / valence / attention への補正拡張**
+  - 特に valence（−100〜100）は signed のため二重符号化に注意。仕様確定後に着手
+- [ ] **マルチ FaceID の拡張**
+  - FaceID が多い場合（10+）のドロップダウン表示
+  - FaceID ごとの感情比較グラフ（オーバーレイ表示）
+  - FaceID に任意のラベル名を付ける機能
+- [ ] **データ保存・読み込み（localStorage）**
+- [ ] **感情閾値設定機能**（実装前に仕様確定）
+  - 閾値設定UI（検出最小値）／表示フィルタか統計補正かの仕様検討／ベースライン・FaceIDとの併用整理
+- [ ] **学術研究者向け Phase 4**
+  - 参加者間の感情平均グラフ（群平均±SD）／CSV一括インポート／統計サマリー出力／実験条件ラベル付け／外部刺激との同期
+  - 統計検定表示: ※ A/B比較タブの **Welch t検定 + Cohen's d** は実装済み。残は Mann-Whitney U 検定・参加者群での検定
+
+---
+
+# ✅ 完了済みタスク
+
+## 2026-06 セッション（UI/UX 改善・バグ修正 / main マージ済）
+- **A/B比較タブに統計検定を追加**: Welch t検定 + Cohen's d（効果量）＋統計結果のCSVエクスポート
+- **10秒テーブルの感情列順序を統一**: `NON_NEUTRAL_EMOTIONS` から動的生成（'困'→'混' 修正含む）
+- **UXスコア異常値バグ修正**: `computeUXScores` の0-1正規化漏れ（デライト指数2496/100→正常化）＋5指標の説明を平易な日本語に
+- **設定カード レイアウト統一の仕上げ**: `SettingBox` / `SettingSubLabel`（新規）で本体内部の余白・副見出し・ネストボックスを共通化
+- **TIME RANGE FILTER カードをオレンジで統一**: 色帯・ラベル・スライダー・つまみ・ベースラインボタン・CSV出力ボタン
+- **EVENT ANNOTATIONS のラベル色を青に統一**（他カードのアクセント色ルールに整合）
+- **「ベースラインとして設定」ボタンの修正**: トグル化（点灯中に押すと解除）＋必ず生データから計算（補正後データで0化する不具合を修正）
+- **概要タブの改善**: 記録時間を「M分S秒」表記に／総フレーム数の「frames」はみ出し修正／複数人(マルチFaceID)データのFPSをユニークなタイムスタンプ数で算出／ツールチップの可読性改善
+- **感情分布カードの左端の色帯を削除**（くどさ解消、識別はドット・数値色・バーで担保）
+- **全 Recharts ツールチップの文字色を明色固定**: 共通スタイル `lib/chartTooltip.ts`（新規）を全セクションに適用、独自実装の散布図ツールチップも対応
+
+## ベースライン補正機能（feature/baseline）
+- `BaselineContext` / `BaselineBanner` / `TimeseriesSection` の BASELINE SETTINGS UI・ゼロライン・区間ハイライト
+- `csvAnalyzer.ts`: `computeBaselineOffsets` / `applyBaselineCorrection`
+- `App.tsx` / `Home.tsx`: プロバイダー配置
+
+## EMOTION TIME SERIES ラベル選択のリセット防止
+- セクション切替時の選択リセットを修正（`switch` → CSS show/hide）
+- デフォルト選択感情を変更
+
+## TRANSITION MATRIX セル色コントラスト改善
+- アルファ → 明度補間（oklch L 0.22→0.72）+ 平方根スケール
+
+## マルチ FaceID 対応（feature/multi-faceid → main）
+- `FaceIDContext` / `FaceIDSelector` / `csvAnalyzer` の検出・グルーピング / `types.ts` の `MultiFaceData`
 - FaceID 列なし CSV は従来と完全同一動作
 
-### ✅ Phase 2: ベースライン補正拡張（feature/phase2-baseline → main マージ済）
-- `useCorrectedDashboardData` フック：補正後の emotion_stats / dominant_emotion / transitions / duration_stats を再計算
-- `Home.tsx`：補正済みデータを全セクションに配信（hooks を early return より前に配置）
-- `OverviewSection`：BASELINE CORRECTED バッジ表示
-- `detectBaselineWindow()`：スライディングウィンドウでベースライン区間を自動検出
-- `TimeseriesSection`：「自動検出」ボタン + Sonner トースト通知
-- バグ修正：EMOTION TIME SERIES ツールチップに困惑（confusion）が表示されない問題を修正
+## Phase 2: ベースライン補正拡張（feature/phase2-baseline → main）
+- `useCorrectedDashboardData`（補正後の各種統計を再計算）
+- 補正済みデータの全セクション配信 / BASELINE CORRECTED バッジ / `detectBaselineWindow()` 自動検出＋トースト
+- ツールチップに困惑が出ない問題を修正
 
-### ✅ 時系列スムージング機能（feature/timeseries-smoothing → main マージ済）
-- `smoothingUtils.ts`：SMA（単純移動平均）/ EMA（指数移動平均）実装
-- `TimeseriesSection`：SMOOTHING SETTINGS UI（手法選択・ウィンドウサイズ・αスライダー）
-- 元データは保持したまま表示のみ平滑化
+## 時系列スムージング機能（feature/timeseries-smoothing → main）
+- `smoothingUtils.ts`（SMA/EMA）、SMOOTHING SETTINGS UI、元データ保持
 
-### ✅ UI/UX 改善バッチ（2026-05-30 / main マージ済）
+## UI/UX 改善バッチ（2026-05-30 / main）
+- KEY INSIGHTS 動的生成 / サイドバー録音日時・ラベル変更 / ファイル操作1ボタン化 / セクション切替で先頭スクロール
+- `TimeseriesSection` を4サブコンポーネントに分割（1,573→約250行）
+- サイドバーAUアイコン変更・折りたたみツールチップ / RadarChart の ×10 スケール廃止
 
-**🔴 高優先度（完了）**
-- `OverviewSection.tsx`：KEY INSIGHTS カードを実データから動的生成（主要感情・Engagement・Valence）
-- `Sidebar.tsx`：フッターの録音日時を `meta.recording_date / recording_time` から動的表示
-- `Sidebar.tsx`：「LIVE DATA」→「SESSION DATA」に変更、OverviewSection バッジを「ANALYZED」に変更
+## ベースライン補正 Phase 1: signed モード（2026-05-30 / main）
+- 0クランプを `clampNegatives` で切替可能化 → 後に撤廃 / signed トグルUI / モード別サブタイトル
 
-**🟠 中〜高優先度（完了）**
-- `Home.tsx`：「ファイル名＋×」と「別のファイル」ボタンを Upload+ファイル名+× の1ボタンに統合
-- `Home.tsx`：`mainRef` + `handleSectionChange` でセクション切り替え時に `scrollTo(0, 0)` を実行
-- `TimeseriesSection.tsx`：1,573行 → 約250行に削減、4サブコンポーネントに分割
-  - `BaselineSettingsCard.tsx`：ベースライン設定UI
-  - `SmoothingSettingsCard.tsx`：スムージング設定UI
-  - `EmotionChartsCard.tsx`：感情チャート（5タブ）＋特殊指標
-  - `EventAnnotationsCard.tsx`：イベントアノテーション＋統計比較
-- `Sidebar.tsx`：アクションユニットアイコン `Clock` → `Scan` に変更、折りたたみ時ホバーツールチップ追加
-- `OverviewSection.tsx`：RadarChart の `mean × 10` スケールを廃止し生の平均値を表示
+## UI/UX 改善バッチ②（2026-05-30 / main）
+- サイドバー アイコン・テキスト色の統一 / 印刷・PDF出力のライトテーマ対応
+- TIME RANGE FILTER スライダーの操作感修正（`.range-thumb`・0.1秒刻み・リセット）
+- 設定カードの折りたたみトグル + 説明ツールチップ（`CollapsibleCard` / `InfoTooltip` 新規、4カードに適用）
 
-### ✅ ベースライン補正 Phase 1: signed モード（2026-05-30 / main マージ済）
-- `applyBaselineCorrection`：`Math.max(0, …)` の0クランプを `clampNegatives` 引数で切替可能に
-- `BaselineContext`：`clampNegatives`（デフォルト true）+ `setClampNegatives` を追加
-- `BaselineSettingsCard`：「0に丸める（一般）／マイナスも表示（研究者向け）」トグルUIを追加
-- `EmotionChartsCard`：signed時にサブタイトルを「ベースラインからの変化（0=平常時/正=増加/負=抑制）」に変更
-- `OverviewSection`：RadarChart に `Math.max(0, …)` ガードを追加（表示崩れ防止）
-- ※ Y軸負値対応・ゼロ基準線は既存実装で対応済み
+## KEY INSIGHTS Phase 1: インサイトエンジン（2026-05-30）
+- `lib/insightEngine.ts`（純粋関数）: 9ルールを score 降順評価 → 上位4枚、tone別アイコン・左ボーダー
 
-### ✅ UI/UX 改善バッチ②（2026-05-30 / main マージ済）
-- **サイドバー アイコン・テキスト色の統一**（`Sidebar.tsx`）
-  - 「UXリサーチ」のみ非選択時にアイコン・テキストが紫になる問題を修正
-  - 非選択時は全項目グレーに統一、紫アクセントは選択時のみに
-- **印刷／PDF 出力のライトテーマ対応**（`index.css` / `AcademicSection.tsx`）
-  - ダーク背景強制で「背景グラフィックOFF時に白文字が白紙に乗り空白化」する問題を解消
-  - `@media print` を白背景＋濃い文字に全面書き換え、カードの改ページ分断防止を追加
-  - 印刷前に `document.title` をセッション名へ変更しPDFデフォルト名を整える
-- **TIME RANGE FILTER スライダーの操作感修正**（`TimeseriesSection.tsx` / `index.css`）
-  - トラック無反応・つまみのみ反応方式（`.range-thumb`）で「左＝開始・右＝終了」を確実に分離
-  - つまみを緑の丸で可視化、リセットボタンを追加、刻みを5秒→0.1秒に変更
-- **設定カードの折りたたみトグル + 説明ツールチップ**（タスクD/E・時系列分析タブ）
-  - `ui/CollapsibleCard.tsx`（新規）：ヘッダー＋折りたたみ本体を共通化、開閉状態を localStorage 保存
-  - `ui/InfoTooltip.tsx`（新規）：ⓘアイコン＋ホバーで説明表示（Radix ベース）
-  - 適用4カード: TIME RANGE FILTER / BASELINE / SMOOTHING / EVENT
-  - ヘッダーのラベル/タイトル/バッジ書式も共通化され、カード間の体裁が統一された
+## ベースライン補正の再設計 Phase 2/3（2026-05-31）
+- `computeBaselineOffsets`（平均/中央値 + per-emotion `{offset, sd}`）/ `applyBaselineCorrection`（absolute/deviation/lift/zscore）
+- `BaselineContext` を `centerMethod` + `displayMode` に刷新 / `BaselineSettingsCard` のセレクター
+- 仕上げ①: モード別Y軸ラベル・単位サフィックス・NaN→「—」/ ヒートマップ「データなし」表示
+- 仕上げ②: 変化率(lift%) を `LIFT_MIN_BASELINE(0.1)` で実用安定化（μ<0.1 は「—」）
+
+## 既存バグ修正: 時系列の time 絶対タイムスタンプ問題（2026-05-31）
+- `computeDashboardData` でソート直後に time を 0 基点へ正規化 → グラフ空問題を解消
+
+## UI 改善
+- セッション間比較機能（`ComparisonSection`：A/B 並列比較・差分・統計検定）
 
 ---
 
-## 進行中タスク
-
-なし
-
----
-
-## バックログ（次フェーズ候補）
-
-### ⭐ KEY INSIGHTS（インサイト）強化
-> 現状: `OverviewSection` の `keyInsights` は固定3テーマにデータを差し込むだけ。
-> 改善: ルールベースのインサイトエンジン（`lib/insightEngine.ts`）に作り替える。
-
-- [x] **Phase 1: インサイトエンジン（標準セット）**（2026-05-30 完了）
-  - `lib/insightEngine.ts`（新規・純粋関数／AI・API不使用）: `generateInsights(data, baselineState, limit) → Insight[]`
-  - `Insight = { id, title, body, color, tone, score }`（tone: positive/neutral/caution/alert）
-  - 9ルールを score 降順で評価 → 上位4枚を固定表示（Engagement/Valence/支配感情はフォールバック確保）
-  - 標準ルール: 検出品質警告・支配感情の偏り/多様性・急変点・最長持続・Engagement・Valence
-    ・Attention低下・UX指標(フラスト/デライト/認知負荷)・感情の慣性(affect_dynamics AR1)
-  - signed/ベースライン補正時は文言を自動切替（負値は「平常時比」で表現）
-  - `OverviewSection.tsx` をエンジン呼び出しに置換、tone別アイコン（✓/ⓘ/△/⛔）と左ボーダー色を付与
-
-- [ ] **Phase 2（将来）: フルセット・ルール拡張**
-  - 遷移パターン(emotion_transitions の最頻ペア)・circumplex 象限の偏り・相関(correlation_matrix)
-    ・頭部動作イベント(head_motion_events)など全データ活用
-  - 「もっと見る」で全インサイト展開、各カードから該当セクションへのジャンプ導線
-
-### Phase 3A: CSV エクスポート機能
-- [ ] `exportUtils.ts`：補正済み感情ログを CSV 生成・ダウンロードする関数
-- [ ] `TimeseriesSection`：「補正後データを出力」ボタンを BASELINE SETTINGS に追加
-- [ ] CSV 先頭にメタデータコメント行（ベースライン区間・オフセット値）を付与
-- [ ] ファイル名に補正有無・日時を含める（例: `session_corrected_20260508.csv`）
-
-### Phase 3B: Before/After AI 比較機能（Claude API）
-- [ ] `.env`：`ANTHROPIC_API_KEY` を設定
-- [ ] `@anthropic-ai/sdk` をインストール
-- [ ] `server/index.ts`：`POST /api/ai-compare` エンドポイント追加
-- [ ] `AiInsightSection.tsx`（新規）：AI 比較 UI（実行ボタン・ローディング・結果表示）
-- [ ] `Sidebar.tsx` / `Home.tsx`：AI INSIGHT セクションをナビに追加
-- [ ] ベースライン未設定時は案内メッセージを表示
-
-### ⭐ ベースライン補正の再設計（研究妥当性の改善）
-> 2026-05-30 調査。実際の感情研究（Affectiva/AFFDEX系）の標準手法を踏まえた再設計。
-> 詳細な背景は本セクション末尾の「調査メモ」を参照。
-
-**現状の問題点**
-- `applyBaselineCorrection` が `Math.max(0, x − offset)` で**マイナス値を0に丸めている**
-- 文献上、ベースライン以下の値（＝感情の抑制・減少）は意味のある情報であり、signed（符号付き）で保持するのが鉄則
-- 0クランプは「平常時より感情が下がった」という方向情報を破壊し、統計のフロア効果も招く
-- 補正方式が「平均減算」1種類のみ／engagement・valence・attention は補正対象外
-
-**設計方針：3つの表示モードをユーザーが切り替えられるようにする**
-| モード | 計算 | 値域 | 対象ユーザー |
-|--------|------|------|------------|
-| ① 絶対値（現状） | 補正なし | 0〜100 | 一般ユーザー（デフォルト） |
-| ② ベースライン偏差（signed） | `x − μ` | 負値あり | 研究者 |
-| ③ 変化率（lift %） | `(x − μ) / μ × 100` | ±% | マーケター |
-
-- [x] **Phase 1（最優先）: 0クランプを廃止し signed 値を保持**（2026-05-30 完了）
-  - 完了内容は「完了済みタスク › ベースライン補正 Phase 1」を参照
-
-- [x] **Phase 2: 補正方式の選択UI + 統合表示モード**（2026-05-31 完了）
-  - `computeBaselineOffsets` を `center`(平均/中央値) 引数 + per-emotion `{ offset, sd }` 返却に拡張
-  - `applyBaselineCorrection` を `clampNegatives` 撤廃 → `mode`(absolute/deviation/lift/zscore) ベースに
-    （0クランプ完全撤廃／変化率は近ゼロμのεガード付き）
-  - `BaselineContext`：`clampNegatives` を削除し `centerMethod` + `displayMode`（派生 `isBaselineActive`）に刷新
-  - `BaselineSettingsCard`：補正方式（平均/中央値）+ 表示モード（絶対値/偏差/変化率/Zスコア）セレクターに置換
-  - **バグ修正**: `TimeseriesSection` の `displayData`/`displayTimeseriesFull` が `applyBaselineCorrection` を
-    第3引数なしで呼び常時0クランプしていた問題を修正（signed モードで負値が描画されない不具合）
-  - `EmotionChartsCard`（モード別サブタイトル）・`insightEngine`（BaselineState）・`OverviewSection` も追随
-  - ※ Phase 3 の「変化率」モードも統合セレクターに含めて先行実装（モデル統合のため）
-
-- [x] **Phase 3 仕上げ①: Y軸単位ラベル + 変化率の「—」表示**（2026-05-31 完了）
-  - `EmotionChartsCard`：モード別Y軸ラベル（Δベースライン比／変化率(%)／Zスコア(SD)）、
-    ツールチップ単位サフィックス、NaN→「—」フォーマッタ（`fmtValue`）を追加
-  - スパークラインの max/avg を NaN 除外で算出（全フレーム算出不能なら「—」）、補正中はY軸を auto レンジに
-  - ヒートマップの NaN セルを「データなし」（透明＋点線）表示に、`emotionMax` の NaN 伝播も防止
-
-- [x] **Phase 3 仕上げ②: 変化率(lift%)の実用安定化 — 案①採用**（2026-05-31 完了）
-  - 実データ検証で判明：感情のベースライン平均は 0.02〜0.43 と小さく、旧εガード(0.01)では NaN にならず
-    巨大な % 値（例: avg 13,737% / max 611,664%）が出ていた（小さなμで割るため）
-  - 対応：`LIFT_EPSILON(0.01)` を `LIFT_MIN_BASELINE(0.1)` に変更。μ<0.1 の感情は「—」表示に。
-    モジュール検証で joy(μ0.43)・感傷(μ0.12) は％表示、他7感情は「—」になることを確認
-  - 「—」セル/系列に「平常時の値が小さく変化率を算出できません」の補足を追加（サブタイトル・ツールチップ・ヒートマップ）
-
-### ✅ 既存バグ修正（Phase 3 検証中に発見）: 時系列の time が絶対タイムスタンプだとグラフが空になる（2026-05-31 完了）
-> `csvAnalyzer.computeDashboardData`：`timeseries_full[].time` が生のタイムスタンプ（Unix秒 例 1705282200〜）を
-> 保持していたため、`TimeseriesSection` の `timeRange=[0, ceil(duration)]` でフィルタすると該当0件となり、
-> オーバーレイ/個別波形/ヒートマップが空になっていた（スタック面/支配感情は0基点の10s要約参照のため表示されていた）。
-- [x] `computeDashboardData`：ソート直後に `df` の time を `time − rawStartTime` で 0 基点へ正規化。
-  これにより timeseries_full・scatter・head_motion・change_points・time_summary・detectBaselineWindow が
-  すべて 0 始まりで整合。meta.start_time/end_time は未使用のため 0/duration となるが影響なし。
-- [x] 検証：モジュールテストで sampledData が 0件→600件に回復。UI でもオーバーレイが描画され X軸 0s〜120s を確認。
-
-- [ ] **Phase 4（要仕様検討）: engagement / valence / attention への補正拡張**
-  - 特に valence（−100〜100の感情価）のベースライン相対化は研究の中心的分析
-  - valence は元々 signed なので二重符号化に注意。仕様を固めてから着手
-
-**調査メモ（根拠）**
+## 調査メモ（ベースライン補正の根拠）
 - 標準手法はKSDV同様「ベースライン区間の平均（or 中央値）を減算」で一致
-- ただし負値は signed 保持が鉄則：「正=刺激への活動増加／負=活動減少」（facial EMG文献）
-- 補正の効果は実証済み：Valenceと自己申告の相関 r=0.71（補正なし）→ r=0.87（補正あり）、anger は補正時のみ行動と相関
+- 負値は signed 保持が鉄則：「正=活動増加／負=活動減少」（facial EMG文献）
+- 補正の効果は実証済み：Valenceと自己申告の相関 r=0.71（補正なし）→ r=0.87（補正あり）
 - 出典: Frontiers/PMC 2026「Facial obstructions and baseline correction shape affective computing's detection of emotion–behavior relationships」(PMC12935594) ほか
 
-### マルチ FaceID の拡張
-- [ ] FaceID が多い場合（10+）のドロップダウン表示
-- [ ] FaceID ごとの感情比較グラフ（オーバーレイ表示）
-- [ ] FaceID に任意のラベル名を付ける機能
-
-### UI 改善
-- [ ] セッション間比較機能
-- [ ] データ保存・読み込み（localStorage）
-
----
-
-## UI/UX 改善バックログ（残タスク）
-> 🔴高優先は完了済み。🟠中〜高優先の大半（印刷/PDF・スライダー操作感・サイドバー色・折りたたみ・ツールチップ）も
-> 2026-05-30 に完了。完了分は「完了済みタスク」を参照。以下は未着手・部分対応分。
-
-### 🟠 中〜高優先度（UX の摩擦）
-
-- [ ] **設定カード レイアウト統一の仕上げ**（`TimeseriesSection.tsx` 配下の各カード）
-  - ⚠️ 部分対応済み: `CollapsibleCard` 導入でヘッダー（ラベル/タイトル/バッジ書式）は統一済み
-  - 残: カード本体内の情報密度・余白・フォントサイズの微調整、操作の優先順位整理
-  - 横展開: 折りたたみ／ツールチップを他セクション（Overview/Academic 等）へ展開（Phase 2）
-
-### 🟡 中優先度（一貫性・洗練度）
-
-- [ ] **ホバー実装をCSSに統一**（`Sidebar.tsx` / `Home.tsx` ほか）
-  - `onMouseEnter/Leave` でDOM直接操作するパターンをTailwindの `hover:` クラスまたはCSS変数ベースに統一
-
-- [ ] **EMOTION_COLORS と CSS `.emotion-*` クラスの色を統一**（`types.ts` / `index.css`）
-  - 同じ感情に異なるOKLCH値が2箇所で定義されている
-  - `types.ts` を Single Source of Truth にして CSS側を削除または同期する
-
-- [ ] **数値フォーマットの統一**（全セクション）
-  - 感情スコア: `.toFixed(3)` に統一
-  - Engagement / Valence / Attention: `.toFixed(1)` に統一
-  - 共通のフォーマッタ関数 `formatScore()` / `formatPct()` を `utils.ts` に追加
-
-- [ ] **セクション切り替え時のフェードイン追加**（`Home.tsx` / `index.css`）
-  - `display: none → block` が瞬時切り替えで唐突
-  - `@keyframes fade-in` + `animation: fade-in 0.15s ease-out` で自然なトランジション
-
-- [ ] **スムージング設定のα値スライダーを反転**（`SmoothingSettingsCard.tsx`）
-  - 現在: 左=0.05（強）/ 右=0.90（弱）で直感と逆
-  - スライダーを「スムージング強度（0〜100%）」として内部でαに逆算、または左右を反転
-
-- [ ] **ComparisonSection の空状態に導線を追加**（`ComparisonSection.tsx` / `Home.tsx`）
-  - 「比較用CSVを追加してください」だけで追加方法が不明
-  - ヘッダーの「＋比較CSV」ボタンを指し示す説明または矢印を追加
-
-### 🟢 低優先度（後回し可）
-
-- [ ] **モバイル対応**（全体）
-  - サイドバーをモバイル幅でオーバーレイ型ドロワーに切り替え
-  - 主要なグリッドのレスポンシブ対応確認
-
-- [ ] **アクセシビリティ（a11y）対応**（全体）
-  - 全アイコンボタンに `aria-label` を追加
-  - キーボードフォーカスリングをデザインに合わせてカスタム
-  - recharts グラフに `role="img"` と `aria-label` を追加
-
-- [ ] **未使用アニメーションクラスの活用または削除**（`index.css`）
-  - `count-up` / `scan-line` クラスが定義されているが未使用
-  - 数値カードのマウントアニメーションなどに活用するか、不要なら削除
-
-### 感情閾値設定機能
-> 適用範囲・UXについて十分な検討が必要。実装前に仕様を固めること。
-- [ ] **閾値設定UIの追加**（`OverviewSection.tsx` / `TimeseriesSection.tsx` ほか）
-  - 各感情スコアに「検出とみなす最小値」の閾値を設定できるようにする
-  - 閾値未満のフレームを「無感情」扱いにするか、単にグラフ表示を薄くするかを選択できる
-- [ ] **適用範囲の仕様検討**（設計フェーズ）
-  - 閾値を「表示フィルタ」として使う（統計には影響しない）か、「データ補正」として使う（統計も変わる）かを決定する
-  - ベースライン補正・FaceID 選択との組み合わせ時の挙動を整理する
-  - 感情ごとに個別設定 vs 全感情一律設定のどちらが実用的か検討する
-
-### Phase 4: 学術研究者向け機能
-> 複数参加者データの集計・統計処理・論文執筆への接続を想定
-- [ ] **参加者間の感情平均グラフ** — 複数人のCSVをまとめて読み込み、感情指標の群平均±SDを時系列で表示
-- [ ] **CSV一括インポート** — フォルダ単位または複数ファイル同時アップロード対応
-- [ ] **統計サマリー出力** — 平均・中央値・SD・最大値をCSV/Excelで書き出す
-- [ ] **実験条件ラベル付け** — 参加者や試行に「条件A / 条件B」などラベルを付与して比較
-- [ ] **外部刺激との同期** — スライド切替・音声などのタイムスタンプをCSVインポートしてグラフに重ねる
-- [ ] **統計検定表示（参考値）** — t検定・Mann-Whitney U検定の結果をインライン表示（研究者向けオプション）
+### 表示モード（実装済み）
+| モード | 計算 | 値域 | 対象ユーザー |
+|--------|------|------|------------|
+| ① 絶対値（デフォルト） | 補正なし | 0〜100 | 一般ユーザー |
+| ② ベースライン偏差（signed） | `x − μ` | 負値あり | 研究者 |
+| ③ 変化率（lift %） | `(x − μ) / μ × 100` | ±% | マーケター |
+| ④ Zスコア | `(x − μ) / σ` | SD単位 | 研究者 |
