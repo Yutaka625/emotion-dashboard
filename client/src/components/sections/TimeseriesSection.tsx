@@ -340,7 +340,7 @@ export default function TimeseriesSection({ data, rawTimeseries }: Props) {
           {/* CSV エクスポート */}
           <button onClick={exportFilteredDataToCSV}
             className="px-3 py-1 rounded text-xs transition-all flex items-center gap-1 ml-auto"
-            style={{ fontFamily: 'Noto Sans JP, sans-serif', background: 'oklch(0.32 0.12 160)', color: 'white', border: '1px solid oklch(0.52 0.18 160)' }}
+            style={{ fontFamily: 'Noto Sans JP, sans-serif', background: 'oklch(0.50 0.13 70)', color: 'white', border: '1px solid oklch(0.70 0.15 70)' }}
             title="フィルタリング範囲のデータをCSVでダウンロード"
           >
             <Download size={14} />
