@@ -6,6 +6,8 @@
 import { Activity } from 'lucide-react';
 import type { SmoothingMethod } from '@/lib/smoothingUtils';
 import CollapsibleCard from '@/components/ui/CollapsibleCard';
+import SettingBox from '@/components/ui/SettingBox';
+import SettingSubLabel from '@/components/ui/SettingSubLabel';
 
 interface Props {
   smoothingMethod: SmoothingMethod;
@@ -44,9 +46,7 @@ export default function SmoothingSettingsCard({
     >
       {/* 手法選択ボタン */}
       <div className="mb-4">
-        <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.68 0.015 255)', marginBottom: '8px', letterSpacing: '0.06em' }}>
-          SMOOTHING METHOD
-        </div>
+        <SettingSubLabel>SMOOTHING METHOD</SettingSubLabel>
         <div className="flex gap-2 flex-wrap">
           {([
             { id: 'none', label: 'なし',              desc: '元データをそのまま表示' },
@@ -75,18 +75,20 @@ export default function SmoothingSettingsCard({
 
       {/* SMA: ウィンドウサイズスライダー */}
       {smoothingMethod === 'sma' && (
-        <div className="p-3 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', border: '1px solid oklch(0.28 0.04 255)' }}>
-          <div className="flex items-center justify-between mb-2">
-            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.68 0.18 140)', letterSpacing: '0.06em' }}>
-              WINDOW SIZE
-            </span>
-            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.82rem', fontWeight: 700, color: 'oklch(0.88 0.005 250)' }}>
-              {smoothingWindow} フレーム
-              <span style={{ fontSize: '0.65rem', color: 'oklch(0.68 0.015 255)', marginLeft: '6px' }}>
-                (約 {(smoothingWindow / fpsAvg).toFixed(1)}秒)
+        <SettingBox>
+          <SettingSubLabel
+            color="oklch(0.68 0.18 140)"
+            action={
+              <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.82rem', fontWeight: 700, color: 'oklch(0.88 0.005 250)' }}>
+                {smoothingWindow} フレーム
+                <span style={{ fontSize: '0.65rem', color: 'oklch(0.68 0.015 255)', marginLeft: '6px' }}>
+                  (約 {(smoothingWindow / fpsAvg).toFixed(1)}秒)
+                </span>
               </span>
-            </span>
-          </div>
+            }
+          >
+            WINDOW SIZE
+          </SettingSubLabel>
           <input
             type="range"
             min={3} max={61} step={2}
@@ -103,23 +105,25 @@ export default function SmoothingSettingsCard({
           <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.66 0.015 255)', marginTop: '8px' }}>
             前後のフレームを平均します。値が大きいほど滑らかになりますが、ピークが低くなります。
           </p>
-        </div>
+        </SettingBox>
       )}
 
       {/* EMA: alpha スライダー */}
       {smoothingMethod === 'ema' && (
-        <div className="p-3 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', border: '1px solid oklch(0.28 0.04 255)' }}>
-          <div className="flex items-center justify-between mb-2">
-            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.68 0.18 140)', letterSpacing: '0.06em' }}>
-              SMOOTHING FACTOR (α)
-            </span>
-            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.82rem', fontWeight: 700, color: 'oklch(0.88 0.005 250)' }}>
-              α = {smoothingAlpha.toFixed(2)}
-              <span style={{ fontSize: '0.65rem', color: 'oklch(0.68 0.015 255)', marginLeft: '6px' }}>
-                {smoothingAlpha < 0.2 ? '（強平滑）' : smoothingAlpha < 0.5 ? '（中程度）' : '（弱平滑）'}
+        <SettingBox>
+          <SettingSubLabel
+            color="oklch(0.68 0.18 140)"
+            action={
+              <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.82rem', fontWeight: 700, color: 'oklch(0.88 0.005 250)' }}>
+                α = {smoothingAlpha.toFixed(2)}
+                <span style={{ fontSize: '0.65rem', color: 'oklch(0.68 0.015 255)', marginLeft: '6px' }}>
+                  {smoothingAlpha < 0.2 ? '（強平滑）' : smoothingAlpha < 0.5 ? '（中程度）' : '（弱平滑）'}
+                </span>
               </span>
-            </span>
-          </div>
+            }
+          >
+            SMOOTHING FACTOR (α)
+          </SettingSubLabel>
           <input
             type="range"
             min={0.05} max={0.90} step={0.05}
@@ -136,7 +140,7 @@ export default function SmoothingSettingsCard({
           <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.66 0.015 255)', marginTop: '8px' }}>
             αが小さいほど平滑度が高くなります。EMAは時系列の「流れ」を重視した平滑化です。
           </p>
-        </div>
+        </SettingBox>
       )}
     </CollapsibleCard>
   );

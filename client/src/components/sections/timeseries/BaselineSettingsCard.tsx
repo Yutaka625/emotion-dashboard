@@ -13,6 +13,8 @@ import { useBaseline } from '@/contexts/BaselineContext';
 import { detectBaselineWindow } from '@/lib/csvAnalyzer';
 import { toast } from 'sonner';
 import CollapsibleCard from '@/components/ui/CollapsibleCard';
+import SettingBox from '@/components/ui/SettingBox';
+import SettingSubLabel from '@/components/ui/SettingSubLabel';
 
 import type { BaselineCenter } from '@/lib/types';
 
@@ -57,34 +59,36 @@ export default function BaselineSettingsCard({ timeseriesFull }: Props) {
       ) : null}
     >
       {/* STEP 1: ベースライン区間の状態表示 */}
-      <div className="mb-4 p-3 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', border: '1px solid oklch(0.28 0.04 255)' }}>
-        <div className="flex items-center justify-between mb-2">
-          <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.70 0.14 195)', letterSpacing: '0.08em' }}>
-            STEP 1 — ベースライン区間
-          </div>
-          {/* 自動検出ボタン */}
-          <button
-            onClick={() => {
-              const detected = detectBaselineWindow(timeseriesFull, 30);
-              setBaseline(detected, timeseriesFull);
-              toast.success(`ベースライン区間を自動検出しました: ${detected[0]}s 〜 ${detected[1]}s`, {
-                description: '感情活性量が最も低い 30 秒区間を選択しました。',
-                duration: 4000,
-              });
-            }}
-            className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs transition-all"
-            style={{
-              fontFamily: 'Noto Sans JP, sans-serif',
-              background: 'oklch(0.70 0.14 195 / 0.12)',
-              color: 'oklch(0.70 0.14 195)',
-              border: '1px solid oklch(0.70 0.14 195 / 0.35)',
-            }}
-            title="感情が最も落ち着いている 30 秒区間を自動的に検出します"
-          >
-            <Wand2 size={12} />
-            自動検出
-          </button>
-        </div>
+      <SettingBox className="mb-4">
+        <SettingSubLabel
+          color="oklch(0.70 0.14 195)"
+          action={
+            /* 自動検出ボタン */
+            <button
+              onClick={() => {
+                const detected = detectBaselineWindow(timeseriesFull, 30);
+                setBaseline(detected, timeseriesFull);
+                toast.success(`ベースライン区間を自動検出しました: ${detected[0]}s 〜 ${detected[1]}s`, {
+                  description: '感情活性量が最も低い 30 秒区間を選択しました。',
+                  duration: 4000,
+                });
+              }}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs transition-all"
+              style={{
+                fontFamily: 'Noto Sans JP, sans-serif',
+                background: 'oklch(0.70 0.14 195 / 0.12)',
+                color: 'oklch(0.70 0.14 195)',
+                border: '1px solid oklch(0.70 0.14 195 / 0.35)',
+              }}
+              title="感情が最も落ち着いている 30 秒区間を自動的に検出します"
+            >
+              <Wand2 size={12} />
+              自動検出
+            </button>
+          }
+        >
+          STEP 1 — ベースライン区間
+        </SettingSubLabel>
         {baselineRange ? (
           <div className="flex items-center gap-3 flex-wrap">
             <div style={{
@@ -102,14 +106,14 @@ export default function BaselineSettingsCard({ timeseriesFull }: Props) {
             未設定 — TIME RANGE FILTERで無表情区間を選択し、「ベースラインとして設定」を押してください
           </p>
         )}
-      </div>
+      </SettingBox>
 
       {/* STEP 2: 補正プレビュー（区間設定済みの場合のみ表示） */}
       {baselineOffsets && (
-        <div className="mb-4 p-3 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', border: '1px solid oklch(0.28 0.04 255)' }}>
-          <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.70 0.14 195)', letterSpacing: '0.08em', marginBottom: '8px' }}>
+        <SettingBox className="mb-4">
+          <SettingSubLabel color="oklch(0.70 0.14 195)">
             STEP 2 — オフセット値（ベースライン{centerMethod === 'median' ? '中央値' : '平均'}）
-          </div>
+          </SettingSubLabel>
           <div className="flex flex-wrap gap-2">
             {NON_NEUTRAL_EMOTIONS
               .map(e => ({ emotion: e, offset: baselineOffsets[e]?.offset ?? 0 }))
@@ -126,16 +130,16 @@ export default function BaselineSettingsCard({ timeseriesFull }: Props) {
                 </div>
               ))}
           </div>
-        </div>
+        </SettingBox>
       )}
 
       {/* STEP 3: 補正方式（中心値）の選択（区間設定済みのみ表示） */}
       {baselineRange && (
-        <div className="mt-4 p-3 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', border: '1px solid oklch(0.28 0.04 255)' }}>
+        <SettingBox className="mt-4">
           {/* 補正方式（中心値） */}
-          <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.70 0.14 195)', letterSpacing: '0.08em', marginBottom: '8px' }}>
+          <SettingSubLabel color="oklch(0.70 0.14 195)">
             STEP 3 — 補正方式（中心値）
-          </div>
+          </SettingSubLabel>
           <div className="flex gap-2">
             {CENTER_OPTIONS.map(opt => {
               const active = centerMethod === opt.value;
@@ -178,7 +182,7 @@ export default function BaselineSettingsCard({ timeseriesFull }: Props) {
               元データは常に保持されます。上部バナーからも解除できます。
             </span>
           </div>
-        </div>
+        </SettingBox>
       )}
     </CollapsibleCard>
   );

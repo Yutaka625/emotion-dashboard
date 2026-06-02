@@ -13,6 +13,8 @@ import { EVENT_PALETTE } from '@/contexts/EventsContext';
 import { compareSegments, TESTABLE_EMOTIONS } from '@/lib/statisticsUtils';
 import type { TTestResult } from '@/lib/statisticsUtils';
 import CollapsibleCard from '@/components/ui/CollapsibleCard';
+import SettingBox from '@/components/ui/SettingBox';
+import SettingSubLabel from '@/components/ui/SettingSubLabel';
 
 const SPECIAL_COLORS: Record<string, string> = {
   engagement: 'oklch(0.78 0.14 82)',
@@ -111,7 +113,7 @@ export default function EventAnnotationsCard({ eventStats, maxTime, displayTimes
 
       {/* 追加フォーム */}
       {showEventForm && (
-        <div className="mb-4 p-4 rounded-xl" style={{ background: 'oklch(0.22 0.04 255)', border: '1px solid oklch(0.28 0.04 255)' }}>
+        <SettingBox className="mb-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
             <div>
               <label style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fontWeight: 600, color: 'oklch(0.75 0.008 250)', display: 'block', marginBottom: '4px' }}>
@@ -169,7 +171,7 @@ export default function EventAnnotationsCard({ eventStats, maxTime, displayTimes
               キャンセル
             </button>
           </div>
-        </div>
+        </SettingBox>
       )}
 
       {/* イベント一覧 */}
@@ -232,7 +234,7 @@ export default function EventAnnotationsCard({ eventStats, maxTime, displayTimes
                 {/* 展開時の感情統計 */}
                 {isExpanded && stat && stat.frameCount > 0 && (
                   <div className="px-4 pb-4 pt-1">
-                    <div className="section-label mb-2" style={{ color: ev.color }}>EVENT EMOTION STATS — {ev.name}</div>
+                    <SettingSubLabel color={ev.color}>EVENT EMOTION STATS — {ev.name}</SettingSubLabel>
                     <div className="grid grid-cols-3 gap-3 mb-3">
                       {(['engagement', 'valence', 'attention'] as const).map(key => (
                         <div key={key} className="p-2 rounded-lg text-center" style={{ background: SPECIAL_COLORS[key] + '12', border: `1px solid ${SPECIAL_COLORS[key]}30` }}>
