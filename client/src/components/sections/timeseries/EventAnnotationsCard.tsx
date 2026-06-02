@@ -81,6 +81,7 @@ export default function EventAnnotationsCard({ eventStats, maxTime, displayTimes
   return (
     <CollapsibleCard
       label="EVENT ANNOTATIONS"
+      labelColor="oklch(0.72 0.16 250)"
       title="イベント（介入）登録"
       info="イベント名・開始・終了時間を登録するとグラフに反映されます"
       borderLeftColor="oklch(0.55 0.18 250)"
