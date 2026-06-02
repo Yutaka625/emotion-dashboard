@@ -214,10 +214,10 @@ export default function TimeseriesSection({ data }: Props) {
       {/* ---- TIME RANGE FILTER ---- */}
       <CollapsibleCard
         label="TIME RANGE FILTER"
-        labelColor="oklch(0.62 0.18 160)"
+        labelColor="oklch(0.76 0.15 70)"
         title="表示範囲フィルタ"
         info="つまみで分析対象の時間範囲を絞り込みます。左つまみ＝開始・右つまみ＝終了（0.1秒単位）。"
-        borderLeftColor="oklch(0.62 0.18 160)"
+        borderLeftColor="oklch(0.76 0.15 70)"
         storageKey="ksdv.collapse.timerange"
         badge={
           /* リセット: 全範囲 [0, 録画長] に戻す。範囲が初期状態のときは無効化 */
@@ -239,7 +239,7 @@ export default function TimeseriesSection({ data }: Props) {
           </span>
           <div className="flex-1 relative h-6 flex items-center">
             <div className="absolute w-full h-1 rounded-full" style={{ background: 'oklch(0.28 0.04 255)' }} />
-            <div className="absolute h-1 rounded-full" style={{ left: `${(timeRange[0] / maxTime) * 100}%`, right: `${100 - (timeRange[1] / maxTime) * 100}%`, background: 'oklch(0.62 0.18 160)' }} />
+            <div className="absolute h-1 rounded-full" style={{ left: `${(timeRange[0] / maxTime) * 100}%`, right: `${100 - (timeRange[1] / maxTime) * 100}%`, background: 'oklch(0.76 0.15 70)' }} />
             {/* 開始ハンドル: つまみ（左）をドラッグすると開始時間が変わる。
                 開始つまみが中央より右にあるときは終了ハンドルより前面に出し、重なっても掴めるようにする */}
             <input type="range" min={0} max={maxTime} step={0.1} value={timeRange[0]}
