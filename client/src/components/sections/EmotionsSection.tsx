@@ -68,7 +68,7 @@ export default function EmotionsSection({ data }: Props) {
           const stats = emotion_stats[e];
           const pct = dominant_emotion_pct[e] || 0;
           return (
-            <div key={e} className="metric-card" style={{ borderLeft: `3px solid ${EMOTION_COLORS[e]}` }}>
+            <div key={e} className="metric-card">
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-2 h-2 rounded-full" style={{ background: EMOTION_COLORS[e] }} />
                 <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600, fontSize: '0.8rem', color: 'oklch(0.88 0.005 250)' }}>
