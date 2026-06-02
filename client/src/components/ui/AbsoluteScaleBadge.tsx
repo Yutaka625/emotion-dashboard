@@ -8,6 +8,7 @@
  *   補正ON中に未補正の値が混在していることを研究者へ明示し、誤解を防ぐ。
  */
 
+import { AlertTriangle } from 'lucide-react';
 import { useBaseline } from '@/contexts/BaselineContext';
 
 export default function AbsoluteScaleBadge() {
@@ -15,20 +16,22 @@ export default function AbsoluteScaleBadge() {
   // 補正OFFのときは何も表示しない（通常時はこの注記は不要）
   if (!isBaselineActive) return null;
 
+  // 補正ON中に「ここは未補正」と一目で気づけるよう、アンバーの警告スタイルで強調する
   return (
-    <span
-      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full"
+    <div
+      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg"
       style={{
-        fontFamily: 'Roboto Mono, monospace',
-        fontSize: '0.62rem',
-        background: 'oklch(0.28 0.04 255)',
-        border: '1px solid oklch(0.38 0.04 255)',
-        color: 'oklch(0.80 0.01 250)',
+        fontFamily: 'Noto Sans JP, sans-serif',
+        fontSize: '0.75rem',
+        fontWeight: 700,
+        background: 'oklch(0.75 0.16 70 / 0.15)',
+        border: '1px solid oklch(0.75 0.16 70 / 0.55)',
+        color: 'oklch(0.82 0.15 70)',
       }}
-      title="このセクションの指標は絶対値スケールが前提のため、ベースライン補正の対象外です（補正前の値を表示）"
+      title="このセクションの指標は絶対値スケールが前提のため、ベースライン補正の対象外です（補正前の値を表示しています）"
     >
-      <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'oklch(0.68 0.015 255)' }} />
-      絶対値表示（補正対象外）
-    </span>
+      <AlertTriangle size={14} />
+      ベースライン補正の対象外（絶対値で表示）
+    </div>
   );
 }
