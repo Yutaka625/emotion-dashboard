@@ -3,8 +3,12 @@
  * Multi-session comparison section — A vs B side-by-side analysis
  */
 
+import { useMemo } from 'react';
+import { Download } from 'lucide-react';
 import type { DashboardData } from '@/lib/types';
 import { EMOTION_LABELS_JA, EMOTION_COLORS, NON_NEUTRAL_EMOTIONS } from '@/lib/types';
+import { welchTTest } from '@/lib/statisticsUtils';
+import type { TTestResult } from '@/lib/statisticsUtils';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   Cell, Legend, LineChart, Line, RadarChart, PolarGrid, PolarAngleAxis, Radar,
@@ -21,6 +25,37 @@ const COLOR_A = 'oklch(0.70 0.14 195)';  /* teal */
 const COLOR_B = 'oklch(0.78 0.22 340)';  /* hot pink */
 
 export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Props) {
+  // ---- セッション間 Welch t検定（全フレームを2標本として比較） ----
+  const sessionComparison = useMemo(() => {
+    const results: Record<string, TTestResult> = {};
+    for (const e of NON_NEUTRAL_EMOTIONS) {
+      const aVals = dataA.timeseries_full.map(p => (p as any)[e] as number).filter(v => !isNaN(v));
+      const bVals = dataB.timeseries_full.map(p => (p as any)[e] as number).filter(v => !isNaN(v));
+      results[e] = welchTTest(aVals, bVals);
+    }
+    return results;
+  }, [dataA, dataB]);
+
+  // ---- 比較統計結果の CSV エクスポート ----
+  const exportComparisonCSV = () => {
+    const q = (s: string | number) => `"${String(s).replace(/"/g, '""')}"`;
+    const headers = ['感情', `${labelA}_mean`, `${labelB}_mean`, 't値', 'df', 'p値', "Cohen's_d", '効果量', '有意性', 'nA', 'nB'];
+    const rows = [headers.join(',')];
+    for (const e of NON_NEUTRAL_EMOTIONS) {
+      const r = sessionComparison[e];
+      if (!r) continue;
+      rows.push([q(EMOTION_LABELS_JA[e] || e), r.meanA, r.meanB, r.t, r.df, r.p, r.cohensD, q(r.effectSize), q(r.significance), r.nA, r.nB].join(','));
+    }
+    const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.setAttribute('href', URL.createObjectURL(blob));
+    link.setAttribute('download', `comparison_statistics_${labelA}_vs_${labelB}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   // ---- 感情統計バーチャート用データ ----
   const emotionBarData = NON_NEUTRAL_EMOTIONS.map(e => ({
     name: EMOTION_LABELS_JA[e] || e,
@@ -286,6 +321,81 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* ---- セッション間統計的検定 ---- */}
+      <div className="metric-card">
+        <div className="flex items-center justify-between mb-1">
+          <div>
+            <div className="section-label mb-1" style={{ color: 'oklch(0.65 0.20 270)' }}>STATISTICAL COMPARISON — SESSION LEVEL</div>
+            <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)' }}>
+              セッション間 統計的検定
+            </div>
+            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.68 0.015 255)', marginTop: '2px' }}>
+              両セッションの全フレームを標本としてWelchのt検定を実施。Cohen's dで効果量を評価します。
+            </p>
+          </div>
+          {/* CSV エクスポートボタン */}
+          <button
+            onClick={exportComparisonCSV}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all flex-shrink-0"
+            style={{ fontFamily: 'Noto Sans JP, sans-serif', background: 'oklch(0.32 0.12 160)', color: 'white', border: '1px solid oklch(0.52 0.18 160)' }}
+            title="統計検定結果をCSVでダウンロード"
+          >
+            <Download size={13} />
+            CSV出力
+          </button>
+        </div>
+
+        {/* 凡例 */}
+        <div className="flex gap-4 mb-3 text-xs" style={{ fontFamily: 'Roboto Mono, monospace', color: 'oklch(0.66 0.015 255)', marginTop: '12px' }}>
+          <span>*** p&lt;0.001</span>
+          <span>** p&lt;0.01</span>
+          <span>* p&lt;0.05</span>
+          <span>n.s. p≥0.05</span>
+          <span style={{ marginLeft: '8px' }}>効果量: 大(|d|≥0.8) / 中(≥0.5) / 小(≥0.2) / 極小</span>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs" style={{ borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ background: 'oklch(0.185 0.04 255)', borderBottom: '1px solid oklch(0.26 0.04 255)' }}>
+                {['感情', `${labelA} 平均`, `${labelB} 平均`, 't値', 'df', 'p値', "Cohen's d", '効果量', '有意性'].map(h => (
+                  <th key={h} style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.62 0.015 255)', padding: '6px 10px', textAlign: 'left', whiteSpace: 'nowrap' }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {NON_NEUTRAL_EMOTIONS.map(emotion => {
+                const r = sessionComparison[emotion];
+                if (!r) return null;
+                const isSig = r.significance !== 'n.s.';
+                return (
+                  <tr key={emotion} style={{ borderBottom: '1px solid oklch(0.22 0.04 255)', background: isSig ? 'oklch(0.22 0.06 270 / 0.4)' : 'transparent' }}>
+                    <td style={{ padding: '5px 10px' }}>
+                      <span className="px-2 py-0.5 rounded text-xs" style={{ background: EMOTION_COLORS[emotion] + '20', color: EMOTION_COLORS[emotion], fontFamily: 'Noto Sans JP, sans-serif' }}>
+                        {EMOTION_LABELS_JA[emotion] || emotion}
+                      </span>
+                    </td>
+                    <td style={{ fontFamily: 'Roboto Mono, monospace', padding: '5px 10px', color: COLOR_A, fontSize: '0.72rem' }}>{r.meanA.toFixed(3)}</td>
+                    <td style={{ fontFamily: 'Roboto Mono, monospace', padding: '5px 10px', color: COLOR_B, fontSize: '0.72rem' }}>{r.meanB.toFixed(3)}</td>
+                    <td style={{ fontFamily: 'Roboto Mono, monospace', padding: '5px 10px', color: 'oklch(0.75 0.008 250)', fontSize: '0.72rem' }}>{r.t.toFixed(3)}</td>
+                    <td style={{ fontFamily: 'Roboto Mono, monospace', padding: '5px 10px', color: 'oklch(0.66 0.015 255)', fontSize: '0.72rem' }}>{r.df.toFixed(1)}</td>
+                    <td style={{ fontFamily: 'Roboto Mono, monospace', padding: '5px 10px', color: isSig ? 'oklch(0.78 0.20 140)' : 'oklch(0.66 0.015 255)', fontSize: '0.72rem' }}>{r.p.toFixed(4)}</td>
+                    <td style={{ fontFamily: 'Roboto Mono, monospace', padding: '5px 10px', color: 'oklch(0.75 0.008 250)', fontSize: '0.72rem' }}>{r.cohensD.toFixed(3)}</td>
+                    <td style={{ fontFamily: 'Noto Sans JP, sans-serif', padding: '5px 10px', color: 'oklch(0.65 0.015 255)', fontSize: '0.72rem' }}>{r.effectSize}</td>
+                    <td style={{ fontFamily: 'Roboto Mono, monospace', padding: '5px 10px', fontSize: '0.85rem', fontWeight: 700, color: isSig ? 'oklch(0.85 0.22 95)' : 'oklch(0.62 0.015 255)' }}>{r.significance}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {/* サンプルサイズの注記 */}
+        <p style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.55 0.015 255)', marginTop: '8px' }}>
+          nA = {dataA.timeseries_full.length} frames ({labelA}) &nbsp;|&nbsp; nB = {dataB.timeseries_full.length} frames ({labelB})
+        </p>
       </div>
     </div>
   );

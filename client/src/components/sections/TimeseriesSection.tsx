@@ -374,7 +374,10 @@ export default function TimeseriesSection({ data }: Props) {
           <table className="w-full text-sm">
             <thead>
               <tr style={{ borderBottom: '2px solid oklch(0.28 0.04 255)' }}>
-                {['時間区間', 'イベント', 'Eng', 'Val', 'Att', '怒', '軽', '嫌', '恐', '喜', '悲', '驚', '感', '困', '主要感情'].map(h => (
+                {/* NON_NEUTRAL_EMOTIONS から動的生成 → 感情並び順が types.ts と常に一致する */}
+                {['時間区間', 'イベント', 'Eng', 'Val', 'Att',
+                  ...NON_NEUTRAL_EMOTIONS.map(e => EMOTION_LABELS_JA[e]?.[0] ?? e),
+                  '主要感情'].map(h => (
                   <th key={h} className="text-left pb-2 pr-2" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.68 0.015 255)', letterSpacing: '0.03em', whiteSpace: 'nowrap' }}>
                     {h}
                   </th>
@@ -407,12 +410,12 @@ export default function TimeseriesSection({ data }: Props) {
                         {((row as any)[key] || 0).toFixed(1)}
                       </td>
                     ))}
-                    {['anger_mean', 'contempt_mean', 'disgust_mean', 'fear_mean', 'joy_mean', 'sadness_mean', 'surprise_mean', 'sentimentality_mean', 'confusion_mean'].map(key => {
-                      const val = (row as any)[key] || 0;
-                      const emotionKey = key.replace('_mean', '');
+                    {/* NON_NEUTRAL_EMOTIONS の順序で動的レンダリング（types.ts と常に一致） */}
+                    {NON_NEUTRAL_EMOTIONS.map(e => {
+                      const val = (row as any)[`${e}_mean`] || 0;
                       return (
-                        <td key={key} className="py-1.5 pr-2">
-                          <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.68rem', color: val > 5 ? EMOTION_HEX[emotionKey] : 'oklch(0.68 0.015 255)', fontWeight: val > 5 ? 600 : 400 }}>
+                        <td key={e} className="py-1.5 pr-2">
+                          <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.68rem', color: val > 5 ? EMOTION_HEX[e] : 'oklch(0.68 0.015 255)', fontWeight: val > 5 ? 600 : 400 }}>
                             {val.toFixed(1)}
                           </span>
                         </td>
