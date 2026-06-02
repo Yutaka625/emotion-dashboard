@@ -262,6 +262,9 @@ export default function OverviewSection({ data }: Props) {
                   name
                 ]}
                 contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
+                /* 項目テキストはデフォルトだとスライス（感情）の色になり、暗い感情色だと暗背景で読めない。明るい色に固定する */
+                itemStyle={{ color: 'oklch(0.90 0.005 250)' }}
+                labelStyle={{ color: 'oklch(0.90 0.005 250)' }}
               />
               <Legend
                 formatter={(value) => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.75 0.008 250)' }}>{value}</span>}
@@ -293,6 +296,8 @@ export default function OverviewSection({ data }: Props) {
               />
               <Tooltip
                 contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
+                itemStyle={{ color: 'oklch(0.90 0.005 250)' }}
+                labelStyle={{ color: 'oklch(0.90 0.005 250)' }}
                 formatter={(v: number) => [v.toFixed(3), '平均値']}
               />
             </RadarChart>
