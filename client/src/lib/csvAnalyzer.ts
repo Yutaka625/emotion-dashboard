@@ -197,6 +197,12 @@ export function computeDashboardData(rows: Record<string, string>[], filename: s
   const times = df.map(r => r.time);
   const durationSec = times[n - 1] - times[0];
 
+  // 1秒あたりのフレーム数（FPS）の算出に使うフレーム数。
+  // 複数人（マルチFaceID）データでは、同一の時刻に人数分の行が存在する。
+  // そのため行数(n)で割ると FPS が人数倍に膨らんでしまう。
+  // ユニークなタイムスタンプの数＝実際のフレーム数で割ることで、人数に依らず正しい FPS になる。
+  const uniqueFrameCount = new Set(times).size;
+
   // Parse recording date/time from filename
   const fnMatch = filename.match(/(\d{4})-(\d{2})-(\d{2})-(\d{2})-(\d{2})-(\d{2})/);
   const recordingDate = fnMatch ? `${fnMatch[1]}-${fnMatch[2]}-${fnMatch[3]}` : filename.slice(0, 10);
@@ -224,7 +230,7 @@ export function computeDashboardData(rows: Record<string, string>[], filename: s
     total_frames: n,
     duration_seconds: round(durationSec, 3),
     duration_minutes: round(durationSec / 60, 3),
-    fps_avg: round(n / durationSec, 2),
+    fps_avg: durationSec > 0 ? round(uniqueFrameCount / durationSec, 2) : 0,
     start_time: round(times[0], 3),
     end_time: round(times[n - 1], 3),
     recording_date: recordingDate,

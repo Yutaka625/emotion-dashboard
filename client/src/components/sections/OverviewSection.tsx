@@ -28,8 +28,10 @@ function MetricCard({ label, value, unit, icon, color, sub }: {
         <span className="section-label">{label}</span>
         <span style={{ color }}>{icon}</span>
       </div>
-      <div className="flex items-baseline gap-1.5">
-        <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '2rem', color: 'oklch(0.88 0.005 250)', lineHeight: 1 }}>
+      {/* 値と単位。長い値（総フレーム数など）でカード枠からはみ出さないよう
+          flex-wrap で単位を折り返し可能にし、値は折り返しを許可する */}
+      <div className="flex items-baseline gap-1.5 flex-wrap min-w-0">
+        <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '2rem', color: 'oklch(0.88 0.005 250)', lineHeight: 1, wordBreak: 'break-word', minWidth: 0 }}>
           {value}
         </span>
         {unit && (
@@ -45,6 +47,16 @@ function MetricCard({ label, value, unit, icon, color, sub }: {
       )}
     </div>
   );
+}
+
+// 記録時間を「M分S秒」形式に整形する。
+// 「0.3分」のような小数表記は直感的でないため、分・秒に分けて表示する。
+// 1分未満のときは「S秒」だけにする（「0分18秒」の冗長さを避ける）。
+function formatDuration(totalSeconds: number): string {
+  const total = Math.round(totalSeconds);
+  const m = Math.floor(total / 60);
+  const s = total % 60;
+  return m >= 1 ? `${m}分${s}秒` : `${s}秒`;
 }
 
 // トーン（良好/中立/注意/警告）に対応するアイコンを返す
@@ -151,11 +163,10 @@ export default function OverviewSection({ data }: Props) {
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <MetricCard
           label="記録時間"
-          value={meta.duration_minutes.toFixed(1)}
-          unit="分"
+          value={formatDuration(meta.duration_seconds)}
           icon={<Clock size={16} />}
           color="oklch(0.62 0.18 160)"
-          sub={`${meta.duration_seconds.toFixed(0)}秒`}
+          sub={`${meta.duration_seconds.toFixed(1)}秒`}
         />
         <MetricCard
           label="総フレーム数"
