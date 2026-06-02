@@ -220,14 +220,14 @@
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    background: oklch(0.62 0.18 160);
+    background: oklch(0.76 0.15 70);
     border: 2px solid oklch(0.16 0.04 255);
     box-shadow: 0 1px 3px oklch(0.10 0.04 255 / 0.6);
     cursor: grab;
   }
   .range-thumb::-webkit-slider-thumb:active {
     cursor: grabbing;
-    background: oklch(0.70 0.20 160);
+    background: oklch(0.82 0.16 70);
   }
   /* つまみ（Firefox） */
   .range-thumb::-moz-range-thumb {
@@ -235,7 +235,7 @@
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    background: oklch(0.62 0.18 160);
+    background: oklch(0.76 0.15 70);
     border: 2px solid oklch(0.16 0.04 255);
     box-shadow: 0 1px 3px oklch(0.10 0.04 255 / 0.6);
     cursor: grab;
@@ -245,7 +245,7 @@
   }
   /* キーボードフォーカス時につまみを強調（アクセシビリティ） */
   .range-thumb:focus-visible::-webkit-slider-thumb {
-    outline: 2px solid oklch(0.78 0.14 195);
+    outline: 2px solid oklch(0.80 0.14 70);
     outline-offset: 1px;
   }
 
