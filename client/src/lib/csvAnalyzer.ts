@@ -534,8 +534,9 @@ function computeUXScores(
   special_stats: DashboardData['special_stats'],
   action_unit_stats: DashboardData['action_unit_stats'],
 ): UXScores {
-  const em = (col: string) => emotion_stats[col]?.mean ?? 0;
-  const sp = (col: string) => special_stats[col]?.mean ?? 0;
+  // 感情スコアは 0〜100 スケールのため、0〜1 に正規化してから計算する
+  const em = (col: string) => (emotion_stats[col]?.mean ?? 0) / 100;
+  const sp = (col: string) => (special_stats[col]?.mean ?? 0) / 100;
 
   // Frustration Index: confusion×0.4 + anger×0.3 + sadness×0.2 + disgust×0.1
   const frustration_index = round(

@@ -1031,17 +1031,43 @@
 
       <div class="howto">
         <div class="howto-title">UX複合スコア（5指標）</div>
+        <p style="font-size:0.82rem;color:var(--text-muted);margin:4px 0 8px;">各指標は 0〜1 のスコアで表示されます（総合UXスコアのみ 0〜100）。スコアが高いほどその特性が強く出ていることを示します。</p>
         <table class="tab-table" style="margin-top:4px">
-          <thead><tr><th>指標</th><th>計算式（概要）</th><th>高い場合の意味</th></tr></thead>
+          <thead><tr><th>指標</th><th>何を表すか</th><th>高い場合</th><th>低い場合</th></tr></thead>
           <tbody>
-            <tr><td>フラストレーション指数</td><td>confusion×0.4 + anger×0.3 + …</td><td>ユーザーが困難・ストレスを感じている</td></tr>
-            <tr><td>デライト指数</td><td>joy×0.5 + surprise×0.3 + …</td><td>ユーザーが喜び・驚きを感じている</td></tr>
-            <tr><td>エンゲージメント品質</td><td>engagement × (1 - confusion×2)</td><td>混乱を除いた純粋な関与度が高い</td></tr>
-            <tr><td>認知負荷推定</td><td>confusion×0.6 + brow_furrow/100×0.4</td><td>思考の重さ・情報処理負荷が高い</td></tr>
-            <tr><td>総合UXスコア</td><td>上記の合成（0〜100）</td><td>セッション全体のUX品質が高い</td></tr>
+            <tr>
+              <td><strong>フラストレーション指数</strong></td>
+              <td>困惑・怒り・悲しみ・嫌悪の強さから体験のストレス度を算出</td>
+              <td>😠 つまずきや不満が多い。UI・手順の見直しポイントを探す</td>
+              <td>😌 ストレスなく進めている</td>
+            </tr>
+            <tr>
+              <td><strong>デライト指数</strong></td>
+              <td>喜び・驚き・感傷の強さからポジティブな感情反応度を算出</td>
+              <td>😊 体験が心地よく響いている。成功体験・好評価のサイン</td>
+              <td>😐 感情的な盛り上がりが少ない</td>
+            </tr>
+            <tr>
+              <td><strong>エンゲージメント品質</strong></td>
+              <td>注意・集中の高さから「混乱のない良質な関与」を評価</td>
+              <td>🎯 画面に引き込まれている。深い集中状態</td>
+              <td>😕 注意が低い、または混乱が多い</td>
+            </tr>
+            <tr>
+              <td><strong>認知負荷推定</strong></td>
+              <td>困惑の強さと眉のしかめ（AU4）から情報処理の重さを推定</td>
+              <td>🧠 理解しにくい・操作が難しい。情報量や複雑さを見直す</td>
+              <td>✅ 操作・理解がスムーズ</td>
+            </tr>
+            <tr>
+              <td><strong>総合UXスコア（0〜100）</strong></td>
+              <td>上記4指標を組み合わせたセッション全体のUX品質評価</td>
+              <td>⭐ 85以上=優秀 / 70以上=良好 / 50以上=改善余地あり</td>
+              <td>⚠ 50未満=要改善。フラストレーション・認知負荷の高い原因を特定</td>
+            </tr>
           </tbody>
         </table>
-        <div class="note">💡 各スコアにはLOW / MED / HIGHの段階評価バッジが表示されます。</div>
+        <div class="note">💡 フラストレーション指数 ≥ 0.3 で「要注意」、認知負荷 ≥ 0.35 で「高負荷」バッジが表示されます。</div>
       </div>
 
       <div class="pill-list">
