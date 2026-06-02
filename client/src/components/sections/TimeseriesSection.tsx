@@ -214,8 +214,10 @@ export default function TimeseriesSection({ data }: Props) {
       {/* ---- TIME RANGE FILTER ---- */}
       <CollapsibleCard
         label="TIME RANGE FILTER"
+        labelColor="oklch(0.62 0.18 160)"
         title="表示範囲フィルタ"
         info="つまみで分析対象の時間範囲を絞り込みます。左つまみ＝開始・右つまみ＝終了（0.1秒単位）。"
+        borderLeftColor="oklch(0.62 0.18 160)"
         storageKey="ksdv.collapse.timerange"
         badge={
           /* リセット: 全範囲 [0, 録画長] に戻す。範囲が初期状態のときは無効化 */
