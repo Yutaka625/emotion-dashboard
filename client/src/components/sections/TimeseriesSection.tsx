@@ -196,7 +196,16 @@ export default function TimeseriesSection({ data }: Props) {
     document.body.removeChild(link);
   };
 
-  const { setBaseline, isBaselineActive: _isActive } = useBaseline();
+  const { setBaseline, baselineRange } = useBaseline();
+
+  // 現在の表示範囲が、設定済みのベースライン区間と一致しているか（0.1秒刻みの丸め誤差を許容）。
+  // ボタンのハイライトはこれで判定する。「ベースラインが有効か」ではなく
+  // 「今の範囲がそのままベースラインになっているか」を示すことで、押すと値が変わる/変わらないが直感的になる。
+  const isCurrentRangeBaseline =
+    isBaselineActive &&
+    baselineRange != null &&
+    Math.abs(baselineRange[0] - timeRange[0]) < 0.05 &&
+    Math.abs(baselineRange[1] - timeRange[1]) < 0.05;
 
   return (
     <div className="space-y-6">
@@ -304,8 +313,10 @@ export default function TimeseriesSection({ data }: Props) {
           <button
             onClick={() => setBaseline(timeRange, data.timeseries_full)}
             className="px-3 py-1 rounded text-xs transition-all flex items-center gap-1"
-            style={{ fontFamily: 'Noto Sans JP, sans-serif', background: isBaselineActive ? 'rgba(0,180,216,0.20)' : 'oklch(0.22 0.04 255)', color: isBaselineActive ? 'oklch(0.70 0.14 195)' : 'oklch(0.72 0.008 250)', border: `1px solid ${isBaselineActive ? 'rgba(0,180,216,0.5)' : 'oklch(0.32 0.04 255)'}` }}
-            title="現在の表示範囲をベースライン区間として設定する"
+            style={{ fontFamily: 'Noto Sans JP, sans-serif', background: isCurrentRangeBaseline ? 'rgba(0,180,216,0.20)' : 'oklch(0.22 0.04 255)', color: isCurrentRangeBaseline ? 'oklch(0.70 0.14 195)' : 'oklch(0.72 0.008 250)', border: `1px solid ${isCurrentRangeBaseline ? 'rgba(0,180,216,0.5)' : 'oklch(0.32 0.04 255)'}` }}
+            title={isCurrentRangeBaseline
+              ? '現在の表示範囲がベースライン区間に設定されています'
+              : '現在の表示範囲をベースライン区間として設定する'}
           >
             <Target size={14} />
             ベースラインとして設定
