@@ -328,7 +328,7 @@ export default function TimeseriesSection({ data, rawTimeseries }: Props) {
               }
             }}
             className="px-3 py-1 rounded text-xs transition-all flex items-center gap-1"
-            style={{ fontFamily: 'Noto Sans JP, sans-serif', background: isCurrentRangeBaseline ? 'rgba(0,180,216,0.20)' : 'oklch(0.22 0.04 255)', color: isCurrentRangeBaseline ? 'oklch(0.70 0.14 195)' : 'oklch(0.72 0.008 250)', border: `1px solid ${isCurrentRangeBaseline ? 'rgba(0,180,216,0.5)' : 'oklch(0.32 0.04 255)'}` }}
+            style={{ fontFamily: 'Noto Sans JP, sans-serif', background: isCurrentRangeBaseline ? 'oklch(0.76 0.15 70 / 0.20)' : 'oklch(0.22 0.04 255)', color: isCurrentRangeBaseline ? 'oklch(0.76 0.15 70)' : 'oklch(0.72 0.008 250)', border: `1px solid ${isCurrentRangeBaseline ? 'oklch(0.76 0.15 70 / 0.5)' : 'oklch(0.32 0.04 255)'}` }}
             title={isCurrentRangeBaseline
               ? '現在の表示範囲がベースラインに設定されています。クリックで解除します'
               : '現在の表示範囲をベースライン区間として設定する'}
