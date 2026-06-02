@@ -694,6 +694,24 @@ const BASELINE_EMOTION_COLS = [
   'disgust', 'contempt', 'sentimentality', 'confusion', 'neutral'
 ] as const;
 
+// ベースライン補正の対象に含める特殊指標（engagement / valence / attention）。
+// valence は signed（−100..100）のため lift（変化率）は不安定 → lift では「—」にする。
+const BASELINE_SPECIAL_COLS = ['engagement', 'valence', 'attention'] as const;
+
+// オフセット（中心値・SD）を計算する全列：全感情（neutral含む）＋特殊指標。
+const BASELINE_OFFSET_COLS = [...BASELINE_EMOTION_COLS, ...BASELINE_SPECIAL_COLS];
+
+// 実際に補正を適用する列：neutral は「無表情の基準」自体なので偏差化せず除外する。
+// → 感情（neutral を除く9種）＋特殊指標。
+const BASELINE_TARGET_COLS = [
+  ...BASELINE_EMOTION_COLS.filter(c => c !== 'neutral'),
+  ...BASELINE_SPECIAL_COLS,
+];
+
+// zscore が発散しないための SD 下限。ベースライン区間の SD がこれ未満なら NaN（「—」）にする。
+// （区間が短い・ほぼ無変化のときに (x−μ)/σ が桁外れになるのを防ぐ）
+const MIN_SD_FOR_ZSCORE = 0.05;
+
 /**
  * 変化率(lift%)を「意味のある値」として算出できる最小ベースライン中心値。
  * 感情スコア(0〜1)は多くの時間ほぼ0でスパースなため、μが小さいと (x−μ)/μ が桁外れに発散する。
@@ -720,15 +738,15 @@ export function computeBaselineOffsets(
 
   const offsets = {} as BaselineOffsets;
 
-  // 区間内にデータがなければ全感情 { offset: 0, sd: 0 }（補正なし）として返す
+  // 区間内にデータがなければ全列 { offset: 0, sd: 0 }（補正なし）として返す
   if (baselinePoints.length === 0) {
-    for (const col of BASELINE_EMOTION_COLS) offsets[col] = { offset: 0, sd: 0 };
+    for (const col of BASELINE_OFFSET_COLS) offsets[col] = { offset: 0, sd: 0 };
     return offsets;
   }
 
-  // 各感情フィールドの中心値（平均 or 中央値）と標準偏差を計算する
-  for (const col of BASELINE_EMOTION_COLS) {
-    const values = baselinePoints.map(p => p[col]).filter(v => !isNaN(v));
+  // 各列（感情＋特殊指標）の中心値（平均 or 中央値）と標準偏差を計算する
+  for (const col of BASELINE_OFFSET_COLS) {
+    const values = baselinePoints.map(p => (p as any)[col] as number).filter(v => !isNaN(v));
     if (values.length === 0) {
       offsets[col] = { offset: 0, sd: 0 };
       continue;
@@ -761,19 +779,25 @@ export function applyBaselineCorrection(
   if (mode === 'absolute') return points;
 
   return points.map(p => {
-    // time / engagement / valence / attention / dominant_emotion は変更しない
+    // time / dominant_emotion / neutral などは変更しない（BASELINE_TARGET_COLS のみ補正）
     const corrected = { ...p };
-    for (const col of BASELINE_EMOTION_COLS) {
+    for (const col of BASELINE_TARGET_COLS) {
       const { offset, sd } = offsets[col] ?? { offset: 0, sd: 0 };
-      const dev = p[col] - offset; // ベースラインからの偏差
+      const dev = (p as any)[col] - offset; // ベースラインからの偏差
       if (mode === 'lift') {
-        // 平常時の値が小さい感情は変化率が発散し信頼できないため NaN（=「—」表示）にする
-        corrected[col] = Math.abs(offset) >= LIFT_MIN_BASELINE ? (dev / offset) * 100 : NaN;
+        // valence は signed（−100..100）でμが0近傍/負だと変化率が発散・無意味になるため「—」にする
+        if (col === 'valence') {
+          (corrected as any)[col] = NaN;
+        } else {
+          // 平常時の値が小さい指標は変化率が発散し信頼できないため NaN（=「—」表示）にする
+          (corrected as any)[col] = Math.abs(offset) >= LIFT_MIN_BASELINE ? (dev / offset) * 100 : NaN;
+        }
       } else if (mode === 'zscore') {
-        corrected[col] = sd > 0 ? dev / sd : 0;
+        // SD が小さすぎる（不安定な）区間では z 値が発散するため「—」にする
+        (corrected as any)[col] = sd >= MIN_SD_FOR_ZSCORE ? dev / sd : NaN;
       } else {
         // deviation
-        corrected[col] = dev;
+        (corrected as any)[col] = dev;
       }
     }
     return corrected;

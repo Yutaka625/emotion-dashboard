@@ -12,6 +12,7 @@ import {
   Cell, ReferenceLine,
 } from 'recharts';
 import { rechartsTooltip } from '@/lib/chartTooltip';
+import AbsoluteScaleBadge from '@/components/ui/AbsoluteScaleBadge';
 
 interface Props {
   data: DashboardData;
@@ -143,6 +144,8 @@ export default function AcademicSection({ data }: Props) {
           <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.68 0.015 255)', marginTop: '0.25rem' }}>
             Affect Dynamics・Circumplex Model・相関分析など学術研究の視点からの多角的分析
           </p>
+          {/* ベースライン補正ON時: このタブの指標は絶対値（補正対象外）であることを明示 */}
+          <div className="mt-2"><AbsoluteScaleBadge /></div>
         </div>
         <div className="flex gap-2 flex-shrink-0">
           <button

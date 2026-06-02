@@ -5,13 +5,17 @@
  *
  * 再計算される統計:
  *   - emotion_stats（各感情の mean / std / min / max / median / q25 / q75）
+ *   - special_stats（engagement / valence / attention — Phase 4 で補正対象に追加）
  *   - dominant_emotion_counts / dominant_emotion_pct（補正後の支配感情が変わりうる）
  *   - emotion_transitions（支配感情の遷移行列）
  *   - emotion_duration_stats（支配感情の継続時間統計）
  *   - timeseries_full の dominant_emotion（各フレームの支配感情を再判定）
  *
- * 再計算されない統計（補正対象外）:
- *   - engagement / valence / attention / head pose / action units
+ * 再計算されない統計（絶対値スケール前提のため＝補正対象外。各タブで明示する）:
+ *   - circumplex_summary（象限分類は絶対スケール前提）
+ *   - ux_scores（指標は絶対0-1前提）
+ *   - affect_dynamics / correlation_matrix（高次統計。偏差化で意味が変わる/NaN混入のリスク）
+ *   - head pose / action units
  */
 
 import { useMemo } from 'react';
@@ -101,6 +105,14 @@ export function useCorrectedDashboardData(data: DashboardData | null): Dashboard
       emotion_stats[col] = computeStats(correctedTimeseries.map(p => p[col]));
     }
 
+    // --- special_stats（engagement / valence / attention）も補正後の値で再計算 ---
+    // これらは Phase 4 で補正対象に追加された。Engagement/Valence タブの統計を補正後に整合させる。
+    // ※ lift モードで valence は NaN（「—」）になるため computeStats が 0 を返すが、表示も「—」のため問題ない。
+    const special_stats: DashboardData['special_stats'] = { ...data.special_stats };
+    for (const col of ['engagement', 'valence', 'attention'] as const) {
+      special_stats[col] = computeStats(correctedTimeseries.map(p => (p as any)[col] as number));
+    }
+
     // --- 支配感情カウント / パーセンテージを再計算 ---
     const dominant_emotion_counts: Record<string, number> = {};
     for (const e of NON_NEUTRAL) dominant_emotion_counts[e] = 0;
@@ -152,10 +164,14 @@ export function useCorrectedDashboardData(data: DashboardData | null): Dashboard
       ...data,
       timeseries_full: correctedTimeseries,
       emotion_stats,
+      special_stats,
       dominant_emotion_counts,
       dominant_emotion_pct,
       emotion_transitions,
       emotion_duration_stats,
     };
+    // ※ circumplex_summary / ux_scores / affect_dynamics / correlation_matrix は
+    //   絶対値スケールが前提（偏差化で意味が壊れる）ため、ここでは再計算せず元の値を保持する。
+    //   各タブ側で「補正対象外（絶対値）」を明示する。
   }, [data, isBaselineActive, baselineOffsets, displayMode]);
 }
