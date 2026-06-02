@@ -167,7 +167,7 @@ export const EMOTION_COLORS: Record<string, string> = {
   sadness:        'oklch(0.82 0.15 198)',   /* シアン — 悲しみ */
   surprise:       'oklch(0.76 0.18 68)',    /* アンバーオレンジ — 驚き（旧オフホワイトから視認性改善） */
   sentimentality: 'oklch(0.66 0.22 350)',   /* ディープローズ — 感傷（旧シェルピンクから視認性改善） */
-  confusion:      'oklch(0.73 0.07 228)',   /* フォグブルー（霧色）— 困惑 */
+  confusion:      'oklch(0.73 0.07 228)',   /* フォグブルー（霧色）— 混乱 */
   neutral:        'oklch(0.58 0.03 255)',   /* ミッドグレーブルー — ニュートラル */
   attention:      'oklch(0.80 0.18 160)',   /* エメラルドグリーン — 注意 */
 };
@@ -181,7 +181,7 @@ export const EMOTION_LABELS_JA: Record<string, string> = {
   sadness: '悲しみ',
   surprise: '驚き',
   sentimentality: '感傷',
-  confusion: '困惑',
+  confusion: '混乱',
   neutral: 'ニュートラル',
 };
 
@@ -256,8 +256,8 @@ export interface ChangePoint {
 }
 
 export const NON_NEUTRAL_EMOTIONS = [
-  'anger', 'contempt', 'disgust', 'fear', 'joy', 
-  'sadness', 'surprise', 'sentimentality', 'confusion'
+  'anger', 'sadness', 'surprise', 'fear', 'joy',
+  'disgust', 'contempt', 'sentimentality', 'confusion'
 ];
 
 export const ALL_EMOTIONS = [...NON_NEUTRAL_EMOTIONS, 'neutral'];

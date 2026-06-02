@@ -21,7 +21,7 @@ import type { DashboardData, EmotionStats, TimeseriesPoint } from '@/lib/types';
 
 // ---- 内部ユーティリティ（csvAnalyzer.ts と同じロジック） ----
 
-const NON_NEUTRAL = ['anger', 'contempt', 'disgust', 'fear', 'joy', 'sadness', 'surprise', 'sentimentality', 'confusion'] as const;
+const NON_NEUTRAL = ['anger', 'sadness', 'surprise', 'fear', 'joy', 'disgust', 'contempt', 'sentimentality', 'confusion'] as const;
 const EMOTION_COLS = [...NON_NEUTRAL, 'neutral'] as const;
 
 function round(v: number, decimals: number): number {

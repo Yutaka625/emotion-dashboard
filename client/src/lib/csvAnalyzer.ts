@@ -6,8 +6,8 @@
 
 import type { DashboardData, EmotionStats, AffectDynamics, BaselineOffsets, BaselineCenter, BaselineDisplayMode, TimeseriesPoint, HeadMotionEvent, ChangePoint, UXScores } from './types';
 
-const EMOTION_COLS = ['anger', 'contempt', 'disgust', 'fear', 'joy', 'sadness', 'surprise', 'sentimentality', 'confusion', 'neutral'];
-const NON_NEUTRAL = ['anger', 'contempt', 'disgust', 'fear', 'joy', 'sadness', 'surprise', 'sentimentality', 'confusion'];
+const NON_NEUTRAL = ['anger', 'sadness', 'surprise', 'fear', 'joy', 'disgust', 'contempt', 'sentimentality', 'confusion'];
+const EMOTION_COLS = [...NON_NEUTRAL, 'neutral'];
 const SPECIAL_COLS = ['engagement', 'valence'];
 const FACIAL_COLS = [...EMOTION_COLS, 'attention']; // attention treated as facial expression metric
 const ACTION_UNIT_COLS = [
@@ -683,8 +683,8 @@ export function groupRowsByFaceId(
 
 // 補正対象の感情フィールド一覧
 const BASELINE_EMOTION_COLS = [
-  'anger', 'contempt', 'disgust', 'fear', 'joy',
-  'sadness', 'surprise', 'sentimentality', 'confusion', 'neutral'
+  'anger', 'sadness', 'surprise', 'fear', 'joy',
+  'disgust', 'contempt', 'sentimentality', 'confusion', 'neutral'
 ] as const;
 
 /**

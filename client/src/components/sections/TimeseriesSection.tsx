@@ -34,7 +34,7 @@ const EMOTION_HEX = EMOTION_COLORS;
 
 export default function TimeseriesSection({ data }: Props) {
   // ---- 感情グラフ選択 state ----
-  const [selectedEmotions, setSelectedEmotions] = useState<string[]>(['anger', 'sadness', 'surprise', 'disgust', 'fear', 'joy']);
+  const [selectedEmotions, setSelectedEmotions] = useState<string[]>(['anger', 'sadness', 'surprise', 'fear', 'joy']);
   const [showSpecial, setShowSpecial]           = useState<string[]>(['engagement', 'valence', 'attention']);
   const [activeTab, setActiveTab]               = useState<TabId>('overlay');
 
