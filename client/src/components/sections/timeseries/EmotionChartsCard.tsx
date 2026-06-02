@@ -14,6 +14,7 @@ import { EMOTION_COLORS, EMOTION_LABELS_JA, NON_NEUTRAL_EMOTIONS } from '@/lib/t
 import type { TimeseriesPoint, ChangePoint, BaselineDisplayMode } from '@/lib/types';
 import { useBaseline } from '@/contexts/BaselineContext';
 import { useEvents } from '@/contexts/EventsContext';
+import { rechartsTooltip } from '@/lib/chartTooltip';
 
 const EMOTION_HEX = EMOTION_COLORS;
 
@@ -332,8 +333,8 @@ export default function EmotionChartsCard({
                         <XAxis dataKey="time" type="number" domain={['dataMin', 'dataMax']} hide />
                         {/* 補正中は偏差/Zで負値が出るため自動レンジに切替 */}
                         <YAxis hide domain={isBaselineActive ? ['auto', 'auto'] : [0, Math.max(maxVal * 1.1, 0.01)]} />
-                        <Tooltip formatter={(v: number) => [fmtValue(Number(v)), EMOTION_LABELS_JA[emotion]]} labelFormatter={(l: number) => `t=${Number(l).toFixed(1)}s`}
-                          contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', border: `1px solid ${EMOTION_HEX[emotion]}50`, borderRadius: '6px', padding: '4px 8px' }}
+                        <Tooltip {...rechartsTooltip} formatter={(v: number) => [fmtValue(Number(v)), EMOTION_LABELS_JA[emotion]]} labelFormatter={(l: number) => `t=${Number(l).toFixed(1)}s`}
+                          contentStyle={{ ...rechartsTooltip.contentStyle, fontSize: '0.72rem', border: `1px solid ${EMOTION_HEX[emotion]}50`, padding: '4px 8px' }}
                         />
                         {renderEventLines()}
                         <Area type="monotone" dataKey={emotion} stroke={EMOTION_HEX[emotion]} fill={`url(#grad-${emotion})`} strokeWidth={1.5} dot={false} />
@@ -439,7 +440,7 @@ export default function EmotionChartsCard({
                 <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" />
                 <XAxis dataKey="time" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} angle={-30} textAnchor="end" />
                 <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} />
-                <Tooltip contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
+                <Tooltip {...rechartsTooltip}
                   formatter={(v: number, name: string) => [v.toFixed(3), EMOTION_LABELS_JA[name] || name]} />
                 <Legend formatter={v => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem' }}>{EMOTION_LABELS_JA[v] || v}</span>} />
                 {NON_NEUTRAL_EMOTIONS.map(emotion => (
@@ -496,7 +497,7 @@ export default function EmotionChartsCard({
                 <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" vertical={false} />
                 <XAxis dataKey="time" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', fill: 'oklch(0.68 0.015 255)' }} angle={-30} textAnchor="end" />
                 <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} />
-                <Tooltip contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
+                <Tooltip {...rechartsTooltip}
                   formatter={(v: number, name: string) => [v.toFixed(3), EMOTION_LABELS_JA[name] || name]} />
                 <Legend formatter={v => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem' }}>{EMOTION_LABELS_JA[v] || v}</span>} />
                 {NON_NEUTRAL_EMOTIONS.map(emotion => (

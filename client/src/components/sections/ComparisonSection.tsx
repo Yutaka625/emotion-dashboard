@@ -13,6 +13,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   Cell, Legend, LineChart, Line, RadarChart, PolarGrid, PolarAngleAxis, Radar,
 } from 'recharts';
+import { rechartsTooltip } from '@/lib/chartTooltip';
 
 interface Props {
   dataA: DashboardData;
@@ -126,9 +127,8 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
     { name: '低覚醒×低Valence', A: +((cmpA.low_arousal_negative / totalA) * 100).toFixed(1), B: +((cmpB.low_arousal_negative / totalB) * 100).toFixed(1) },
   ];
 
-  const tooltipStyle = {
-    contentStyle: { fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' },
-  };
+  // 共通ツールチップスタイル（項目テキストを明るい色に固定し可読性を確保）
+  const tooltipStyle = rechartsTooltip;
 
   return (
     <div className="space-y-6">

@@ -7,6 +7,7 @@ import type { DashboardData } from '@/lib/types';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
 } from 'recharts';
+import { rechartsTooltip } from '@/lib/chartTooltip';
 import { ArrowUpDown, ArrowLeftRight, RotateCcw } from 'lucide-react';
 
 interface Props {
@@ -112,7 +113,7 @@ export default function ActionUnitsSection({ data }: Props) {
                 `${v.toFixed(4)} (最大: ${props.payload.max.toFixed(2)})`,
                 props.payload.desc
               ]}
-              contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
+              {...rechartsTooltip}
             />
             <Bar dataKey="mean" radius={[4, 4, 0, 0]} activeBar={{ fill: 'oklch(0.55 0.04 255 / 0.6)', stroke: 'none' }}>
               {auData.map((entry, i) => (
@@ -139,7 +140,7 @@ export default function ActionUnitsSection({ data }: Props) {
             <YAxis type="category" dataKey="desc" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fill: 'oklch(0.75 0.008 250)' }} width={125} />
             <Tooltip
               formatter={(v: number, _: string, props: any) => [`${v.toFixed(2)}%`, `${props.payload.label}: ${props.payload.desc}`]}
-              contentStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '6px', background: 'oklch(0.20 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
+              {...rechartsTooltip}
             />
             <Bar dataKey="active_pct" radius={[0, 4, 4, 0]} activeBar={{ fill: 'oklch(0.55 0.04 255 / 0.6)', stroke: 'none' }}>
               {topActive.map((entry, i) => (
