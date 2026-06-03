@@ -40,8 +40,10 @@
   - 残: BASELINE SETTINGS に「補正後データを出力」ボタン、先頭にメタデータ行（区間・オフセット）、補正有無・日時を含むファイル名
 - [ ] **Before/After AI 比較機能 Phase 3B（Claude API）**
   - `.env` に `ANTHROPIC_API_KEY`、`@anthropic-ai/sdk`、`POST /api/ai-compare`、`AiInsightSection.tsx`、ナビ追加
-- [ ] **ベースライン補正 Phase 4: engagement / valence / attention への補正拡張**
-  - 特に valence（−100〜100）は signed のため二重符号化に注意。仕様確定後に着手
+- [ ] **ベースライン補正 Phase 4 の残作業（細部の作り込み）** ※中核は完了（下記「完了済み」参照）
+  - lift / zスコア モード時の特殊指標（engagement/valence/attention）グラフの軸ラベル・「—」の見せ方を
+    感情グラフ並みに整える（現状は感情グラフほど作り込んでいない）
+  - circumplex は補正の影響を valence/engagement の絶対値で受けない設計だが、補正中の解釈ガイド文言の補強
 - [ ] **マルチ FaceID の拡張**
   - FaceID が多い場合（10+）のドロップダウン表示
   - FaceID ごとの感情比較グラフ（オーバーレイ表示）
@@ -68,6 +70,11 @@
 - **概要タブの改善**: 記録時間を「M分S秒」表記に／総フレーム数の「frames」はみ出し修正／複数人(マルチFaceID)データのFPSをユニークなタイムスタンプ数で算出／ツールチップの可読性改善
 - **感情分布カードの左端の色帯を削除**（くどさ解消、識別はドット・数値色・バーで担保）
 - **全 Recharts ツールチップの文字色を明色固定**: 共通スタイル `lib/chartTooltip.ts`（新規）を全セクションに適用、独自実装の散布図ツールチップも対応
+- **ベースライン補正 Phase 4（特殊指標補正・一貫化・品質可視化・堅牢化）**:
+  - A: engagement/valence/attention を補正対象に追加（`BASELINE_SPECIAL_COLS`）。valence は signed のため lift では「—」。neutral は補正対象から除外
+  - B: `special_stats` を補正後で再計算。circumplex/`ux_scores`/`affect_dynamics`/`correlation_matrix` は絶対値スケール前提のため再計算せず、Academic・UXリサーチに「補正対象外（絶対値）」警告バッジ（`AbsoluteScaleBadge` 新規）を表示
+  - C: zscore に `MIN_SD` ガード（発散→「—」）。`BaselineSettingsCard` に mean±SD・フレーム数・区間警告（短い/高ばらつき）を追加
+  - 併せて解釈ボックスのライトテーマ残りをダーク基調に統一
 
 ## ベースライン補正機能（feature/baseline）
 - `BaselineContext` / `BaselineBanner` / `TimeseriesSection` の BASELINE SETTINGS UI・ゼロライン・区間ハイライト
