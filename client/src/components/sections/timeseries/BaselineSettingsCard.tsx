@@ -9,9 +9,9 @@
 import { useMemo } from 'react';
 import type { TimeseriesPoint } from '@/lib/types';
 import { EMOTION_COLORS, EMOTION_LABELS_JA, NON_NEUTRAL_EMOTIONS } from '@/lib/types';
-import { Wand2, AlertTriangle } from 'lucide-react';
+import { Wand2, AlertTriangle, Download } from 'lucide-react';
 import { useBaseline } from '@/contexts/BaselineContext';
-import { detectBaselineWindow } from '@/lib/csvAnalyzer';
+import { detectBaselineWindow, applyBaselineCorrection } from '@/lib/csvAnalyzer';
 import { toast } from 'sonner';
 import CollapsibleCard from '@/components/ui/CollapsibleCard';
 import SettingBox from '@/components/ui/SettingBox';
@@ -39,7 +39,54 @@ export default function BaselineSettingsCard({ timeseriesFull }: Props) {
     clearBaseline,
     centerMethod,
     setCenterMethod,
+    displayMode,
   } = useBaseline();
+
+  // ---- 補正後データの CSV エクスポート ----
+  // ベースライン補正を適用した全フレームの感情・特殊指標を、メタデータ行つきで出力する。
+  // AU列は補正対象外のため含めない（感情＋engagement/valence/attention に絞る）。
+  const exportCorrectedCSV = () => {
+    if (!baselineOffsets || !baselineRange) return;
+    const corrected = applyBaselineCorrection(timeseriesFull, baselineOffsets, displayMode);
+    const cols = [...NON_NEUTRAL_EMOTIONS, 'engagement', 'valence', 'attention'];
+    const num = (v: number) => (Number.isNaN(v) ? '' : v.toFixed(3)); // NaN（lift/zscoreの「—」相当）は空欄
+    const rows: string[] = [];
+
+    // メタデータ
+    rows.push('## BASELINE CORRECTION METADATA');
+    rows.push('項目,値');
+    rows.push(`補正対象区間(秒),${baselineRange[0]}-${baselineRange[1]}`);
+    rows.push(`ベースライン中心,${centerMethod === 'mean' ? '平均' : '中央値'}`);
+    rows.push(`表示モード,${displayMode}`);
+    rows.push(`出力日時,${new Date().toISOString()}`);
+    rows.push('');
+    // 各指標のオフセット・SD
+    rows.push('## BASELINE OFFSETS');
+    rows.push('指標,offset,sd');
+    for (const c of cols) {
+      const o = baselineOffsets[c];
+      if (!o) continue;
+      rows.push(`${EMOTION_LABELS_JA[c] || c},${o.offset.toFixed(4)},${o.sd.toFixed(4)}`);
+    }
+    rows.push('');
+    // 補正後データ本体
+    rows.push('## CORRECTED TIMESERIES');
+    rows.push(['time', ...cols].join(','));
+    for (const p of corrected) {
+      rows.push([p.time.toFixed(3), ...cols.map(c => num((p as any)[c] as number))].join(','));
+    }
+
+    const stamp = new Date().toISOString().slice(0, 16).replace(/[-:T]/g, '').replace(/(\d{8})(\d{4})/, '$1-$2');
+    const blob = new Blob(['﻿' + rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.setAttribute('href', URL.createObjectURL(blob));
+    link.setAttribute('download', `ksdv_corrected_${centerMethod}_${displayMode}_${baselineRange[0]}-${baselineRange[1]}s_${stamp}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
+  };
 
   // ベースライン区間の品質指標（区間長・フレーム数・安定性の警告）を算出する。
   // 研究妥当性のため「短すぎる区間」「ばらつきが大きい（無表情として不安定な）区間」を可視化する。
@@ -222,6 +269,29 @@ export default function BaselineSettingsCard({ timeseriesFull }: Props) {
               元データは常に保持されます。上部バナーからも解除できます。
             </span>
           </div>
+
+          {/* 補正後データの出力（補正が計算済みのときのみ） */}
+          {baselineOffsets && (
+            <div className="flex items-center gap-3 mt-4 pt-4" style={{ borderTop: '1px solid oklch(0.26 0.04 255)' }}>
+              <button
+                onClick={exportCorrectedCSV}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition-all"
+                style={{
+                  fontFamily: 'Noto Sans JP, sans-serif',
+                  background: 'oklch(0.32 0.12 160)',
+                  color: 'white',
+                  border: '1px solid oklch(0.52 0.18 160)',
+                }}
+                title="補正後の全フレームデータを、補正区間・方式・モード・日時のメタデータ付きでCSV出力します"
+              >
+                <Download size={14} />
+                補正後データを出力
+              </button>
+              <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.68 0.015 255)', fontStyle: 'italic' }}>
+                現在の表示モード（{displayMode}）で補正した値を出力します。
+              </span>
+            </div>
+          )}
         </SettingBox>
       )}
     </CollapsibleCard>

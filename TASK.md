@@ -16,9 +16,6 @@
 - [ ] **KEY INSIGHTS Phase 2: フルセット・ルール拡張**
   - 遷移パターン・circumplex 象限の偏り・相関・頭部動作イベントの活用
   - 「もっと見る」で全インサイト展開、各カードから該当セクションへのジャンプ導線
-- [ ] **CSV エクスポート Phase 3A（残）**
-  - ※ TIME RANGE FILTER の「範囲CSV出力」は実装済み
-  - 残: BASELINE SETTINGS に「補正後データを出力」ボタン、先頭にメタデータ行（区間・オフセット）、補正有無・日時を含むファイル名
 - [ ] **Before/After AI 比較機能 Phase 3B（Claude API）**
   - `.env` に `ANTHROPIC_API_KEY`、`@anthropic-ai/sdk`、`POST /api/ai-compare`、`AiInsightSection.tsx`、ナビ追加
 - [ ] **ベースライン補正 Phase 4 の残作業（細部の作り込み）** ※中核は完了（下記「完了済み」参照）
@@ -32,13 +29,21 @@
 - [ ] **データ保存・読み込み（localStorage）**
 - [ ] **感情閾値設定機能**（実装前に仕様確定）
   - 閾値設定UI（検出最小値）／表示フィルタか統計補正かの仕様検討／ベースライン・FaceIDとの併用整理
-- [ ] **学術研究者向け Phase 4**
-  - 参加者間の感情平均グラフ（群平均±SD）／CSV一括インポート／統計サマリー出力／実験条件ラベル付け／外部刺激との同期
-  - 統計検定表示: ※ A/B比較タブの **Welch t検定 + Cohen's d** は実装済み。残は Mann-Whitney U 検定・参加者群での検定
+- [ ] **学術研究者向け Phase 4（残作業）**
+  - ※ **Mann-Whitney U 検定**・**統計サマリー出力** は実装済み（下記「完了済み」参照）
+  - 残: **参加者間の感情平均グラフ（群平均±SD）＋ 複数セッション一括インポート** — 要: 任意Nセッションを保持する新規基盤（現状は1セッション内マルチFaceID と A/B 2セッションのみ）
+  - 残: **実験条件ラベル付け ＋ 外部刺激との同期** — イベント注釈機能（`EventsContext` / `EventAnnotationsCard`）の拡張
+  - 残: **参加者群での検定** — 上記Nセッション基盤の上で Welch / Mann-Whitney を群適用
 
 ---
 
 # ✅ 完了済みタスク
+
+## 2026-06 セッション（機能拡張: エクスポート・統計）
+- **CSV エクスポート Phase 3A（補正後データ出力）**: BASELINE SETTINGS に「補正後データを出力」ボタンを追加。先頭にメタデータ（補正区間・中心・表示モード・出力日時）＋各指標の offset/sd、続けて補正後の全フレーム（time＋感情＋engagement/valence/attention、AUは補正対象外のため除外）。BOM付き。ファイル名に中心・モード・区間・日時を含む（`BaselineSettingsCard.tsx`）
+- **Mann-Whitney U 検定（ノンパラメトリック）**: `statisticsUtils.ts` に `rank`（タイ平均順位）＋ `mannWhitneyU`（タイ補正つき正規近似・両側p値・効果量はランク二列相関 r）を追加。A/B比較タブに「Welch t検定 / Mann-Whitney U」トグルを追加し、median/U/z/p/r の列に切替（`ComparisonSection.tsx`）
+- **統計サマリー出力**: A/B比較のCSVエクスポートを拡充。メタデータ＋記述統計＋Welch＋Mann-Whitney の4セクションを1ファイルに、BOM付き・日時入りファイル名で出力
+- **バグ修正: `normalCDF` の標準正規化漏れ**: `0.5·(1+erf(x))` になっていた（`/√2` 欠落）ため標準正規CDFとして誤り。`erf(x/√2)` に修正。大標本（df>200）の Welch t検定 p値と Mann-Whitney の正規近似p値が正しくなる（`statisticsUtils.ts`）
 
 ## 2026-06 セッション（一貫性・洗練度バッチ）
 - **感情色を EMOTION_COLORS に一本化（SSOT）**: `index.css` の未使用かつ値がズレていた `.emotion-*` / `.bg-emotion-*`（22行）を削除。`types.ts` の `EMOTION_COLORS` を唯一の根拠に

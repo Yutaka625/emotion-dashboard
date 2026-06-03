@@ -3,13 +3,16 @@
  * Multi-session comparison section — A vs B side-by-side analysis
  */
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Download } from 'lucide-react';
 import type { DashboardData } from '@/lib/types';
 import { EMOTION_LABELS_JA, EMOTION_COLORS, NON_NEUTRAL_EMOTIONS } from '@/lib/types';
-import { welchTTest } from '@/lib/statisticsUtils';
-import type { TTestResult } from '@/lib/statisticsUtils';
+import { welchTTest, mannWhitneyU } from '@/lib/statisticsUtils';
+import type { TTestResult, MannWhitneyResult } from '@/lib/statisticsUtils';
 import { formatScore } from '@/lib/utils';
+
+// 統計検定の手法切替（パラメトリック / ノンパラメトリック）
+type TestMethod = 'welch' | 'mannwhitney';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   Cell, Legend, LineChart, Line, RadarChart, PolarGrid, PolarAngleAxis, Radar,
@@ -27,35 +30,93 @@ const COLOR_A = 'oklch(0.70 0.14 195)';  /* teal */
 const COLOR_B = 'oklch(0.78 0.22 340)';  /* hot pink */
 
 export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Props) {
-  // ---- セッション間 Welch t検定（全フレームを2標本として比較） ----
+  // ---- 統計検定の手法切替（Welch t検定 / Mann-Whitney U） ----
+  const [testMethod, setTestMethod] = useState<TestMethod>('welch');
+
+  // 各感情について、両セッションの全フレームを2標本として抽出する
+  const emotionSamples = useMemo(() => {
+    const out: Record<string, { a: number[]; b: number[] }> = {};
+    for (const e of NON_NEUTRAL_EMOTIONS) {
+      out[e] = {
+        a: dataA.timeseries_full.map(p => (p as any)[e] as number).filter(v => !isNaN(v)),
+        b: dataB.timeseries_full.map(p => (p as any)[e] as number).filter(v => !isNaN(v)),
+      };
+    }
+    return out;
+  }, [dataA, dataB]);
+
+  // ---- セッション間 Welch t検定（パラメトリック） ----
   const sessionComparison = useMemo(() => {
     const results: Record<string, TTestResult> = {};
     for (const e of NON_NEUTRAL_EMOTIONS) {
-      const aVals = dataA.timeseries_full.map(p => (p as any)[e] as number).filter(v => !isNaN(v));
-      const bVals = dataB.timeseries_full.map(p => (p as any)[e] as number).filter(v => !isNaN(v));
-      results[e] = welchTTest(aVals, bVals);
+      results[e] = welchTTest(emotionSamples[e].a, emotionSamples[e].b);
     }
     return results;
-  }, [dataA, dataB]);
+  }, [emotionSamples]);
 
-  // ---- 比較統計結果の CSV エクスポート ----
+  // ---- セッション間 Mann-Whitney U検定（ノンパラメトリック） ----
+  const sessionComparisonMW = useMemo(() => {
+    const results: Record<string, MannWhitneyResult> = {};
+    for (const e of NON_NEUTRAL_EMOTIONS) {
+      results[e] = mannWhitneyU(emotionSamples[e].a, emotionSamples[e].b);
+    }
+    return results;
+  }, [emotionSamples]);
+
+  // ---- 統計サマリーの CSV エクスポート（記述統計＋Welch＋Mann-Whitney を1ファイルに） ----
   const exportComparisonCSV = () => {
     const q = (s: string | number) => `"${String(s).replace(/"/g, '""')}"`;
-    const headers = ['感情', `${labelA}_mean`, `${labelB}_mean`, 't値', 'df', 'p値', "Cohen's_d", '効果量', '有意性', 'nA', 'nB'];
-    const rows = [headers.join(',')];
+    const rows: string[] = [];
+
+    // メタデータ
+    rows.push('## COMPARISON META');
+    rows.push('項目,値');
+    rows.push(`セッションA,${q(labelA)}`);
+    rows.push(`セッションB,${q(labelB)}`);
+    rows.push(`出力日時,${q(new Date().toISOString())}`);
+    rows.push('');
+
+    // 記述統計
+    rows.push('## DESCRIPTIVE STATISTICS');
+    rows.push('感情,meanA,meanB,medianA,medianB,sdA,sdB,nA,nB');
+    for (const e of NON_NEUTRAL_EMOTIONS) {
+      const t = sessionComparison[e];
+      const m = sessionComparisonMW[e];
+      if (!t || !m) continue;
+      rows.push([q(EMOTION_LABELS_JA[e] || e), t.meanA, t.meanB, m.medianA, m.medianB, t.stdA, t.stdB, t.nA, t.nB].join(','));
+    }
+    rows.push('');
+
+    // Welch t検定
+    rows.push('## WELCH T-TEST (parametric)');
+    rows.push("感情,t値,df,p値,Cohen's_d,効果量,有意性");
     for (const e of NON_NEUTRAL_EMOTIONS) {
       const r = sessionComparison[e];
       if (!r) continue;
-      rows.push([q(EMOTION_LABELS_JA[e] || e), r.meanA, r.meanB, r.t, r.df, r.p, r.cohensD, q(r.effectSize), q(r.significance), r.nA, r.nB].join(','));
+      rows.push([q(EMOTION_LABELS_JA[e] || e), r.t, r.df, r.p, r.cohensD, q(r.effectSize), q(r.significance)].join(','));
     }
-    const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    rows.push('');
+
+    // Mann-Whitney U検定
+    rows.push('## MANN-WHITNEY U TEST (non-parametric)');
+    rows.push('感情,U,z,p値,効果量r,効果量,有意性');
+    for (const e of NON_NEUTRAL_EMOTIONS) {
+      const r = sessionComparisonMW[e];
+      if (!r) continue;
+      rows.push([q(EMOTION_LABELS_JA[e] || e), r.U, r.z, r.p, r.rankBiserial, q(r.effectSize), q(r.significance)].join(','));
+    }
+
+    // BOM 付きで出力（Excel 文字化け対策。他エクスポートと統一）
+    const stamp = new Date().toISOString().slice(0, 16).replace(/[-:T]/g, '').replace(/(\d{8})(\d{4})/, '$1-$2');
+    const blob = new Blob(['﻿' + rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.setAttribute('href', URL.createObjectURL(blob));
-    link.setAttribute('download', `comparison_statistics_${labelA}_vs_${labelB}.csv`);
+    link.setAttribute('download', `comparison_statistics_${labelA}_vs_${labelB}_${stamp}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
   };
 
   // ---- 感情統計バーチャート用データ ----
@@ -330,7 +391,9 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
               セッション間 統計的検定
             </div>
             <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.68 0.015 255)', marginTop: '2px' }}>
-              両セッションの全フレームを標本としてWelchのt検定を実施。Cohen's dで効果量を評価します。
+              {testMethod === 'welch'
+                ? '両セッションの全フレームを標本としてWelchのt検定を実施。Cohen\'s dで効果量を評価します。'
+                : '両セッションの全フレームを標本としてMann-Whitney U検定（ノンパラメトリック）を実施。正規性を仮定せず、効果量はランク二列相関 r で評価します。'}
             </p>
           </div>
           {/* CSV エクスポートボタン */}
@@ -338,36 +401,78 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
             onClick={exportComparisonCSV}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all flex-shrink-0"
             style={{ fontFamily: 'Noto Sans JP, sans-serif', background: 'oklch(0.32 0.12 160)', color: 'white', border: '1px solid oklch(0.52 0.18 160)' }}
-            title="統計検定結果をCSVでダウンロード"
+            title="記述統計＋Welch＋Mann-Whitneyの統計サマリーをCSVでダウンロード"
           >
             <Download size={13} />
             CSV出力
           </button>
         </div>
 
+        {/* 検定手法トグル（パラメトリック / ノンパラメトリック） */}
+        <div className="flex gap-2 mt-3 mb-3">
+          {([
+            { id: 'welch', label: 'Welch t検定', desc: 'パラメトリック' },
+            { id: 'mannwhitney', label: 'Mann-Whitney U', desc: 'ノンパラメトリック' },
+          ] as const).map(opt => {
+            const on = testMethod === opt.id;
+            return (
+              <button
+                key={opt.id}
+                onClick={() => setTestMethod(opt.id)}
+                title={opt.desc}
+                className="px-3 py-1.5 rounded-lg text-xs transition-all"
+                style={{
+                  fontFamily: 'Noto Sans JP, sans-serif',
+                  fontWeight: on ? 700 : 400,
+                  background: on ? 'oklch(0.30 0.10 270)' : 'oklch(0.22 0.04 255)',
+                  color: on ? 'oklch(0.85 0.18 285)' : 'oklch(0.66 0.015 255)',
+                  border: `1px solid ${on ? 'oklch(0.55 0.18 285)' : 'oklch(0.30 0.04 255)'}`,
+                }}
+              >
+                {opt.label}
+              </button>
+            );
+          })}
+        </div>
+
         {/* 凡例 */}
-        <div className="flex gap-4 mb-3 text-xs" style={{ fontFamily: 'Roboto Mono, monospace', color: 'oklch(0.66 0.015 255)', marginTop: '12px' }}>
+        <div className="flex gap-4 mb-3 text-xs flex-wrap" style={{ fontFamily: 'Roboto Mono, monospace', color: 'oklch(0.66 0.015 255)' }}>
           <span>*** p&lt;0.001</span>
           <span>** p&lt;0.01</span>
           <span>* p&lt;0.05</span>
           <span>n.s. p≥0.05</span>
-          <span style={{ marginLeft: '8px' }}>効果量: 大(|d|≥0.8) / 中(≥0.5) / 小(≥0.2) / 極小</span>
+          <span style={{ marginLeft: '8px' }}>
+            {testMethod === 'welch'
+              ? '効果量(Cohen\'s d): 大(|d|≥0.8) / 中(≥0.5) / 小(≥0.2) / 極小'
+              : '効果量(r): 大(|r|≥0.5) / 中(≥0.3) / 小(≥0.1) / 極小'}
+          </span>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-xs" style={{ borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: 'oklch(0.185 0.04 255)', borderBottom: '1px solid oklch(0.26 0.04 255)' }}>
-                {['感情', `${labelA} 平均`, `${labelB} 平均`, 't値', 'df', 'p値', "Cohen's d", '効果量', '有意性'].map(h => (
+                {(testMethod === 'welch'
+                  ? ['感情', `${labelA} 平均`, `${labelB} 平均`, 't値', 'df', 'p値', "Cohen's d", '効果量', '有意性']
+                  : ['感情', `${labelA} 中央値`, `${labelB} 中央値`, 'U', 'z', 'p値', '効果量r', '効果量', '有意性']
+                ).map(h => (
                   <th key={h} style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.62 0.015 255)', padding: '6px 10px', textAlign: 'left', whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {NON_NEUTRAL_EMOTIONS.map(emotion => {
+                // 選択中の検定に応じて表示する統計量を切り替える
                 const r = sessionComparison[emotion];
-                if (!r) return null;
-                const isSig = r.significance !== 'n.s.';
+                const m = sessionComparisonMW[emotion];
+                if (!r || !m) return null;
+                const isSig = (testMethod === 'welch' ? r.significance : m.significance) !== 'n.s.';
+                const significance = testMethod === 'welch' ? r.significance : m.significance;
+                const effectSize = testMethod === 'welch' ? r.effectSize : m.effectSize;
+                // 3〜6列目（検定統計量）の値
+                const cols = testMethod === 'welch'
+                  ? [formatScore(r.meanA), formatScore(r.meanB), r.t.toFixed(3), r.df.toFixed(1), r.p.toFixed(4), r.cohensD.toFixed(3)]
+                  : [formatScore(m.medianA), formatScore(m.medianB), m.U.toFixed(1), m.z.toFixed(3), m.p.toFixed(4), m.rankBiserial.toFixed(3)];
                 return (
                   <tr key={emotion} style={{ borderBottom: '1px solid oklch(0.22 0.04 255)', background: isSig ? 'oklch(0.22 0.06 270 / 0.4)' : 'transparent' }}>
                     <td style={{ padding: '5px 10px' }}>
@@ -375,14 +480,14 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
                         {EMOTION_LABELS_JA[emotion] || emotion}
                       </span>
                     </td>
-                    <td style={{ fontFamily: 'Roboto Mono, monospace', padding: '5px 10px', color: COLOR_A, fontSize: '0.72rem' }}>{formatScore(r.meanA)}</td>
-                    <td style={{ fontFamily: 'Roboto Mono, monospace', padding: '5px 10px', color: COLOR_B, fontSize: '0.72rem' }}>{formatScore(r.meanB)}</td>
-                    <td style={{ fontFamily: 'Roboto Mono, monospace', padding: '5px 10px', color: 'oklch(0.75 0.008 250)', fontSize: '0.72rem' }}>{r.t.toFixed(3)}</td>
-                    <td style={{ fontFamily: 'Roboto Mono, monospace', padding: '5px 10px', color: 'oklch(0.66 0.015 255)', fontSize: '0.72rem' }}>{r.df.toFixed(1)}</td>
-                    <td style={{ fontFamily: 'Roboto Mono, monospace', padding: '5px 10px', color: isSig ? 'oklch(0.78 0.20 140)' : 'oklch(0.66 0.015 255)', fontSize: '0.72rem' }}>{r.p.toFixed(4)}</td>
-                    <td style={{ fontFamily: 'Roboto Mono, monospace', padding: '5px 10px', color: 'oklch(0.75 0.008 250)', fontSize: '0.72rem' }}>{r.cohensD.toFixed(3)}</td>
-                    <td style={{ fontFamily: 'Noto Sans JP, sans-serif', padding: '5px 10px', color: 'oklch(0.65 0.015 255)', fontSize: '0.72rem' }}>{r.effectSize}</td>
-                    <td style={{ fontFamily: 'Roboto Mono, monospace', padding: '5px 10px', fontSize: '0.85rem', fontWeight: 700, color: isSig ? 'oklch(0.85 0.22 95)' : 'oklch(0.62 0.015 255)' }}>{r.significance}</td>
+                    <td style={{ fontFamily: 'Roboto Mono, monospace', padding: '5px 10px', color: COLOR_A, fontSize: '0.72rem' }}>{cols[0]}</td>
+                    <td style={{ fontFamily: 'Roboto Mono, monospace', padding: '5px 10px', color: COLOR_B, fontSize: '0.72rem' }}>{cols[1]}</td>
+                    <td style={{ fontFamily: 'Roboto Mono, monospace', padding: '5px 10px', color: 'oklch(0.75 0.008 250)', fontSize: '0.72rem' }}>{cols[2]}</td>
+                    <td style={{ fontFamily: 'Roboto Mono, monospace', padding: '5px 10px', color: 'oklch(0.66 0.015 255)', fontSize: '0.72rem' }}>{cols[3]}</td>
+                    <td style={{ fontFamily: 'Roboto Mono, monospace', padding: '5px 10px', color: isSig ? 'oklch(0.78 0.20 140)' : 'oklch(0.66 0.015 255)', fontSize: '0.72rem' }}>{cols[4]}</td>
+                    <td style={{ fontFamily: 'Roboto Mono, monospace', padding: '5px 10px', color: 'oklch(0.75 0.008 250)', fontSize: '0.72rem' }}>{cols[5]}</td>
+                    <td style={{ fontFamily: 'Noto Sans JP, sans-serif', padding: '5px 10px', color: 'oklch(0.65 0.015 255)', fontSize: '0.72rem' }}>{effectSize}</td>
+                    <td style={{ fontFamily: 'Roboto Mono, monospace', padding: '5px 10px', fontSize: '0.85rem', fontWeight: 700, color: isSig ? 'oklch(0.85 0.22 95)' : 'oklch(0.62 0.015 255)' }}>{significance}</td>
                   </tr>
                 );
               })}
