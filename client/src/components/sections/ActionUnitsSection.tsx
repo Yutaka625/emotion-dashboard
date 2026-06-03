@@ -240,8 +240,8 @@ export default function ActionUnitsSection({ data }: Props) {
             </div>
           ))}
         </div>
-        <div className="mt-4 p-3 rounded" style={{ background: 'oklch(0.95 0.005 250 / 0.5)', border: '1px solid oklch(0.88 0.008 250)' }}>
-          <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.56 0.015 250)', lineHeight: 1.6 }}>
+        <div className="mt-4 p-3 rounded" style={{ background: 'oklch(0.20 0.04 255)', border: '1px solid oklch(0.30 0.04 255)' }}>
+          <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.78 0.012 250)', lineHeight: 1.6 }}>
             <strong>解釈：</strong>Pitch（上下方向の傾き）の平均{headPoseData.find(p => p.key === 'pitch')?.mean.toFixed(2)}°は、わずかに下を向いた姿勢を示します。Yaw（左右方向）の平均{headPoseData.find(p => p.key === 'yaw')?.mean.toFixed(2)}°は正面からのわずかな左向きを示します。これらの値は自然な会話・視聴時の典型的な頭部姿勢の範囲内です。
           </p>
         </div>
