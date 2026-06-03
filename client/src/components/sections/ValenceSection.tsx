@@ -192,8 +192,8 @@ export default function ValenceSection({ data }: Props) {
             </div>
           ))}
         </div>
-        <div className="mt-3 p-3 rounded" style={{ background: 'oklch(0.95 0.005 250 / 0.5)', border: '1px solid oklch(0.88 0.008 250)' }}>
-          <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.56 0.015 250)', lineHeight: 1.6 }}>
+        <div className="mt-3 p-3 rounded" style={{ background: 'oklch(0.20 0.04 255)', border: '1px solid oklch(0.30 0.04 255)' }}>
+          <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.78 0.012 250)', lineHeight: 1.6 }}>
             <strong>解釈：</strong>大多数のフレーム（{circumplex_summary.low_arousal_positive.toLocaleString()}フレーム）が「低覚醒×高Valence」象限に分類されました。これはリラックスした満足状態または穏やかなポジティブ感情を示しており、覚醒度が低い（Engagement低）ながらも感情価は高い（Valence高）という特徴的なパターンです。
           </p>
         </div>

@@ -7,6 +7,7 @@
 import { useMemo, useState } from 'react';
 import type { DashboardData } from '@/lib/types';
 import { EMOTION_LABELS_JA, EMOTION_COLORS, NON_NEUTRAL_EMOTIONS } from '@/lib/types';
+import AbsoluteScaleBadge from '@/components/ui/AbsoluteScaleBadge';
 import { useEvents } from '@/contexts/EventsContext';
 import { AlertTriangle, Star, Zap, Brain, Trophy, Filter } from 'lucide-react';
 
@@ -200,6 +201,8 @@ export default function UXResearchSection({ data }: Props) {
         <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.68 0.015 255)', marginTop: '0.5rem' }}>
           フラストレーション・デライト・認知負荷など、UX改善に直結する感情指標を可視化します
         </p>
+        {/* ベースライン補正ON時: UXスコアは絶対値（補正対象外）であることを明示 */}
+        <div className="mt-2"><AbsoluteScaleBadge /></div>
       </div>
 
       {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

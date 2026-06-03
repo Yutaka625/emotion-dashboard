@@ -6,9 +6,10 @@
  * ベースラインバナーから行えます（全タブ共通）。
  */
 
+import { useMemo } from 'react';
 import type { TimeseriesPoint } from '@/lib/types';
 import { EMOTION_COLORS, EMOTION_LABELS_JA, NON_NEUTRAL_EMOTIONS } from '@/lib/types';
-import { Wand2 } from 'lucide-react';
+import { Wand2, AlertTriangle } from 'lucide-react';
 import { useBaseline } from '@/contexts/BaselineContext';
 import { detectBaselineWindow } from '@/lib/csvAnalyzer';
 import { toast } from 'sonner';
@@ -39,6 +40,26 @@ export default function BaselineSettingsCard({ timeseriesFull }: Props) {
     centerMethod,
     setCenterMethod,
   } = useBaseline();
+
+  // ベースライン区間の品質指標（区間長・フレーム数・安定性の警告）を算出する。
+  // 研究妥当性のため「短すぎる区間」「ばらつきが大きい（無表情として不安定な）区間」を可視化する。
+  const quality = useMemo(() => {
+    if (!baselineRange) return null;
+    const [s, e] = baselineRange;
+    const windowSec = e - s;
+    const frames = timeseriesFull.filter(p => p.time >= s && p.time <= e).length;
+    // 非ニュートラル感情のSDの最大値（0-100スケール）。無表情区間なら小さいはず。
+    const maxSd = baselineOffsets
+      ? Math.max(0, ...NON_NEUTRAL_EMOTIONS.map(em => baselineOffsets[em]?.sd ?? 0))
+      : 0;
+    return {
+      windowSec,
+      frames,
+      maxSd,
+      shortWindow: windowSec < 10,      // 10秒未満は短すぎて代表性が低い
+      highVariance: maxSd > 5,          // SD>5（0-100）は無表情区間としてやや不安定
+    };
+  }, [baselineRange, baselineOffsets, timeseriesFull]);
 
   return (
     <CollapsibleCard
@@ -98,7 +119,7 @@ export default function BaselineSettingsCard({ timeseriesFull }: Props) {
               {baselineRange[0]}s 〜 {baselineRange[1]}s
             </div>
             <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.68 0.015 255)' }}>
-              （{(baselineRange[1] - baselineRange[0]).toFixed(1)}秒区間）
+              （{(baselineRange[1] - baselineRange[0]).toFixed(1)}秒区間{quality ? ` ・ ${quality.frames.toLocaleString()}フレーム` : ''}）
             </span>
           </div>
         ) : (
@@ -106,19 +127,37 @@ export default function BaselineSettingsCard({ timeseriesFull }: Props) {
             未設定 — TIME RANGE FILTERで無表情区間を選択し、「ベースラインとして設定」を押してください
           </p>
         )}
+
+        {/* 品質警告: 区間が短い / ばらつきが大きい場合に注意喚起（研究妥当性の担保） */}
+        {quality && (quality.shortWindow || quality.highVariance) && (
+          <div className="mt-2 flex flex-col gap-1">
+            {quality.shortWindow && (
+              <div className="flex items-center gap-1.5" style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', color: 'oklch(0.78 0.14 70)' }}>
+                <AlertTriangle size={12} />
+                区間が短い（{quality.windowSec.toFixed(1)}秒）。10秒以上を推奨します。
+              </div>
+            )}
+            {quality.highVariance && (
+              <div className="flex items-center gap-1.5" style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', color: 'oklch(0.78 0.14 70)' }}>
+                <AlertTriangle size={12} />
+                区間内のばらつきが大きい（最大SD {quality.maxSd.toFixed(1)}）。より落ち着いた区間を選ぶと補正が安定します。
+              </div>
+            )}
+          </div>
+        )}
       </SettingBox>
 
       {/* STEP 2: 補正プレビュー（区間設定済みの場合のみ表示） */}
       {baselineOffsets && (
         <SettingBox className="mb-4">
           <SettingSubLabel color="oklch(0.70 0.14 195)">
-            STEP 2 — オフセット値（ベースライン{centerMethod === 'median' ? '中央値' : '平均'}）
+            STEP 2 — オフセット値（ベースライン{centerMethod === 'median' ? '中央値' : '平均'} ± SD）
           </SettingSubLabel>
           <div className="flex flex-wrap gap-2">
             {NON_NEUTRAL_EMOTIONS
-              .map(e => ({ emotion: e, offset: baselineOffsets[e]?.offset ?? 0 }))
+              .map(e => ({ emotion: e, offset: baselineOffsets[e]?.offset ?? 0, sd: baselineOffsets[e]?.sd ?? 0 }))
               .sort((a, b) => b.offset - a.offset)
-              .map(({ emotion, offset }) => (
+              .map(({ emotion, offset, sd }) => (
                 <div key={emotion} className="flex items-center gap-1.5 px-2 py-1 rounded" style={{ background: EMOTION_COLORS[emotion] + '18', border: `1px solid ${EMOTION_COLORS[emotion]}40` }}>
                   <div className="w-1.5 h-1.5 rounded-full" style={{ background: EMOTION_COLORS[emotion] }} />
                   <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', color: 'oklch(0.75 0.008 250)' }}>
@@ -126,6 +165,7 @@ export default function BaselineSettingsCard({ timeseriesFull }: Props) {
                   </span>
                   <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.68rem', color: EMOTION_COLORS[emotion] }}>
                     {offset.toFixed(2)}
+                    <span style={{ color: 'oklch(0.62 0.015 255)' }}> ±{sd.toFixed(2)}</span>
                   </span>
                 </div>
               ))}
