@@ -10,6 +10,7 @@ import {
   Cell, RadarChart, PolarGrid, PolarAngleAxis, Radar,
 } from 'recharts';
 import { rechartsTooltip } from '@/lib/chartTooltip';
+import { formatScore } from '@/lib/utils';
 
 interface Props {
   data: DashboardData;
@@ -77,7 +78,7 @@ export default function EmotionsSection({ data }: Props) {
                 </span>
               </div>
               <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.4rem', color: EMOTION_COLORS[e], lineHeight: 1 }}>
-                {stats?.mean.toFixed(3)}
+                {formatScore(stats?.mean ?? 0)}
               </div>
               <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', color: 'oklch(0.68 0.015 255)', marginTop: '4px' }}>
                 平均値
@@ -87,7 +88,7 @@ export default function EmotionsSection({ data }: Props) {
                   <div className="h-full rounded-full" style={{ width: `${Math.min(100, stats?.max || 0)}%`, background: EMOTION_COLORS[e] }} />
                 </div>
                 <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.68 0.015 255)' }}>
-                  {stats?.max.toFixed(1)}
+                  {formatScore(stats?.max ?? 0)}
                 </span>
               </div>
               <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.68 0.015 255)', marginTop: '2px' }}>
@@ -147,10 +148,7 @@ export default function EmotionsSection({ data }: Props) {
             </thead>
             <tbody>
               {statsTableData.map((row: { emotion: string; key: string; mean: number; std: number; max: number; median: number; color: string }, i: number) => (
-                <tr key={i} style={{ borderBottom: '1px solid oklch(0.20 0.04 255)' }}
-                  onMouseEnter={e => (e.currentTarget.style.background = 'oklch(0.22 0.04 255)')}
-                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                >
+                <tr key={i} className="row-hover" style={{ borderBottom: '1px solid oklch(0.20 0.04 255)' }}>
                   <td className="py-2 pr-4">
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full" style={{ background: row.color }} />

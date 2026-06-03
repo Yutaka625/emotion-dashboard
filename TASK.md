@@ -7,25 +7,6 @@
 
 # 🔲 未完了タスク（これから対応するもの）
 
-## 🟠 中〜高優先度（UX の摩擦）
-- [ ] **設定カードの折りたたみ／ツールチップを他セクションへ横展開**（Overview / Academic 等）
-  - ※ 設定4カードの本体レイアウト統一（共通部品化）は完了済み
-- [ ] **ComparisonSection の空状態に導線を追加**（`ComparisonSection.tsx` / `Home.tsx`）
-  - 「比較用CSVを追加してください」だけで追加方法が不明 → ＋比較CSVボタンへの案内・矢印を追加
-- [ ] **スムージング設定のα値スライダーを反転**（`SmoothingSettingsCard.tsx`）
-  - 現在: 左=0.05（強）/ 右=0.90（弱）で直感と逆。「スムージング強度0〜100%」表記に
-
-## 🟡 中優先度（一貫性・洗練度）
-- [ ] **ホバー実装をCSSに統一**（`Sidebar.tsx` / `Home.tsx` ほか）
-  - `onMouseEnter/Leave` のDOM直接操作を Tailwind `hover:` / CSS変数ベースへ
-- [ ] **EMOTION_COLORS と CSS `.emotion-*` クラスの色を統一**（`types.ts` / `index.css`）
-  - 同じ感情に異なるOKLCH値が2箇所で定義。`types.ts` を Single Source of Truth に
-- [ ] **数値フォーマットの統一**（全セクション）
-  - 感情スコア `.toFixed(3)` / Engagement・Valence・Attention `.toFixed(1)` に統一
-  - 共通フォーマッタ `formatScore()` / `formatPct()` を `utils.ts` に追加
-- [ ] **セクション切り替え時のフェードイン追加**（`Home.tsx` / `index.css`）
-  - `display: none → block` の瞬時切替が唐突 → `@keyframes fade-in` で自然に
-
 ## 🟢 低優先度（後回し可）
 - [ ] **モバイル対応**（サイドバーのドロワー化・グリッドのレスポンシブ確認）
 - [ ] **アクセシビリティ（a11y）対応**（aria-label・フォーカスリング・グラフの role）
@@ -56,6 +37,17 @@
 ---
 
 # ✅ 完了済みタスク
+
+## 2026-06 セッション（一貫性・洗練度バッチ）
+- **感情色を EMOTION_COLORS に一本化（SSOT）**: `index.css` の未使用かつ値がズレていた `.emotion-*` / `.bg-emotion-*`（22行）を削除。`types.ts` の `EMOTION_COLORS` を唯一の根拠に
+- **セクション切替フェードイン**: `@keyframes fade-in` + `.section-fade-in` を追加し、`Home.tsx` の各セクション wrapper に付与。display:none↔block の切替ごとに再生（状態は保持）
+- **数値フォーマット統一**: `utils.ts` に `formatScore()`（感情スコア=小数3桁）/ `formatPct()`（Engagement・Valence・Attention=小数1桁）を追加し、Overview/Emotions/Comparison/EngagementValence の該当表示を置換（相関・時間・占有率は対象外）
+- **ホバー実装をCSSに統一**: `onMouseEnter/Leave` のDOM直接操作（24箇所/10ファイル）を全廃。`index.css` に共通クラス（`.row-hover` / CSS変数ベースの `.hbg`・`.hfg`・`.hbd` / `.nav-item[data-active]`）を定義し、動的値はCSS変数で受け渡し。条件付き2箇所（サイドバーナビの選択判定・Timeseries行のイベント色背景）も変換
+
+## 2026-06 セッション（UX の摩擦 解消バッチ）
+- **折りたたみ／ツールチップを Overview・Academic へ横展開**: 各重いチャート・表カードを `CollapsibleCard` 化（▲▼トグル＋ⓘツールチップ＋localStorage で開閉永続化）。既存のインライン説明文は維持し ⓘ に補足を追加。Hero の小さな数値カードは対象外
+- **ComparisonSection の空状態に導線を追加**: 「比較用CSVを追加してください」の一文を、機能説明＋「＋比較用CSVを選択」ボタン（直接ファイル選択を起動）＋右上ボタンへの矢印つき案内ブロックに刷新（`Home.tsx`）
+- **スムージングα値スライダーを「平滑化強度 0〜100%」に反転**: 右ほど強い直感的UIに（内部 α と `smoothEMA` の式は不変＝計算互換。`SmoothingSettingsCard.tsx` のみ変更）
 
 ## 2026-06 セッション（UI/UX 改善・バグ修正 / main マージ済）
 - **A/B比較タブに統計検定を追加**: Welch t検定 + Cohen's d（効果量）＋統計結果のCSVエクスポート

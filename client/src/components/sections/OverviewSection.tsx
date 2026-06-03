@@ -14,6 +14,8 @@ import {
   RadarChart, PolarGrid, PolarAngleAxis, Radar,
 } from 'recharts';
 import { rechartsTooltip } from '@/lib/chartTooltip';
+import CollapsibleCard from '@/components/ui/CollapsibleCard';
+import { formatScore, formatPct } from '@/lib/utils';
 
 interface Props {
   data: DashboardData;
@@ -179,27 +181,27 @@ export default function OverviewSection({ data }: Props) {
         />
         <MetricCard
           label="Engagement 平均"
-          value={engMean.toFixed(2)}
+          value={formatPct(engMean)}
           unit="%"
           icon={<Zap size={16} />}
           color="oklch(0.72 0.18 80)"
-          sub={`最大: ${engMax.toFixed(1)}%`}
+          sub={`最大: ${formatPct(engMax)}%`}
         />
         <MetricCard
           label="Valence 平均"
-          value={valMean.toFixed(1)}
+          value={formatPct(valMean)}
           unit="%"
           icon={<TrendingUp size={16} />}
           color="oklch(0.62 0.18 25)"
-          sub={`中央値: ${special_stats.valence?.median.toFixed(1)}%`}
+          sub={`中央値: ${formatPct(special_stats.valence?.median ?? 0)}%`}
         />
         <MetricCard
           label="Attention 平均"
-          value={attMean.toFixed(1)}
+          value={formatPct(attMean)}
           unit="%"
           icon={<Eye size={16} />}
           color="oklch(0.55 0.18 300)"
-          sub={`最大: ${attentionStats?.max.toFixed(1)}%`}
+          sub={`最大: ${formatPct(attentionStats?.max ?? 0)}%`}
         />
         <MetricCard
           label="主要感情"
@@ -213,11 +215,12 @@ export default function OverviewSection({ data }: Props) {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Dominant Emotion Pie */}
-        <div className="metric-card">
-          <div className="section-label mb-3">支配的感情の分布</div>
-          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
-            感情状態の占有率
-          </div>
+        <CollapsibleCard
+          label="支配的感情の分布"
+          title="感情状態の占有率"
+          info="各フレームで最も強い感情を「支配的感情」として集計し、占有率（時間割合）で示します。"
+          storageKey="ksdv.collapse.overview.pie"
+        >
           <ResponsiveContainer width="100%" height={240}>
             <PieChart>
               <Pie
@@ -269,14 +272,15 @@ export default function OverviewSection({ data }: Props) {
               />
             </PieChart>
           </ResponsiveContainer>
-        </div>
+        </CollapsibleCard>
 
         {/* Emotion Radar */}
-        <div className="metric-card">
-          <div className="section-label mb-3">EMOTION PROFILE</div>
-          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
-            感情プロファイル（平均値）
-          </div>
+        <CollapsibleCard
+          label="EMOTION PROFILE"
+          title="感情プロファイル（平均値）"
+          info="9種類の感情スコアの平均値をレーダーチャートで俯瞰します。外側に広がるほどその感情が強く表れています。"
+          storageKey="ksdv.collapse.overview.radar"
+        >
           <ResponsiveContainer width="100%" height={240}>
             <RadarChart data={radarData}>
               <PolarGrid stroke="oklch(0.28 0.04 255)" />
@@ -294,19 +298,20 @@ export default function OverviewSection({ data }: Props) {
               />
               <Tooltip
                 {...rechartsTooltip}
-                formatter={(v: number) => [v.toFixed(3), '平均値']}
+                formatter={(v: number) => [formatScore(v), '平均値']}
               />
             </RadarChart>
           </ResponsiveContainer>
-        </div>
+        </CollapsibleCard>
       </div>
 
       {/* Key Insights */}
-      <div className="metric-card">
-        <div className="section-label mb-3">KEY INSIGHTS</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
-          主要な発見
-        </div>
+      <CollapsibleCard
+        label="KEY INSIGHTS"
+        title="主要な発見"
+        info="本セッションの統計から自動抽出した注目ポイントです（ルールベース判定、上位4件）。"
+        storageKey="ksdv.collapse.overview.insights"
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {keyInsights.map(insight => (
             <div key={insight.id} className="p-4 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', borderLeft: `3px solid ${insight.color}`, border: `1px solid ${insight.color}30`, borderLeftWidth: '3px' }}>
@@ -322,14 +327,15 @@ export default function OverviewSection({ data }: Props) {
             </div>
           ))}
         </div>
-      </div>
+      </CollapsibleCard>
 
       {/* Data Quality */}
-      <div className="metric-card">
-        <div className="section-label mb-3">DATA QUALITY</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
-          データ品質指標
-        </div>
+      <CollapsibleCard
+        label="DATA QUALITY"
+        title="データ品質指標"
+        info="記録日時・フレームレート・顔/感情の検出率など、分析の信頼性を示す指標です。"
+        storageKey="ksdv.collapse.overview.quality"
+      >
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { label: '記録日時', value: `${meta.recording_date} ${meta.recording_time}` },
@@ -350,7 +356,7 @@ export default function OverviewSection({ data }: Props) {
             </div>
           ))}
         </div>
-      </div>
+      </CollapsibleCard>
     </div>
   );
 }

@@ -172,10 +172,7 @@ export default function ActionUnitsSection({ data }: Props) {
               {auData.map((row, i) => {
                 const info = AU_DESCRIPTIONS[row.name];
                 return (
-                  <tr key={i} style={{ borderBottom: '1px solid oklch(0.20 0.04 255)' }}
-                    onMouseEnter={e => (e.currentTarget.style.background = 'oklch(0.22 0.04 255)')}
-                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                  >
+                  <tr key={i} className="row-hover" style={{ borderBottom: '1px solid oklch(0.20 0.04 255)' }}>
                     <td className="py-2 pr-4">
                       <span className="px-2 py-0.5 rounded text-xs" style={{ background: getColor(row.mean) + '20', color: getColor(row.mean), fontFamily: 'Roboto Mono, monospace', fontWeight: 600 }}>
                         {info?.au || '—'}
@@ -301,9 +298,8 @@ export default function ActionUnitsSection({ data }: Props) {
                   return (
                     <tr
                       key={i}
+                      className="row-hover"
                       style={{ borderBottom: '1px solid oklch(0.20 0.04 255)' }}
-                      onMouseEnter={e => (e.currentTarget.style.background = 'oklch(0.22 0.04 255)')}
-                      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                     >
                       {/* 動作種別 */}
                       <td className="py-2 pr-4">

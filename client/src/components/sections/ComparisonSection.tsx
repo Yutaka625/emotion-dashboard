@@ -9,6 +9,7 @@ import type { DashboardData } from '@/lib/types';
 import { EMOTION_LABELS_JA, EMOTION_COLORS, NON_NEUTRAL_EMOTIONS } from '@/lib/types';
 import { welchTTest } from '@/lib/statisticsUtils';
 import type { TTestResult } from '@/lib/statisticsUtils';
+import { formatScore } from '@/lib/utils';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   Cell, Legend, LineChart, Line, RadarChart, PolarGrid, PolarAngleAxis, Radar,
@@ -296,19 +297,16 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
                 const barWidth = maxDiff > 0 ? Math.abs(row.diff) / maxDiff * 100 : 0;
                 const isPositive = row.diff >= 0;
                 return (
-                  <tr key={i} style={{ borderBottom: '1px solid oklch(0.20 0.04 255)' }}
-                    onMouseEnter={e => (e.currentTarget.style.background = 'oklch(0.22 0.04 255)')}
-                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                  >
+                  <tr key={i} className="row-hover" style={{ borderBottom: '1px solid oklch(0.20 0.04 255)' }}>
                     <td className="py-2 pr-4">
                       <span className="px-2 py-0.5 rounded text-xs" style={{ background: row.color + '20', color: row.color, fontFamily: 'Noto Sans JP, sans-serif' }}>
                         {row.label}
                       </span>
                     </td>
-                    <td className="py-2 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: COLOR_A }}>{row.meanA.toFixed(4)}</td>
-                    <td className="py-2 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: COLOR_B }}>{row.meanB.toFixed(4)}</td>
+                    <td className="py-2 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: COLOR_A }}>{formatScore(row.meanA)}</td>
+                    <td className="py-2 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: COLOR_B }}>{formatScore(row.meanB)}</td>
                     <td className="py-2 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.75rem', fontWeight: 700, color: isPositive ? COLOR_B : COLOR_A }}>
-                      {row.diff > 0 ? '+' : ''}{row.diff.toFixed(4)}
+                      {row.diff > 0 ? '+' : ''}{formatScore(row.diff)}
                     </td>
                     <td className="py-2 pr-4" style={{ minWidth: '80px' }}>
                       <div className="h-2 rounded-full" style={{ background: 'oklch(0.22 0.04 255)' }}>
@@ -377,8 +375,8 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
                         {EMOTION_LABELS_JA[emotion] || emotion}
                       </span>
                     </td>
-                    <td style={{ fontFamily: 'Roboto Mono, monospace', padding: '5px 10px', color: COLOR_A, fontSize: '0.72rem' }}>{r.meanA.toFixed(3)}</td>
-                    <td style={{ fontFamily: 'Roboto Mono, monospace', padding: '5px 10px', color: COLOR_B, fontSize: '0.72rem' }}>{r.meanB.toFixed(3)}</td>
+                    <td style={{ fontFamily: 'Roboto Mono, monospace', padding: '5px 10px', color: COLOR_A, fontSize: '0.72rem' }}>{formatScore(r.meanA)}</td>
+                    <td style={{ fontFamily: 'Roboto Mono, monospace', padding: '5px 10px', color: COLOR_B, fontSize: '0.72rem' }}>{formatScore(r.meanB)}</td>
                     <td style={{ fontFamily: 'Roboto Mono, monospace', padding: '5px 10px', color: 'oklch(0.75 0.008 250)', fontSize: '0.72rem' }}>{r.t.toFixed(3)}</td>
                     <td style={{ fontFamily: 'Roboto Mono, monospace', padding: '5px 10px', color: 'oklch(0.66 0.015 255)', fontSize: '0.72rem' }}>{r.df.toFixed(1)}</td>
                     <td style={{ fontFamily: 'Roboto Mono, monospace', padding: '5px 10px', color: isSig ? 'oklch(0.78 0.20 140)' : 'oklch(0.66 0.015 255)', fontSize: '0.72rem' }}>{r.p.toFixed(4)}</td>

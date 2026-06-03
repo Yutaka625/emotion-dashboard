@@ -21,7 +21,7 @@ import AcademicSection from '@/components/sections/AcademicSection';
 import ActionUnitsSection from '@/components/sections/ActionUnitsSection';
 import ComparisonSection from '@/components/sections/ComparisonSection';
 import UXResearchSection from '@/components/sections/UXResearchSection';
-import { Upload, X, GitCompare } from 'lucide-react';
+import { Upload, X, GitCompare, ArrowUp } from 'lucide-react';
 
 export default function Home() {
   const [data, setData] = useState<DashboardData | null>(null);
@@ -185,7 +185,42 @@ export default function Home() {
     actionunits: <ActionUnitsSection data={safeDisplayData} />,
     comparison:  secondaryData
       ? <ComparisonSection dataA={safeDisplayData} dataB={secondaryData} labelA={filename || 'Session A'} labelB={secondaryFilename || 'Session B'} />
-      : <div className="flex items-center justify-center h-64" style={{ fontFamily: 'Noto Sans JP, sans-serif', color: 'oklch(0.66 0.015 255)' }}>比較用CSVを追加してください</div>,
+      : (
+        // 比較CSV未追加時の空状態。一文だけだと追加方法が分からないため、
+        // 機能説明と「直接ファイルを選ぶボタン」＋「右上ボタンへの矢印」で導線を示す。
+        <div className="flex items-center justify-center" style={{ minHeight: '60vh' }}>
+          <div
+            className="flex flex-col items-center text-center px-8 py-10 rounded-2xl"
+            style={{ background: 'oklch(0.22 0.04 255)', border: '1px solid oklch(0.32 0.04 255)', maxWidth: '440px' }}
+          >
+            <div
+              className="flex items-center justify-center rounded-full mb-4"
+              style={{ width: '56px', height: '56px', background: 'oklch(0.25 0.08 300)', border: '1px solid oklch(0.45 0.16 300)' }}
+            >
+              <GitCompare size={26} style={{ color: 'oklch(0.78 0.22 300)' }} />
+            </div>
+            <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1.1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '0.5rem' }}>
+              セッション比較を始める
+            </div>
+            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.82rem', color: 'oklch(0.68 0.015 255)', lineHeight: 1.7, marginBottom: '1.5rem' }}>
+              もう1つのCSVを追加すると、2つのセッションをA/B並列で表示し、
+              感情・指標の差分や統計検定（Welch t検定・効果量）を確認できます。
+            </p>
+            <button
+              onClick={() => secondaryInputRef.current?.click()}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-lg hbg"
+              style={{ border: '1px solid oklch(0.45 0.16 300)', color: 'oklch(0.82 0.20 300)', fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '0.85rem', ['--hbg']: 'oklch(0.25 0.08 300)', ['--hbg-h']: 'oklch(0.30 0.10 300)' } as React.CSSProperties}
+            >
+              <GitCompare size={16} />
+              ＋ 比較用CSVを選択
+            </button>
+            <div className="flex items-center gap-1.5 mt-4" style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.60 0.015 255)' }}>
+              <ArrowUp size={13} />
+              右上の「＋比較CSV」ボタンからも追加できます
+            </div>
+          </div>
+        </div>
+      ),
     uxresearch: <UXResearchSection data={safeDisplayData} />,
   };
 
@@ -308,22 +343,18 @@ export default function Home() {
             href="KSDV_guide.html"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-colors"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg hbd hfg"
             style={{
               background: 'oklch(0.27 0.04 255)',
-              border: '1px solid oklch(0.32 0.04 255)',
-              color: 'oklch(0.72 0.008 250)',
+              borderWidth: '1px',
+              borderStyle: 'solid',
               textDecoration: 'none',
               flexShrink: 0,
-            }}
-            onMouseEnter={e => {
-              (e.currentTarget as HTMLAnchorElement).style.borderColor = 'oklch(0.70 0.14 195 / 0.5)';
-              (e.currentTarget as HTMLAnchorElement).style.color = 'oklch(0.70 0.14 195)';
-            }}
-            onMouseLeave={e => {
-              (e.currentTarget as HTMLAnchorElement).style.borderColor = 'oklch(0.32 0.04 255)';
-              (e.currentTarget as HTMLAnchorElement).style.color = 'oklch(0.72 0.008 250)';
-            }}
+              ['--hbd']: 'oklch(0.32 0.04 255)',
+              ['--hbd-h']: 'oklch(0.70 0.14 195 / 0.5)',
+              ['--hfg']: 'oklch(0.72 0.008 250)',
+              ['--hfg-h']: 'oklch(0.70 0.14 195)',
+            } as React.CSSProperties}
             title="使い方ガイドを開く"
           >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -338,7 +369,7 @@ export default function Home() {
             これによりセクション切り替えで内部状態がリセットされなくなる。 */}
         <main ref={mainRef} className="flex-1 overflow-y-auto p-6">
           {sectionIds.map(id => (
-            <div key={id} style={{ display: activeSection === id ? 'block' : 'none' }}>
+            <div key={id} className={activeSection === id ? 'section-fade-in' : undefined} style={{ display: activeSection === id ? 'block' : 'none' }}>
               {sectionComponents[id]}
             </div>
           ))}

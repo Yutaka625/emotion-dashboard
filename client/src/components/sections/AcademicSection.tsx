@@ -13,6 +13,7 @@ import {
 } from 'recharts';
 import { rechartsTooltip } from '@/lib/chartTooltip';
 import AbsoluteScaleBadge from '@/components/ui/AbsoluteScaleBadge';
+import CollapsibleCard from '@/components/ui/CollapsibleCard';
 
 interface Props {
   data: DashboardData;
@@ -224,11 +225,12 @@ export default function AcademicSection({ data }: Props) {
       </div>
 
       {/* Affect Dynamics - Variability */}
-      <div className="metric-card">
-        <div className="section-label mb-3">AFFECT DYNAMICS — VARIABILITY</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '0.5rem' }}>
-          感情変動性（Standard Deviation）
-        </div>
+      <CollapsibleCard
+        label="AFFECT DYNAMICS — VARIABILITY"
+        title="感情変動性（Standard Deviation）"
+        info="各指標の標準偏差（SD）。値が大きいほど、その感情・指標が時間とともに大きく揺れ動いたことを示します。"
+        storageKey="ksdv.collapse.academic.variability"
+      >
         <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.68 0.015 255)', marginBottom: '1rem' }}>
           高い変動性は感情の揺れ幅が大きいことを示します。Fearの変動性が最も高く、Engagementも高い変動性を示しています。
         </p>
@@ -248,14 +250,15 @@ export default function AcademicSection({ data }: Props) {
             </Bar>
           </BarChart>
         </ResponsiveContainer>
-      </div>
+      </CollapsibleCard>
 
       {/* Affect Dynamics - Inertia */}
-      <div className="metric-card">
-        <div className="section-label mb-3">AFFECT DYNAMICS — INERTIA (AR1)</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '0.5rem' }}>
-          感情慣性（1次自己相関係数）
-        </div>
+      <CollapsibleCard
+        label="AFFECT DYNAMICS — INERTIA (AR1)"
+        title="感情慣性（1次自己相関係数）"
+        info="1つ前のフレームとの自己相関（AR1）。1に近いほど状態が持続しやすく、負の値は振動（揺り戻し）を示します。"
+        storageKey="ksdv.collapse.academic.inertia"
+      >
         <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.68 0.015 255)', marginBottom: '1rem' }}>
           高い慣性（AR1が1に近い）は感情状態が持続しやすいことを示します。負の値は振動パターンを示します。
         </p>
@@ -276,14 +279,15 @@ export default function AcademicSection({ data }: Props) {
             </Bar>
           </BarChart>
         </ResponsiveContainer>
-      </div>
+      </CollapsibleCard>
 
       {/* Correlation Heatmap */}
-      <div className="metric-card">
-        <div className="section-label mb-3">CORRELATION MATRIX</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '0.5rem' }}>
-          感情指標間の相関行列
-        </div>
+      <CollapsibleCard
+        label="CORRELATION MATRIX"
+        title="感情指標間の相関行列"
+        info="2つの指標が一緒に増減する度合い（ピアソン相関係数 −1〜+1）。+1に近いほど同調、−1に近いほど逆方向に動きます。"
+        storageKey="ksdv.collapse.academic.correlation"
+      >
         <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.68 0.015 255)', marginBottom: '1rem' }}>
           色の濃さは相関の強さを示します。緑：正の相関、赤：負の相関。
         </p>
@@ -334,14 +338,15 @@ export default function AcademicSection({ data }: Props) {
             </tbody>
           </table>
         </div>
-      </div>
+      </CollapsibleCard>
 
       {/* Circumplex Model Visualization */}
-      <div className="metric-card">
-        <div className="section-label mb-3">CIRCUMPLEX MODEL — QUADRANT ANALYSIS</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '0.5rem' }}>
-          感情の円環モデル象限分析（Russell, 1980）
-        </div>
+      <CollapsibleCard
+        label="CIRCUMPLEX MODEL — QUADRANT ANALYSIS"
+        title="感情の円環モデル象限分析（Russell, 1980）"
+        info="覚醒度（縦）×感情価（横）の2軸で感情を4象限に分類し、各象限に該当したフレーム数と割合を示します。"
+        storageKey="ksdv.collapse.academic.circumplex"
+      >
         <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.68 0.015 255)', marginBottom: '1.5rem' }}>
           X軸：Valence（感情価）、Y軸：Engagement（覚醒度代理）。各象限のフレーム数と割合を示します。
         </p>
@@ -388,14 +393,15 @@ export default function AcademicSection({ data }: Props) {
             高Valence →
           </div>
         </div>
-      </div>
+      </CollapsibleCard>
 
       {/* Academic Interpretation */}
-      <div className="metric-card">
-        <div className="section-label mb-3">ACADEMIC INTERPRETATION</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
-          学術的解釈と考察
-        </div>
+      <CollapsibleCard
+        label="ACADEMIC INTERPRETATION"
+        title="学術的解釈と考察"
+        info="上記の各分析結果を統合し、本セッションの感情ダイナミクスを文章で考察したものです。"
+        storageKey="ksdv.collapse.academic.interpretation"
+      >
         <div className="space-y-4">
           {[
             {
@@ -429,7 +435,7 @@ export default function AcademicSection({ data }: Props) {
             </div>
           ))}
         </div>
-      </div>
+      </CollapsibleCard>
     </div>
   );
 }

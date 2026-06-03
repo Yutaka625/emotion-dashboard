@@ -7,6 +7,7 @@
  * キーボード操作（Tabでフォーカス→説明表示）にも対応している。
  */
 
+import type { CSSProperties } from 'react';
 import { Info } from 'lucide-react';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 
@@ -24,10 +25,8 @@ export default function InfoTooltip({ text, size = 13 }: Props) {
         {/* ボタンにしてキーボードフォーカス可能にする。type="button" でフォーム送信を防ぐ */}
         <button
           type="button"
-          className="inline-flex items-center justify-center rounded-full transition-colors"
-          style={{ color: 'oklch(0.66 0.015 255)', cursor: 'help' }}
-          onMouseEnter={e => (e.currentTarget.style.color = 'oklch(0.75 0.10 255)')}
-          onMouseLeave={e => (e.currentTarget.style.color = 'oklch(0.66 0.015 255)')}
+          className="inline-flex items-center justify-center rounded-full hfg"
+          style={{ cursor: 'help', ['--hfg']: 'oklch(0.66 0.015 255)', ['--hfg-h']: 'oklch(0.75 0.10 255)' } as CSSProperties}
           aria-label="説明を表示"
         >
           <Info size={size} />
