@@ -463,8 +463,12 @@
       <a href="#tab-actionunits">アクションユニット</a>
       <a href="#tab-uxresearch">UXリサーチ</a>
       <a href="#tab-comparison">比較分析</a>
+
+      <div class="section-heading">参考資料</div>
+      <a href="#reference">指標クイックリファレンス</a>
+      <a href="#academic-guide">学術活用ガイド</a>
     </nav>
-    <div class="sidenav-footer">KSDV v2.0 · 2026-05</div>
+    <div class="sidenav-footer">KSDV v2.1 · 2026-06</div>
   </div>
 
   <!-- ─── MAIN CONTENT ─── -->
@@ -638,7 +642,7 @@
           <li><strong>TIME RANGE FILTER</strong> セクションで「開始秒」「終了秒」を入力します。</li>
           <li>プリセットボタン（全体 / 0-60s / 60-120s …）で素早く切り替えることもできます。</li>
           <li>指定後、グラフとすべての統計が選択範囲のデータに絞られます。</li>
-          <li><strong>「CSV出力」ボタン</strong>を押すと、絞り込んだ範囲のデータを <code>emotion_data_○-○s.csv</code> としてダウンロードできます（全感情スコア・Engagement・Valence・Attention・アクションユニット22種を含む）。</li>
+          <li><strong>「CSV出力」ボタン</strong>を押すと、絞り込んだ範囲のデータを <code>emotion_data_○-○s.csv</code> としてダウンロードできます（感情スコア9種〔ニュートラルを除く〕・Engagement・Valence・Attention・AU01〜AU45〔数値コード〕を含む）。</li>
         </ol>
         <div class="note">💡 ベースライン補正と組み合わせる場合は、先にタイムレンジを安静時区間に合わせて「ベースラインとして設定」を押します。</div>
       </div>
@@ -888,6 +892,21 @@
         <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(192,132,252,.25);">特殊指標オーバーレイ（Engagement / Valence / Attention）</span>
         <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">10秒ウィンドウ集計表</span>
         <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">区間t検定</span>
+        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(251,191,36,.25);">補正後データCSV出力（ベースライン有効時）</span>
+      </div>
+
+      <div class="howto">
+        <div class="howto-title">ベースライン補正後データの出力</div>
+        <p style="margin-bottom:8px">ベースライン補正が有効な間、<strong>BASELINE SETTINGS</strong> カードに「補正後データを出力」ボタンが表示されます。出力はBOM付きCSV（Excelでそのまま開けます）で、ファイル名に補正パラメータと日時が含まれます。</p>
+        <table class="tab-table">
+          <thead><tr><th>セクション</th><th>内容</th></tr></thead>
+          <tbody>
+            <tr><td><code>## BASELINE CORRECTION METADATA</code></td><td>補正区間（秒）・中心方式（平均/中央値）・表示モード・出力日時</td></tr>
+            <tr><td><code>## BASELINE OFFSETS</code></td><td>指標ごとのオフセット値（offset）と標準偏差（sd）</td></tr>
+            <tr><td><code>## CORRECTED TIMESERIES</code></td><td>補正後の全フレームデータ（time + 感情9種 + Engagement/Valence/Attention）</td></tr>
+          </tbody>
+        </table>
+        <div class="note">⚠️ AUはベースライン補正の対象外のため、このCSVには含まれません。</div>
       </div>
     </div>
 
@@ -999,6 +1018,24 @@
           <tr><td>FACS</td><td>Ekman & Friesen (1978)</td><td>顔の筋肉動作をAction Unitで体系化。アクションユニットタブと連携</td></tr>
         </tbody>
       </table>
+
+      <div class="howto">
+        <div class="howto-title">CSVレポート出力</div>
+        <p style="margin-bottom:8px">右上の「CSV出力」ボタンで、学術セクションの全データを1ファイルにダウンロードできます。ファイル名は <code>ksdv_report_[元ファイル名].csv</code> です。BOM付きCSVのためExcelでそのまま開けます。</p>
+        <table class="tab-table">
+          <thead><tr><th>セクション</th><th>内容</th></tr></thead>
+          <tbody>
+            <tr><td><code>## SESSION META</code></td><td>ファイル名・総フレーム・録画時間・平均FPS・顔検出率・感情検出率</td></tr>
+            <tr><td><code>## EMOTION STATISTICS</code></td><td>9感情のmean / std / min / max / median / Q25 / Q75</td></tr>
+            <tr><td><code>## SPECIAL METRICS STATISTICS</code></td><td>Engagement / Valence / Attentionの同統計量</td></tr>
+            <tr><td><code>## AFFECT DYNAMICS</code></td><td>全指標のvariability_SD / instability_MSSD / inertia_AR1 / range / mean_absolute_change</td></tr>
+            <tr><td><code>## CORRELATION MATRIX</code></td><td>感情×感情・特殊指標のピアソン相関行列</td></tr>
+            <tr><td><code>## CIRCUMPLEX MODEL (Russell 1980)</code></td><td>4象限のフレーム数</td></tr>
+            <tr><td><code>## CHANGE POINTS</code>（変化点がある場合のみ）</td><td>時刻（秒）・感情・変化量・方向</td></tr>
+          </tbody>
+        </table>
+        <div class="note">💡 統計ソフト（R / Python / SPSS）への読み込みや、論文への数値転記にご活用ください。</div>
+      </div>
     </div>
 
 
@@ -1063,13 +1100,49 @@
       <p>2つのCSVセッションを並べてA/B比較するタブです。ヘッダー右上の「＋比較CSV」ボタンで第2CSVを追加したときのみ表示されます。</p>
 
       <div class="pill-list">
-        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(192,132,252,.25);">感情スコア並列棒グラフ（A vs B）</span>
-        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">差分テーブル（|B−A| 降順）</span>
-        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(251,191,36,.25);">時系列オーバーレイ</span>
-        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">感情プロファイル レーダーチャート（A vs B）</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">セッションメタデータ比較（フレーム数・時間・FPS・顔検出率）</span>
+        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(192,132,252,.25);">感情スコア平均値の比較（EMOTION MEANS）</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">特殊指標比較（Engagement / Valence / Attention）</span>
+        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(251,191,36,.25);">感情状態の象限分布（CIRCUMPLEX MODEL）</span>
+        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">感情変動性レーダー（AFFECT DYNAMICS — VARIABILITY）</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">Engagement 時系列オーバーレイ（時間正規化）</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">感情差分ランキング（DIFFERENCE TABLE、|B−A| 降順）</span>
+        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(192,132,252,.25);">統計検定（Welch t / Mann-Whitney U トグル）</span>
+        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">CSV出力（4セクション構成）</span>
       </div>
 
-      <p><strong>差分テーブル</strong>は |B−A| の絶対差が大きい順に感情を並べます。どの感情で2セッションの差が最も顕著かを一目で把握できます。</p>
+      <div class="howto">
+        <div class="howto-title">セッション間統計検定（STATISTICAL COMPARISON）</div>
+        <p style="margin-bottom:8px">両セッションの全フレームを2標本として統計検定を実施します。画面上のトグルで手法を切り替えられます。</p>
+        <table class="tab-table">
+          <thead><tr><th>手法</th><th>種類</th><th>適した場面</th><th>表示される統計量</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Welch t検定</strong></td><td>パラメトリック</td><td>標本が大きく分布が概ね正規的</td><td>平均A/B・t値・df・p値・Cohen's d</td></tr>
+            <tr><td><strong>Mann-Whitney U</strong></td><td>ノンパラメトリック</td><td>外れ値が多い・正規性が疑わしい</td><td>中央値A/B・U値・z・p値・効果量r</td></tr>
+          </tbody>
+        </table>
+
+        <table class="tab-table" style="margin-top:10px">
+          <thead><tr><th>有意性マーク</th><th>意味</th><th colspan="2">効果量の基準</th></tr></thead>
+          <tbody>
+            <tr><td><strong>***</strong></td><td>p &lt; 0.001</td><td>Cohen's d（Welch）</td><td>大≥0.8 / 中≥0.5 / 小≥0.2 / 極小</td></tr>
+            <tr><td><strong>**</strong></td><td>p &lt; 0.01</td><td>r（Mann-Whitney）</td><td>大≥0.5 / 中≥0.3 / 小≥0.1 / 極小</td></tr>
+            <tr><td><strong>*</strong></td><td>p &lt; 0.05</td><td colspan="2"></td></tr>
+            <tr><td><strong>n.s.</strong></td><td>p ≥ 0.05（有意差なし）</td><td colspan="2"></td></tr>
+          </tbody>
+        </table>
+
+        <table class="tab-table" style="margin-top:10px">
+          <thead><tr><th>CSV出力セクション</th><th>内容</th></tr></thead>
+          <tbody>
+            <tr><td><code>## COMPARISON META</code></td><td>セッションA/Bのファイル名・出力日時</td></tr>
+            <tr><td><code>## DESCRIPTIVE STATISTICS</code></td><td>各感情の平均・中央値・SD・標本数（A/B）</td></tr>
+            <tr><td><code>## WELCH T-TEST</code></td><td>全感情のt値・df・p値・Cohen's d・効果量・有意性</td></tr>
+            <tr><td><code>## MANN-WHITNEY U TEST</code></td><td>全感情のU値・z・p値・効果量r・効果量・有意性</td></tr>
+          </tbody>
+        </table>
+        <div class="note">⚠️ KSDVは9感情を多重比較補正なしで独立検定します。論文発表時はBonferroni補正（α' = 0.05/9 ≈ 0.006）等を研究者自身で適用してください。詳細は「<a href="#academic-guide">学術活用ガイド</a>」を参照。</div>
+      </div>
     </div>
 
 
@@ -1087,16 +1160,151 @@
           <tr><th>指標</th><th>単位/範囲</th><th>説明</th></tr>
         </thead>
         <tbody>
+          <tr><td>感情スコア（10種）</td><td>0〜100%</td><td>anger / contempt / disgust / fear / joy / sadness / surprise / sentimentality / confusion / neutral</td></tr>
           <tr><td>Engagement</td><td>0〜100%</td><td>関与度・集中度。顔の動き・表情の複雑さ・目の動きを総合して算出</td></tr>
           <tr><td>Valence</td><td>0〜100%（50=中立）</td><td>感情の快/不快の度合い。50超がポジティブ、50未満がネガティブ</td></tr>
           <tr><td>Attention</td><td>0〜100%</td><td>視線・注意の向き</td></tr>
-          <tr><td>AR1（慣性）</td><td>0〜1</td><td>前のフレームの状態が次に引き継がれる度合い。1に近いほど感情が持続しやすい</td></tr>
+          <tr><td>frames（フレーム）</td><td>整数</td><td>データの行数。1フレーム = 1回の計測</td></tr>
+          <tr><td>sec（秒）</td><td>秒</td><td>時間軸の単位</td></tr>
+          <tr><td>AR1（慣性）</td><td>−1〜+1</td><td>前のフレームの状態が次に引き継がれる度合い。正=持続、負=振動パターン</td></tr>
           <tr><td>SD（変動性）</td><td>—</td><td>標準偏差。感情スコアのばらつきの大きさ</td></tr>
-          <tr><td>MSSD（不安定性）</td><td>—</td><td>隣接フレーム間の変化の平均二乗。急激な変動の頻度を示す</td></tr>
+          <tr><td>MSSD（不安定性）</td><td>—</td><td>平均二乗連続差。隣接フレーム間の急激な変動の頻度を示す</td></tr>
           <tr><td>支配的感情</td><td>感情名</td><td>そのフレームで最もスコアが高かった感情</td></tr>
-          <tr><td>Pitch / Yaw / Roll</td><td>度（°）</td><td>頭部姿勢の角度。Pitch=上下、Yaw=左右、Roll=傾き</td></tr>
+          <tr><td>Pitch / Yaw / Roll</td><td>度（°）</td><td>頭部姿勢の角度。Pitch=上下（＋=上向き）、Yaw=左右（＋=右向き）、Roll=傾き（＋=右傾き）</td></tr>
         </tbody>
       </table>
+    </div>
+
+    <hr>
+    <div class="doc-section" id="academic-guide">
+      <h2>
+        <span class="h2-icon" style="background:var(--green-dim); color:var(--green);">🎓</span>
+        学術研究・研究開発での活用ガイド
+      </h2>
+      <p>研究論文への活用・査読対応を念頭に置いた補足情報です。数値の根拠・方法論の記述例・査読で問われやすい論点をまとめています。</p>
+
+      <!-- A. データ品質基準 -->
+      <div class="howto">
+        <div class="howto-title">A. 推奨されるデータ品質基準</div>
+        <p style="margin-bottom:8px">論文使用前に以下の基準を満たしているか確認してください。KEY INSIGHTSが自動警告を発する閾値も合わせて示します。</p>
+        <table class="tab-table">
+          <thead><tr><th>指標</th><th>推奨値</th><th>KSDVの自動警告閾値</th></tr></thead>
+          <tbody>
+            <tr><td>顔検出率</td><td>≥ 85%</td><td>&lt; 70%（KEY INSIGHTSでアラート）</td></tr>
+            <tr><td>感情検出率</td><td>≥ 60%</td><td>&lt; 50%（KEY INSIGHTSで注意）</td></tr>
+            <tr><td>フレームレート</td><td>≥ 15 fps</td><td>—（動態指標 AR1/MSSD の信頼性に直接影響）</td></tr>
+            <tr><td>ベースライン区間の長さ</td><td>15〜30秒以上</td><td>短い・ばらつきが大きい場合はBASELINE SETTINGSに警告が出る</td></tr>
+          </tbody>
+        </table>
+        <div class="note">💡 顔検出率が低い場合、感情スコアが0のフレームが混入し、平均値や動態指標が過小評価される可能性があります。論文には顔検出率を必ず記載してください。</div>
+      </div>
+
+      <!-- B. Affect Dynamics 解釈目安 -->
+      <div class="howto">
+        <div class="howto-title">B. Affect Dynamics（感情動態指標）の解釈目安</div>
+        <p style="margin-bottom:4px"><strong>AR1（慣性）</strong>は感情状態の「持続しやすさ」を示します（−1〜+1）。</p>
+        <table class="tab-table">
+          <thead><tr><th>AR1の範囲</th><th>解釈</th></tr></thead>
+          <tbody>
+            <tr><td>0.85 以上</td><td>感情状態が硬直しやすい。一度変わると長く持続する傾向</td></tr>
+            <tr><td>0.50〜0.85</td><td>中程度の持続性</td></tr>
+            <tr><td>0.30〜0.50</td><td>普通の変化しやすさ</td></tr>
+            <tr><td>0.30 未満</td><td>感情が移ろいやすい・反応的（刺激に素早く反応して変化）</td></tr>
+            <tr><td>負値</td><td>振動パターン（↑↓↑↓と交互に変化する）</td></tr>
+          </tbody>
+        </table>
+        <p style="margin-top:10px; margin-bottom:4px"><strong>MSSD と SD² の比較</strong>（不安定性の解釈）：</p>
+        <table class="tab-table">
+          <thead><tr><th>比較</th><th>解釈</th></tr></thead>
+          <tbody>
+            <tr><td>MSSD ≈ SD²</td><td>変化がランダムウォーク的（規則性のない揺れ）</td></tr>
+            <tr><td>MSSD &gt; SD²</td><td>急激な変化が頻発（突発的な感情変化が多い）</td></tr>
+            <tr><td>MSSD &lt; SD²</td><td>変化が緩やか（感情が滑らかに推移）</td></tr>
+          </tbody>
+        </table>
+        <div class="note">📚 参考文献: Kuppens et al. (2010). Emotional inertia and psychological maladjustment. <em>Psychological Science</em>, 21(7), 984–991.</div>
+      </div>
+
+      <!-- C. ベースライン補正の方法論 -->
+      <div class="howto">
+        <div class="howto-title">C. ベースライン補正の方法論的記載</div>
+        <table class="tab-table">
+          <thead><tr><th>モード</th><th>使う場面</th><th>値域</th></tr></thead>
+          <tbody>
+            <tr><td><strong>deviation（偏差）</strong></td><td>標準的な実験研究。方向性（正/負）を保持</td><td>負値あり</td></tr>
+            <tr><td><strong>lift（変化率%）</strong></td><td>「ベースラインから何%増減したか」を比較</td><td>±%</td></tr>
+            <tr><td><strong>zscore</strong></td><td>個人間の標準化が必要な場合。SD &lt; 0.05 は「—」表示</td><td>SD単位</td></tr>
+          </tbody>
+        </table>
+        <div class="note">⚠️ liftモードはValenceで常に「—」表示されます（符号付き指標のため変化率計算が成立しない）。Valenceにはdeviatioまたはzscoreを使用してください。</div>
+        <p style="margin-top:10px"><strong>論文Methods記述例（deviationモード）：</strong></p>
+        <pre style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:12px;font-size:0.78rem;line-height:1.6;color:var(--text-dim);white-space:pre-wrap">測定開始前30秒間（t = 0〜30 s）を安静時ベースライン区間として設定し、各感情スコアおよびEngagement・Valence・Attentionからベースライン平均値を減算した（deviation mode）。ベースライン中心値には算術平均を使用した（Kuppens et al., 2010）。</pre>
+      </div>
+
+      <!-- D. 統計検定と多重比較 -->
+      <div class="howto">
+        <div class="howto-title">D. 統計検定の選択指針と多重比較の注意</div>
+        <table class="tab-table">
+          <thead><tr><th>状況</th><th>推奨検定</th></tr></thead>
+          <tbody>
+            <tr><td>標本が大きく（各群 n ≥ 30）、分布が概ね正規的</td><td>Welch t検定</td></tr>
+            <tr><td>外れ値が多い・正規性が疑わしい・標本が小さい</td><td>Mann-Whitney U検定</td></tr>
+          </tbody>
+        </table>
+        <p style="margin-top:10px; margin-bottom:6px">⚠️ <strong>多重比較補正（重要）：</strong> KSDVは9感情を補正なしで独立検定します。論文発表時は研究者自身で補正を適用してください。</p>
+        <table class="tab-table">
+          <thead><tr><th>補正方法</th><th>特徴</th><th>9感情の場合の修正後有意水準</th></tr></thead>
+          <tbody>
+            <tr><td>Bonferroni補正</td><td>保守的。確実に第1種過誤を抑制</td><td>α' = 0.05 / 9 ≈ <strong>0.0056</strong></td></tr>
+            <tr><td>Holm法</td><td>Bonferroniより検出力が高い</td><td>各p値を小さい順に調整</td></tr>
+            <tr><td>FDR補正（Benjamini-Hochberg法）</td><td>探索的研究向け。偽陽性率を制御</td><td>推奨FDR &lt; 0.05</td></tr>
+          </tbody>
+        </table>
+        <p style="margin-top:10px"><strong>論文Methods記述例：</strong></p>
+        <pre style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:12px;font-size:0.78rem;line-height:1.6;color:var(--text-dim);white-space:pre-wrap">各感情スコアのセッション間差はWelch's t検定（両側）で検定し、多重比較に対してBonferroni補正を適用した（α' = .05/9 = .006）。効果量はCohen's dで評価した（小: d ≥ .2, 中: d ≥ .5, 大: d ≥ .8; Cohen, 1988）。正規性が確認できない場合はMann-Whitney U検定（効果量: rank-biserial r, 小: r ≥ .1, 中: r ≥ .3, 大: r ≥ .5）を代替的に用いた。</pre>
+      </div>
+
+      <!-- E. 査読FAQ -->
+      <div class="howto">
+        <div class="howto-title">E. 査読で問われやすい論点と回答指針</div>
+        <table class="tab-table">
+          <thead><tr><th>問い</th><th>回答指針</th></tr></thead>
+          <tbody>
+            <tr><td>変化点検出の 2.5σ 閾値の根拠は？</td><td>信号処理・異常検知の標準値（グローバルSDの2.5倍）。現バージョンは固定値。論文では「探索的な検出」として記述し、感度分析（2.0σ / 3.0σでの比較）を補足することを推奨。</td></tr>
+            <tr><td>Engagement を覚醒度（Arousal）代理指標として使う根拠は？</td><td>Affectiva社のモデル定義に準拠。ただしAffectivaの覚醒度とRussell (1980) の理論的Arousalは完全に等価ではないため、論文中での言及を推奨。</td></tr>
+            <tr><td>UX スコアの重みの根拠は？</td><td>当システム固有の経験的設計値（例: confusion×0.4 + anger×0.3 + …）。論文では「参考指標・探索的分析」として位置づけ、感情スコアの生値と並記することを推奨。</td></tr>
+            <tr><td>Circumplex モデルはベースライン補正の影響を受けるか？</td><td>受けない。絶対値スケールを前提とした計算のため補正対象外。補正有効中は「補正対象外（絶対値）」バッジが表示される。</td></tr>
+            <tr><td>多重比較補正はアプリに実装されているか？</td><td>実装されていない（上記セクションDを参照）。</td></tr>
+            <tr><td>感情スコアの信頼性・妥当性の根拠は？</td><td>Affectiva（現iMotions）の計測エンジンの精度に依存。論文にはAffectiva社の検証資料・先行研究を引用し、使用モデルのバージョンを明記すること。</td></tr>
+            <tr><td>データの正規性はどう確認するか？</td><td>感情スコアは一般に右歪み（低スコア側に値が集中）。記述統計表でmean &gt;&gt; medianなら歪みを疑い、Mann-Whitney U検定を採用すること。</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- F. 論文記載例 -->
+      <div class="howto">
+        <div class="howto-title">F. 結果の論文記載例（テンプレート）</div>
+        <p style="margin-bottom:6px"><strong>感情統計の記述例：</strong></p>
+        <pre style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:12px;font-size:0.78rem;line-height:1.6;color:var(--text-dim);white-space:pre-wrap">喜び（M = 23.4%, SD = 12.3%）が最も多く出現し、セッション中45.2%のフレームで支配的感情として検出された。感情多様性は7種類であった。</pre>
+        <p style="margin-top:10px; margin-bottom:6px"><strong>Affect Dynamics の記述例：</strong></p>
+        <pre style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:12px;font-size:0.78rem;line-height:1.6;color:var(--text-dim);white-space:pre-wrap">Engagementの慣性（AR1 = 0.82）は高く、一度高まった集中状態が持続する傾向が確認された（Kuppens et al., 2010）。不安定性（MSSD = 14.3）は変動性の二乗（SD² = 75.7）より小さく、急激な変化よりも緩やかな推移が支配的であった。</pre>
+        <p style="margin-top:10px; margin-bottom:6px"><strong>統計検定の記述例（ComparisonタブのCSV出力を使用する場合）：</strong></p>
+        <pre style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:12px;font-size:0.78rem;line-height:1.6;color:var(--text-dim);white-space:pre-wrap">セッションAとBの喜びスコアに有意差が認められた（Welch's t(4532) = 3.21, p = .001, d = 0.48 [中程度]; Mann-Whitney U = 12,430, z = 3.08, p = .002, r = .31 [中程度]）。</pre>
+      </div>
+
+      <!-- G. 引用文献 -->
+      <div class="howto">
+        <div class="howto-title">G. 引用すべき主要文献</div>
+        <table class="tab-table">
+          <thead><tr><th>文献</th><th>対応する機能</th></tr></thead>
+          <tbody>
+            <tr><td>Kuppens, P., Allen, N. B., &amp; Sheeber, L. B. (2010). Emotional inertia and psychological maladjustment. <em>Psychological Science</em>, 21(7), 984–991.</td><td>Affect Dynamics（AR1・MSSD・SD）・ベースライン補正</td></tr>
+            <tr><td>Russell, J. A. (1980). A circumplex model of affect. <em>Journal of Personality and Social Psychology</em>, 39(6), 1161–1178.</td><td>Circumplex Model（4象限分類）</td></tr>
+            <tr><td>Ekman, P., &amp; Friesen, W. V. (1978). <em>Facial Action Coding System</em>. Consulting Psychologists Press.</td><td>Action Units（AU分析）</td></tr>
+            <tr><td>Cohen, J. (1988). <em>Statistical power analysis for the behavioral sciences</em> (2nd ed.). Lawrence Erlbaum Associates.</td><td>効果量の解釈基準（Cohen's d）</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
   </div><!-- /.main -->
