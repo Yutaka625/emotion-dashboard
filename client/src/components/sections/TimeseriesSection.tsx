@@ -9,7 +9,7 @@
  *   EventAnnotationsCard  — イベント登録・統計・区間比較
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, type CSSProperties } from 'react';
 import type { DashboardData, TimeseriesPoint } from '@/lib/types';
 import { EMOTION_LABELS_JA, EMOTION_COLORS, NON_NEUTRAL_EMOTIONS } from '@/lib/types';
 import { Target, Download, RotateCcw } from 'lucide-react';
@@ -417,9 +417,13 @@ export default function TimeseriesSection({ data, rawTimeseries }: Props) {
                 const rowEvents = events.filter(ev => ev.startTime < row.time_end && ev.endTime > row.time_start);
                 return (
                   <tr key={i}
-                    style={{ borderBottom: '1px solid oklch(0.20 0.04 255)', background: rowEvents.length > 0 ? `${rowEvents[0].color}08` : 'transparent' }}
-                    onMouseEnter={e => (e.currentTarget.style.background = rowEvents.length > 0 ? `${rowEvents[0].color}15` : 'oklch(0.22 0.04 255)')}
-                    onMouseLeave={e => (e.currentTarget.style.background = rowEvents.length > 0 ? `${rowEvents[0].color}08` : 'transparent')}
+                    className="hbg"
+                    style={{
+                      borderBottom: '1px solid oklch(0.20 0.04 255)',
+                      // 背景は CSS（.hbg）が所有。イベントがある行はそのイベント色ベースの背景にする。
+                      ['--hbg']: rowEvents.length > 0 ? `${rowEvents[0].color}08` : 'transparent',
+                      ['--hbg-h']: rowEvents.length > 0 ? `${rowEvents[0].color}15` : 'oklch(0.22 0.04 255)',
+                    } as CSSProperties}
                   >
                     <td className="py-1.5 pr-2" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.68rem', color: 'oklch(0.68 0.015 250)', whiteSpace: 'nowrap' }}>
                       {row.time_start}–{row.time_end}s

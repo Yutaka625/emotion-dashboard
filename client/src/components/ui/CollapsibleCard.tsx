@@ -10,7 +10,7 @@
  * 開閉状態は storageKey を指定すると localStorage に保存し、再訪時も維持する。
  */
 
-import { useState, useEffect, type ReactNode } from 'react';
+import { useState, useEffect, type ReactNode, type CSSProperties } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import InfoTooltip from '@/components/ui/InfoTooltip';
 
@@ -96,10 +96,8 @@ export default function CollapsibleCard({
           <button
             type="button"
             onClick={() => setOpen(o => !o)}
-            className="p-1 rounded transition-colors"
-            style={{ color: 'oklch(0.68 0.015 255)', background: 'transparent' }}
-            onMouseEnter={e => (e.currentTarget.style.background = 'oklch(0.26 0.04 255)')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+            className="p-1 rounded hbg"
+            style={{ color: 'oklch(0.68 0.015 255)', ['--hbg']: 'transparent', ['--hbg-h']: 'oklch(0.26 0.04 255)' } as CSSProperties}
             aria-label={open ? '折りたたむ' : '展開する'}
             aria-expanded={open}
           >

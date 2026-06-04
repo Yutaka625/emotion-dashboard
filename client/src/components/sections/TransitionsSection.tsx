@@ -231,10 +231,7 @@ export default function TransitionsSection({ data }: Props) {
               {durationData.map((row, i) => {
                 const key = NON_NEUTRAL_EMOTIONS.find(e => EMOTION_LABELS_JA[e] === row.name) || '';
                 return (
-                  <tr key={i} style={{ borderBottom: '1px solid oklch(0.20 0.04 255)' }}
-                    onMouseEnter={e => (e.currentTarget.style.background = 'oklch(0.22 0.04 255)')}
-                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                  >
+                  <tr key={i} className="row-hover" style={{ borderBottom: '1px solid oklch(0.20 0.04 255)' }}>
                     <td className="py-2 pr-4">
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full" style={{ background: row.color }} />

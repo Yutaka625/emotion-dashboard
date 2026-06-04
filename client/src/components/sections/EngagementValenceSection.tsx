@@ -10,6 +10,7 @@ import {
   ScatterChart, Scatter, Cell, AreaChart, Area, Legend, ReferenceLine,
 } from 'recharts';
 import { rechartsTooltip } from '@/lib/chartTooltip';
+import { formatPct } from '@/lib/utils';
 
 interface Props {
   data: DashboardData;
@@ -76,10 +77,10 @@ export default function EngagementValenceSection({ data }: Props) {
         {/* Key Metrics - Special Indicators */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: '平均値', value: eng.mean.toFixed(2), unit: '%', color: 'oklch(0.72 0.18 80)' },
-            { label: '最大値', value: eng.max.toFixed(2), unit: '%', color: 'oklch(0.68 0.26 22)' },
-            { label: '中央値', value: eng.median.toFixed(2), unit: '%', color: 'oklch(0.70 0.14 195)' },
-            { label: '標準偏差', value: eng.std.toFixed(2), unit: '%', color: 'oklch(0.55 0.18 300)' },
+            { label: '平均値', value: formatPct(eng.mean), unit: '%', color: 'oklch(0.72 0.18 80)' },
+            { label: '最大値', value: formatPct(eng.max), unit: '%', color: 'oklch(0.68 0.26 22)' },
+            { label: '中央値', value: formatPct(eng.median), unit: '%', color: 'oklch(0.70 0.14 195)' },
+            { label: '標準偏差', value: formatPct(eng.std), unit: '%', color: 'oklch(0.55 0.18 300)' },
           ].map((m, i) => (
             <div key={i} className="metric-card">
               <div className="section-label mb-2">{m.label}</div>
@@ -173,8 +174,8 @@ export default function EngagementValenceSection({ data }: Props) {
                   const d = payload[0]?.payload;
                   return (
                     <div style={{ background: 'oklch(0.20 0.04 255)', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '4px', padding: '8px', fontFamily: 'Roboto Mono, monospace', fontSize: '0.75rem', color: 'oklch(0.88 0.005 250)' }}>
-                      <p>Engagement: {d?.engagement?.toFixed(1)}%</p>
-                      <p>Valence: {d?.valence?.toFixed(1)}%</p>
+                      <p>Engagement: {formatPct(d?.engagement ?? 0)}%</p>
+                      <p>Valence: {formatPct(d?.valence ?? 0)}%</p>
                       {/* 感情名は色ドット＋明るい文字色にする（感情色のままだと暗背景で読めないため） */}
                       <p className="flex items-center gap-1.5" style={{ color: 'oklch(0.90 0.005 250)' }}>
                         <span className="w-2 h-2 rounded-full" style={{ background: d?.color || 'oklch(0.70 0.14 195)' }} />

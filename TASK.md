@@ -7,25 +7,6 @@
 
 # 🔲 未完了タスク（これから対応するもの）
 
-## 🟠 中〜高優先度（UX の摩擦）
-- [ ] **設定カードの折りたたみ／ツールチップを他セクションへ横展開**（Overview / Academic 等）
-  - ※ 設定4カードの本体レイアウト統一（共通部品化）は完了済み
-- [ ] **ComparisonSection の空状態に導線を追加**（`ComparisonSection.tsx` / `Home.tsx`）
-  - 「比較用CSVを追加してください」だけで追加方法が不明 → ＋比較CSVボタンへの案内・矢印を追加
-- [ ] **スムージング設定のα値スライダーを反転**（`SmoothingSettingsCard.tsx`）
-  - 現在: 左=0.05（強）/ 右=0.90（弱）で直感と逆。「スムージング強度0〜100%」表記に
-
-## 🟡 中優先度（一貫性・洗練度）
-- [ ] **ホバー実装をCSSに統一**（`Sidebar.tsx` / `Home.tsx` ほか）
-  - `onMouseEnter/Leave` のDOM直接操作を Tailwind `hover:` / CSS変数ベースへ
-- [ ] **EMOTION_COLORS と CSS `.emotion-*` クラスの色を統一**（`types.ts` / `index.css`）
-  - 同じ感情に異なるOKLCH値が2箇所で定義。`types.ts` を Single Source of Truth に
-- [ ] **数値フォーマットの統一**（全セクション）
-  - 感情スコア `.toFixed(3)` / Engagement・Valence・Attention `.toFixed(1)` に統一
-  - 共通フォーマッタ `formatScore()` / `formatPct()` を `utils.ts` に追加
-- [ ] **セクション切り替え時のフェードイン追加**（`Home.tsx` / `index.css`）
-  - `display: none → block` の瞬時切替が唐突 → `@keyframes fade-in` で自然に
-
 ## 🟢 低優先度（後回し可）
 - [ ] **モバイル対応**（サイドバーのドロワー化・グリッドのレスポンシブ確認）
 - [ ] **アクセシビリティ（a11y）対応**（aria-label・フォーカスリング・グラフの role）
@@ -35,9 +16,6 @@
 - [ ] **KEY INSIGHTS Phase 2: フルセット・ルール拡張**
   - 遷移パターン・circumplex 象限の偏り・相関・頭部動作イベントの活用
   - 「もっと見る」で全インサイト展開、各カードから該当セクションへのジャンプ導線
-- [ ] **CSV エクスポート Phase 3A（残）**
-  - ※ TIME RANGE FILTER の「範囲CSV出力」は実装済み
-  - 残: BASELINE SETTINGS に「補正後データを出力」ボタン、先頭にメタデータ行（区間・オフセット）、補正有無・日時を含むファイル名
 - [ ] **Before/After AI 比較機能 Phase 3B（Claude API）**
   - `.env` に `ANTHROPIC_API_KEY`、`@anthropic-ai/sdk`、`POST /api/ai-compare`、`AiInsightSection.tsx`、ナビ追加
 - [ ] **ベースライン補正 Phase 4 の残作業（細部の作り込み）** ※中核は完了（下記「完了済み」参照）
@@ -51,13 +29,32 @@
 - [ ] **データ保存・読み込み（localStorage）**
 - [ ] **感情閾値設定機能**（実装前に仕様確定）
   - 閾値設定UI（検出最小値）／表示フィルタか統計補正かの仕様検討／ベースライン・FaceIDとの併用整理
-- [ ] **学術研究者向け Phase 4**
-  - 参加者間の感情平均グラフ（群平均±SD）／CSV一括インポート／統計サマリー出力／実験条件ラベル付け／外部刺激との同期
-  - 統計検定表示: ※ A/B比較タブの **Welch t検定 + Cohen's d** は実装済み。残は Mann-Whitney U 検定・参加者群での検定
+- [ ] **学術研究者向け Phase 4（残作業）**
+  - ※ **Mann-Whitney U 検定**・**統計サマリー出力** は実装済み（下記「完了済み」参照）
+  - 残: **参加者間の感情平均グラフ（群平均±SD）＋ 複数セッション一括インポート** — 要: 任意Nセッションを保持する新規基盤（現状は1セッション内マルチFaceID と A/B 2セッションのみ）
+  - 残: **実験条件ラベル付け ＋ 外部刺激との同期** — イベント注釈機能（`EventsContext` / `EventAnnotationsCard`）の拡張
+  - 残: **参加者群での検定** — 上記Nセッション基盤の上で Welch / Mann-Whitney を群適用
 
 ---
 
 # ✅ 完了済みタスク
+
+## 2026-06 セッション（機能拡張: エクスポート・統計）
+- **CSV エクスポート Phase 3A（補正後データ出力）**: BASELINE SETTINGS に「補正後データを出力」ボタンを追加。先頭にメタデータ（補正区間・中心・表示モード・出力日時）＋各指標の offset/sd、続けて補正後の全フレーム（time＋感情＋engagement/valence/attention、AUは補正対象外のため除外）。BOM付き。ファイル名に中心・モード・区間・日時を含む（`BaselineSettingsCard.tsx`）
+- **Mann-Whitney U 検定（ノンパラメトリック）**: `statisticsUtils.ts` に `rank`（タイ平均順位）＋ `mannWhitneyU`（タイ補正つき正規近似・両側p値・効果量はランク二列相関 r）を追加。A/B比較タブに「Welch t検定 / Mann-Whitney U」トグルを追加し、median/U/z/p/r の列に切替（`ComparisonSection.tsx`）
+- **統計サマリー出力**: A/B比較のCSVエクスポートを拡充。メタデータ＋記述統計＋Welch＋Mann-Whitney の4セクションを1ファイルに、BOM付き・日時入りファイル名で出力
+- **バグ修正: `normalCDF` の標準正規化漏れ**: `0.5·(1+erf(x))` になっていた（`/√2` 欠落）ため標準正規CDFとして誤り。`erf(x/√2)` に修正。大標本（df>200）の Welch t検定 p値と Mann-Whitney の正規近似p値が正しくなる（`statisticsUtils.ts`）
+
+## 2026-06 セッション（一貫性・洗練度バッチ）
+- **感情色を EMOTION_COLORS に一本化（SSOT）**: `index.css` の未使用かつ値がズレていた `.emotion-*` / `.bg-emotion-*`（22行）を削除。`types.ts` の `EMOTION_COLORS` を唯一の根拠に
+- **セクション切替フェードイン**: `@keyframes fade-in` + `.section-fade-in` を追加し、`Home.tsx` の各セクション wrapper に付与。display:none↔block の切替ごとに再生（状態は保持）
+- **数値フォーマット統一**: `utils.ts` に `formatScore()`（感情スコア=小数3桁）/ `formatPct()`（Engagement・Valence・Attention=小数1桁）を追加し、Overview/Emotions/Comparison/EngagementValence の該当表示を置換（相関・時間・占有率は対象外）
+- **ホバー実装をCSSに統一**: `onMouseEnter/Leave` のDOM直接操作（24箇所/10ファイル）を全廃。`index.css` に共通クラス（`.row-hover` / CSS変数ベースの `.hbg`・`.hfg`・`.hbd` / `.nav-item[data-active]`）を定義し、動的値はCSS変数で受け渡し。条件付き2箇所（サイドバーナビの選択判定・Timeseries行のイベント色背景）も変換
+
+## 2026-06 セッション（UX の摩擦 解消バッチ）
+- **折りたたみ／ツールチップを Overview・Academic へ横展開**: 各重いチャート・表カードを `CollapsibleCard` 化（▲▼トグル＋ⓘツールチップ＋localStorage で開閉永続化）。既存のインライン説明文は維持し ⓘ に補足を追加。Hero の小さな数値カードは対象外
+- **ComparisonSection の空状態に導線を追加**: 「比較用CSVを追加してください」の一文を、機能説明＋「＋比較用CSVを選択」ボタン（直接ファイル選択を起動）＋右上ボタンへの矢印つき案内ブロックに刷新（`Home.tsx`）
+- **スムージングα値スライダーを「平滑化強度 0〜100%」に反転**: 右ほど強い直感的UIに（内部 α と `smoothEMA` の式は不変＝計算互換。`SmoothingSettingsCard.tsx` のみ変更）
 
 ## 2026-06 セッション（UI/UX 改善・バグ修正 / main マージ済）
 - **A/B比較タブに統計検定を追加**: Welch t検定 + Cohen's d（効果量）＋統計結果のCSVエクスポート

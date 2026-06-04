@@ -108,40 +108,52 @@ export default function SmoothingSettingsCard({
         </SettingBox>
       )}
 
-      {/* EMA: alpha スライダー */}
-      {smoothingMethod === 'ema' && (
+      {/* EMA: 平滑化強度スライダー */}
+      {smoothingMethod === 'ema' && (() => {
+        // EMA の内部係数 α（0.05〜0.90）は「小さいほど平滑が強い」ため直感と逆。
+        // UI では「平滑化強度 0〜100%」に反転して表示する（右ほど強い）。
+        // 内部の α と smoothEMA の式は変更しないため、計算結果の互換性は保たれる。
+        const A_MIN = 0.05;
+        const A_MAX = 0.90;
+        // 強度% → α（強度が高いほど α は小さい＝平滑が強い）
+        const alphaFromStrength = (s: number) => A_MAX - (s / 100) * (A_MAX - A_MIN);
+        // α → 強度%（表示・スライダー value 用）
+        const strengthFromAlpha = (a: number) => Math.round((A_MAX - a) / (A_MAX - A_MIN) * 100);
+        const strength = strengthFromAlpha(smoothingAlpha);
+        return (
         <SettingBox>
           <SettingSubLabel
             color="oklch(0.68 0.18 140)"
             action={
               <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.82rem', fontWeight: 700, color: 'oklch(0.88 0.005 250)' }}>
-                α = {smoothingAlpha.toFixed(2)}
+                平滑化強度 {strength}%
                 <span style={{ fontSize: '0.65rem', color: 'oklch(0.68 0.015 255)', marginLeft: '6px' }}>
-                  {smoothingAlpha < 0.2 ? '（強平滑）' : smoothingAlpha < 0.5 ? '（中程度）' : '（弱平滑）'}
+                  {strength >= 70 ? '（強）' : strength >= 40 ? '（中程度）' : '（弱）'}
                 </span>
               </span>
             }
           >
-            SMOOTHING FACTOR (α)
+            SMOOTHING STRENGTH（平滑化強度）
           </SettingSubLabel>
           <input
             type="range"
-            min={0.05} max={0.90} step={0.05}
-            value={smoothingAlpha}
-            onChange={e => setSmoothingAlpha(Number(e.target.value))}
+            min={0} max={100} step={5}
+            value={strength}
+            onChange={e => setSmoothingAlpha(alphaFromStrength(Number(e.target.value)))}
             className="w-full"
             style={{ accentColor: 'oklch(0.68 0.18 140)' }}
           />
           <div className="flex justify-between mt-1">
-            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.60 0.015 255)' }}>0.05 (強)</span>
-            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.60 0.015 255)' }}>0.45</span>
-            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.60 0.015 255)' }}>0.90 (弱)</span>
+            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.60 0.015 255)' }}>0% (弱)</span>
+            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.60 0.015 255)' }}>50%</span>
+            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.60 0.015 255)' }}>100% (強)</span>
           </div>
           <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.66 0.015 255)', marginTop: '8px' }}>
-            αが小さいほど平滑度が高くなります。EMAは時系列の「流れ」を重視した平滑化です。
+            強度が高いほど平滑化が強くなります。EMAは時系列の「流れ」を重視した平滑化です。
           </p>
         </SettingBox>
-      )}
+        );
+      })()}
     </CollapsibleCard>
   );
 }

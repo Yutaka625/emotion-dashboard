@@ -273,6 +273,41 @@
     animation: count-up 0.6s ease-out forwards;
   }
 
+  /* セクション切替時のフェードイン。
+     Home.tsx は各セクションを常時マウントし display:none↔block で出し分けるため、
+     表示（block）になるたびにこのアニメーションが再生される（状態は保持されたまま）。 */
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .section-fade-in {
+    animation: fade-in 0.25s ease-out;
+  }
+
+  /* ── ホバー共通部品 ──────────────────────────────────────────
+   * onMouseEnter/Leave による style 直接操作をやめ、CSS の :hover に集約する。
+   * ホバーで変わるプロパティ（背景/文字色/枠色）は inline style に残さず CSS が所有し、
+   * 動的な色は CSS 変数（--hbg など）で各要素から渡す。
+   * ──────────────────────────────────────────────────────────── */
+
+  /* 静的な行ホバー（背景: 透明 → 既定のうっすら明るい色） */
+  .row-hover { transition: background 0.15s ease; }
+  .row-hover:hover { background: oklch(0.22 0.04 255); }
+
+  /* 動的な値を CSS 変数で受け取る汎用ホバー */
+  .hbg { background: var(--hbg, transparent); transition: background 0.15s ease; }
+  .hbg:hover { background: var(--hbg-h, var(--hbg, transparent)); }
+  .hfg { color: var(--hfg); transition: color 0.15s ease; }
+  .hfg:hover { color: var(--hfg-h, var(--hfg)); }
+  .hbd { border-color: var(--hbd); transition: border-color 0.15s ease; }
+  .hbd:hover { border-color: var(--hbd-h, var(--hbd)); }
+
+  /* サイドバーのナビ項目（選択状態を data-active で出し分け。選択中はホバーで変化しない） */
+  .nav-item { transition: background 0.15s ease, color 0.15s ease; }
+  .nav-item[data-active="false"]       { background: transparent;         color: oklch(0.60 0.015 255); }
+  .nav-item[data-active="false"]:hover { background: oklch(0.18 0.04 255); color: oklch(0.85 0.005 250); }
+  .nav-item[data-active="true"]        { background: oklch(0.20 0.04 255); color: oklch(0.92 0.005 250); }
+
   .container {
     width: 100%;
     margin-left: auto;
@@ -301,30 +336,8 @@
     }
   }
 
-  /* Emotion color classes — vivid on dark bg */
-  .emotion-anger          { color: oklch(0.68 0.26 22); }
-  .emotion-contempt       { color: oklch(0.72 0.22 300); }
-  .emotion-disgust        { color: oklch(0.72 0.22 145); }
-  .emotion-fear           { color: oklch(0.68 0.20 280); }
-  .emotion-joy            { color: oklch(0.88 0.20 82); }
-  .emotion-sadness        { color: oklch(0.68 0.18 235); }
-  .emotion-surprise       { color: oklch(0.82 0.22 195); }
-  .emotion-sentimentality { color: oklch(0.78 0.22 340); }
-  .emotion-confusion      { color: oklch(0.78 0.18 60); }
-  .emotion-neutral        { color: oklch(0.58 0.03 255); }
-  .emotion-attention      { color: oklch(0.80 0.18 160); }
-
-  .bg-emotion-anger          { background-color: oklch(0.68 0.26 22); }
-  .bg-emotion-contempt       { background-color: oklch(0.72 0.22 300); }
-  .bg-emotion-disgust        { background-color: oklch(0.72 0.22 145); }
-  .bg-emotion-fear           { background-color: oklch(0.68 0.20 280); }
-  .bg-emotion-joy            { background-color: oklch(0.88 0.20 82); }
-  .bg-emotion-sadness        { background-color: oklch(0.68 0.18 235); }
-  .bg-emotion-surprise       { background-color: oklch(0.82 0.22 195); }
-  .bg-emotion-sentimentality { background-color: oklch(0.78 0.22 340); }
-  .bg-emotion-confusion      { background-color: oklch(0.78 0.18 60); }
-  .bg-emotion-neutral        { background-color: oklch(0.58 0.03 255); }
-  .bg-emotion-attention      { background-color: oklch(0.80 0.18 160); }
+  /* 感情色は types.ts の EMOTION_COLORS を単一の根拠（SSOT）とする。
+     旧 .emotion-* / .bg-emotion-* クラスは未使用かつ値がズレていたため削除。 */
 
   /* Gold accent divider */
   .gold-divider {

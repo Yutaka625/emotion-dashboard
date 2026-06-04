@@ -4,7 +4,7 @@
  * Syne font for labels, Roboto Mono for data
  */
 
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { BarChart2, Brain, GitBranch, Grid, Zap, ChevronRight, Activity, GitCompare, FlaskConical, Scan } from 'lucide-react';
 import FaceScanIcon from '@/components/FaceScanIcon';
 
@@ -69,10 +69,8 @@ export default function Sidebar({ activeSection, onSectionChange, hasComparison,
         )}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="p-1.5 rounded transition-colors"
-          style={{ color: 'oklch(0.68 0.015 255)', background: 'transparent' }}
-          onMouseEnter={e => (e.currentTarget.style.background = 'oklch(0.22 0.02 250)')}
-          onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+          className="p-1.5 rounded hbg"
+          style={{ color: 'oklch(0.68 0.015 255)', ['--hbg']: 'transparent', ['--hbg-h']: 'oklch(0.22 0.02 250)' } as CSSProperties}
         >
           <ChevronRight size={14} style={{ transform: collapsed ? 'rotate(0deg)' : 'rotate(180deg)', transition: 'transform 0.3s' }} />
         </button>
@@ -100,23 +98,12 @@ export default function Sidebar({ activeSection, onSectionChange, hasComparison,
             <div key={item.id} className="relative group/nav">
               <button
                 onClick={() => onSectionChange(item.id)}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-left transition-all duration-150"
+                data-active={isActive}
+                className="nav-item w-full flex items-center gap-3 px-4 py-2.5 text-left"
                 style={{
-                  background: isActive ? 'oklch(0.20 0.04 255)' : 'transparent',
+                  // 背景・文字色は CSS（.nav-item[data-active])が所有。
+                  // 動的な左ボーダーのアクセント色（highlight=紫 / 通常=金）のみ inline で指定。
                   borderLeft: isActive ? `2px solid ${item.highlight ? 'oklch(0.78 0.22 300)' : 'oklch(0.78 0.14 82)'}` : '2px solid transparent',
-                  color: isActive ? 'oklch(0.92 0.005 250)' : 'oklch(0.60 0.015 255)',
-                }}
-                onMouseEnter={e => {
-                  if (!isActive) {
-                    e.currentTarget.style.background = 'oklch(0.18 0.04 255)';
-                    e.currentTarget.style.color = 'oklch(0.85 0.005 250)';
-                  }
-                }}
-                onMouseLeave={e => {
-                  if (!isActive) {
-                    e.currentTarget.style.background = 'transparent';
-                    e.currentTarget.style.color = 'oklch(0.60 0.015 255)';
-                  }
                 }}
               >
                 {/* アイコン色: 選択時のみアクセント色（highlight=紫 / 通常=金）。
