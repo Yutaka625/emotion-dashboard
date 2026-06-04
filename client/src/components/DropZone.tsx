@@ -191,7 +191,7 @@ export default function DropZone({ onDataLoaded }: DropZoneProps) {
 
       {/* ガイドリンク */}
       <a
-        href="KSDV_guide.html"
+        href="KSDV_User-Guide.html"
         target="_blank"
         rel="noopener noreferrer"
         onClick={e => e.stopPropagation()}

@@ -340,7 +340,7 @@ export default function Home() {
 
           {/* ガイドリンク（右端） */}
           <a
-            href="KSDV_guide.html"
+            href="KSDV_User-Guide.html"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg hbd hfg"
