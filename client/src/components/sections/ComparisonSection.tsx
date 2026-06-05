@@ -29,9 +29,20 @@ interface Props {
 const COLOR_A = 'oklch(0.70 0.14 195)';  /* teal */
 const COLOR_B = 'oklch(0.78 0.22 340)';  /* hot pink */
 
+// タイムラインオーバーレイで選択できる指標（特殊指標3種＋非ニュートラル9感情）
+const OVERLAY_METRICS: { key: string; label: string; color: string }[] = [
+  { key: 'engagement', label: 'Engagement', color: 'oklch(0.78 0.14 82)' },
+  { key: 'valence', label: 'Valence', color: 'oklch(0.70 0.14 195)' },
+  { key: 'attention', label: 'Attention', color: 'oklch(0.60 0.25 15)' },
+  ...NON_NEUTRAL_EMOTIONS.map(e => ({ key: e, label: EMOTION_LABELS_JA[e] || e, color: EMOTION_COLORS[e] })),
+];
+
 export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Props) {
   // ---- 統計検定の手法切替（Welch t検定 / Mann-Whitney U） ----
   const [testMethod, setTestMethod] = useState<TestMethod>('welch');
+
+  // ---- タイムラインオーバーレイで表示する指標（既定: Engagement） ----
+  const [overlayMetric, setOverlayMetric] = useState<string>('engagement');
 
   // 各感情について、両セッションの全フレームを2標本として抽出する
   const emotionSamples = useMemo(() => {
@@ -153,29 +164,27 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
     B: +(dataB.affect_dynamics[k]?.variability_sd || 0).toFixed(4),
   }));
 
-  // ---- 時系列オーバーレイ（各データを0-1に正規化してから比較） ----
-  const maxLen = 200;
-  const stepA = Math.max(1, Math.floor(dataA.timeseries_full.length / maxLen));
-  const stepB = Math.max(1, Math.floor(dataB.timeseries_full.length / maxLen));
-  const tsA = dataA.timeseries_full.filter((_, i) => i % stepA === 0);
-  const tsB = dataB.timeseries_full.filter((_, i) => i % stepB === 0);
-  const maxTimeA = dataA.meta.duration_seconds;
-  const maxTimeB = dataB.meta.duration_seconds;
-  // 時刻を0-100%に正規化して重ねる
-  const overlayData: { pct: number; engA: number; engB: number; valA: number; valB: number }[] = [];
-  const len = Math.max(tsA.length, tsB.length);
-  for (let i = 0; i < len; i++) {
-    const pct = Math.round((i / (len - 1)) * 100);
-    const idxA = Math.min(i, tsA.length - 1);
-    const idxB = Math.min(i, tsB.length - 1);
-    overlayData.push({
-      pct,
-      engA: tsA[idxA]?.engagement ?? 0,
-      engB: tsB[idxB]?.engagement ?? 0,
-      valA: tsA[idxA]?.valence ?? 0,
-      valB: tsB[idxB]?.valence ?? 0,
-    });
-  }
+  // ---- 時系列オーバーレイ（時間を0-100%に正規化し、選択指標をA/Bで重ねる） ----
+  const overlayMeta = OVERLAY_METRICS.find(m => m.key === overlayMetric) ?? OVERLAY_METRICS[0];
+  const overlayData = useMemo(() => {
+    const maxLen = 200;
+    const stepA = Math.max(1, Math.floor(dataA.timeseries_full.length / maxLen));
+    const stepB = Math.max(1, Math.floor(dataB.timeseries_full.length / maxLen));
+    const tsA = dataA.timeseries_full.filter((_, i) => i % stepA === 0);
+    const tsB = dataB.timeseries_full.filter((_, i) => i % stepB === 0);
+    const len = Math.max(tsA.length, tsB.length);
+    const out: { pct: number; A: number; B: number }[] = [];
+    for (let i = 0; i < len; i++) {
+      const idxA = Math.min(i, tsA.length - 1);
+      const idxB = Math.min(i, tsB.length - 1);
+      out.push({
+        pct: Math.round((i / Math.max(1, len - 1)) * 100),
+        A: (tsA[idxA] as any)?.[overlayMetric] ?? 0,
+        B: (tsB[idxB] as any)?.[overlayMetric] ?? 0,
+      });
+    }
+    return out;
+  }, [dataA, dataB, overlayMetric]);
 
   // ---- Circumplex象限比較 ----
   const cmpA = dataA.circumplex_summary;
@@ -312,15 +321,40 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
         </ResponsiveContainer>
       </div>
 
-      {/* Engagement 時系列オーバーレイ */}
+      {/* 時系列オーバーレイ（指標を選択してA/B重ね合わせ） */}
       <div className="metric-card">
-        <div className="section-label mb-3">ENGAGEMENT TIMELINE OVERLAY</div>
+        <div className="section-label mb-3">TIMELINE OVERLAY</div>
         <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '4px' }}>
-          Engagement 時系列の重ね合わせ（時間正規化）
+          {overlayMeta.label} 時系列の重ね合わせ（時間正規化）
         </div>
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.68 0.015 255)', marginBottom: '1rem' }}>
-          各セッションの時間を0-100%に正規化して比較。Bは破線で表示。
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.68 0.015 255)', marginBottom: '0.75rem' }}>
+          指標を選んで比較します。各セッションの時間を0-100%に正規化し、Aは実線・Bは破線で表示。
         </p>
+
+        {/* 指標選択ピル */}
+        <div className="flex flex-wrap gap-1.5 mb-4">
+          {OVERLAY_METRICS.map(m => {
+            const on = overlayMetric === m.key;
+            return (
+              <button
+                key={m.key}
+                onClick={() => setOverlayMetric(m.key)}
+                className="px-2.5 py-0.5 rounded-full text-xs transition-all"
+                style={{
+                  fontFamily: 'Noto Sans JP, sans-serif',
+                  fontSize: '0.72rem',
+                  background: on ? m.color : 'oklch(0.20 0.04 255)',
+                  color: on ? 'oklch(0.16 0.02 250)' : 'oklch(0.68 0.015 250)',
+                  border: `1px solid ${on ? m.color : 'oklch(0.28 0.04 255)'}`,
+                  fontWeight: on ? 700 : 400,
+                }}
+              >
+                {m.label}
+              </button>
+            );
+          })}
+        </div>
+
         <ResponsiveContainer width="100%" height={200}>
           <LineChart data={overlayData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" />
@@ -328,8 +362,8 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
             <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} />
             <Tooltip {...tooltipStyle} labelFormatter={v => `進行率 ${v}%`} />
             <Legend formatter={v => <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem' }}>{v}</span>} />
-            <Line type="monotone" dataKey="engA" name={`Eng ${labelA}`} stroke={COLOR_A} strokeWidth={1.5} dot={false} />
-            <Line type="monotone" dataKey="engB" name={`Eng ${labelB}`} stroke={COLOR_B} strokeWidth={1.5} dot={false} strokeDasharray="5 3" />
+            <Line type="monotone" dataKey="A" name={`${overlayMeta.label} ${labelA}`} stroke={COLOR_A} strokeWidth={1.5} dot={false} />
+            <Line type="monotone" dataKey="B" name={`${overlayMeta.label} ${labelB}`} stroke={COLOR_B} strokeWidth={1.5} dot={false} strokeDasharray="5 3" />
           </LineChart>
         </ResponsiveContainer>
       </div>
