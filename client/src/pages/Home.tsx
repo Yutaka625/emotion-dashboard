@@ -41,22 +41,26 @@ export default function Home() {
   const [secondaryFilename, setSecondaryFilename] = useState<string>('');
   const secondaryInputRef = useRef<HTMLInputElement>(null);
 
+  // CSVテキストから比較用(B)データを解析・設定し、比較タブへ遷移する
+  const applySecondaryFromText = useCallback((text: string, name: string) => {
+    if (!text) return;
+    try {
+      const newData = analyzeCSV(text, name);
+      setSecondaryData(newData);
+      setSecondaryFilename(name);
+      setActiveSection('comparison');
+    } catch {
+      // ignore
+    }
+  }, []);
+
   const handleSecondaryCSV = useCallback((file: File) => {
     const reader = new FileReader();
     reader.onload = (ev) => {
-      const text = ev.target?.result as string;
-      if (!text) return;
-      try {
-        const newData = analyzeCSV(text, file.name);
-        setSecondaryData(newData);
-        setSecondaryFilename(file.name);
-        setActiveSection('comparison');
-      } catch {
-        // ignore
-      }
+      applySecondaryFromText(ev.target?.result as string, file.name);
     };
     reader.readAsText(file);
-  }, []);
+  }, [applySecondaryFromText]);
 
   // マルチ FaceID の状態管理（Context 経由）
   const { activeDashboardData, setMultiFaceData, isMultiFace } = useFaceID();
@@ -163,7 +167,7 @@ export default function Home() {
 
   // ---- Upload screen ----
   if (!data) {
-    return <DropZone onDataLoaded={handleDataLoaded} />;
+    return <DropZone onDataLoaded={handleDataLoaded} onComparisonSecondary={applySecondaryFromText} />;
   }
 
   // ---- Dashboard screen ----
