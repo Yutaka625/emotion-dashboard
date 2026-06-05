@@ -465,13 +465,14 @@
       <a href="#tab-academic">学術的分析</a>
       <a href="#tab-actionunits">アクションユニット</a>
       <a href="#tab-uxresearch">UXリサーチ</a>
+      <a href="#tab-multiface">マルチFaceID</a>
       <a href="#tab-comparison">比較分析</a>
 
       <div class="section-heading">参考資料</div>
       <a href="#reference">指標クイックリファレンス</a>
       <a href="#academic-guide">学術活用ガイド</a>
     </nav>
-    <div class="sidenav-footer">KSDV v2.1 · 2026-06</div>
+    <div class="sidenav-footer">KSDV v2.2 · 2026-06</div>
   </div>
 
   <!-- ─── MAIN CONTENT ─── -->
@@ -627,6 +628,24 @@
         <ul>
           <li>ダッシュボード右上の<strong>ファイル名表示エリア</strong>をクリックすると、新しいCSVをドロップして解析をリセットできます。</li>
         </ul>
+      </div>
+
+      <div class="howto">
+        <div class="howto-title">
+          サンプルで試す（ファイルがなくてもOK）
+          <span class="howto-badge tag-gold">お試し</span>
+        </div>
+        <p style="margin-bottom:8px">アップロードエリアの下に「サンプルで試す」ボタンが4つあります。クリックすると心sensor準拠のサンプルデータが読み込まれ、そのまま解析画面に進みます。各機能の動作確認にご利用ください。</p>
+        <table class="tab-table">
+          <thead><tr><th>ボタン</th><th>内容</th></tr></thead>
+          <tbody>
+            <tr><td><strong>基本サンプル</strong></td><td>喜び優勢・約120秒の単一セッション（概要〜各タブの確認用）</td></tr>
+            <tr><td><strong>A/B比較デモ</strong></td><td>対照的な2セッションを読み込み、比較タブ（統計検定含む）へ遷移</td></tr>
+            <tr><td><strong>ベースライン・変化点</strong></td><td>冒頭が静穏で途中に急変があるデータ（ベースライン補正・変化点検出の確認用）</td></tr>
+            <tr><td><strong>マルチFaceID</strong></td><td>複数の顔を含むデータ（顔ごとの比較・ノイズ除外の確認用）</td></tr>
+          </tbody>
+        </table>
+        <div class="note">📄 アップロード画面の下部には<strong>「利用規約・プライバシーポリシー」</strong>へのリンクもあります（新規タブで開きます）。</div>
       </div>
     </div>
 
@@ -794,12 +813,26 @@
       <div class="howto">
         <div class="howto-title">FaceID切り替えUI</div>
         <ul>
-          <li>複数FaceIDが検出されると、ダッシュボード上部に<strong>FaceIDセレクター</strong>が表示されます。</li>
+          <li>複数FaceIDが検出されると、ダッシュボード上部に<strong>FaceIDセレクター</strong>が表示されます（各FaceIDは識別色付き）。</li>
           <li><strong>「全員」ボタン</strong>：すべての被験者を合算したデータを表示します。</li>
-          <li><strong>個別チップ</strong>（FaceID名）：クリックするとその1人のデータに切り替わります。</li>
+          <li><strong>個別チップ</strong>（FaceID名／ラベル名）：クリックするとその1人のデータに切り替わります。</li>
           <li><strong>Ctrl/Cmd＋クリック</strong>：複数人を選択して合算表示できます。</li>
         </ul>
         <div class="note">💡 FaceID列がない、または1人分のデータのみの場合は通常モードで動作し、このUIは表示されません。</div>
+      </div>
+
+      <div class="howto">
+        <div class="howto-title">
+          ノイズ（少フレームFaceID）の自動除外
+          <span class="howto-badge tag-gold">データ品質</span>
+        </div>
+        <p style="margin-bottom:8px">心sensorでは、検出が不安定だと同一人物が別IDで採番されたり、数フレームだけの誤検出IDが生じることがあります。KSDVはこうした<strong>少フレームのFaceIDを自動で「ノイズ」と判定し、既定で解析対象から除外</strong>します。</p>
+        <ul>
+          <li><strong>既定の判定基準</strong>：出現フレーム数が「総フレームの5%未満」または「約3秒未満」のFaceID（しきい値は変更可能）。</li>
+          <li>除外があると上部に<strong>品質バナー</strong>（例：「FaceID 4個検出 / 1個をノイズ除外」）が表示されます。</li>
+          <li>除外により「全員」合算の集計品質も向上します（ノイズのフレームを混ぜずに集計）。</li>
+        </ul>
+        <div class="note">🔧 しきい値の調整・除外内訳の確認・<strong>「微小なIDも表示」</strong>での再表示・<strong>FaceIDへのラベル名付け</strong>は、サイドバーの「<a href="#tab-multiface">マルチFaceID</a>」タブで行えます。ラベル名はブラウザに保存され、同じファイルを再度開くと復元されます。</div>
       </div>
     </div>
 
@@ -1035,9 +1068,10 @@
             <tr><td><code>## CORRELATION MATRIX</code></td><td>感情×感情・特殊指標のピアソン相関行列</td></tr>
             <tr><td><code>## CIRCUMPLEX MODEL (Russell 1980)</code></td><td>4象限のフレーム数</td></tr>
             <tr><td><code>## CHANGE POINTS</code>（変化点がある場合のみ）</td><td>時刻（秒）・感情・変化量・方向</td></tr>
+            <tr><td><code>## FACE FILTERING</code>（複数顔データの場合のみ）</td><td>ノイズ除外の判定基準（%・秒）・総フレーム数・解析対象(kept)／除外(excluded)の FaceID とフレーム数</td></tr>
           </tbody>
         </table>
-        <div class="note">💡 統計ソフト（R / Python / SPSS）への読み込みや、論文への数値転記にご活用ください。</div>
+        <div class="note">💡 統計ソフト（R / Python / SPSS）への読み込みや、論文への数値転記にご活用ください。複数顔データでは、どの基準で何を除外したかが <code>## FACE FILTERING</code> に記録され、分析の再現性を担保します。</div>
       </div>
     </div>
 
@@ -1095,6 +1129,49 @@
     </div>
 
 
+    <div class="doc-section" id="tab-multiface">
+      <h2>
+        <span class="h2-icon" style="background:var(--purple-dim); color:var(--purple);">👥</span>
+        タブ：マルチFaceID（複数顔の比較）
+      </h2>
+      <p>1つのCSVに複数の顔（FaceID）が含まれるとき、サイドバーに表示されるタブです。顔ごとのデータ品質管理と、顔どうしの感情の比較を行います。</p>
+
+      <div class="pill-list">
+        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(251,191,36,.25);">データ品質サマリ＋しきい値調整</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">顔の管理リスト（色・フレーム数・ラベル名・表示トグル）</span>
+        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(192,132,252,.25);">感情オーバーレイ（指標選択式）</span>
+      </div>
+
+      <div class="howto">
+        <div class="howto-title">データ品質とノイズ除外</div>
+        <ul>
+          <li>検出した顔の総数と、ノイズとして除外した数を表示します（例：「4個検出 / 1個をノイズ除外」）。</li>
+          <li><strong>除外しきい値</strong>を変更できます：「総フレームの〔5〕%未満」「〔3〕秒未満」を少フレームとして除外（「既定に戻す」ボタンあり）。変更すると即座に再評価されます。</li>
+          <li><strong>「微小なIDも表示」</strong>をオンにすると、除外した少フレームのFaceIDも一覧・選択に表示されます。</li>
+          <li>除外は表示・集計上のものでデータ自体は保持され、除外基準と内訳は学術CSV（<code>## FACE FILTERING</code>）に記録されます（再現性のため）。</li>
+        </ul>
+      </div>
+
+      <div class="howto">
+        <div class="howto-title">顔の管理リスト ＆ ラベル名</div>
+        <ul>
+          <li>各顔の<strong>識別色</strong>・<strong>フレーム数</strong>・<strong>少フレームバッジ</strong>を一覧表示します。</li>
+          <li><strong>ラベル名入力</strong>欄に名前（例：「司会者」「参加者A」）を入れて Enter または入力欄からフォーカスを外すと保存されます。ラベル名はブラウザに保存され、同じファイル名で再度開くと復元されます。</li>
+          <li><strong>表示トグル</strong>で、その顔をグラフ・集計に含めるか切り替えられます（ヘッダーのFaceIDセレクターと連動）。</li>
+        </ul>
+      </div>
+
+      <div class="howto">
+        <div class="howto-title">感情オーバーレイ（顔どうしの比較）</div>
+        <ul>
+          <li><strong>指標ピル</strong>（Engagement / Valence / Attention ＋ 非ニュートラル9感情）から1つを選びます。</li>
+          <li>表示中の各顔の時系列を<strong>時間0-100%に正規化</strong>して、1本ずつ色分けで重ね描画します（凡例はラベル名）。録画長が異なる顔どうしでも進行率で比較できます。</li>
+        </ul>
+        <div class="note">💡 顔の識別色は一覧・凡例・FaceIDセレクターで共通です。</div>
+      </div>
+    </div>
+
+
     <div class="doc-section" id="tab-comparison">
       <h2>
         <span class="h2-icon" style="background:var(--purple-dim); color:var(--purple);">⊞⊞</span>
@@ -1108,10 +1185,15 @@
         <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">特殊指標比較（Engagement / Valence / Attention）</span>
         <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(251,191,36,.25);">感情状態の象限分布（CIRCUMPLEX MODEL）</span>
         <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">感情変動性レーダー（AFFECT DYNAMICS — VARIABILITY）</span>
-        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">Engagement 時系列オーバーレイ（時間正規化）</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">タイムラインオーバーレイ（指標選択式・時間正規化）</span>
         <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">感情差分ランキング（DIFFERENCE TABLE、|B−A| 降順）</span>
         <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(192,132,252,.25);">統計検定（Welch t / Mann-Whitney U トグル）</span>
         <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">CSV出力（4セクション構成）</span>
+      </div>
+
+      <div class="howto">
+        <div class="howto-title">タイムラインオーバーレイ（指標選択式）</div>
+        <p>指標ピルから1つ（Engagement / Valence / Attention ＋ 非ニュートラル9感情）を選ぶと、その指標の時系列を <strong>A=実線 / B=破線</strong> で重ねて表示します。各セッションの時間を0-100%に正規化しているため、録画長が異なっても進行に沿って比較できます。</p>
       </div>
 
       <div class="howto">
