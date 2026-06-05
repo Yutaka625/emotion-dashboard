@@ -215,18 +215,32 @@ export interface BaselineStat {
  */
 export type BaselineOffsets = Record<string, BaselineStat>;
 
+// マルチ FaceID のデータ品質情報（ノイズ＝少フレームFaceID の判定結果。しきい値から動的に算出）
+export interface FaceQuality {
+  /** 録画全体のユニーク時刻数（＝総フレーム数） */
+  totalFrames: number;
+  /** 解析対象として残した FaceID（出現フレームが十分） */
+  kept: string[];
+  /** 少フレームのため除外した FaceID（検出が不安定な可能性） */
+  minor: { id: string; frames: number }[];
+}
+
 // マルチ FaceID 対応: 複数の顔を含む CSV データの管理構造
+// ※ ノイズ判定（kept/minor）は固定せず、FaceIDContext がしきい値から動的に算出する。
+//    ここでは「検出した全 FaceID」と素材（perFace/rawRowsByFace/totalFrames）のみ保持する。
 export interface MultiFaceData {
-  /** 検出された全 FaceID（出現順）。FaceID 列がない場合は空配列 */
+  /** 検出した全 FaceID（ソート済み）。FaceID 列がない場合は空配列 */
   faceIds: string[];
-  /** FaceID 別に事前計算した DashboardData */
+  /** FaceID 別に事前計算した DashboardData（全 ID） */
   perFace: Map<string, DashboardData>;
-  /** 全 FaceID を合算した DashboardData（従来と同じ） */
+  /** 全 FaceID を合算した DashboardData（フォールバック用） */
   allCombined: DashboardData;
-  /** FaceID 別の生行データ（複数選択時の再計算用） */
+  /** FaceID 別の生行データ（再計算・フレーム数算出用。全 ID） */
   rawRowsByFace: Map<string, Record<string, string>[]>;
   /** 元ファイル名 */
   filename: string;
+  /** 録画全体のユニーク時刻数（＝総フレーム数） */
+  totalFrames: number;
 }
 
 /** UXリサーチ向け複合指標スコア */

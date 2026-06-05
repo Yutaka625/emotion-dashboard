@@ -21,6 +21,8 @@ import AcademicSection from '@/components/sections/AcademicSection';
 import ActionUnitsSection from '@/components/sections/ActionUnitsSection';
 import ComparisonSection from '@/components/sections/ComparisonSection';
 import UXResearchSection from '@/components/sections/UXResearchSection';
+import MultiFaceComparisonSection from '@/components/sections/MultiFaceComparisonSection';
+import FaceQualityBanner from '@/components/FaceQualityBanner';
 import { Upload, X, GitCompare, ArrowUp } from 'lucide-react';
 
 export default function Home() {
@@ -71,31 +73,36 @@ export default function Home() {
   const displayData = useCorrectedDashboardData(baseData);
 
   // CSV テキストからマルチ FaceID データを構築するヘルパー
+  // ※ ノイズ判定（kept/minor）は固定せず、全 FaceID と totalFrames を詰めるだけにする。
+  //    実際の除外判定は FaceIDContext がしきい値から動的に行う。
   const buildMultiFaceData = useCallback((csvText: string, fname: string, allCombined: DashboardData) => {
+    const setPlain = () => setMultiFaceData({ faceIds: [], perFace: new Map(), allCombined, rawRowsByFace: new Map(), filename: fname, totalFrames: 0 });
     try {
       const rows = parseCSV(csvText);
       if (rows.length === 0) return;
       const headers = Object.keys(rows[0]);
+      const timeCol = headers[0];
       const faceIdCol = detectFaceIdColumn(headers);
 
       if (faceIdCol) {
         const grouped = groupRowsByFaceId(rows, faceIdCol);
-        const faceIds = Array.from(grouped.keys()).sort();
-        if (faceIds.length > 1) {
-          // 複数の FaceID が存在 → 各 FaceID の DashboardData を事前計算
+        const allIds = Array.from(grouped.keys()).sort();
+        if (allIds.length > 1) {
+          const totalFrames = new Set(rows.map(r => r[timeCol])).size;
+          // 各 FaceID の DashboardData を事前計算（全 ID）
           const perFace = new Map<string, DashboardData>();
           grouped.forEach((faceRows, id) => {
-            perFace.set(id, computeDashboardData(faceRows, fname));
+            try { perFace.set(id, computeDashboardData(faceRows, fname)); } catch { /* 空/不正は登録しない */ }
           });
-          setMultiFaceData({ faceIds, perFace, allCombined, rawRowsByFace: grouped, filename: fname });
+          setMultiFaceData({ faceIds: allIds, perFace, allCombined, rawRowsByFace: grouped, filename: fname, totalFrames });
           return;
         }
       }
       // FaceID 列なし or 1人分のみ → 通常モード
-      setMultiFaceData({ faceIds: [], perFace: new Map(), allCombined, rawRowsByFace: new Map(), filename: fname });
+      setPlain();
     } catch {
       // エラー時は通常モードにフォールバック
-      setMultiFaceData({ faceIds: [], perFace: new Map(), allCombined, rawRowsByFace: new Map(), filename: fname });
+      setPlain();
     }
   }, [setMultiFaceData]);
 
@@ -108,7 +115,7 @@ export default function Home() {
       buildMultiFaceData(rawCsvText, newFilename, newData);
     } else {
       // 生テキストなし → 通常モード
-      setMultiFaceData({ faceIds: [], perFace: new Map(), allCombined: newData, rawRowsByFace: new Map(), filename: newFilename });
+      setMultiFaceData({ faceIds: [], perFace: new Map(), allCombined: newData, rawRowsByFace: new Map(), filename: newFilename, totalFrames: 0 });
     }
   }, [buildMultiFaceData, setMultiFaceData]);
 
@@ -178,7 +185,7 @@ export default function Home() {
   // data は early return 後に非 null 保証。displayData も非 null だが型上は null を許容するため ?? でフォールバック
   const safeDisplayData = displayData ?? data;
 
-  const sectionIds = ['overview', 'timeseries', 'engagement', 'emotions', 'transitions', 'academic', 'actionunits', 'comparison', 'uxresearch'] as const;
+  const sectionIds = ['overview', 'timeseries', 'engagement', 'emotions', 'transitions', 'academic', 'actionunits', 'multiface', 'comparison', 'uxresearch'] as const;
   const sectionComponents: Record<string, React.ReactNode> = {
     overview:    <OverviewSection data={safeDisplayData} />,
     timeseries:  <TimeseriesSection data={safeDisplayData} rawTimeseries={(baseData ?? safeDisplayData).timeseries_full} />,
@@ -187,6 +194,7 @@ export default function Home() {
     transitions: <TransitionsSection data={safeDisplayData} />,
     academic:    <AcademicSection data={safeDisplayData} />,
     actionunits: <ActionUnitsSection data={safeDisplayData} />,
+    multiface:   <MultiFaceComparisonSection />,
     comparison:  secondaryData
       ? <ComparisonSection dataA={safeDisplayData} dataB={secondaryData} labelA={filename || 'Session A'} labelB={secondaryFilename || 'Session B'} />
       : (
@@ -257,7 +265,7 @@ export default function Home() {
       )}
 
       {/* Sidebar */}
-      <Sidebar activeSection={activeSection} onSectionChange={handleSectionChange} hasComparison={!!secondaryData} meta={displayData?.meta} />
+      <Sidebar activeSection={activeSection} onSectionChange={handleSectionChange} hasComparison={!!secondaryData} hasMultiFace={isMultiFace} meta={displayData?.meta} />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden dashboard-inner">
@@ -273,6 +281,9 @@ export default function Home() {
           <div className="flex items-center gap-3">
             {/* マルチ FaceID セレクター（複数人データの場合のみ表示） */}
             <FaceIDSelector />
+
+            {/* FaceID 品質バナー（ノイズ除外があった場合のみ表示） */}
+            <FaceQualityBanner />
 
             <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.68 0.015 255)' }}>
               {safeDisplayData.meta.total_frames.toLocaleString()} frames · {safeDisplayData.meta.duration_minutes.toFixed(2)} min

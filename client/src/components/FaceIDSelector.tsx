@@ -7,7 +7,7 @@
  * - 個別ボタン: クリックで単一選択、Ctrl/Cmd+クリックで複数選択トグル
  */
 
-import { Users, User } from 'lucide-react';
+import { Users } from 'lucide-react';
 import { useFaceID } from '@/contexts/FaceIDContext';
 
 export default function FaceIDSelector() {
@@ -18,6 +18,8 @@ export default function FaceIDSelector() {
     selectAll,
     selectOne,
     toggleFaceId,
+    displayName,
+    faceColor,
   } = useFaceID();
 
   // マルチフェイスモードでなければ何も表示しない
@@ -92,10 +94,10 @@ export default function FaceIDSelector() {
               cursor: 'pointer',
               whiteSpace: 'nowrap',
             }}
-            title={`Face ${faceId} のデータを表示（Ctrl+クリックで複数選択）`}
+            title={`${displayName(faceId)} のデータを表示（Ctrl+クリックで複数選択）`}
           >
-            <User size={9} />
-            {faceId}
+            <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: faceColor(faceId), flexShrink: 0 }} />
+            {displayName(faceId)}
           </button>
         );
       })}
