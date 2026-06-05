@@ -13,6 +13,11 @@
 - [ ] **未使用アニメーションクラスの活用または削除**（`index.css` の `count-up` / `scan-line`）
 
 ## 機能拡張（次フェーズ候補）
+- [ ] **比較分析のタイムラインオーバーレイを多指標対応にする**
+  - 現状は比較タブの ENGAGEMENT TIMELINE OVERLAY が Engagement のみ（時間正規化してA/B重ね合わせ）
+  - Engagement だけでなく **Valence・各感情（9種）も選択して**時系列の重ね合わせ表示できるようにする
+  - 指標を選ぶUI（ピル/ドロップダウン等）を追加し、選択指標でA（実線）/B（破線）をオーバーレイ
+  - 対象: `client/src/components/sections/ComparisonSection.tsx`
 - [ ] **利用規約・プライバシーポリシーの同意フロー（クリックラップ）**
   - 文書は作成済み（`KSDV_terms.html` ＝アプリ内リンク先、`client/public/` と同期）
   - 初回利用時に「利用規約・プライバシーポリシーに同意する」チェック＋ボタンの同意ゲートを表示
