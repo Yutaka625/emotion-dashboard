@@ -12,9 +12,14 @@ import type { DashboardData } from '@/lib/types';
 interface DropZoneProps {
   // 第3引数: 生 CSV テキスト（マルチ FaceID 解析用）
   onDataLoaded: (data: DashboardData, filename: string, rawCsvText?: string) => void;
+  // A/B比較サンプル用: 2つ目(B)のCSVテキストを親に渡して比較タブへ遷移させる
+  onComparisonSecondary?: (csvText: string, filename: string) => void;
 }
 
-export default function DropZone({ onDataLoaded }: DropZoneProps) {
+// サンプルCSVの配信元（GitHub Pages の base path も解決される）
+const SAMPLE_BASE = `${import.meta.env.BASE_URL}samples/`;
+
+export default function DropZone({ onDataLoaded, onComparisonSecondary }: DropZoneProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -74,6 +79,48 @@ export default function DropZone({ onDataLoaded }: DropZoneProps) {
     const file = e.target.files?.[0];
     if (file) processFile(file);
   }, [processFile]);
+
+  // 配信フォルダ(public/samples)からサンプルCSVを取得して解析・遷移する
+  const loadSample = useCallback(async (file: string, name: string) => {
+    setIsProcessing(true);
+    setError(null);
+    setProgress('サンプルを読み込み中...');
+    try {
+      const res = await fetch(SAMPLE_BASE + file);
+      if (!res.ok) throw new Error(`サンプルの取得に失敗しました（${res.status}）`);
+      const text = await res.text();
+      setProgress('統計を計算中...');
+      await new Promise(resolve => setTimeout(resolve, 50));
+      const data = analyzeCSV(text, name);
+      onDataLoaded(data, name, text);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'サンプルの読み込みに失敗しました');
+      setIsProcessing(false);
+      setProgress('');
+    }
+  }, [onDataLoaded]);
+
+  // A/B比較サンプル: A を主データとして読み込み、B を比較データとして親へ渡す
+  const loadComparisonSample = useCallback(async (fileA: string, nameA: string, fileB: string, nameB: string) => {
+    setIsProcessing(true);
+    setError(null);
+    setProgress('比較サンプルを読み込み中...');
+    try {
+      const [textA, textB] = await Promise.all([
+        fetch(SAMPLE_BASE + fileA).then(r => { if (!r.ok) throw new Error(`Aの取得に失敗（${r.status}）`); return r.text(); }),
+        fetch(SAMPLE_BASE + fileB).then(r => { if (!r.ok) throw new Error(`Bの取得に失敗（${r.status}）`); return r.text(); }),
+      ]);
+      setProgress('統計を計算中...');
+      await new Promise(resolve => setTimeout(resolve, 50));
+      const dataA = analyzeCSV(textA, nameA);
+      onDataLoaded(dataA, nameA, textA);
+      onComparisonSecondary?.(textB, nameB);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '比較サンプルの読み込みに失敗しました');
+      setIsProcessing(false);
+      setProgress('');
+    }
+  }, [onDataLoaded, onComparisonSecondary]);
 
   return (
     <div
@@ -187,6 +234,54 @@ export default function DropZone({ onDataLoaded }: DropZoneProps) {
             </div>
           </div>
         )}
+      </div>
+
+      {/* サンプルで試す（検証用） */}
+      <div style={{ marginTop: '24px', width: '100%', maxWidth: '560px' }}>
+        <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', color: 'oklch(0.60 0.01 250)', letterSpacing: '0.08em', textAlign: 'center', marginBottom: '10px' }}>
+          サンプルで試す（ファイルが無くても各機能を確認できます）
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+          {[
+            { label: '基本サンプル', sub: '喜び優勢・約120秒', onClick: () => loadSample('basic_joy_120s.csv', 'サンプル_基本_喜び.csv') },
+            { label: 'A/B比較デモ', sub: '2セッション→比較・検定', onClick: () => loadComparisonSample('basic_joy_120s.csv', 'サンプルA_喜び.csv', 'contrast_confusion_100s.csv', 'サンプルB_混乱.csv') },
+            { label: 'ベースライン・変化点', sub: '補正＋急変の検出', onClick: () => loadSample('baseline_changepoints_90s.csv', 'サンプル_ベースライン変化点.csv') },
+            { label: 'マルチFaceID', sub: '複数人（3名）', onClick: () => loadSample('multiface_3people_60s.csv', 'サンプル_マルチFaceID.csv') },
+          ].map(btn => (
+            <button
+              key={btn.label}
+              type="button"
+              disabled={isProcessing}
+              onClick={e => { e.stopPropagation(); btn.onClick(); }}
+              className="hbd hfg"
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                gap: '2px',
+                padding: '10px 12px',
+                borderRadius: '8px',
+                borderWidth: '1px',
+                borderStyle: 'solid',
+                background: 'oklch(0.22 0.04 255)',
+                cursor: isProcessing ? 'not-allowed' : 'pointer',
+                opacity: isProcessing ? 0.5 : 1,
+                textAlign: 'left',
+                ['--hbd']: 'oklch(0.28 0.04 255)',
+                ['--hbd-h']: 'oklch(0.70 0.14 195 / 0.5)',
+                ['--hfg']: 'oklch(0.85 0.01 250)',
+                ['--hfg-h']: 'oklch(0.70 0.14 195)',
+              } as CSSProperties}
+            >
+              <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', fontWeight: 700, color: 'oklch(0.88 0.005 250)' }}>
+                {btn.label}
+              </span>
+              <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.66rem', color: 'oklch(0.62 0.015 255)' }}>
+                {btn.sub}
+              </span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* ガイドリンク */}
