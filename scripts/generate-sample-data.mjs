@@ -295,7 +295,19 @@ mkdirSync(PUB_DIR, { recursive: true });
   }));
   const rows = [];
   for (let i = 0; i < timeline.length; i++) for (const pf of perFace) rows.push(pf[i]);
-  writeBoth('multiface_3people_60s.csv', toCsv(rows));
+
+  // 短命なノイズ顔（faceId 3）: 先頭 0.8 秒（12フレーム）だけ出現＝検出の不安定さを模擬。
+  // 総フレーム(900)の5%未満かつ3秒未満なので、アプリ側でノイズ除外される。
+  const noiseTimeline = timeline.slice(0, 12);
+  const noiseRows = buildFaceRows({
+    rng: makeRng(20260614), timeline: noiseTimeline, faceId: 3,
+    weights: { surprise: 2, fear: 1 }, meanGap: 5, engBase: 40, calmNeutral: 88, geometry: GEO.right,
+  });
+  // 全行を結合し、時刻→FaceID 順に並べ替え（実データの並びに合わせる）
+  const allRows = [...rows, ...noiseRows];
+  allRows.sort((a, b) =>
+    Number(a['time stamp']) - Number(b['time stamp']) || Number(a['face id']) - Number(b['face id']));
+  writeBoth('multiface_3people_60s.csv', toCsv(allRows));
 }
 
 console.log('\n✅ サンプル生成完了（心sensor実データ準拠・0〜100スケール・54列）→ client/public/samples/');
