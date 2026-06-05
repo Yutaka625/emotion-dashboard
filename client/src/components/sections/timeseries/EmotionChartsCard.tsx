@@ -94,6 +94,13 @@ export default function EmotionChartsCard({
     : displayMode === 'zscore'  ? '感情スコアのZスコア（平常時=0 / 単位=標準偏差SD）'
     : '感情スコアの時系列グラフ';
 
+  // 特殊指標（Engagement/Valence/Attention）用の補正モード別サブタイトル
+  const correctedSubtitleSpecial =
+    displayMode === 'deviation' ? 'ベースラインからの変化（0=平常時 / 正=増加 / 負=低下）'
+    : displayMode === 'lift'    ? 'ベースライン比の変化率（%）。Valence は符号付きのため「—」'
+    : displayMode === 'zscore'  ? 'Zスコア（平常時=0 / 単位=SD）。SDが極小の区間は「—」'
+    : 'Engagement / Valence / Attention';
+
   // ---- ベースライン区間ハイライト ----
   const renderBaselineArea = () => {
     if (!baselineRange) return null;
@@ -523,7 +530,7 @@ export default function EmotionChartsCard({
           <div>
             <div className="section-label mb-1">SPECIAL METRICS</div>
             <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)' }}>
-              Engagement / Valence / Attention
+              {isBaselineActive ? correctedSubtitleSpecial : 'Engagement / Valence / Attention'}
             </div>
           </div>
           <div className="flex gap-2">
@@ -544,7 +551,7 @@ export default function EmotionChartsCard({
           </div>
         </div>
         <ResponsiveContainer width="100%" height={200}>
-          <ComposedChart data={displayData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
+          <ComposedChart data={displayData} margin={{ top: 5, right: 10, bottom: 5, left: isBaselineActive && AXIS_LABEL[displayMode] ? 12 : 0 }}>
             <defs>
               <linearGradient id="engGrad" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%"  stopColor={SPECIAL_COLORS.engagement} stopOpacity={0.25} />
@@ -553,10 +560,17 @@ export default function EmotionChartsCard({
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" />
             <XAxis dataKey="time" type="number" domain={['dataMin', 'dataMax']} tickFormatter={formatTime} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} />
-            <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} domain={[0, 100]} />
+            <YAxis
+              tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }}
+              domain={isBaselineActive ? ['auto', 'auto'] : [0, 100]}
+              label={isBaselineActive && AXIS_LABEL[displayMode]
+                ? { value: AXIS_LABEL[displayMode], angle: -90, position: 'insideLeft', style: { fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.66rem', fill: 'oklch(0.68 0.015 255)', textAnchor: 'middle' } }
+                : undefined}
+            />
             <Tooltip content={<CustomTooltip />} />
             <Legend formatter={v => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem' }}>{v}</span>} />
             {renderBaselineArea()}
+            {renderBaselineZeroLine()}
             {renderEventAreas()}
             {showSpecial.includes('engagement') && (
               <Area type="monotone" dataKey="engagement" stroke={SPECIAL_COLORS.engagement} fill="url(#engGrad)" strokeWidth={1.5} dot={false} name="Engagement" />
@@ -569,6 +583,12 @@ export default function EmotionChartsCard({
             )}
           </ComposedChart>
         </ResponsiveContainer>
+        {/* 変化率(lift)モードで Valence は符号付きのため算出しない旨の常設注記 */}
+        {displayMode === 'lift' && showSpecial.includes('valence') && (
+          <div className="mt-2 px-3 py-2 rounded" style={{ background: 'oklch(0.20 0.04 255)', border: '1px solid oklch(0.30 0.04 255)', fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', color: 'oklch(0.72 0.012 250)', lineHeight: 1.6 }}>
+            ℹ Valence は符号付き指標（−100〜+100）のため、変化率（lift）モードでは算出しません（グラフ・ツールチップ上は「—」）。偏差（deviation）または Zスコア モードでご確認ください。
+          </div>
+        )}
       </div>
     </>
   );

@@ -11,6 +11,8 @@ import {
 } from 'recharts';
 import { rechartsTooltip } from '@/lib/chartTooltip';
 import { formatPct } from '@/lib/utils';
+import { useBaseline } from '@/contexts/BaselineContext';
+import AbsoluteScaleBadge from '@/components/ui/AbsoluteScaleBadge';
 
 interface Props {
   data: DashboardData;
@@ -18,6 +20,8 @@ interface Props {
 
 export default function EngagementValenceSection({ data }: Props) {
   const { special_stats, engagement_distribution, engagement_correlations, engagement_emotion_profile, scatter_eng_val, affect_dynamics, valence_distribution, valence_correlations, timeseries_full, circumplex_summary } = data;
+  // Circumplex は絶対値スケール前提のため補正対象外。補正中はその旨を明示する。
+  const { isBaselineActive } = useBaseline();
 
   const eng = special_stats.engagement;
   const val = special_stats.valence;
@@ -222,6 +226,8 @@ export default function EngagementValenceSection({ data }: Props) {
           <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
             Valence-Arousal 円環モデル
           </div>
+          {/* 補正ON中: 円環モデルは絶対値スケール前提のため補正対象外であることを明示 */}
+          <div className="mb-3"><AbsoluteScaleBadge /></div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {circumplexData.map((item, i) => (
               <div key={i} className="p-3 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', border: `2px solid ${item.color}` }}>
@@ -240,6 +246,11 @@ export default function EngagementValenceSection({ data }: Props) {
           <div className="mt-3 p-3 rounded" style={{ background: 'oklch(0.20 0.04 255)', border: '1px solid oklch(0.30 0.04 255)' }}>
             <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.78 0.012 250)', lineHeight: 1.6 }}>
               <strong>解釈：</strong>大多数のフレーム（{circumplex_summary.low_arousal_positive.toLocaleString()}フレーム）が「低覚醒×高Valence」象限に分類されました。これはリラックスした満足状態または穏やかなポジティブ感情を示しており、覚醒度が低い（Engagement低）ながらも感情価は高い（Valence高）という特徴的なパターンです。
+              {isBaselineActive && (
+                <span style={{ display: 'block', marginTop: '0.5rem', color: 'oklch(0.82 0.15 70)' }}>
+                  ※ ベースライン補正の表示中ですが、この象限分類は補正前の絶対値（Engagement／Valence の生値）に基づいています。
+                </span>
+              )}
             </p>
           </div>
         </div>
