@@ -14,6 +14,7 @@ import { Users } from 'lucide-react';
 import { useFaceID } from '@/contexts/FaceIDContext';
 import { NON_NEUTRAL_EMOTIONS, EMOTION_LABELS_JA } from '@/lib/types';
 import { rechartsTooltip } from '@/lib/chartTooltip';
+import InfoTooltip from '@/components/ui/InfoTooltip';
 
 // オーバーレイで選べる指標（特殊指標3種＋非ニュートラル9感情）
 const OVERLAY_METRICS: { key: string; label: string }[] = [
@@ -195,11 +196,14 @@ export default function MultiFaceComparisonSection() {
       {/* 感情オーバーレイグラフ */}
       <div className="metric-card">
         <div className="section-label mb-3">EMOTION OVERLAY</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '4px' }}>
-          {metricLabel} 時系列の重ね合わせ（時間正規化）
+        <div className="flex items-center gap-1.5" style={{ marginBottom: '4px' }}>
+          <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)' }}>
+            {metricLabel} 時系列の重ね合わせ（時間正規化）
+          </span>
+          <InfoTooltip text="横軸の％は「各顔が映っていた区間の進行率」です。0%＝その顔が最初に検出されたフレーム、100%＝最後のフレーム。顔ごとに登場した時刻も映っていた長さも異なるため、各顔をそれぞれの登場区間で0〜100%に引き伸ばして揃え、波形の形を比較できるようにしています（実時間の同じ瞬間を指すものではありません）。" />
         </div>
         <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.68 0.015 255)', marginBottom: '0.75rem' }}>
-          指標を選んで、表示中の各顔を重ねて比較します。各顔の時間を0-100%に正規化しています。
+          指標を選んで、表示中の各顔を重ねて比較します。横軸は各顔の登場区間を0〜100%に正規化した「進行率」です（顔ごとに登場時刻・長さが異なるため、実時間の秒ではなく割合で揃えています）。
         </p>
 
         {/* 指標選択ピル */}
