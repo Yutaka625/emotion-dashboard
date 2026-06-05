@@ -221,6 +221,38 @@ export default function DropZone({ onDataLoaded }: DropZoneProps) {
         使い方ガイドを見る
       </a>
 
+      {/* 利用規約・プライバシーポリシーリンク（ガイドリンクのすぐ下） */}
+      <a
+        href="KSDV_terms.html"
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={e => e.stopPropagation()}
+        className="hbd hfg"
+        style={{
+          marginTop: '8px',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '6px',
+          fontFamily: 'Noto Sans JP, sans-serif',
+          fontSize: '0.75rem',
+          textDecoration: 'none',
+          padding: '5px 12px',
+          borderRadius: '6px',
+          borderWidth: '1px',
+          borderStyle: 'solid',
+          background: 'oklch(0.22 0.04 255)',
+          ['--hbd']: 'oklch(0.28 0.04 255)',
+          ['--hbd-h']: 'oklch(0.70 0.14 195 / 0.4)',
+          ['--hfg']: 'oklch(0.68 0.015 255)',
+          ['--hfg-h']: 'oklch(0.70 0.14 195)',
+        } as CSSProperties}
+      >
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/>
+        </svg>
+        利用規約・プライバシーポリシー
+      </a>
+
       {/* Error message */}
       {error && (
         <div
