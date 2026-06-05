@@ -853,6 +853,7 @@
           <li>自動で<strong>「比較分析」タブ</strong>に切り替わり、2セッションの並列比較が表示されます。</li>
         </ol>
         <div class="note">💡 比較データを削除するには「比較中: ○○」ボタン右の × をクリックします。</div>
+        <div class="note">💡 比較CSVを追加すると、ヘッダーに <strong>「表示中 A / B」切替トグル</strong>が現れます。「比較分析」タブ以外（概要・感情分布・特殊指標など各タブ）に表示するセッションをA／Bで切り替えられます。「比較分析」タブは切替に関係なく常に A 対 B を表示します。</div>
       </div>
     </div>
 
@@ -970,7 +971,7 @@
         <div class="howto-title">Valence タブ</div>
         <ul>
           <li>Valenceの基本統計量・レベル分布・感情との相関係数</li>
-          <li><strong>Circumplex Model（Russell 1980）</strong>：Valence × 覚醒度（Engagement代理）で4象限分類。高覚醒×高Valence＝興奮、低覚醒×高Valence＝リラックスなど</li>
+          <li><strong>Circumplex Model（Russell 1980）</strong>：Valence × 覚醒度（Engagement代理）で4象限分類。高覚醒×高Valence＝興奮、低覚醒×高Valence＝リラックスなど。分割は<strong>固定中立点（Engagement=50／Valence=0）</strong>で行い、絶対スケールで判定します（セッション間で比較可能）。</li>
           <li>Affect Dynamics（Valence版）</li>
         </ul>
       </div>
@@ -988,10 +989,11 @@
         <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">感情カード × 10枚（平均・最大・支配率）</span>
         <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(251,191,36,.25);">感情出現率（Prevalence）</span>
         <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(192,132,252,.25);">記述統計表（全感情×平均・SD・最大・中央値）</span>
-        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">Affect Dynamics 比較棒グラフ</span>
+        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">Affect Dynamics 比較棒グラフ（変動性・不安定性）</span>
+        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">感情慣性（AR1）比較</span>
       </div>
 
-      <p><strong>感情出現率</strong>は「その感情が有意に出現した時間の割合」で、平均スコアとは異なる指標です。例：喜び 68% → セッションの68%の時間で喜びスコアが閾値以上だった。</p>
+      <p><strong>感情出現率</strong>は「その感情が有意に出現した時間の割合」で、平均スコアとは異なる指標です。閾値は<strong>スコア 0.3</strong>（0〜100スケール）で、低めに設定されているためわずかな表出も出現として数えます。例：喜び 68% → セッションの68%の時間で喜びスコアが 0.3 以上だった。</p>
 
       <table class="tab-table" style="margin-top:12px">
         <thead>

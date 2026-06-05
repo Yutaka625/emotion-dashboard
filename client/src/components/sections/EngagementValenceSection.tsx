@@ -93,6 +93,13 @@ export default function EngagementValenceSection({ data }: Props) {
     { label: '低覚醒×低Valence', value: circumplex_summary.low_arousal_negative, color: 'oklch(0.55 0.12 250)', desc: '疲労・抑うつ状態' },
   ];
 
+  // 円環モデルの解釈文はデータ駆動で生成する。
+  // 固定中立点分割（Engagement=50 / Valence=0）では最多象限がデータにより変わるため、
+  // 旧コードのような「低覚醒×高Valence」固定の文言は使わず、実際の最多象限を選ぶ。
+  const circumTotal = circumplexData.reduce((s, q) => s + q.value, 0) || 1;
+  const dominantQuadrant = [...circumplexData].sort((a, b) => b.value - a.value)[0];
+  const dominantQuadrantPct = ((dominantQuadrant.value / circumTotal) * 100).toFixed(1);
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -362,7 +369,7 @@ export default function EngagementValenceSection({ data }: Props) {
           </div>
           <div className="mt-3 p-3 rounded" style={{ background: 'oklch(0.20 0.04 255)', border: '1px solid oklch(0.30 0.04 255)' }}>
             <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.78 0.012 250)', lineHeight: 1.6 }}>
-              <strong>解釈：</strong>大多数のフレーム（{circumplex_summary.low_arousal_positive.toLocaleString()}フレーム）が「低覚醒×高Valence」象限に分類されました。これはリラックスした満足状態または穏やかなポジティブ感情を示しており、覚醒度が低い（Engagement低）ながらも感情価は高い（Valence高）という特徴的なパターンです。
+              <strong>解釈：</strong>最も多くのフレーム（{dominantQuadrant.value.toLocaleString()}フレーム・{dominantQuadrantPct}%）が「{dominantQuadrant.label}」象限に分類されました（{dominantQuadrant.desc}）。分割は固定中立点（Engagement=50／Valence=0）で行っています。
               {isBaselineActive && (
                 <span style={{ display: 'block', marginTop: '0.5rem', color: 'oklch(0.82 0.15 70)' }}>
                   ※ ベースライン補正の表示中ですが、この象限分類は補正前の絶対値（Engagement／Valence の生値）に基づいています。

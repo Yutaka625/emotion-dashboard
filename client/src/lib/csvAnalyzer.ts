@@ -446,14 +446,19 @@ export function computeDashboardData(rows: Record<string, string>[], filename: s
   }));
 
   // ---- 19. Circumplex summary ----
-  const engMed = special_stats.engagement.median;
-  const valMed = special_stats.valence.median;
+  // Russell(1980) の円環モデルは「絶対的な2次元感情空間」のため、分割は固定の中立点で行う。
+  //   - Valence は符号付き（−100〜100）で 0 が中立 → 0 で分割
+  //   - Engagement は覚醒度の代理（0〜100）で 50 を中点として分割
+  // 旧実装はセッション中央値で分割していたが、構造上どのデータも各象限ほぼ25%になり情報量が失われ、
+  // かつ「絶対値スケール前提（補正対象外）」という本指標の扱いと矛盾していたため固定中立点へ変更。
+  const AROUSAL_MID = 50; // Engagement の中点（覚醒度の高低境界）
+  const VALENCE_MID = 0;  // Valence の中立点（快−不快の境界）
   const circumplex_summary: DashboardData['circumplex_summary'] = {
-    high_arousal_positive: df.filter(r => (r.engagement as number) >= engMed && (r.valence as number) >= valMed).length,
-    high_arousal_negative: df.filter(r => (r.engagement as number) >= engMed && (r.valence as number) < valMed).length,
-    low_arousal_positive: df.filter(r => (r.engagement as number) < engMed && (r.valence as number) >= valMed).length,
-    low_arousal_negative: df.filter(r => (r.engagement as number) < engMed && (r.valence as number) < valMed).length,
-    note: 'Engagement=Arousal proxy, Valence=Valence (Russell 1980 Circumplex Model)',
+    high_arousal_positive: df.filter(r => (r.engagement as number) >= AROUSAL_MID && (r.valence as number) >= VALENCE_MID).length,
+    high_arousal_negative: df.filter(r => (r.engagement as number) >= AROUSAL_MID && (r.valence as number) < VALENCE_MID).length,
+    low_arousal_positive: df.filter(r => (r.engagement as number) < AROUSAL_MID && (r.valence as number) >= VALENCE_MID).length,
+    low_arousal_negative: df.filter(r => (r.engagement as number) < AROUSAL_MID && (r.valence as number) < VALENCE_MID).length,
+    note: 'Engagement>=50=High Arousal, Valence>=0=Positive (Russell 1980 Circumplex Model, fixed neutral split)',
   };
 
   // ---- 20. Engagement emotion profile ----
