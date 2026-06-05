@@ -19,9 +19,9 @@ KSDVは、顔表情認識データをCSV形式でアップロードし、感情�
 - **UXリサーチ向け複合指標**：フラストレーション指数・デライト指数・認知負荷・総合UXスコアを自動計算
 - **頭部動作検知**：うなづき（nod）・首振り（shake）・首傾げ（tilt）を自動検出
 - **感情変化点検出**：感情スコアの急激な変化（上位20件）を自動検出
-- **マルチFaceID対応**：複数の被験者データを含むCSVを人物別に分析・切り替え
+- **マルチFaceID対応**：複数の被験者データを含むCSVを人物別に分析・切り替え。少フレームの不安定なFaceID（ノイズ）を既定で自動除外（しきい値は可変）、品質バナーで明示、顔ごとの感情オーバーレイ、FaceIDへのラベル名付け（ブラウザ保存）に対応
 - **ベースライン補正**：安静時セッションとの差分で補正済みスコアを表示
-- **セッション比較（A/B）**：2つのCSVセッションを並列比較
+- **セッション比較（A/B）**：2つのCSVセッションを並列比較。タイムラインオーバーレイは指標選択式（Engagement/Valence/Attention＋9感情）
 
 ### 1.2 ビジネス目的
 
@@ -88,7 +88,7 @@ KSDVは、顔表情認識データをCSV形式でアップロードし、感情�
 │  │  └────────────────────────────────────────────────┘  │   │
 │  │                    ↓                                  │   │
 │  │  ┌────────────────────────────────────────────────┐  │   │
-│  │  │ Dashboard Sections（9セクション）             │  │   │
+│  │  │ Dashboard Sections（10セクション）            │  │   │
 │  │  │ - Overview / Timeseries / EngagementValence   │  │   │
 │  │  │ - Emotions / Transitions / Academic           │  │   │
 │  │  │ - ActionUnits / UXResearch / Comparison       │  │   │
@@ -100,7 +100,7 @@ KSDVは、顔表情認識データをCSV形式でアップロードし、感情�
 ### 2.3 データフロー
 
 1. **ファイルアップロード**：ユーザーがCSVファイルをドラッグ&ドロップ
-2. **FaceID検出**：FaceID列の有無を自動判定。複数人データの場合はFaceIDSelector UIを表示
+2. **FaceID検出・品質判定**：FaceID列の有無を自動判定。複数人データの場合は、各FaceIDの出現フレーム数からノイズ（少フレーム＝検出が不安定な可能性）を動的に判定し、解析対象（kept）と除外（minor）に分離。kept のみで集計し、FaceIDSelector／マルチFaceIDセクションを表示
 3. **ブラウザ側解析**：FileReader APIを使用してCSVをメモリに読み込み
 4. **統計計算**：TypeScriptで実装された分析エンジンが以下を計算
    - 基本統計量（平均、標準偏差、中央値、四分位数）
@@ -111,7 +111,7 @@ KSDVは、顔表情認識データをCSV形式でアップロードし、感情�
    - UXスコア複合指標（フラストレーション・デライト・認知負荷・総合スコア）
 5. **ベースライン補正（オプション）**：安静時CSVを別途読み込み、useCorrectedDashboardDataフックで差分補正
 6. **ダッシュボード表示**：計算結果をReact Stateで管理し、Rechartsで可視化
-7. **ユーザー操作**：セクション切り替え、FaceID切り替え、時間範囲フィルタリング、CSV出力
+7. **ユーザー操作**：セクション切り替え、FaceID切り替え、時間範囲フィルタリング、CSV出力（学術CSVでは複数顔データ時に `## FACE FILTERING` セクションで除外基準・kept/excluded の内訳を記録し、分析の再現性を確保）
 
 ### 2.4 主要コンポーネント設計
 
@@ -134,7 +134,7 @@ KSDVは、顔表情認識データをCSV形式でアップロードし、感情�
   - `computeUXScores()` — UX複合スコア計算
   - `detectFaceIdColumn()` / `groupRowsByFaceId()` — マルチFaceID処理
 
-#### 2.4.3 Dashboard Sections（9セクション）
+#### 2.4.3 Dashboard Sections（10セクション）
 
 | セクション | 主要機能 | 主要グラフ種 |
 |-----------|--------|------------|
@@ -146,16 +146,32 @@ KSDVは、顔表情認識データをCSV形式でアップロードし、感情�
 | **Academic** | 学術的指標（動態、相関行列） | BarChart、CorrelationHeatMap |
 | **ActionUnits** | 顔表情単位22種の活性度 | BarChart |
 | **UXResearch** | UXスコア、フリクション/デライト、タスク別分析 | GaugeBar、HeatMap、Timeline |
-| **Comparison** | 2セッションA/B比較 | 並列BarChart、RadarChart |
+| **MultiFaceComparison** | 複数顔データ時のみ表示。データ品質（ノイズ除外）管理・FaceIDラベル付け・顔ごとの感情オーバーレイ | LineChart（顔別オーバーレイ）|
+| **Comparison** | 2セッションA/B比較。タイムラインオーバーレイは指標選択式（Engagement/Valence/Attention＋9感情、A=実線/B=破線） | 並列BarChart、RadarChart、LineChart |
+
+※ MultiFaceComparison は FaceID が複数（ノイズ除外後2人以上）検出された場合のみサイドバーに出現する。
 
 #### 2.4.4 Contexts（状態管理）
 
 | Context | 役割 |
 |---------|------|
-| **FaceIDContext** | マルチFaceIDの選択状態・FaceID別DashboardDataを管理 |
+| **FaceIDContext** | マルチFaceIDの選択状態・FaceID別DashboardData を管理。さらに、ノイズ判定しきい値（`DEFAULT_MIN_FRACTION=0.05` / `DEFAULT_MIN_SECONDS=3`、利用者が変更可）から kept/minor を**動的算出**し、kept のみの「全員」合算（denoise）を提供。FaceID の識別色・**ラベル名（localStorage にファイル名キーで永続化）**・品質情報（`FaceQuality` 型）も管理 |
 | **BaselineContext** | ベースライン補正の有効/無効・オフセット値を管理 |
 | **EventsContext** | イベントアノテーション（タスク区間）を管理。UXリサーチセクションと連携 |
-| **ThemeContext** | ライト/ダークテーマを管理 |
+| **ThemeContext** | テーマ（ダーク基調。印刷/PDF出力時はライト）を管理 |
+
+### 2.5 入力CSV形式仕様（心sensor準拠）
+
+KSDV は心sensor（Affectiva/AFFDEX 互換）が出力するCSVを入力とする。実データの主な特徴は以下のとおり。
+
+- **列構成**：54列。先頭が `time stamp`、**2列目が `face id`**、続いて感情10種・engagement/valence/attention・アクションユニット22種・頭部姿勢（pitch/yaw/roll）・brightness・interocular distance・顔のバウンディングボックス（topleft/bottomright）・ランドマーク座標（eye/nose/chin）。
+- **値スケール**：**0〜100**（感情・engagement・attention・AU）。**valence は符号付き（−100〜+100）**。アプリ側の集計・UXスコアは 0〜100 前提（平均値を `/100` して扱う）。
+- **欠損・空欄**：`blink rate` など一部列は空欄になり得る（パース時に 0 として扱う）。列はヘッダー名で対応づけるため、未知の追加列（ランドマーク等）は無視される。
+- **サンプリング**：等間隔とは限らず**不規則・低頻度**（実測で平均約7fps、0.06〜0.4秒程度のゆらぎ）。
+- **時刻正規化**：`time stamp` が絶対時刻でも、解析時に先頭を0とする相対時間へ正規化する。
+- **マルチFaceID**：`face id` 列で人物を識別（`/^face\s*_?\s*id$/i` で検出）。同一時刻に人数分の行が並ぶ。FaceID 列がない／1人のみの場合は従来どおり単一セッションとして動作。
+
+> 開発・検証用に、この形式へ準拠した合成サンプルを `scripts/generate-sample-data.mjs`（`npm run gen:samples`）で生成し、`client/public/samples/` に配置している（第6章参照）。
 
 ---
 
@@ -335,6 +351,12 @@ Chrome・Firefox・Safari・Edge（各最新版）で完全対応。IE 11は非�
 | **Recharts** | 年2-3回 | 中 | チャート表示に影響するため検証必須 |
 | **TypeScript** | 年2-3回 | 低 | マイナーバージョンは自動更新 |
 
+### 6.3 開発・テスト支援（サンプルデータ生成）
+
+- **サンプル生成スクリプト**：`scripts/generate-sample-data.mjs`（`npm run gen:samples`）。心sensor準拠（54列・0〜100スケール・不規則サンプリング・低周期でランダムな表出）の合成サンプルをシード付き乱数で**決定的**に生成する（追加依存なし）。
+- **配信サンプル**：`client/public/samples/` に4本を配置 — `basic_joy_120s`（基本）／`contrast_confusion_100s`（A/B比較の相手）／`baseline_changepoints_90s`（ベースライン・変化点）／`multiface_3people_60s`（複数顔＋短命なノイズ顔を含む）。
+- **トップ画面の読み込みボタン**：`DropZone.tsx` の「サンプルで試す」4ボタンが上記を `fetch` して解析画面へ遷移。ファイルがなくても各機能を検証できる。
+
 ---
 
 ## 第7章 今後の拡張性と技術的負債への対応
@@ -360,7 +382,7 @@ Chrome・Firefox・Safari・Edge（各最新版）で完全対応。IE 11は非�
 |-----|------|------|---------|
 | **Web Workers未実装** | メインスレッドで計算 | 中 | フェーズ4 |
 | **E2Eテスト未実装** | 手動テストに依存 | 高 | フェーズ3 |
-| **ダークモード未実装** | ライトモードのみ | 低 | フェーズ3 |
+| **テーマ切替UI未提供** | ダーク基調で固定（印刷/PDF出力時のみライト）。ユーザー向けの明暗切替UIはなし | 低 | 必要に応じ検討 |
 | **アクセシビリティ改善** | WCAG 2.1 AA準拠率70% | 中 | 継続的改善 |
 
 ---
@@ -406,6 +428,7 @@ KSDVは、バイブコーディング（AIによるコード生成）を活用�
 - **Valence**：感情価。ポジティブ/ネガティブの度合いを示す指標
 - **Action Unit（AU）**：顔の筋肉の動きを示す単位。FACS（Facial Action Coding System）に基づく
 - **FaceID**：複数被験者を識別するためのCSV列。マルチFaceID機能で活用
+- **FaceID ノイズ除外**：少フレームのFaceID（検出が不安定な可能性。既定: 総フレームの5%未満 or 3秒未満。しきい値可変）を解析対象から除外する仕組み。除外基準と内訳は学術CSVに記録
 - **ベースライン補正**：安静時セッションのスコアを差し引いた補正済みスコアで分析する機能
 - **Head Motion Event**：頭部の意味ある動作（nod/shake/tilt）を自動検知したイベント
 - **Change Point**：感情スコアの急激な変化点。上位20件を自動検出
@@ -415,6 +438,8 @@ KSDVは、バイブコーディング（AIによるコード生成）を活用�
 
 ---
 
-**作成日**：2026年5月29日（旧版：2026年4月12日）  
-**バージョン**：2.0  
+**作成日**：2026年6月5日（旧版：2026年5月29日 / 2026年4月12日）  
+**バージョン**：2.1  
 **ステータス**：完成版
+
+> 2.1 での主な更新：入力CSV形式仕様（2.5）を追加、Dashboard Sections を10セクションに更新（MultiFaceComparison 追加）、マルチFaceID のノイズ除外・しきい値可変・FaceIDラベル・顔ごと感情オーバーレイを反映、比較タイムラインの多指標化、サンプル生成ツール（6.3）と学術CSVの `## FACE FILTERING` を追記。
