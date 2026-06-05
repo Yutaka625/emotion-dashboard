@@ -14,6 +14,7 @@ import {
 import { rechartsTooltip } from '@/lib/chartTooltip';
 import AbsoluteScaleBadge from '@/components/ui/AbsoluteScaleBadge';
 import CollapsibleCard from '@/components/ui/CollapsibleCard';
+import { useFaceID } from '@/contexts/FaceIDContext';
 
 interface Props {
   data: DashboardData;
@@ -22,6 +23,8 @@ interface Props {
 export default function AcademicSection({ data }: Props) {
   const { affect_dynamics, correlation_matrix, circumplex_summary, emotion_prevalence, special_stats, engagement_correlations, emotion_stats, meta } = data;
   const [_exporting, setExporting] = useState(false);
+  // マルチFaceID のノイズ除外情報（CSV へ再現性のため記録する）
+  const { isMultiFace, quality, minFraction, minSeconds, faceFrameCount } = useFaceID();
 
   // ---- CSV レポート出力 ----
   const exportReportCSV = () => {
@@ -95,6 +98,21 @@ export default function AcademicSection({ data }: Props) {
       for (const cp of data.change_points) {
         rows.push(`${cp.time},${EMOTION_LABELS_JA[cp.emotion] || cp.emotion},${cp.delta},${cp.direction}`);
       }
+      rows.push('');
+    }
+
+    // セクション7: FaceID ノイズ除外（マルチフェイス or 除外ありの場合のみ。再現性のため基準と内訳を記録）
+    if (isMultiFace || quality.minor.length > 0) {
+      rows.push('## FACE FILTERING');
+      rows.push('項目,値');
+      rows.push(`判定基準,${q(`総フレームの${(minFraction * 100).toFixed(0)}%未満 または ${minSeconds}秒未満を除外`)}`);
+      rows.push(`総フレーム数,${quality.totalFrames}`);
+      rows.push(`解析対象(kept)数,${quality.kept.length}`);
+      rows.push(`除外(minor)数,${quality.minor.length}`);
+      rows.push('');
+      rows.push('区分,FaceID,フレーム数');
+      for (const id of quality.kept) rows.push(`kept,${q(id)},${faceFrameCount(id)}`);
+      for (const m of quality.minor) rows.push(`excluded,${q(m.id)},${m.frames}`);
       rows.push('');
     }
 
