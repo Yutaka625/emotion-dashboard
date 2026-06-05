@@ -5,7 +5,7 @@
  */
 
 import { useState, type CSSProperties } from 'react';
-import { BarChart2, Brain, GitBranch, Grid, Zap, ChevronRight, Activity, GitCompare, FlaskConical, Scan } from 'lucide-react';
+import { BarChart2, Brain, GitBranch, Grid, Zap, ChevronRight, Activity, GitCompare, FlaskConical, Scan, Users } from 'lucide-react';
 import FaceScanIcon from '@/components/FaceScanIcon';
 
 interface NavItem {
@@ -31,14 +31,16 @@ interface SidebarProps {
   activeSection: string;
   onSectionChange: (id: string) => void;
   hasComparison?: boolean;
+  hasMultiFace?: boolean;
   meta?: { recording_date: string; recording_time: string };
 }
 
-export default function Sidebar({ activeSection, onSectionChange, hasComparison, meta }: SidebarProps) {
+export default function Sidebar({ activeSection, onSectionChange, hasComparison, hasMultiFace, meta }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
 
   const navItems: NavItem[] = [
     ...baseNavItems,
+    ...(hasMultiFace ? [{ id: 'multiface', label: 'マルチFaceID', icon: <Users size={16} />, description: '顔ごとの比較', highlight: true }] : []),
     ...(hasComparison ? [{ id: 'comparison', label: '比較分析', icon: <GitCompare size={16} />, description: 'セッション間比較', highlight: true }] : []),
   ];
 
