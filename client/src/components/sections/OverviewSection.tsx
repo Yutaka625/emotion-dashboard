@@ -314,7 +314,7 @@ export default function OverviewSection({ data }: Props) {
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {keyInsights.map(insight => (
-            <div key={insight.id} className="p-4 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', borderLeft: `3px solid ${insight.color}`, border: `1px solid ${insight.color}30`, borderLeftWidth: '3px' }}>
+            <div key={insight.id} className="p-4 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', borderTop: `1px solid ${insight.color}30`, borderRight: `1px solid ${insight.color}30`, borderBottom: `1px solid ${insight.color}30`, borderLeft: `3px solid ${insight.color}` }}>
               <div className="flex items-center gap-2 mb-2">
                 {toneIcon(insight.tone, insight.color)}
                 <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600, fontSize: '0.85rem', color: 'oklch(0.88 0.005 250)' }}>

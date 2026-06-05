@@ -151,6 +151,76 @@ export default function AcademicSection({ data }: Props) {
     color: d.color,
   }));
 
+  // ============================================================
+  // 学術的所見の動的生成
+  // 旧コードは「Fearの変動性が最も高い」等をハードコードしており、
+  // 読み込んだデータと無関係（＝任意データで誤情報）だった。
+  // 以下は実データから所見を導出し、文章・断定をデータに追従させる。
+  // ============================================================
+
+  // 変動性(SD)が最も高い指標／慣性(AR1)が最も高い＝最も持続しやすい指標
+  const topVariability = [...dynamicsCompare].sort((a, b) => b.sd - a.sd)[0];
+  const topInertia = [...dynamicsCompare].sort((a, b) => b.ar1 - a.ar1)[0];
+  // 2番目に変動性が高い指標（変動性の一文で補足に使う。無ければ undefined）
+  const secondVariability = [...dynamicsCompare].sort((a, b) => b.sd - a.sd)[1];
+
+  // Engagement と最も強く相関する非ニュートラル感情（|r| 最大）
+  const engEmotionCorr = NON_NEUTRAL_EMOTIONS
+    .map(e => ({ key: e, name: EMOTION_LABELS_JA[e] || e, r: engagement_correlations[e] ?? 0 }))
+    .sort((a, b) => Math.abs(b.r) - Math.abs(a.r))[0];
+  const corrSign = engEmotionCorr.r >= 0 ? '正' : '負';
+  const corrCoMove = engEmotionCorr.r >= 0 ? '増加' : '減少';
+  // FACS AU の具体説明は表情筋が対応する fear / surprise のときだけ付す（他感情では誤りになるため）
+  const facsNote = (engEmotionCorr.key === 'fear' || engEmotionCorr.key === 'surprise')
+    ? 'これはFACSにおけるAU1（内眉挙上）・AU2（外眉挙上）・AU5（目を見開く）の活性化パターンと関連します。'
+    : '';
+
+  // Valence の慣性・平均（実値で水準を表現）
+  const valAr1 = affect_dynamics.valence?.inertia_ar1 ?? 0;
+  const valMean = special_stats.valence?.mean ?? 0;
+  const valInertiaLevel = valAr1 >= 0.7 ? '非常に高く' : valAr1 >= 0.4 ? '比較的高く' : valAr1 >= 0 ? '中程度で' : '負（揺り戻し傾向）であり';
+
+  // Circumplex で最多の象限（4象限の合計を母数にして割合を出す。旧コードのマジックナンバー 3371 を排除）
+  const quadrantList = [
+    { key: 'high_arousal_positive', label: '高覚醒×高Valence', desc: '活性化・興奮', value: circumplex_summary.high_arousal_positive },
+    { key: 'high_arousal_negative', label: '高覚醒×低Valence', desc: '怒り・不安', value: circumplex_summary.high_arousal_negative },
+    { key: 'low_arousal_positive', label: '低覚醒×高Valence', desc: '穏やかな満足・リラックス', value: circumplex_summary.low_arousal_positive },
+    { key: 'low_arousal_negative', label: '低覚醒×低Valence', desc: '疲労・抑うつ', value: circumplex_summary.low_arousal_negative },
+  ];
+  const circumTotal = Math.max(1, quadrantList.reduce((s, q) => s + q.value, 0));
+  const topQuadrant = [...quadrantList].sort((a, b) => b.value - a.value)[0];
+  const topQuadrantPct = ((topQuadrant.value / circumTotal) * 100).toFixed(1);
+
+  // 変動性の一文（グラフ直上の説明）をデータ駆動で生成
+  const variabilityLead =
+    `高い変動性は感情の揺れ幅が大きいことを示します。`
+    + `本セッションでは${topVariability.name}の変動性が最も高く（SD: ${topVariability.sd.toFixed(4)}）`
+    + (secondVariability ? `、次いで${secondVariability.name}が高い変動性を示しています。` : `。`);
+
+  // 解釈カード4枚の本文をデータ駆動で生成
+  const interpretationCards = [
+    {
+      heading: '1. 感情の安定性と慣性',
+      content: `Affect Dynamicsの分析から、本セッションでは「${topInertia.name}」が最も高い慣性（AR1: ${topInertia.ar1.toFixed(4)}）を示しており、一度この状態に入ると持続しやすいことが示唆されます。一方、${topVariability.name}は最も高い変動性（SD: ${topVariability.sd.toFixed(4)}）を示し、瞬間的な変化が頻繁に発生していました。`,
+      color: 'oklch(0.62 0.18 160)',
+    },
+    {
+      heading: '2. Valenceの安定性',
+      content: `Valenceの慣性（AR1: ${valAr1.toFixed(4)}）は${valInertiaLevel}、感情価が一度設定されると${valAr1 >= 0.4 ? '長時間維持される傾向があります' : '比較的変化しやすい状態でした'}。平均値${valMean.toFixed(2)}のValence水準が${valMean >= 50 ? 'ポジティブ寄り' : valMean >= 0 ? '中立付近' : 'ネガティブ寄り'}で推移しました。`,
+      color: 'oklch(0.62 0.18 25)',
+    },
+    {
+      heading: `3. Engagementと${engEmotionCorr.name}の相関の解釈`,
+      content: `Engagementと${engEmotionCorr.name}の${corrSign}相関（r = ${engEmotionCorr.r.toFixed(4)}）は、高覚醒状態において${engEmotionCorr.name}に関連する表情筋活動が${corrCoMove}する傾向を示します。${facsNote}`,
+      color: 'oklch(0.55 0.18 300)',
+    },
+    {
+      heading: '4. Circumplex Modelによる感情状態の分類',
+      content: `Russell（1980）の円環モデルに基づく分析では、${topQuadrant.value.toLocaleString()}フレーム（${topQuadrantPct}%）が「${topQuadrant.label}」象限に最も多く分類されました。これは「${topQuadrant.desc}」に対応し、本セッションの主要な感情状態を特徴づけています。`,
+      color: 'oklch(0.72 0.12 80)',
+    },
+  ];
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -250,7 +320,7 @@ export default function AcademicSection({ data }: Props) {
         storageKey="ksdv.collapse.academic.variability"
       >
         <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.68 0.015 255)', marginBottom: '1rem' }}>
-          高い変動性は感情の揺れ幅が大きいことを示します。Fearの変動性が最も高く、Engagementも高い変動性を示しています。
+          {variabilityLead}
         </p>
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={dynamicsCompare} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
@@ -421,28 +491,7 @@ export default function AcademicSection({ data }: Props) {
         storageKey="ksdv.collapse.academic.interpretation"
       >
         <div className="space-y-4">
-          {[
-            {
-              heading: '1. 感情の安定性と慣性',
-              content: `Affect Dynamicsの分析から、本セッションでは「困惑」が高い慣性（AR1: ${affect_dynamics.confusion?.inertia_ar1.toFixed(4)}）を示しており、一度この感情状態に入ると持続しやすいことが示唆されます。一方、Engagementは高い変動性（SD: ${affect_dynamics.engagement?.variability_sd.toFixed(4)}）を示し、瞬間的な覚醒の変化が頻繁に発生していました。`,
-              color: 'oklch(0.62 0.18 160)',
-            },
-            {
-              heading: '2. Valenceの高安定性',
-              content: `Valenceの慣性（AR1: ${affect_dynamics.valence?.inertia_ar1.toFixed(4)}）は非常に高く、感情価が一度設定されると長時間維持される傾向があります。平均値${data.special_stats.valence?.mean.toFixed(2)}%という高いValenceが持続したことは、ポジティブな感情状態の安定性を示しています。`,
-              color: 'oklch(0.62 0.18 25)',
-            },
-            {
-              heading: '3. Engagement-Fear相関の解釈',
-              content: `EngagementとFearの高い正相関（r = ${engagement_correlations.fear?.toFixed(4)}）は、高覚醒状態において恐怖・驚愕に関連する表情筋活動が増加することを示します。これはFACSにおけるAU1（内眉挙上）・AU2（外眉挙上）・AU5（目を見開く）の同時活性化パターンと一致します。`,
-              color: 'oklch(0.55 0.18 300)',
-            },
-            {
-              heading: '4. Circumplex Modelによる感情状態の分類',
-              content: `Russell（1980）の円環モデルに基づく分析では、${circumplex_summary.low_arousal_positive.toLocaleString()}フレーム（${((circumplex_summary.low_arousal_positive / (data.meta?.total_frames || 3371)) * 100).toFixed(1)}%）が「低覚醒×高Valence」象限に分類されました。これは「穏やかな満足感」「リラックス状態」に対応し、本セッションの主要な感情状態を特徴づけています。`,
-              color: 'oklch(0.72 0.12 80)',
-            },
-          ].map((item, i) => (
+          {interpretationCards.map((item, i) => (
             <div key={i} className="p-4 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', borderLeft: `3px solid ${item.color}` }}>
               <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600, fontSize: '0.85rem', color: 'oklch(0.88 0.005 250)', marginBottom: '6px' }}>
                 {item.heading}

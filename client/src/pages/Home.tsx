@@ -43,6 +43,9 @@ export default function Home() {
   const [secondaryFilename, setSecondaryFilename] = useState<string>('');
   const secondaryInputRef = useRef<HTMLInputElement>(null);
 
+  // 詳細タブ（比較タブ以外）にどちらのセッションを表示するか。比較データがある時のみ B を選べる。
+  const [detailSession, setDetailSession] = useState<'A' | 'B'>('A');
+
   // CSVテキストから比較用(B)データを解析・設定し、比較タブへ遷移する
   const applySecondaryFromText = useCallback((text: string, name: string) => {
     if (!text) return;
@@ -67,10 +70,16 @@ export default function Home() {
   // マルチ FaceID の状態管理（Context 経由）
   const { activeDashboardData, setMultiFaceData, isMultiFace } = useFaceID();
 
-  // FaceID 選択中はその DashboardData、未選択/非マルチフェイスなら従来の data を使う
-  const baseData = (isMultiFace && activeDashboardData) ? activeDashboardData : data;
-  // ベースライン補正が有効なとき、感情統計を補正後の値で差し替える（hooks は early return より前に呼ぶ）
-  const displayData = useCorrectedDashboardData(baseData);
+  // セッションA（主データ）: FaceID 選択中はその DashboardData、未選択/非マルチフェイスなら従来の data を使う
+  const aBaseData = (isMultiFace && activeDashboardData) ? activeDashboardData : data;
+  // 詳細タブに表示するセッション。B を選べるのは比較データがある時だけ（無ければ常にA）。
+  const selectedBaseData = (detailSession === 'B' && secondaryData) ? secondaryData : aBaseData;
+  // ベースライン補正フック（純粋・メモ化済みなので2回呼んでも安全）。
+  //   displayA       … 比較タブの dataA 用（常にA。トグルに影響されない）
+  //   displaySelected … 詳細タブ用（選択中セッション A or B）
+  // hooks は early return より前に呼ぶ。
+  const displayA = useCorrectedDashboardData(aBaseData);
+  const displaySelected = useCorrectedDashboardData(selectedBaseData);
 
   // CSV テキストからマルチ FaceID データを構築するヘルパー
   // ※ ノイズ判定（kept/minor）は固定せず、全 FaceID と totalFrames を詰めるだけにする。
@@ -110,6 +119,7 @@ export default function Home() {
     setData(newData);
     setFilename(newFilename);
     setActiveSection('overview');
+    setDetailSession('A'); // 新規読み込み時は詳細タブをAに戻す
     // マルチ FaceID データを構築（生 CSV テキストがある場合のみ）
     if (rawCsvText) {
       buildMultiFaceData(rawCsvText, newFilename, newData);
@@ -126,6 +136,7 @@ export default function Home() {
     setMultiFaceData(null);
     setSecondaryData(null);
     setSecondaryFilename('');
+    setDetailSession('A');
   }, [setMultiFaceData]);
 
   // Allow re-uploading by dragging onto the dashboard
@@ -160,6 +171,7 @@ export default function Home() {
           setData(newData);
           setFilename(file.name);
           setActiveSection('overview');
+          setDetailSession('A'); // 再分析時は詳細タブをAに戻す
           // マルチ FaceID データを構築
           buildMultiFaceData(text, file.name, newData);
         } catch {
@@ -182,21 +194,23 @@ export default function Home() {
   // こうすることで、セクション切り替え時にコンポーネントが破棄されず、
   // 各セクション内の状態（選択中の感情など）がリセットされない。
 
-  // data は early return 後に非 null 保証。displayData も非 null だが型上は null を許容するため ?? でフォールバック
-  const safeDisplayData = displayData ?? data;
+  // data は early return 後に非 null 保証。補正フックの結果も型上は null を許容するため ?? でフォールバック。
+  // safeSelected … 詳細タブ用（選択中セッション）／ safeA … 比較タブの dataA 用（常にA）
+  const safeSelected = displaySelected ?? selectedBaseData ?? data;
+  const safeA = displayA ?? aBaseData ?? data;
 
   const sectionIds = ['overview', 'timeseries', 'engagement', 'emotions', 'transitions', 'academic', 'actionunits', 'multiface', 'comparison', 'uxresearch'] as const;
   const sectionComponents: Record<string, React.ReactNode> = {
-    overview:    <OverviewSection data={safeDisplayData} />,
-    timeseries:  <TimeseriesSection data={safeDisplayData} rawTimeseries={(baseData ?? safeDisplayData).timeseries_full} />,
-    engagement:  <EngagementValenceSection data={safeDisplayData} />,
-    emotions:    <EmotionsSection data={safeDisplayData} />,
-    transitions: <TransitionsSection data={safeDisplayData} />,
-    academic:    <AcademicSection data={safeDisplayData} />,
-    actionunits: <ActionUnitsSection data={safeDisplayData} />,
+    overview:    <OverviewSection data={safeSelected} />,
+    timeseries:  <TimeseriesSection data={safeSelected} rawTimeseries={(selectedBaseData ?? safeSelected).timeseries_full} />,
+    engagement:  <EngagementValenceSection data={safeSelected} />,
+    emotions:    <EmotionsSection data={safeSelected} />,
+    transitions: <TransitionsSection data={safeSelected} />,
+    academic:    <AcademicSection data={safeSelected} />,
+    actionunits: <ActionUnitsSection data={safeSelected} />,
     multiface:   <MultiFaceComparisonSection />,
     comparison:  secondaryData
-      ? <ComparisonSection dataA={safeDisplayData} dataB={secondaryData} labelA={filename || 'Session A'} labelB={secondaryFilename || 'Session B'} />
+      ? <ComparisonSection dataA={safeA} dataB={secondaryData} labelA={filename || 'Session A'} labelB={secondaryFilename || 'Session B'} />
       : (
         // 比較CSV未追加時の空状態。一文だけだと追加方法が分からないため、
         // 機能説明と「直接ファイルを選ぶボタン」＋「右上ボタンへの矢印」で導線を示す。
@@ -233,7 +247,7 @@ export default function Home() {
           </div>
         </div>
       ),
-    uxresearch: <UXResearchSection data={safeDisplayData} />,
+    uxresearch: <UXResearchSection data={safeSelected} />,
   };
 
   return (
@@ -265,7 +279,7 @@ export default function Home() {
       )}
 
       {/* Sidebar */}
-      <Sidebar activeSection={activeSection} onSectionChange={handleSectionChange} hasComparison={!!secondaryData} hasMultiFace={isMultiFace} meta={displayData?.meta} />
+      <Sidebar activeSection={activeSection} onSectionChange={handleSectionChange} hasComparison={!!secondaryData} hasMultiFace={isMultiFace} meta={safeSelected.meta} />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden dashboard-inner">
@@ -279,19 +293,55 @@ export default function Home() {
           }}
         >
           <div className="flex items-center gap-3">
-            {/* マルチ FaceID セレクター（複数人データの場合のみ表示） */}
-            <FaceIDSelector />
+            {/* マルチ FaceID セレクター／品質バナーは A 表示中のみ（マルチFaceIDはAの文脈のため） */}
+            {detailSession === 'A' && (
+              <>
+                {/* マルチ FaceID セレクター（複数人データの場合のみ表示） */}
+                <FaceIDSelector />
+                {/* FaceID 品質バナー（ノイズ除外があった場合のみ表示） */}
+                <FaceQualityBanner />
+              </>
+            )}
 
-            {/* FaceID 品質バナー（ノイズ除外があった場合のみ表示） */}
-            <FaceQualityBanner />
+            {/* A/B 表示切替（比較データがある時のみ）。詳細タブにどちらのセッションを出すかを切り替える */}
+            {secondaryData && (
+              <div className="flex items-center gap-1 px-1.5 py-1 rounded-lg" style={{ background: 'oklch(0.25 0.03 255)', border: '1px solid oklch(0.32 0.04 255)' }}>
+                <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.58rem', color: 'oklch(0.60 0.015 255)', marginLeft: '2px', marginRight: '1px', whiteSpace: 'nowrap' }}>表示中</span>
+                {([
+                  { id: 'A' as const, name: filename || 'Session A', color: 'oklch(0.70 0.14 195)' },
+                  { id: 'B' as const, name: secondaryFilename || 'Session B', color: 'oklch(0.78 0.22 340)' },
+                ]).map(({ id, name, color }) => {
+                  const on = detailSession === id;
+                  return (
+                    <button
+                      key={id}
+                      onClick={() => setDetailSession(id)}
+                      className="px-2 py-0.5 rounded-full transition-colors"
+                      title={`${name} のデータを詳細タブに表示`}
+                      style={{
+                        background: on ? color : 'transparent',
+                        color: on ? 'oklch(0.16 0.02 250)' : 'oklch(0.66 0.015 255)',
+                        border: `1px solid ${on ? color : 'oklch(0.35 0.03 255)'}`,
+                        fontFamily: 'Roboto Mono, monospace',
+                        fontSize: '0.62rem',
+                        fontWeight: on ? 700 : 400,
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {id}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
 
             <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.68 0.015 255)' }}>
-              {safeDisplayData.meta.total_frames.toLocaleString()} frames · {safeDisplayData.meta.duration_minutes.toFixed(2)} min
+              {safeSelected.meta.total_frames.toLocaleString()} frames · {safeSelected.meta.duration_minutes.toFixed(2)} min
             </div>
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: 'oklch(0.70 0.14 195 / 0.12)', border: '1px solid oklch(0.70 0.14 195 / 0.30)' }}>
               <div className="w-1.5 h-1.5 rounded-full" style={{ background: 'oklch(0.70 0.14 195)' }} />
               <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', color: 'oklch(0.70 0.14 195)' }}>
-                {safeDisplayData.meta.recording_date}
+                {safeSelected.meta.recording_date}
               </span>
             </div>
 
@@ -336,7 +386,7 @@ export default function Home() {
               </span>
               {secondaryData && (
                 <button
-                  onClick={e => { e.stopPropagation(); setSecondaryData(null); setSecondaryFilename(''); }}
+                  onClick={e => { e.stopPropagation(); setSecondaryData(null); setSecondaryFilename(''); setDetailSession('A'); }}
                   style={{ color: 'oklch(0.68 0.015 255)', lineHeight: 1 }}
                   title="比較データを削除"
                 >
