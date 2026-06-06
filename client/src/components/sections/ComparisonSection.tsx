@@ -177,30 +177,13 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
     const tsA = dataA.timeseries_full.filter((_, i) => i % stepA === 0);
     const tsB = dataB.timeseries_full.filter((_, i) => i % stepB === 0);
 
-    // ---- 進行率（%）モード: 現状の挙動を完全維持 ----
-    if (overlayNormalize) {
-      const len = Math.max(tsA.length, tsB.length);
-      const out: { pct: number; A: number | null; B: number | null }[] = [];
-      for (let i = 0; i < len; i++) {
-        const idxA = Math.min(i, tsA.length - 1);
-        const idxB = Math.min(i, tsB.length - 1);
-        out.push({
-          pct: Math.round((i / Math.max(1, len - 1)) * 100),
-          A: (tsA[idxA] as any)?.[overlayMetric] ?? 0,
-          B: (tsB[idxB] as any)?.[overlayMetric] ?? 0,
-        });
-      }
-      return out;
-    }
-
-    // ---- 実時間（秒）モード: 共通の絶対時間グリッドへ線形補間でリサンプル ----
-    // 各セッションの time(秒) で指定指標を線形補間。セッション終端を超えたら null（線を止める）。
-    const sampleAt = (ts: TimeseriesPoint[], t: number): number | null => {
+    // 指定 time(秒) における指標値を線形補間（両モード共通）。
+    // nullPastEnd=true: 終端超過で null（線を止める） / false: 終端値を返す（正規化モード用）
+    const sampleAt = (ts: TimeseriesPoint[], t: number, nullPastEnd: boolean): number | null => {
       const n = ts.length;
       if (n === 0) return null;
       if (t < ts[0].time) return (ts[0] as any)[overlayMetric] ?? 0;
-      if (t > ts[n - 1].time) return null;            // 終端超過 → 線を止める
-      // 単調増加の time を二分探索で挟む2点を特定
+      if (t > ts[n - 1].time) return nullPastEnd ? null : ((ts[n - 1] as any)[overlayMetric] ?? 0);
       let lo = 0, hi = n - 1;
       while (hi - lo > 1) {
         const mid = (lo + hi) >> 1;
@@ -213,12 +196,31 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
       return v0 + (v1 - v0) * ((t - t0) / (t1 - t0));
     };
 
-    const maxDuration = Math.max(dataA.meta.duration_seconds, dataB.meta.duration_seconds, 0.001);
     const grid = 200;
+
+    // ---- 進行率（%）モード: 各セッションを自身の時間スパンで 0〜100% に正規化（時間ベース） ----
+    // 最長セッションは実時間モードと同じサンプル位置になるため形が一致し、短い方だけが引き伸ばされる。
+    if (overlayNormalize) {
+      const startA = tsA[0]?.time ?? 0, spanA = (tsA[tsA.length - 1]?.time ?? 0) - startA;
+      const startB = tsB[0]?.time ?? 0, spanB = (tsB[tsB.length - 1]?.time ?? 0) - startB;
+      const out: { pct: number; A: number | null; B: number | null }[] = [];
+      for (let i = 0; i < grid; i++) {
+        const frac = i / (grid - 1);
+        out.push({
+          pct: Math.round(frac * 100),
+          A: sampleAt(tsA, startA + frac * spanA, false),
+          B: sampleAt(tsB, startB + frac * spanB, false),
+        });
+      }
+      return out;
+    }
+
+    // ---- 実時間（秒）モード: 共通絶対時間グリッドへ線形補間。終端超過は null で線を止める ----
+    const maxDuration = Math.max(dataA.meta.duration_seconds, dataB.meta.duration_seconds, 0.001);
     const out: { time: number; A: number | null; B: number | null }[] = [];
     for (let i = 0; i < grid; i++) {
       const t = (i / (grid - 1)) * maxDuration;
-      out.push({ time: +t.toFixed(2), A: sampleAt(tsA, t), B: sampleAt(tsB, t) });
+      out.push({ time: +t.toFixed(2), A: sampleAt(tsA, t, true), B: sampleAt(tsB, t, true) });
     }
     return out;
   }, [dataA, dataB, overlayMetric, overlayNormalize]);
