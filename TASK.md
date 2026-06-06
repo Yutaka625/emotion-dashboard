@@ -14,6 +14,17 @@
 - [ ] **未使用アニメーションクラスの活用または削除**（`index.css` の `count-up` / `scan-line`）
 
 ## 機能拡張（次フェーズ候補）
+- [ ] **BL区間を統計分析スコープから除外するオプション（研究者向け）**
+  - **背景**: 現状、BL区間を設定しても `useCorrectedDashboardData` は `timeseries_full` 全体（BL込み）に補正を適用するため、Overview・Emotions・Academic 等の全セクション統計にBL期間のデータが混入する。TIME RANGE FILTER はTimeseriesタブのローカル状態にとどまり、グローバル統計には反映されない。
+  - **研究者の期待**: 「BLを0〜30sに設定したら、分析対象は30s以降のみ。BL区間は補正の参照値として使うが、統計には含めない」
+  - **実装方針（案）**:
+    1. `BaselineContext` に `excludeBaselineFromAnalysis: boolean` フラグを追加（デフォルト: false）
+    2. `useCorrectedDashboardData` 内で、フラグが true かつ `baselineRange` が設定済みの場合、`timeseries_full` からBL区間（`time < baselineRange[1]`）を除外してから統計を再計算
+    3. `BaselineSettingsCard` にトグルUI（「BL区間を分析から除外する」）を追加
+    4. BaselineBanner にも現在の除外状態を表示
+  - **注意点**: BL区間除外は補正（offset計算）とは独立した操作。除外してもオフセット値は BL区間から算出する点を UI で明示する
+  - **優先度**: 中（研究者ユーザーが明確なニーズを持つが、現状は TIME RANGE FILTER で代替可能）
+
 - [ ] **利用規約・プライバシーポリシーの同意フロー（クリックラップ）**
   - 文書は作成済み（`KSDV_terms.html` ＝アプリ内リンク先、`client/public/` と同期）
   - 初回利用時に「利用規約・プライバシーポリシーに同意する」チェック＋ボタンの同意ゲートを表示
