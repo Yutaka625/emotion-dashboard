@@ -35,11 +35,16 @@ export default function EngagementValenceSection({ data }: Props) {
     { label: '80-100\n非常に高い', value: engagement_distribution['Very High (80-100)'] || 0, color: 'oklch(0.58 0.26 22)' },
   ];
 
+  // 特殊指標（engagement/valence/attention）は EMOTION_LABELS_JA に無いため、
+  // 相関グラフのY軸ラベルが英語のまま長く表示され見切れる。日本語の短い名前を補う。
+  const SPECIAL_LABELS_JA: Record<string, string> = { engagement: '関与度', valence: '感情価', attention: '注視度' };
+  const labelJa = (key: string) => EMOTION_LABELS_JA[key] || SPECIAL_LABELS_JA[key] || key;
+
   const engCorrData = Object.entries(engagement_correlations)
     .filter(([k]) => k !== 'engagement')
     .sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]))
     .map(([key, val]) => ({
-      name: EMOTION_LABELS_JA[key] || key,
+      name: labelJa(key),
       value: val,
       color: val > 0 ? 'oklch(0.70 0.14 195)' : 'oklch(0.68 0.26 22)',
     }));
@@ -58,7 +63,7 @@ export default function EngagementValenceSection({ data }: Props) {
     .filter(([k]) => k !== 'valence')
     .sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]))
     .map(([key, v]) => ({
-      name: EMOTION_LABELS_JA[key] || key,
+      name: labelJa(key),
       value: v,
       color: v > 0 ? 'oklch(0.70 0.14 195)' : 'oklch(0.68 0.26 22)',
     }));
@@ -129,7 +134,7 @@ export default function EngagementValenceSection({ data }: Props) {
           {/* Distribution */}
           <div className="metric-card">
             <CardHeader
-              label="DISTRIBUTION"
+              label="ENGAGEMENT DISTRIBUTION"
               title="Engagement レベル分布"
               info="Engagement（関与度・0〜100）を5段階（非常に低い〜非常に高い）に区切り、各レベルに該当したフレーム数を示します。関与度の高低の偏りを把握できます。"
             />
@@ -154,15 +159,15 @@ export default function EngagementValenceSection({ data }: Props) {
           {/* Correlation */}
           <div className="metric-card">
             <CardHeader
-              label="CORRELATIONS"
+              label="ENGAGEMENT CORRELATIONS"
               title="Engagement と各指標の相関"
               info="Engagement（関与度）と各感情・指標のピアソン相関係数（−1〜+1）です。+1に近いほど Engagement と同時に増減し、−1に近いほど逆方向に動きます（0は無関係）。どの感情が関与度と連動するかを把握できます。"
             />
-            <ResponsiveContainer width="100%" height={220}>
+            <ResponsiveContainer width="100%" height={300}>
               <BarChart data={engCorrData} layout="vertical" margin={{ top: 5, right: 30, bottom: 5, left: 60 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" horizontal={false} />
                 <XAxis type="number" domain={[-1, 1]} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.68 0.015 255)' }} />
-                <YAxis type="category" dataKey="name" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fill: 'oklch(0.75 0.008 250)' }} width={55} />
+                <YAxis type="category" dataKey="name" interval={0} tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fill: 'oklch(0.75 0.008 250)' }} width={64} />
                 <Tooltip
                   formatter={(v: number) => [v.toFixed(4), '相関係数']}
                   {...rechartsTooltip}
@@ -208,7 +213,7 @@ export default function EngagementValenceSection({ data }: Props) {
           {/* Valence Distribution */}
           <div className="metric-card">
             <CardHeader
-              label="DISTRIBUTION"
+              label="VALENCE DISTRIBUTION"
               title="Valence レベル分布"
               info="Valence（感情価・−100〜+100）を測定範囲で5区間に等分し、各区間のフレーム数を示します。ネガティブ寄り・ポジティブ寄りの偏りを把握できます（区間の境界はデータの最小〜最大から自動算出）。"
             />
@@ -233,15 +238,15 @@ export default function EngagementValenceSection({ data }: Props) {
           {/* Valence Correlation */}
           <div className="metric-card">
             <CardHeader
-              label="CORRELATIONS"
+              label="VALENCE CORRELATIONS"
               title="Valence と各指標の相関"
               info="Valence（感情価）と各感情・指標のピアソン相関係数（−1〜+1）です。+1に近いほど Valence と同時に増減し、−1に近いほど逆方向に動きます（0は無関係）。どの感情が感情価と連動するかを把握できます。"
             />
-            <ResponsiveContainer width="100%" height={220}>
+            <ResponsiveContainer width="100%" height={300}>
               <BarChart data={valCorrData} layout="vertical" margin={{ top: 5, right: 30, bottom: 5, left: 60 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" horizontal={false} />
                 <XAxis type="number" domain={[-1, 1]} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.68 0.015 255)' }} />
-                <YAxis type="category" dataKey="name" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fill: 'oklch(0.75 0.008 250)' }} width={55} />
+                <YAxis type="category" dataKey="name" interval={0} tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fill: 'oklch(0.75 0.008 250)' }} width={64} />
                 <Tooltip
                   formatter={(v: number) => [v.toFixed(4), '相関係数']}
                   {...rechartsTooltip}
