@@ -382,8 +382,12 @@ export function computeDashboardData(rows: Record<string, string>[], filename: s
   }
 
   // ---- 13. Affect dynamics ----
+  // 特殊指標（engagement/valence/attention）＋ 非ニュートラル9感情すべてを計算する。
+  // 以前は NON_NEUTRAL.slice(0, 5) で先頭5感情のみ計算しており、
+  // 嫌悪・軽蔑・感傷・混乱が未計算（学術/感情分布タブで値が0=空）になっていた。
+  // computeAffectDynamics は1列あたり O(n) と軽いため全9感情を計算して問題ない。
   const affect_dynamics: DashboardData['affect_dynamics'] = {};
-  for (const col of [...SPECIAL_COLS, 'attention', ...NON_NEUTRAL.slice(0, 5)]) {
+  for (const col of [...SPECIAL_COLS, 'attention', ...NON_NEUTRAL]) {
     affect_dynamics[col] = computeAffectDynamics(df.map(r => r[col] as number));
   }
 
