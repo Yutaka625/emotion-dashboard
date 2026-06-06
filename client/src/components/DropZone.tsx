@@ -243,9 +243,9 @@ export default function DropZone({ onDataLoaded, onComparisonSecondary }: DropZo
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
           {[
-            { label: '基本サンプル', sub: '喜び優勢・約120秒', onClick: () => loadSample('basic_joy_120s.csv', 'サンプル_基本_喜び.csv') },
-            { label: 'A/B比較デモ', sub: '2セッション→比較・検定', onClick: () => loadComparisonSample('basic_joy_120s.csv', 'サンプルA_喜び.csv', 'contrast_confusion_100s.csv', 'サンプルB_混乱.csv') },
-            { label: 'ベースライン・変化点', sub: '補正＋急変の検出', onClick: () => loadSample('baseline_changepoints_90s.csv', 'サンプル_ベースライン変化点.csv') },
+            { label: '基本サンプル', sub: '実データA・約2分', onClick: () => loadSample('real_a.csv', '実データA_2026-06-06-08-25-51.csv') },
+            { label: 'A/B比較デモ', sub: '2セッション→比較・検定', onClick: () => loadComparisonSample('real_a.csv', '実データA_2026-06-06-08-25-51.csv', 'real_b.csv', '実データB_2026-06-06-10-00-01.csv') },
+            { label: 'ベースライン・変化点', sub: '補正＋急変の検出', onClick: () => loadSample('real_b.csv', '実データB_2026-06-06-10-00-01.csv') },
             { label: 'マルチFaceID', sub: '複数人（3名）', onClick: () => loadSample('multiface_3people_60s.csv', 'サンプル_マルチFaceID.csv') },
           ].map(btn => (
             <button
