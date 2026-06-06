@@ -216,7 +216,7 @@ export default function OverviewSection({ data }: Props) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Dominant Emotion Pie */}
         <CollapsibleCard
-          label="支配的感情の分布"
+          label="DOMINANT EMOTION DISTRIBUTION"
           title="感情状態の占有率"
           info="各フレームで最も強い感情を「支配的感情」として集計し、占有率（時間割合）で示します。"
           storageKey="ksdv.collapse.overview.pie"

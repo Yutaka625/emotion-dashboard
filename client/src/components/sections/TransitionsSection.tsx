@@ -9,6 +9,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
 } from 'recharts';
 import { rechartsTooltip } from '@/lib/chartTooltip';
+import CardHeader from '@/components/ui/CardHeader';
 
 interface Props {
   data: DashboardData;
@@ -63,13 +64,11 @@ export default function TransitionsSection({ data }: Props) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Transition Matrix */}
       <div className="metric-card">
-        <div className="section-label mb-3">TRANSITION MATRIX</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '0.5rem' }}>
-          感情遷移行列
-        </div>
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.68 0.015 255)', marginBottom: '1rem' }}>
-          行：遷移元の感情、列：遷移先の感情。セルの色の濃さは遷移頻度を示します。
-        </p>
+        <CardHeader
+          label="TRANSITION MATRIX"
+          title="感情遷移行列"
+          info="支配的感情が「どの感情から、どの感情へ」変化したかの回数を行列で示します。行＝遷移元、列＝遷移先で、セルの色が濃いほどその遷移が多く起きたことを表します。"
+        />
         <div className="overflow-x-auto">
           <table className="text-xs">
             <thead>
@@ -132,10 +131,11 @@ export default function TransitionsSection({ data }: Props) {
 
       {/* Top Transitions */}
       <div className="metric-card">
-        <div className="section-label mb-3">TOP TRANSITIONS</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
-          主要な感情遷移パターン（上位10件）
-        </div>
+        <CardHeader
+          label="TOP TRANSITIONS"
+          title="主要な感情遷移パターン（上位10件）"
+          info="最も多く起きた『感情→感情』の遷移を回数の多い順に上位10件並べます。セッション中に頻繁に繰り返された感情の移り変わりを把握できます。"
+        />
         <div className="space-y-2">
           {top10.map((t, i) => (
             <div key={i} className="flex items-center gap-3">
@@ -164,10 +164,11 @@ export default function TransitionsSection({ data }: Props) {
       {/* Duration Analysis */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="metric-card">
-          <div className="section-label mb-3">DURATION ANALYSIS</div>
-          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
-            感情状態の平均持続時間
-          </div>
+          <CardHeader
+            label="DURATION ANALYSIS"
+            title="感情状態の平均持続時間"
+            info="各感情が支配的だった『ひと続きの区間』が平均で何秒続いたかを示します。値が大きいほど、その感情が一度出ると長く続きやすいことを表します。"
+          />
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={durationData} layout="vertical" margin={{ top: 5, right: 30, bottom: 5, left: 55 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" horizontal={false} />
@@ -187,10 +188,11 @@ export default function TransitionsSection({ data }: Props) {
         </div>
 
         <div className="metric-card">
-          <div className="section-label mb-3">TOTAL DURATION</div>
-          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
-            感情状態の累積時間
-          </div>
+          <CardHeader
+            label="TOTAL DURATION"
+            title="感情状態の累積時間"
+            info="各感情が支配的だった時間の合計（秒）です。セッション全体を通して、どの感情が長く占めていたかを把握できます。"
+          />
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={durationData} layout="vertical" margin={{ top: 5, right: 30, bottom: 5, left: 55 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" horizontal={false} />
@@ -212,10 +214,11 @@ export default function TransitionsSection({ data }: Props) {
 
       {/* Duration Stats Table */}
       <div className="metric-card">
-        <div className="section-label mb-3">DURATION STATISTICS</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
-          感情持続時間の詳細統計
-        </div>
+        <CardHeader
+          label="DURATION STATISTICS"
+          title="感情持続時間の詳細統計"
+          info="各感情について、出現回数・平均持続時間・最大持続時間・累積時間・支配的割合を表でまとめたものです。持続のパターンを数値で詳しく確認できます。"
+        />
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>

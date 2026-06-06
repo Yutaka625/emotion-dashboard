@@ -82,12 +82,13 @@ export default function CollapsibleCard({
       {/* ヘッダー（常時表示）。クリックで開閉 */}
       <div className="flex items-start justify-between gap-3" style={{ marginBottom: open ? '0.75rem' : 0 }}>
         <div className="min-w-0">
-          <div className="flex items-center gap-1.5 mb-1">
-            <span className="section-label" style={{ color: labelColor }}>{label}</span>
+          <div className="section-label mb-1" style={{ color: labelColor }}>{label}</div>
+          {/* ⓘ は日本語タイトル側に付ける（カードの内容説明をタイトルから確認できるように） */}
+          <div className="flex items-center gap-1.5">
+            <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: titleColor }}>
+              {title}
+            </span>
             {info && <InfoTooltip text={info} />}
-          </div>
-          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: titleColor }}>
-            {title}
           </div>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">

@@ -18,6 +18,7 @@ import {
   Cell, Legend, LineChart, Line, RadarChart, PolarGrid, PolarAngleAxis, Radar,
 } from 'recharts';
 import { rechartsTooltip } from '@/lib/chartTooltip';
+import CardHeader from '@/components/ui/CardHeader';
 
 interface Props {
   dataA: DashboardData;
@@ -249,10 +250,11 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
 
       {/* 感情平均値バーチャート */}
       <div className="metric-card">
-        <div className="section-label mb-3">EMOTION MEANS</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
-          感情スコア平均値の比較
-        </div>
+        <CardHeader
+          label="EMOTION MEANS"
+          title="感情スコア平均値の比較"
+          info="2つのセッション（A/B）について、各感情の平均スコアを並べて比較します。どの感情がどちらのセッションで強く出たかを把握できます。"
+        />
         <ResponsiveContainer width="100%" height={260}>
           <BarChart data={emotionBarData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" />
@@ -269,10 +271,11 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
       {/* 特殊指標 + Circumplex 横並び */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="metric-card">
-          <div className="section-label mb-3">SPECIAL METRICS</div>
-          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
-            Engagement / Valence / Attention
-          </div>
+          <CardHeader
+            label="SPECIAL METRICS"
+            title="Engagement / Valence / Attention"
+            info="特殊指標3種（Engagement=関与度、Valence=感情価、Attention=注視度）の平均値を、A/B 2セッションで比較します。"
+          />
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={specialBarData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" />
@@ -286,10 +289,11 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
         </div>
 
         <div className="metric-card">
-          <div className="section-label mb-3">CIRCUMPLEX MODEL</div>
-          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
-            感情状態の象限分布（%）
-          </div>
+          <CardHeader
+            label="CIRCUMPLEX MODEL"
+            title="感情状態の象限分布（%）"
+            info="円環モデルの4象限（覚醒度×感情価）に各フレームを分類し、その割合（%）を A/B で比較します。分割は固定中立点（Engagement=50／Valence=0）です。"
+          />
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={quadrantData} layout="vertical" margin={{ top: 5, right: 20, bottom: 5, left: 100 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" horizontal={false} />
@@ -305,10 +309,11 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
 
       {/* Affect Dynamics レーダー */}
       <div className="metric-card">
-        <div className="section-label mb-3">AFFECT DYNAMICS — VARIABILITY</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
-          感情変動性（SD）のレーダー比較
-        </div>
+        <CardHeader
+          label="AFFECT DYNAMICS — VARIABILITY"
+          title="感情変動性（SD）のレーダー比較"
+          info="主要な感情・指標の変動性（標準偏差＝時間的な揺れ幅）を、A/B 2セッションでレーダーチャートに重ねて比較します。外側ほど揺れが大きいことを示します。"
+        />
         <ResponsiveContainer width="100%" height={240}>
           <RadarChart data={radarData}>
             <PolarGrid stroke="oklch(0.28 0.04 255)" />
@@ -323,13 +328,11 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
 
       {/* 時系列オーバーレイ（指標を選択してA/B重ね合わせ） */}
       <div className="metric-card">
-        <div className="section-label mb-3">TIMELINE OVERLAY</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '4px' }}>
-          {overlayMeta.label} 時系列の重ね合わせ（時間正規化）
-        </div>
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.68 0.015 255)', marginBottom: '0.75rem' }}>
-          指標を選んで比較します。各セッションの時間を0-100%に正規化し、Aは実線・Bは破線で表示。
-        </p>
+        <CardHeader
+          label="TIMELINE OVERLAY"
+          title={`${overlayMeta.label} 時系列の重ね合わせ（時間正規化）`}
+          info="下のピルで選んだ1指標の時系列を、A/B 2セッションで重ねて比較します。各セッションの時間を0〜100%（進行率）に正規化し、Aは実線・Bは破線で表示します。録画長が違っても波形の形を比べられます。"
+        />
 
         {/* 指標選択ピル */}
         <div className="flex flex-wrap gap-1.5 mb-4">
@@ -370,13 +373,11 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
 
       {/* 差分テーブル */}
       <div className="metric-card">
-        <div className="section-label mb-3">DIFFERENCE TABLE</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '0.5rem' }}>
-          感情差分ランキング（|B − A|の大きい順）
-        </div>
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.68 0.015 255)', marginBottom: '1rem' }}>
-          正の差（B &gt; A）はB優勢、負の差（A &gt; B）はA優勢を示します。
-        </p>
+        <CardHeader
+          label="DIFFERENCE TABLE"
+          title="感情差分ランキング（|B − A|の大きい順）"
+          info="各感情の平均スコアについて B − A の差を計算し、差の大きい順に並べます。正の差（B＞A）はB優勢、負の差（A＞B）はA優勢を示します。2セッションで最も違いが出た感情がひと目で分かります。"
+        />
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -418,29 +419,25 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
 
       {/* ---- セッション間統計的検定 ---- */}
       <div className="metric-card">
-        <div className="flex items-center justify-between mb-1">
-          <div>
-            <div className="section-label mb-1" style={{ color: 'oklch(0.65 0.20 270)' }}>STATISTICAL COMPARISON — SESSION LEVEL</div>
-            <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)' }}>
-              セッション間 統計的検定
-            </div>
-            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.68 0.015 255)', marginTop: '2px' }}>
-              {testMethod === 'welch'
-                ? '両セッションの全フレームを標本としてWelchのt検定を実施。Cohen\'s dで効果量を評価します。'
-                : '両セッションの全フレームを標本としてMann-Whitney U検定（ノンパラメトリック）を実施。正規性を仮定せず、効果量はランク二列相関 r で評価します。'}
-            </p>
-          </div>
-          {/* CSV エクスポートボタン */}
-          <button
-            onClick={exportComparisonCSV}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all flex-shrink-0"
-            style={{ fontFamily: 'Noto Sans JP, sans-serif', background: 'oklch(0.32 0.12 160)', color: 'white', border: '1px solid oklch(0.52 0.18 160)' }}
-            title="記述統計＋Welch＋Mann-Whitneyの統計サマリーをCSVでダウンロード"
-          >
-            <Download size={13} />
-            CSV出力
-          </button>
-        </div>
+        <CardHeader
+          label="STATISTICAL COMPARISON — SESSION LEVEL"
+          labelColor="oklch(0.65 0.20 270)"
+          title="セッション間 統計的検定"
+          info={testMethod === 'welch'
+            ? '両セッションの全フレームを標本としてWelchのt検定を実施し、感情ごとに差が統計的に有意かを判定します。効果量はCohen\'s dで評価。下のトグルでMann-Whitney U検定にも切り替えられます。'
+            : '両セッションの全フレームを標本としてMann-Whitney U検定（ノンパラメトリック）を実施します。正規性を仮定せず、効果量はランク二列相関 r で評価。下のトグルでWelch t検定にも切り替えられます。'}
+          right={(
+            <button
+              onClick={exportComparisonCSV}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all flex-shrink-0"
+              style={{ fontFamily: 'Noto Sans JP, sans-serif', background: 'oklch(0.32 0.12 160)', color: 'white', border: '1px solid oklch(0.52 0.18 160)' }}
+              title="記述統計＋Welch＋Mann-Whitneyの統計サマリーをCSVでダウンロード"
+            >
+              <Download size={13} />
+              CSV出力
+            </button>
+          )}
+        />
 
         {/* 検定手法トグル（パラメトリック / ノンパラメトリック） */}
         <div className="flex gap-2 mt-3 mb-3">

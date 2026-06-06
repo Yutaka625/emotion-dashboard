@@ -9,6 +9,7 @@ import {
 } from 'recharts';
 import { rechartsTooltip } from '@/lib/chartTooltip';
 import { ArrowUpDown, ArrowLeftRight, RotateCcw } from 'lucide-react';
+import CardHeader from '@/components/ui/CardHeader';
 
 interface Props {
   data: DashboardData;
@@ -99,10 +100,11 @@ export default function ActionUnitsSection({ data }: Props) {
 
       {/* AU Mean Values Chart */}
       <div className="metric-card">
-        <div className="section-label mb-3">AU MEAN ACTIVATION</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
-          アクションユニット別平均活性化値
-        </div>
+        <CardHeader
+          label="AU MEAN ACTIVATION"
+          title="アクションユニット別平均活性化値"
+          info="FACS（表情の筋肉動作の体系）に基づく各アクションユニット（眉上げ・口角上げ等）の平均活性化値です。どの表情筋がよく動いていたかを把握できます。"
+        />
         <ResponsiveContainer width="100%" height={280}>
           <BarChart data={auData} margin={{ top: 5, right: 10, bottom: 60, left: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" vertical={false} />
@@ -126,13 +128,11 @@ export default function ActionUnitsSection({ data }: Props) {
 
       {/* Active AU Percentage */}
       <div className="metric-card">
-        <div className="section-label mb-3">AU ACTIVITY RATE</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '0.5rem' }}>
-          アクションユニット活性率（閾値5%超の割合）
-        </div>
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.68 0.015 255)', marginBottom: '1rem' }}>
-          各AUが5%以上の活性化を示したフレームの割合
-        </p>
+        <CardHeader
+          label="AU ACTIVITY RATE"
+          title="アクションユニット活性率（閾値5%超の割合）"
+          info="各アクションユニットが 5% 以上活性化したフレームの割合を示します。平均値とは別に「その表情筋が実際に動いていた時間の割合」を把握できます。"
+        />
         <ResponsiveContainer width="100%" height={Math.max(220, topActive.length * 28 + 20)}>
           <BarChart data={topActive} layout="vertical" margin={{ top: 5, right: 60, bottom: 5, left: 130 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" horizontal={false} />
@@ -153,10 +153,11 @@ export default function ActionUnitsSection({ data }: Props) {
 
       {/* AU Details Table */}
       <div className="metric-card">
-        <div className="section-label mb-3">AU REFERENCE TABLE</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
-          アクションユニット詳細一覧
-        </div>
+        <CardHeader
+          label="AU REFERENCE TABLE"
+          title="アクションユニット詳細一覧"
+          info="全アクションユニットの平均値・最大値・活性率を一覧表にまとめたものです。日本語名（顔の動作の説明）とあわせて、各表情筋の動きを詳しく確認できます。"
+        />
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -208,10 +209,11 @@ export default function ActionUnitsSection({ data }: Props) {
 
       {/* Head Pose */}
       <div className="metric-card">
-        <div className="section-label mb-3">HEAD POSE ANALYSIS</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
-          頭部姿勢分析（Pitch / Yaw / Roll）
-        </div>
+        <CardHeader
+          label="HEAD POSE ANALYSIS"
+          title="頭部姿勢分析（Pitch / Yaw / Roll）"
+          info="頭の向きの3軸（Pitch=上下、Yaw=左右、Roll=傾き）について、平均・標準偏差・最小・最大を示します。うなずきや首振りなど頭の動きの傾向を把握できます。"
+        />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {headPoseData.map((pose, i) => (
             <div key={i} className="p-4 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', border: '1px solid oklch(0.22 0.04 255)' }}>
@@ -246,13 +248,11 @@ export default function ActionUnitsSection({ data }: Props) {
 
       {/* Head Motion Events */}
       <div className="metric-card">
-        <div className="section-label mb-3">HEAD MOTION EVENTS</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '0.5rem' }}>
-          頭部動作検知イベント
-        </div>
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.68 0.015 255)', marginBottom: '1rem' }}>
-          明確なうなづき（Pitch ≥8°）・首振り（Yaw ≥12°）・首傾げ（Roll ≥15°）を検知した時刻一覧
-        </p>
+        <CardHeader
+          label="HEAD MOTION EVENTS"
+          title="頭部動作検知イベント"
+          info="明確なうなづき（Pitch ≥8°）・首振り（Yaw ≥12°）・首傾げ（Roll ≥15°）を自動検知し、発生した時刻の一覧を示します。同意・否定・思考などの非言語サインの手がかりになります。"
+        />
 
         {/* 凡例 */}
         <div className="flex gap-4 mb-4">

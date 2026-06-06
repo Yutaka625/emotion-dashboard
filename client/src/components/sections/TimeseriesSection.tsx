@@ -19,6 +19,7 @@ import { applyBaselineCorrection } from '@/lib/csvAnalyzer';
 import { applySmoothing, type SmoothingMethod } from '@/lib/smoothingUtils';
 
 import CollapsibleCard       from '@/components/ui/CollapsibleCard';
+import CardHeader            from '@/components/ui/CardHeader';
 import BaselineSettingsCard  from './timeseries/BaselineSettingsCard';
 import SmoothingSettingsCard from './timeseries/SmoothingSettingsCard';
 import EmotionChartsCard     from './timeseries/EmotionChartsCard';
@@ -394,10 +395,11 @@ export default function TimeseriesSection({ data, rawTimeseries }: Props) {
 
       {/* ---- 10秒区間サマリーテーブル ---- */}
       <div className="metric-card">
-        <div className="section-label mb-3">10-SECOND WINDOWS TABLE</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
-          10秒区間ごとのサマリー
-        </div>
+        <CardHeader
+          label="10-SECOND WINDOWS TABLE"
+          title="10秒区間ごとのサマリー"
+          info="セッションを10秒ごとの区間に区切り、各区間の Engagement・Valence・Attention の平均と支配的感情を表にまとめます。時間帯ごとの傾向をざっと俯瞰できます。"
+        />
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>

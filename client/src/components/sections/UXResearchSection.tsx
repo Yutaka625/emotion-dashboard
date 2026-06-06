@@ -8,6 +8,7 @@ import { useMemo, useState } from 'react';
 import type { DashboardData } from '@/lib/types';
 import { EMOTION_LABELS_JA, EMOTION_COLORS, NON_NEUTRAL_EMOTIONS } from '@/lib/types';
 import AbsoluteScaleBadge from '@/components/ui/AbsoluteScaleBadge';
+import CardHeader from '@/components/ui/CardHeader';
 import { useEvents } from '@/contexts/EventsContext';
 import { AlertTriangle, Star, Zap, Brain, Trophy, Filter } from 'lucide-react';
 
@@ -182,14 +183,6 @@ export default function UXResearchSection({ data }: Props) {
     textTransform: 'uppercase' as const,
   };
 
-  const cardTitle = {
-    fontFamily: 'Noto Sans JP, sans-serif',
-    fontWeight: 700,
-    fontSize: '1rem',
-    color: 'oklch(0.88 0.005 250)',
-    marginBottom: '1rem',
-  };
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -209,8 +202,11 @@ export default function UXResearchSection({ data }: Props) {
           Panel 1: UXスコアダッシュボード
       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
       <div style={cardStyle}>
-        <div style={sectionLabel} className="mb-3">UX SCORE DASHBOARD</div>
-        <div style={cardTitle}>UX複合指標スコア</div>
+        <CardHeader
+          label="UX SCORE DASHBOARD"
+          title="UX複合指標スコア"
+          info="感情データから算出した4つのUX指標（フラストレーション・デライト・エンゲージメント品質・認知負荷）と、それらを合成した総合UXスコア（0〜100）を表示します。数値が高いほど良好な体験を示します。"
+        />
 
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           {/* UX Score 総合（大） */}
@@ -300,11 +296,11 @@ export default function UXResearchSection({ data }: Props) {
           Panel 2: 感情ヒートマップ
       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
       <div style={cardStyle}>
-        <div style={sectionLabel} className="mb-3">EMOTION HEATMAP</div>
-        <div style={cardTitle}>感情強度ヒートマップ（時間 × 感情）</div>
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.66 0.015 255)', marginBottom: '1rem' }}>
-          色が明るいほど感情強度が高い。横軸=時間、縦軸=感情種別。
-        </p>
+        <CardHeader
+          label="EMOTION HEATMAP"
+          title="感情強度ヒートマップ（時間 × 感情）"
+          info="横軸=時間、縦軸=感情種別のマス目で、各時間帯にどの感情がどれだけ強く出たかを色の明るさで示します。明るいマスほど感情強度が高く、時間に沿った感情の盛り上がりを把握できます。"
+        />
 
         {/* グリッド本体 */}
         <div className="overflow-x-auto">
@@ -389,25 +385,27 @@ export default function UXResearchSection({ data }: Props) {
           Panel 3: フリクション & デライト分析
       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
       <div style={cardStyle}>
-        <div style={sectionLabel} className="mb-3">FRICTION & DELIGHT ANALYSIS</div>
-        <div className="flex items-center justify-between mb-4">
-          <div style={cardTitle}>フリクション＆デライト検出</div>
-          {/* サマリーカウント */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: 'oklch(0.62 0.22 25 / 0.12)', border: '1px solid oklch(0.62 0.22 25 / 0.3)' }}>
-              <AlertTriangle size={12} style={{ color: 'oklch(0.62 0.22 25)' }} />
-              <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.7rem', color: 'oklch(0.62 0.22 25)' }}>
-                Friction: {frictionCount}
-              </span>
+        <CardHeader
+          label="FRICTION & DELIGHT ANALYSIS"
+          title="フリクション＆デライト検出"
+          info="ネガティブ感情が強まった瞬間（フリクション＝つまずき）と、ポジティブ感情が高まった瞬間（デライト＝喜び）を時系列から自動検出し一覧します。下のトグルで種類を絞り込めます。UX改善の着目点を見つけられます。"
+          right={(
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: 'oklch(0.62 0.22 25 / 0.12)', border: '1px solid oklch(0.62 0.22 25 / 0.3)' }}>
+                <AlertTriangle size={12} style={{ color: 'oklch(0.62 0.22 25)' }} />
+                <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.7rem', color: 'oklch(0.62 0.22 25)' }}>
+                  Friction: {frictionCount}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: 'oklch(0.78 0.14 82 / 0.12)', border: '1px solid oklch(0.78 0.14 82 / 0.3)' }}>
+                <Star size={12} style={{ color: 'oklch(0.78 0.14 82)' }} />
+                <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.7rem', color: 'oklch(0.78 0.14 82)' }}>
+                  Delight: {delightCount}
+                </span>
+              </div>
             </div>
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: 'oklch(0.78 0.14 82 / 0.12)', border: '1px solid oklch(0.78 0.14 82 / 0.3)' }}>
-              <Star size={12} style={{ color: 'oklch(0.78 0.14 82)' }} />
-              <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.7rem', color: 'oklch(0.78 0.14 82)' }}>
-                Delight: {delightCount}
-              </span>
-            </div>
-          </div>
-        </div>
+          )}
+        />
 
         {/* フィルタートグル */}
         <div className="flex gap-2 mb-4">
@@ -494,8 +492,11 @@ export default function UXResearchSection({ data }: Props) {
           Panel 4: タスク別サマリー
       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
       <div style={cardStyle}>
-        <div style={sectionLabel} className="mb-3">TASK SUMMARY</div>
-        <div style={cardTitle}>タスク別UX指標</div>
+        <CardHeader
+          label="TASK SUMMARY"
+          title="タスク別UX指標"
+          info="「時系列分析」タブで登録したイベント（タスク区間）ごとに、UXスコアや主要指標を集計します。『どのタスクで最もフラストレーションが高かったか』などをタスク単位で比較できます。"
+        />
 
         {events.length === 0 ? (
           <div

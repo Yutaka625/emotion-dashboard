@@ -15,6 +15,7 @@ import type { TimeseriesPoint, ChangePoint, BaselineDisplayMode } from '@/lib/ty
 import { useBaseline } from '@/contexts/BaselineContext';
 import { useEvents } from '@/contexts/EventsContext';
 import { rechartsTooltip } from '@/lib/chartTooltip';
+import CardHeader from '@/components/ui/CardHeader';
 
 const EMOTION_HEX = EMOTION_COLORS;
 
@@ -196,10 +197,11 @@ export default function EmotionChartsCard({
     <>
       {/* ---- EMOTION TIME SERIES ---- */}
       <div className="metric-card">
-        <div className="section-label mb-3">EMOTION TIME SERIES</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
-          {isBaselineActive ? correctedSubtitle : '感情スコアの時系列グラフ'}
-        </div>
+        <CardHeader
+          label="EMOTION TIME SERIES"
+          title={isBaselineActive ? correctedSubtitle : '感情スコアの時系列グラフ'}
+          info="感情スコアの時間変化を表示します。タブで表示形式（オーバーレイ／個別波形／ヒートマップ／スタック面／支配感情）を切り替えられます。ベースライン補正中は補正後の値（平常時からの変化）を表示します。"
+        />
 
         {/* タブバー */}
         <div className="flex gap-1 mb-5 p-1 rounded-lg" style={{ background: 'oklch(0.20 0.04 255)', width: 'fit-content' }}>

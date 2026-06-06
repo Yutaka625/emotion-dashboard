@@ -13,6 +13,7 @@ import { rechartsTooltip } from '@/lib/chartTooltip';
 import { formatPct } from '@/lib/utils';
 import { useBaseline } from '@/contexts/BaselineContext';
 import AbsoluteScaleBadge from '@/components/ui/AbsoluteScaleBadge';
+import CardHeader from '@/components/ui/CardHeader';
 
 interface Props {
   data: DashboardData;
@@ -145,10 +146,11 @@ export default function EngagementValenceSection({ data }: Props) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Distribution */}
           <div className="metric-card">
-            <div className="section-label mb-3">DISTRIBUTION</div>
-            <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
-              Engagement レベル分布
-            </div>
+            <CardHeader
+              label="DISTRIBUTION"
+              title="Engagement レベル分布"
+              info="Engagement（関与度・0〜100）を5段階（非常に低い〜非常に高い）に区切り、各レベルに該当したフレーム数を示します。関与度の高低の偏りを把握できます。"
+            />
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={engDistData} margin={{ top: 5, right: 10, bottom: 20, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" vertical={false} />
@@ -169,13 +171,11 @@ export default function EngagementValenceSection({ data }: Props) {
 
           {/* Correlation */}
           <div className="metric-card">
-            <div className="section-label mb-3">CORRELATIONS</div>
-            <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '0.4rem' }}>
-              Engagement と各指標のピアソン相関係数
-            </div>
-            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.68 0.015 255)', marginBottom: '0.8rem', lineHeight: 1.6 }}>
-              −1〜+1の範囲。+1に近いほど Engagement と同時に増減し、−1に近いほど逆方向に動きます（0は無関係）。
-            </p>
+            <CardHeader
+              label="CORRELATIONS"
+              title="Engagement と各指標の相関"
+              info="Engagement（関与度）と各感情・指標のピアソン相関係数（−1〜+1）です。+1に近いほど Engagement と同時に増減し、−1に近いほど逆方向に動きます（0は無関係）。どの感情が関与度と連動するかを把握できます。"
+            />
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={engCorrData} layout="vertical" margin={{ top: 5, right: 30, bottom: 5, left: 60 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" horizontal={false} />
@@ -225,10 +225,11 @@ export default function EngagementValenceSection({ data }: Props) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Valence Distribution */}
           <div className="metric-card">
-            <div className="section-label mb-3">DISTRIBUTION</div>
-            <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
-              Valence レベル分布
-            </div>
+            <CardHeader
+              label="DISTRIBUTION"
+              title="Valence レベル分布"
+              info="Valence（感情価・−100〜+100）を測定範囲で5区間に等分し、各区間のフレーム数を示します。ネガティブ寄り・ポジティブ寄りの偏りを把握できます（区間の境界はデータの最小〜最大から自動算出）。"
+            />
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={valDistData} margin={{ top: 5, right: 10, bottom: 20, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" vertical={false} />
@@ -249,13 +250,11 @@ export default function EngagementValenceSection({ data }: Props) {
 
           {/* Valence Correlation */}
           <div className="metric-card">
-            <div className="section-label mb-3">CORRELATIONS</div>
-            <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '0.4rem' }}>
-              Valence と各指標のピアソン相関係数
-            </div>
-            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.68 0.015 255)', marginBottom: '0.8rem', lineHeight: 1.6 }}>
-              −1〜+1の範囲。+1に近いほど Valence と同時に増減し、−1に近いほど逆方向に動きます（0は無関係）。
-            </p>
+            <CardHeader
+              label="CORRELATIONS"
+              title="Valence と各指標の相関"
+              info="Valence（感情価）と各感情・指標のピアソン相関係数（−1〜+1）です。+1に近いほど Valence と同時に増減し、−1に近いほど逆方向に動きます（0は無関係）。どの感情が感情価と連動するかを把握できます。"
+            />
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={valCorrData} layout="vertical" margin={{ top: 5, right: 30, bottom: 5, left: 60 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" horizontal={false} />
@@ -277,13 +276,11 @@ export default function EngagementValenceSection({ data }: Props) {
 
         {/* Engagement vs Valence Scatter */}
         <div className="metric-card">
-          <div className="section-label mb-3">ENGAGEMENT × VALENCE</div>
-          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '0.5rem' }}>
-            Engagement × Valence 散布図
-          </div>
-          <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.68 0.015 255)', marginBottom: '1rem' }}>
-            各点は1フレームを表します。色は支配的感情を示します（先頭1000点を表示）。
-          </p>
+          <CardHeader
+            label="ENGAGEMENT × VALENCE"
+            title="Engagement × Valence 散布図"
+            info="横軸=Valence（感情価）、縦軸=Engagement（関与度）で各フレームを1点として配置します。点の色はそのフレームの支配的感情（最もスコアが高い感情）。右上ほど『関与が高くポジティブ』です。性能のため先頭約1000点を表示。点にカーソルを乗せると経過時間・各値・感情が出ます。"
+          />
           <ResponsiveContainer width="100%" height={280}>
             <ScatterChart margin={{ top: 10, right: 20, bottom: 20, left: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" />
@@ -302,6 +299,8 @@ export default function EngagementValenceSection({ data }: Props) {
                   const d = payload[0]?.payload;
                   return (
                     <div style={{ background: 'oklch(0.20 0.04 255)', border: '1px solid oklch(0.30 0.04 255)', borderRadius: '4px', padding: '8px', fontFamily: 'Roboto Mono, monospace', fontSize: '0.75rem', color: 'oklch(0.88 0.005 250)' }}>
+                      {/* 経過時間（録画開始=0秒からの相対秒）。scatter_eng_val の time をそのまま表示 */}
+                      <p style={{ color: 'oklch(0.70 0.012 250)' }}>経過時間: {(d?.time ?? 0).toFixed(1)}s</p>
                       <p>Engagement: {formatPct(d?.engagement ?? 0)}%</p>
                       <p>Valence: {formatPct(d?.valence ?? 0)}%</p>
                       {/* 感情名は色ドット＋明るい文字色にする（感情色のままだと暗背景で読めないため） */}
@@ -324,10 +323,11 @@ export default function EngagementValenceSection({ data }: Props) {
 
         {/* Emotion Profile */}
         <div className="metric-card">
-          <div className="section-label mb-3">EMOTION PROFILE</div>
-          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
-            特殊指標レベル別の感情プロファイル
-          </div>
+          <CardHeader
+            label="EMOTION PROFILE"
+            title="Engagement レベル別の感情プロファイル"
+            info="Engagement が高いとき（50以上）と低いとき（50未満）で、各感情の平均スコアがどう違うかを比較します。関与度が高い場面でどんな感情が伴いやすいかを把握できます。"
+          />
           <ResponsiveContainer width="100%" height={240}>
             <BarChart data={profileData} margin={{ top: 5, right: 20, bottom: 20, left: 60 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" />
@@ -346,10 +346,11 @@ export default function EngagementValenceSection({ data }: Props) {
 
         {/* Circumplex Model */}
         <div className="metric-card">
-          <div className="section-label mb-3">CIRCUMPLEX MODEL</div>
-          <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
-            Valence-Arousal 円環モデル
-          </div>
+          <CardHeader
+            label="CIRCUMPLEX MODEL"
+            title="Valence-Arousal 円環モデル"
+            info="Russell(1980)の円環モデルに基づき、各フレームを『覚醒度（Engagement代理）×感情価（Valence）』の4象限に分類し、象限ごとのフレーム数を示します。分割は固定中立点（Engagement=50／Valence=0）で行う絶対スケール判定です。"
+          />
           {/* 補正ON中: 円環モデルは絶対値スケール前提のため補正対象外であることを明示 */}
           <div className="mb-3"><AbsoluteScaleBadge /></div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -382,10 +383,11 @@ export default function EngagementValenceSection({ data }: Props) {
         {/* Affect Dynamics */}
         {engDynamics && (
           <div className="metric-card">
-            <div className="section-label mb-3">AFFECT DYNAMICS</div>
-            <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
-              特殊指標の動態指標
-            </div>
+            <CardHeader
+              label="AFFECT DYNAMICS"
+              title="Engagement の動態指標"
+              info="Engagement（関与度）の時間的な動きを5つの指標で示します。変動性(SD)=揺れ幅、不安定性(MSSD)=連続変化の激しさ、慣性(AR1)=状態の持続性、レンジ=最大−最小、平均絶対変化量=1フレームあたりの平均変化量。"
+            />
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               {[
                 { label: '変動性 (SD)', value: engDynamics.variability_sd.toFixed(4), desc: '特殊指標の変動幅' },

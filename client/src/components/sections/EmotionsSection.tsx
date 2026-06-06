@@ -11,6 +11,7 @@ import {
 } from 'recharts';
 import { rechartsTooltip } from '@/lib/chartTooltip';
 import { formatScore } from '@/lib/utils';
+import CardHeader from '@/components/ui/CardHeader';
 
 interface Props {
   data: DashboardData;
@@ -109,13 +110,11 @@ export default function EmotionsSection({ data }: Props) {
 
       {/* Prevalence Chart */}
       <div className="metric-card">
-        <div className="section-label mb-3">EMOTION PREVALENCE</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '0.5rem' }}>
-          感情出現率（閾値超過の割合）
-        </div>
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.68 0.015 255)', marginBottom: '1rem' }}>
-          各感情のスコアが <strong style={{ color: 'oklch(0.82 0.008 250)' }}>{prevalenceThreshold}</strong>（0〜100スケール）を超えたフレームの割合。低めの閾値のため、わずかな表出も出現として数えます。
-        </p>
+        <CardHeader
+          label="EMOTION PREVALENCE"
+          title="感情出現率（閾値超過の割合）"
+          info={`各感情のスコアが ${prevalenceThreshold}（0〜100スケール）を超えたフレームの割合を示します。平均スコアとは異なり「その感情が出ていた時間の割合」を表します。低めの閾値のため、わずかな表出も出現として数えます。`}
+        />
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={prevalenceData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" vertical={false} />
@@ -139,10 +138,11 @@ export default function EmotionsSection({ data }: Props) {
 
       {/* Stats Table */}
       <div className="metric-card">
-        <div className="section-label mb-3">DESCRIPTIVE STATISTICS</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '1rem' }}>
-          感情スコアの記述統計
-        </div>
+        <CardHeader
+          label="DESCRIPTIVE STATISTICS"
+          title="感情スコアの記述統計"
+          info="各感情スコア（0〜100）の平均値・標準偏差・中央値・最大値に加え、変動性(SD)と慣性(AR1)を一覧表示します。セッション全体での各感情の出方を数値で把握できます。"
+        />
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -185,13 +185,11 @@ export default function EmotionsSection({ data }: Props) {
 
       {/* Dynamics Comparison */}
       <div className="metric-card">
-        <div className="section-label mb-3">AFFECT DYNAMICS COMPARISON</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '0.5rem' }}>
-          感情動態指標の比較
-        </div>
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.68 0.015 255)', marginBottom: '1rem' }}>
-          変動性（SD）・不安定性（MSSD平方根）の感情間比較
-        </p>
+        <CardHeader
+          label="AFFECT DYNAMICS COMPARISON"
+          title="感情動態指標の比較"
+          info="感情の時間的な動きを2指標で比較します。変動性（SD＝揺れ幅の大きさ）と不安定性（√MSSD＝隣り合うフレーム間の急変の起きやすさ）を感情ごとに並べています。慣性は下の別カードに表示します。"
+        />
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={dynamicsData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" vertical={false} />
@@ -210,13 +208,11 @@ export default function EmotionsSection({ data }: Props) {
       {/* 慣性(AR1)は -1〜1 スケールで、変動性・不安定性(0〜100由来)と桁が違うため別グラフにする。
           学術タブの慣性カードと同じ体裁（domain[-1,1]・ゼロライン・符号で色分け）に揃える。 */}
       <div className="metric-card">
-        <div className="section-label mb-3">AFFECT DYNAMICS — INERTIA</div>
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)', marginBottom: '0.5rem' }}>
-          感情慣性（AR1）の比較
-        </div>
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.68 0.015 255)', marginBottom: '1rem' }}>
-          1フレーム前との自己相関（AR1）。1に近いほど状態が持続し、負の値は揺り戻し（振動）を示します。
-        </p>
+        <CardHeader
+          label="AFFECT DYNAMICS — INERTIA"
+          title="感情慣性（AR1）の比較"
+          info="1フレーム前との自己相関（AR1）を感情ごとに比較します。1に近いほどその感情状態が持続しやすく、負の値は揺り戻し（振動）を示します。−1〜1のスケールで、ゼロラインを基準に正負を色分けしています。"
+        />
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={dynamicsData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" vertical={false} />

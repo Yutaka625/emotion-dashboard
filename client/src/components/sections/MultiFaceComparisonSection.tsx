@@ -14,7 +14,7 @@ import { Users } from 'lucide-react';
 import { useFaceID } from '@/contexts/FaceIDContext';
 import { NON_NEUTRAL_EMOTIONS, EMOTION_LABELS_JA } from '@/lib/types';
 import { rechartsTooltip } from '@/lib/chartTooltip';
-import InfoTooltip from '@/components/ui/InfoTooltip';
+import CardHeader from '@/components/ui/CardHeader';
 
 // オーバーレイで選べる指標（特殊指標3種＋非ニュートラル9感情）
 const OVERLAY_METRICS: { key: string; label: string }[] = [
@@ -88,7 +88,11 @@ export default function MultiFaceComparisonSection() {
 
       {/* 品質サマリ + 微小ID表示トグル */}
       <div className="metric-card">
-        <div className="section-label mb-3">DATA QUALITY</div>
+        <CardHeader
+          label="DATA QUALITY"
+          title="データ品質（ノイズ除外）"
+          info="検出した顔の数と、少フレーム（検出が不安定で誤検出の可能性が高い顔）として除外した数を示します。除外しきい値（％・秒）は変更でき、「微小なIDも表示」で除外分も一覧に戻せます。除外はデータを消すものではなく表示・集計上の扱いです。"
+        />
         <div className="flex items-center justify-between flex-wrap gap-3">
           <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.82rem', color: 'oklch(0.78 0.012 250)', lineHeight: 1.7 }}>
             FaceID を <strong style={{ color: 'oklch(0.88 0.005 250)' }}>{detected}</strong> 個検出。
@@ -139,7 +143,11 @@ export default function MultiFaceComparisonSection() {
 
       {/* 顔の管理リスト（色・フレーム数・ラベル編集・表示トグル） */}
       <div className="metric-card">
-        <div className="section-label mb-3">FACES</div>
+        <CardHeader
+          label="FACES"
+          title="顔（FaceID）の管理"
+          info="検出された各顔の識別色・フレーム数・少フレームバッジを一覧表示します。ラベル名（例：司会者・参加者A）を付けると凡例やセレクターに反映され、ブラウザに保存されます。表示トグルでグラフ・集計に含めるか切り替えられます。"
+        />
         <div className="space-y-2">
           {availableFaceIds.map(id => {
             const isSel = selectedFaceIds.includes(id);
@@ -195,16 +203,11 @@ export default function MultiFaceComparisonSection() {
 
       {/* 感情オーバーレイグラフ */}
       <div className="metric-card">
-        <div className="section-label mb-3">EMOTION OVERLAY</div>
-        <div className="flex items-center gap-1.5" style={{ marginBottom: '4px' }}>
-          <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'oklch(0.88 0.005 250)' }}>
-            {metricLabel} 時系列の重ね合わせ（時間正規化）
-          </span>
-          <InfoTooltip text="横軸の％は「各顔が映っていた区間の進行率」です。0%＝その顔が最初に検出されたフレーム、100%＝最後のフレーム。顔ごとに登場した時刻も映っていた長さも異なるため、各顔をそれぞれの登場区間で0〜100%に引き伸ばして揃え、波形の形を比較できるようにしています（実時間の同じ瞬間を指すものではありません）。" />
-        </div>
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.68 0.015 255)', marginBottom: '0.75rem' }}>
-          指標を選んで、表示中の各顔を重ねて比較します。横軸は各顔の登場区間を0〜100%に正規化した「進行率」です（顔ごとに登場時刻・長さが異なるため、実時間の秒ではなく割合で揃えています）。
-        </p>
+        <CardHeader
+          label="EMOTION OVERLAY"
+          title={`${metricLabel} 時系列の重ね合わせ（時間正規化）`}
+          info="下のピルで選んだ1指標について、表示中の各顔の時系列を重ねて比較します。横軸の％は「各顔が映っていた区間の進行率」（0%＝最初の検出フレーム、100%＝最後のフレーム）。顔ごとに登場時刻も長さも異なるため、各顔をそれぞれの区間で0〜100%に引き伸ばして波形の形を比べます。実時間（秒）の同じ瞬間を指すものではありません。"
+        />
 
         {/* 指標選択ピル */}
         <div className="flex flex-wrap gap-1.5 mb-4">
