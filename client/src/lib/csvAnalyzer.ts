@@ -361,7 +361,10 @@ export function computeDashboardData(rows: Record<string, string>[], filename: s
   }
 
   // ---- 10. Correlation matrix ----
-  const corrCols = ['engagement', 'valence', 'attention', ...NON_NEUTRAL.slice(0, 6)];
+  // 特殊指標3種＋非ニュートラル9感情すべてで相関行列を作る（12×12）。
+  // 以前は NON_NEUTRAL.slice(0, 6) で6感情のみ（軽蔑・感傷・混乱が欠落）だった。
+  // pearson は1セルあたり O(n) で、12×12=144セルでも負荷は軽微。
+  const corrCols = ['engagement', 'valence', 'attention', ...NON_NEUTRAL];
   const corrData: number[][] = corrCols.map(c1 =>
     corrCols.map(c2 => pearson(df.map(r => r[c1] as number), df.map(r => r[c2] as number)))
   );
