@@ -11,8 +11,6 @@ import {
 } from 'recharts';
 import { rechartsTooltip } from '@/lib/chartTooltip';
 import { formatPct } from '@/lib/utils';
-import { useBaseline } from '@/contexts/BaselineContext';
-import AbsoluteScaleBadge from '@/components/ui/AbsoluteScaleBadge';
 import CardHeader from '@/components/ui/CardHeader';
 
 interface Props {
@@ -20,9 +18,7 @@ interface Props {
 }
 
 export default function EngagementValenceSection({ data }: Props) {
-  const { special_stats, engagement_distribution, engagement_correlations, engagement_emotion_profile, scatter_eng_val, affect_dynamics, valence_distribution, valence_correlations, timeseries_full, circumplex_summary } = data;
-  // Circumplex は絶対値スケール前提のため補正対象外。補正中はその旨を明示する。
-  const { isBaselineActive } = useBaseline();
+  const { special_stats, engagement_distribution, engagement_correlations, engagement_emotion_profile, scatter_eng_val, affect_dynamics, valence_distribution, valence_correlations } = data;
 
   const eng = special_stats.engagement;
   const val = special_stats.valence;
@@ -86,20 +82,6 @@ export default function EngagementValenceSection({ data }: Props) {
     color: EMOTION_COLORS[d.dominant] || 'oklch(0.70 0.14 195)',
     emotion: EMOTION_LABELS_JA[d.dominant] || d.dominant,
   }));
-
-  const circumplexData = [
-    { label: '高覚醒×高Valence', value: circumplex_summary.high_arousal_positive, color: 'oklch(0.62 0.18 160)', desc: '活性化・興奮状態' },
-    { label: '高覚醒×低Valence', value: circumplex_summary.high_arousal_negative, color: 'oklch(0.62 0.18 25)', desc: '怒り・不安状態' },
-    { label: '低覚醒×高Valence', value: circumplex_summary.low_arousal_positive, color: 'oklch(0.72 0.12 80)', desc: 'リラックス・満足状態' },
-    { label: '低覚醒×低Valence', value: circumplex_summary.low_arousal_negative, color: 'oklch(0.55 0.12 250)', desc: '疲労・抑うつ状態' },
-  ];
-
-  // 円環モデルの解釈文はデータ駆動で生成する。
-  // 固定中立点分割（Engagement=50 / Valence=0）では最多象限がデータにより変わるため、
-  // 旧コードのような「低覚醒×高Valence」固定の文言は使わず、実際の最多象限を選ぶ。
-  const circumTotal = circumplexData.reduce((s, q) => s + q.value, 0) || 1;
-  const dominantQuadrant = [...circumplexData].sort((a, b) => b.value - a.value)[0];
-  const dominantQuadrantPct = ((dominantQuadrant.value / circumTotal) * 100).toFixed(1);
 
   return (
     <div className="space-y-6">
@@ -344,41 +326,7 @@ export default function EngagementValenceSection({ data }: Props) {
           </ResponsiveContainer>
         </div>
 
-        {/* Circumplex Model */}
-        <div className="metric-card">
-          <CardHeader
-            label="CIRCUMPLEX MODEL"
-            title="Valence-Arousal 円環モデル"
-            info="Russell(1980)の円環モデルに基づき、各フレームを『覚醒度（Engagement代理）×感情価（Valence）』の4象限に分類し、象限ごとのフレーム数を示します。分割は固定中立点（Engagement=50／Valence=0）で行う絶対スケール判定です。"
-          />
-          {/* 補正ON中: 円環モデルは絶対値スケール前提のため補正対象外であることを明示 */}
-          <div className="mb-3"><AbsoluteScaleBadge /></div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {circumplexData.map((item, i) => (
-              <div key={i} className="p-3 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', border: `2px solid ${item.color}` }}>
-                <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.8rem', color: 'oklch(0.75 0.008 250)', marginBottom: '4px', fontWeight: 600 }}>
-                  {item.label}
-                </div>
-                <div style={{ fontFamily: 'Roboto Mono, monospace', fontWeight: 700, fontSize: '1.2rem', color: item.color, lineHeight: 1.2 }}>
-                  {item.value.toLocaleString()}
-                </div>
-                <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', color: 'oklch(0.68 0.015 255)' }}>
-                  フレーム — {item.desc}
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="mt-3 p-3 rounded" style={{ background: 'oklch(0.20 0.04 255)', border: '1px solid oklch(0.30 0.04 255)' }}>
-            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.78 0.012 250)', lineHeight: 1.6 }}>
-              <strong>解釈：</strong>最も多くのフレーム（{dominantQuadrant.value.toLocaleString()}フレーム・{dominantQuadrantPct}%）が「{dominantQuadrant.label}」象限に分類されました（{dominantQuadrant.desc}）。分割は固定中立点（Engagement=50／Valence=0）で行っています。
-              {isBaselineActive && (
-                <span style={{ display: 'block', marginTop: '0.5rem', color: 'oklch(0.82 0.15 70)' }}>
-                  ※ ベースライン補正の表示中ですが、この象限分類は補正前の絶対値（Engagement／Valence の生値）に基づいています。
-                </span>
-              )}
-            </p>
-          </div>
-        </div>
+        {/* Circumplex Model は学術的分析タブに集約したため、特殊指標タブからは削除 */}
 
         {/* Affect Dynamics */}
         {engDynamics && (
