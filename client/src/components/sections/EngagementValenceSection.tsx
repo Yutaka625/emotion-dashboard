@@ -40,8 +40,9 @@ export default function EngagementValenceSection({ data }: Props) {
   const SPECIAL_LABELS_JA: Record<string, string> = { engagement: '関与度', valence: '感情価', attention: '注視度' };
   const labelJa = (key: string) => EMOTION_LABELS_JA[key] || SPECIAL_LABELS_JA[key] || key;
 
+  // neutral（無表情）は他タブ・学術相関行列・感情プロファイルと同様に除外し、9感情＋特殊指標に絞る
   const engCorrData = Object.entries(engagement_correlations)
-    .filter(([k]) => k !== 'engagement')
+    .filter(([k]) => k !== 'engagement' && k !== 'neutral')
     .sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]))
     .map(([key, val]) => ({
       name: labelJa(key),
@@ -60,7 +61,7 @@ export default function EngagementValenceSection({ data }: Props) {
   }));
 
   const valCorrData = Object.entries(valence_correlations)
-    .filter(([k]) => k !== 'valence')
+    .filter(([k]) => k !== 'valence' && k !== 'neutral')
     .sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]))
     .map(([key, v]) => ({
       name: labelJa(key),
@@ -138,7 +139,7 @@ export default function EngagementValenceSection({ data }: Props) {
               title="Engagement レベル分布"
               info="Engagement（関与度・0〜100）を5段階（非常に低い〜非常に高い）に区切り、各レベルに該当したフレーム数を示します。関与度の高低の偏りを把握できます。"
             />
-            <ResponsiveContainer width="100%" height={220}>
+            <ResponsiveContainer width="100%" height={300}>
               <BarChart data={engDistData} margin={{ top: 5, right: 10, bottom: 20, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" vertical={false} />
                 <XAxis dataKey="label" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.65rem', fill: 'oklch(0.68 0.015 255)' }} />
@@ -217,7 +218,7 @@ export default function EngagementValenceSection({ data }: Props) {
               title="Valence レベル分布"
               info="Valence（感情価・−100〜+100）を測定範囲で5区間に等分し、各区間のフレーム数を示します。ネガティブ寄り・ポジティブ寄りの偏りを把握できます（区間の境界はデータの最小〜最大から自動算出）。"
             />
-            <ResponsiveContainer width="100%" height={220}>
+            <ResponsiveContainer width="100%" height={300}>
               <BarChart data={valDistData} margin={{ top: 5, right: 10, bottom: 20, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" vertical={false} />
                 <XAxis dataKey="label" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} />
