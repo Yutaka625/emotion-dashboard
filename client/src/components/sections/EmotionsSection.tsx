@@ -6,8 +6,7 @@
 import type { DashboardData } from '@/lib/types';
 import { EMOTION_LABELS_JA, EMOTION_COLORS, NON_NEUTRAL_EMOTIONS, ALL_EMOTIONS } from '@/lib/types';
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  Cell, RadarChart, PolarGrid, PolarAngleAxis, Radar, ReferenceLine,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
 } from 'recharts';
 import { rechartsTooltip } from '@/lib/chartTooltip';
 import { formatScore } from '@/lib/utils';
@@ -37,21 +36,13 @@ export default function EmotionsSection({ data }: Props) {
     color: EMOTION_COLORS[e] || '#999',
   })).sort((a, b) => b.pct - a.pct);
 
+  // 変動性(SD)と不安定性(√MSSD)の感情間比較に使う。
+  // ※ 慣性(AR1)は学術タブの「感情慣性」カードに集約（重複のため当タブからは削除）。
   const dynamicsData = NON_NEUTRAL_EMOTIONS.map(e => ({
     emotion: EMOTION_LABELS_JA[e] || e,
     variability: affect_dynamics[e]?.variability_sd || 0,
     instability: Math.sqrt(affect_dynamics[e]?.instability_mssd || 0),
-    // 慣性(AR1)は別カードで符号付き表示するため signed を保持する。
-    // 変動性・不安定性(0〜100スケール由来)とはレンジが大きく異なる(-1〜1)ので同一グラフには混ぜない。
-    inertia: affect_dynamics[e]?.inertia_ar1 || 0,
     color: EMOTION_COLORS[e] || '#999',
-  }));
-
-  const radarData = NON_NEUTRAL_EMOTIONS.map(e => ({
-    emotion: EMOTION_LABELS_JA[e] || e,
-    mean: emotion_stats[e]?.mean || 0,
-    max: emotion_stats[e]?.max || 0,
-    prevalence: emotion_prevalence[e]?.prevalence_pct || 0,
   }));
 
   // 出現率の判定に使われている実際の閾値を取得する（生成側で固定 0.3。emotion_prevalence に格納済み）。
@@ -188,7 +179,7 @@ export default function EmotionsSection({ data }: Props) {
         <CardHeader
           label="AFFECT DYNAMICS COMPARISON"
           title="感情動態指標の比較"
-          info="感情の時間的な動きを2指標で比較します。変動性（SD＝揺れ幅の大きさ）と不安定性（√MSSD＝隣り合うフレーム間の急変の起きやすさ）を感情ごとに並べています。慣性は下の別カードに表示します。"
+          info="感情の時間的な動きを2指標で比較します。変動性（SD＝揺れ幅の大きさ）と不安定性（√MSSD＝隣り合うフレーム間の急変の起きやすさ）を感情ごとに並べています。慣性（AR1）は「学術的分析」タブに集約しています。"
         />
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={dynamicsData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
@@ -203,34 +194,7 @@ export default function EmotionsSection({ data }: Props) {
           </BarChart>
         </ResponsiveContainer>
       </div>
-
-      {/* Inertia (AR1) — 別カードで表示 */}
-      {/* 慣性(AR1)は -1〜1 スケールで、変動性・不安定性(0〜100由来)と桁が違うため別グラフにする。
-          学術タブの慣性カードと同じ体裁（domain[-1,1]・ゼロライン・符号で色分け）に揃える。 */}
-      <div className="metric-card">
-        <CardHeader
-          label="AFFECT DYNAMICS — INERTIA"
-          title="感情慣性（AR1）の比較"
-          info="1フレーム前との自己相関（AR1）を感情ごとに比較します。1に近いほどその感情状態が持続しやすく、負の値は揺り戻し（振動）を示します。−1〜1のスケールで、ゼロラインを基準に正負を色分けしています。"
-        />
-        <ResponsiveContainer width="100%" height={220}>
-          <BarChart data={dynamicsData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" vertical={false} />
-            <XAxis dataKey="emotion" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', fill: 'oklch(0.68 0.015 255)' }} />
-            <YAxis domain={[-1, 1]} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.68 0.015 255)' }} />
-            <Tooltip
-              formatter={(v: number) => [v.toFixed(4), 'AR1（慣性）']}
-              {...rechartsTooltip}
-            />
-            <ReferenceLine y={0} stroke="oklch(0.68 0.015 255)" strokeDasharray="4 4" />
-            <Bar dataKey="inertia" name="慣性(AR1)" radius={[4, 4, 0, 0]} activeBar={{ fill: 'oklch(0.55 0.04 255 / 0.6)', stroke: 'none' }}>
-              {dynamicsData.map((entry, i) => (
-                <Cell key={i} fill={entry.inertia >= 0 ? 'oklch(0.62 0.18 160)' : 'oklch(0.62 0.18 25)'} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+      {/* 慣性(AR1)カードは学術タブ「感情慣性」と重複のため削除し、学術タブに集約した */}
     </div>
   );
 }
