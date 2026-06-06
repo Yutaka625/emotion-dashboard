@@ -5,7 +5,7 @@
 
 import { useMemo, useState } from 'react';
 import { Download } from 'lucide-react';
-import type { DashboardData } from '@/lib/types';
+import type { DashboardData, TimeseriesPoint } from '@/lib/types';
 import { EMOTION_LABELS_JA, EMOTION_COLORS, NON_NEUTRAL_EMOTIONS } from '@/lib/types';
 import { welchTTest, mannWhitneyU } from '@/lib/statisticsUtils';
 import type { TTestResult, MannWhitneyResult } from '@/lib/statisticsUtils';
@@ -44,6 +44,9 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
 
   // ---- タイムラインオーバーレイで表示する指標（既定: Engagement） ----
   const [overlayMetric, setOverlayMetric] = useState<string>('engagement');
+
+  // ---- タイムライン横軸モード（false=実時間秒, true=進行率%）。既定は実時間 ----
+  const [overlayNormalize, setOverlayNormalize] = useState<boolean>(false);
 
   // 各感情について、両セッションの全フレームを2標本として抽出する
   const emotionSamples = useMemo(() => {
@@ -165,7 +168,7 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
     B: +(dataB.affect_dynamics[k]?.variability_sd || 0).toFixed(4),
   }));
 
-  // ---- 時系列オーバーレイ（時間を0-100%に正規化し、選択指標をA/Bで重ねる） ----
+  // ---- 時系列オーバーレイ（選択指標をA/Bで重ねる。横軸は実時間秒 or 進行率%） ----
   const overlayMeta = OVERLAY_METRICS.find(m => m.key === overlayMetric) ?? OVERLAY_METRICS[0];
   const overlayData = useMemo(() => {
     const maxLen = 200;
@@ -173,19 +176,57 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
     const stepB = Math.max(1, Math.floor(dataB.timeseries_full.length / maxLen));
     const tsA = dataA.timeseries_full.filter((_, i) => i % stepA === 0);
     const tsB = dataB.timeseries_full.filter((_, i) => i % stepB === 0);
-    const len = Math.max(tsA.length, tsB.length);
-    const out: { pct: number; A: number; B: number }[] = [];
-    for (let i = 0; i < len; i++) {
-      const idxA = Math.min(i, tsA.length - 1);
-      const idxB = Math.min(i, tsB.length - 1);
-      out.push({
-        pct: Math.round((i / Math.max(1, len - 1)) * 100),
-        A: (tsA[idxA] as any)?.[overlayMetric] ?? 0,
-        B: (tsB[idxB] as any)?.[overlayMetric] ?? 0,
-      });
+
+    // 指定 time(秒) における指標値を線形補間（両モード共通）。
+    // nullPastEnd=true: 終端超過で null（線を止める） / false: 終端値を返す（正規化モード用）
+    const sampleAt = (ts: TimeseriesPoint[], t: number, nullPastEnd: boolean): number | null => {
+      const n = ts.length;
+      if (n === 0) return null;
+      if (t < ts[0].time) return (ts[0] as any)[overlayMetric] ?? 0;
+      if (t > ts[n - 1].time) return nullPastEnd ? null : ((ts[n - 1] as any)[overlayMetric] ?? 0);
+      let lo = 0, hi = n - 1;
+      while (hi - lo > 1) {
+        const mid = (lo + hi) >> 1;
+        if (ts[mid].time <= t) lo = mid; else hi = mid;
+      }
+      const t0 = ts[lo].time, t1 = ts[hi].time;
+      const v0 = (ts[lo] as any)[overlayMetric] ?? 0;
+      const v1 = (ts[hi] as any)[overlayMetric] ?? 0;
+      if (t1 === t0) return v0;
+      return v0 + (v1 - v0) * ((t - t0) / (t1 - t0));
+    };
+
+    const grid = 200;
+
+    // ---- 進行率（%）モード: 各セッションを自身の時間スパンで 0〜100% に正規化（時間ベース） ----
+    // 最長セッションは実時間モードと同じサンプル位置になるため形が一致し、短い方だけが引き伸ばされる。
+    if (overlayNormalize) {
+      const startA = tsA[0]?.time ?? 0, spanA = (tsA[tsA.length - 1]?.time ?? 0) - startA;
+      const startB = tsB[0]?.time ?? 0, spanB = (tsB[tsB.length - 1]?.time ?? 0) - startB;
+      const out: { pct: number; A: number | null; B: number | null }[] = [];
+      for (let i = 0; i < grid; i++) {
+        const frac = i / (grid - 1);
+        out.push({
+          pct: Math.round(frac * 100),
+          A: sampleAt(tsA, startA + frac * spanA, false),
+          B: sampleAt(tsB, startB + frac * spanB, false),
+        });
+      }
+      return out;
+    }
+
+    // ---- 実時間（秒）モード: 共通絶対時間グリッドへ線形補間。終端超過は null で線を止める ----
+    const maxDuration = Math.max(dataA.meta.duration_seconds, dataB.meta.duration_seconds, 0.001);
+    const out: { time: number; A: number | null; B: number | null }[] = [];
+    for (let i = 0; i < grid; i++) {
+      const t = (i / (grid - 1)) * maxDuration;
+      out.push({ time: +t.toFixed(2), A: sampleAt(tsA, t, true), B: sampleAt(tsB, t, true) });
     }
     return out;
-  }, [dataA, dataB, overlayMetric]);
+  }, [dataA, dataB, overlayMetric, overlayNormalize]);
+
+  // 実時間モードの X 軸ドメイン上限（JSX で参照）
+  const overlayMaxDuration = Math.max(dataA.meta.duration_seconds, dataB.meta.duration_seconds, 0.001);
 
   // ---- Circumplex象限比較 ----
   const cmpA = dataA.circumplex_summary;
@@ -335,8 +376,10 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
       <div className="metric-card">
         <CardHeader
           label="TIMELINE OVERLAY"
-          title={`${overlayMeta.label} 時系列の重ね合わせ（時間正規化）`}
-          info="下のピルで選んだ1指標の時系列を、A/B 2セッションで重ねて比較します。各セッションの時間を0〜100%（進行率）に正規化し、Aは実線・Bは破線で表示します。録画長が違っても波形の形を比べられます。"
+          title={`${overlayMeta.label} 時系列の重ね合わせ（${overlayNormalize ? '時間正規化' : '実時間'}）`}
+          info={overlayNormalize
+            ? '下のピルで選んだ1指標の時系列を、A/B 2セッションで重ねて比較します。各セッションの時間を0〜100%（進行率）に正規化し、Aは実線・Bは破線で表示します。録画長が違っても波形の形を比べられます。'
+            : '下のピルで選んだ1指標の時系列を、A/B 2セッションで重ねて比較します。横軸は実時間（秒）で、同じ時刻の反応が縦に揃います（例: 同じ動画を別々に視聴した反応タイミングの比較に最適）。Aは実線・Bは破線。短い方のセッションは録画終了時点で線が止まります。'}
         />
 
         {/* 指標選択ピル */}
@@ -363,15 +406,45 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
           })}
         </div>
 
+        {/* 横軸モード切替（実時間 / 正規化） */}
+        <div className="flex gap-2 mb-4">
+          {([
+            { id: 'abs',  label: '実時間（秒）', val: false },
+            { id: 'norm', label: '正規化（%）',  val: true  },
+          ] as const).map(opt => {
+            const on = overlayNormalize === opt.val;
+            return (
+              <button
+                key={opt.id}
+                onClick={() => setOverlayNormalize(opt.val)}
+                className="px-3 py-1 rounded-lg text-xs transition-all"
+                style={{
+                  fontFamily: 'Noto Sans JP, sans-serif',
+                  fontWeight: on ? 700 : 400,
+                  background: on ? 'oklch(0.30 0.10 270)' : 'oklch(0.22 0.04 255)',
+                  color: on ? 'oklch(0.85 0.18 285)' : 'oklch(0.66 0.015 255)',
+                  border: `1px solid ${on ? 'oklch(0.55 0.18 285)' : 'oklch(0.30 0.04 255)'}`,
+                }}
+              >
+                時間軸: {opt.label}
+              </button>
+            );
+          })}
+        </div>
+
         <ResponsiveContainer width="100%" height={200}>
           <LineChart data={overlayData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" />
-            <XAxis dataKey="pct" unit="%" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} />
+            {overlayNormalize ? (
+              <XAxis dataKey="pct" unit="%" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} />
+            ) : (
+              <XAxis dataKey="time" type="number" domain={[0, overlayMaxDuration]} tickFormatter={(t: number) => `${Number(t).toFixed(0)}s`} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} />
+            )}
             <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} />
-            <Tooltip {...tooltipStyle} labelFormatter={v => `進行率 ${v}%`} />
+            <Tooltip {...tooltipStyle} labelFormatter={v => (overlayNormalize ? `進行率 ${v}%` : `t = ${Number(v).toFixed(1)}s`)} />
             <Legend formatter={v => <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem' }}>{v}</span>} />
-            <Line type="monotone" dataKey="A" name={`${overlayMeta.label} ${labelA}`} stroke={COLOR_A} strokeWidth={1.5} dot={false} />
-            <Line type="monotone" dataKey="B" name={`${overlayMeta.label} ${labelB}`} stroke={COLOR_B} strokeWidth={1.5} dot={false} strokeDasharray="5 3" />
+            <Line type="monotone" dataKey="A" name={`${overlayMeta.label} ${labelA}`} stroke={COLOR_A} strokeWidth={1.5} dot={false} connectNulls={false} />
+            <Line type="monotone" dataKey="B" name={`${overlayMeta.label} ${labelB}`} stroke={COLOR_B} strokeWidth={1.5} dot={false} strokeDasharray="5 3" connectNulls={false} />
           </LineChart>
         </ResponsiveContainer>
       </div>
