@@ -1187,15 +1187,31 @@
         <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">特殊指標比較（Engagement / Valence / Attention）</span>
         <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(251,191,36,.25);">感情状態の象限分布（CIRCUMPLEX MODEL）</span>
         <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">感情変動性レーダー（AFFECT DYNAMICS — VARIABILITY）</span>
-        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">タイムラインオーバーレイ（指標選択式・時間正規化）</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">タイムラインオーバーレイ（指標選択式・時間軸切替）</span>
         <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">感情差分ランキング（DIFFERENCE TABLE、|B−A| 降順）</span>
         <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(192,132,252,.25);">統計検定（Welch t / Mann-Whitney U トグル）</span>
         <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">CSV出力（4セクション構成）</span>
       </div>
 
       <div class="howto">
-        <div class="howto-title">タイムラインオーバーレイ（指標選択式）</div>
-        <p>指標ピルから1つ（Engagement / Valence / Attention ＋ 非ニュートラル9感情）を選ぶと、その指標の時系列を <strong>A=実線 / B=破線</strong> で重ねて表示します。各セッションの時間を0-100%に正規化しているため、録画長が異なっても進行に沿って比較できます。</p>
+        <div class="howto-title">タイムラインオーバーレイ（指標選択式・時間軸切替）</div>
+        <p>指標ピルから1つ（Engagement / Valence / Attention ＋ 非ニュートラル9感情）を選ぶと、その指標の時系列を <strong>A=実線 / B=破線</strong> で重ねて表示します。</p>
+        <p style="margin-top:8px">指標ピルの下にある <strong>「時間軸」トグル</strong> で横軸の表示方法を切り替えられます。</p>
+        <table class="tab-table" style="margin-top:8px">
+          <thead><tr><th>モード</th><th>横軸</th><th>向いている用途</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>実時間（秒）</strong>（既定）</td>
+              <td>0〜最大録画長（秒）</td>
+              <td>同じ動画を複数人が別々に視聴したケース。t=30s の反応が A/B で縦に揃うため、反応タイミングをそのまま比較できる。録画長が短い方のセッションは終端で線が止まる。</td>
+            </tr>
+            <tr>
+              <td><strong>正規化（%）</strong></td>
+              <td>0〜100%（進行率）</td>
+              <td>録画長が異なる素材や条件の異なるセッションを比較するケース。各セッションの時間を 0〜100% に引き伸ばして波形の形を比較できる。長いセッションは両モードで形が一致し、短いセッションだけが横に引き伸ばされる。</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       <div class="howto">
