@@ -248,28 +248,29 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
         ))}
       </div>
 
-      {/* 感情平均値バーチャート */}
-      <div className="metric-card">
-        <CardHeader
-          label="EMOTION MEANS"
-          title="感情スコア平均値の比較"
-          info="2つのセッション（A/B）について、各感情の平均スコアを並べて比較します。どの感情がどちらのセッションで強く出たかを把握できます。"
-        />
-        <ResponsiveContainer width="100%" height={260}>
-          <BarChart data={emotionBarData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" />
-            <XAxis dataKey="name" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.65rem', fill: 'oklch(0.65 0.015 255)' }} />
-            <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} />
-            <Tooltip {...tooltipStyle} />
-            <Legend formatter={v => <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem' }}>{v}</span>} />
-            <Bar dataKey="A" name={labelA} fill={COLOR_A} radius={[3, 3, 0, 0]} opacity={0.85} />
-            <Bar dataKey="B" name={labelB} fill={COLOR_B} radius={[3, 3, 0, 0]} opacity={0.85} />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+      {/* Row1: 感情スコア平均値 + 特殊指標（Engagement/Valence/Attention）を横並び */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        {/* 感情平均値バーチャート */}
+        <div className="metric-card">
+          <CardHeader
+            label="EMOTION MEANS"
+            title="感情スコア平均値の比較"
+            info="2つのセッション（A/B）について、各感情の平均スコアを並べて比較します。どの感情がどちらのセッションで強く出たかを把握できます。"
+          />
+          <ResponsiveContainer width="100%" height={260}>
+            <BarChart data={emotionBarData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" />
+              <XAxis dataKey="name" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.65rem', fill: 'oklch(0.65 0.015 255)' }} />
+              <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} />
+              <Tooltip {...tooltipStyle} />
+              <Legend formatter={v => <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem' }}>{v}</span>} />
+              <Bar dataKey="A" name={labelA} fill={COLOR_A} radius={[3, 3, 0, 0]} opacity={0.85} />
+              <Bar dataKey="B" name={labelB} fill={COLOR_B} radius={[3, 3, 0, 0]} opacity={0.85} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
 
-      {/* 特殊指標 + Circumplex 横並び */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* 特殊指標 */}
         <div className="metric-card">
           <CardHeader
             label="SPECIAL METRICS"
@@ -287,14 +288,18 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
             </BarChart>
           </ResponsiveContainer>
         </div>
+      </div>
 
+      {/* Row2: 象限分布 + 感情変動性レーダー を横並び */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        {/* Circumplex 象限分布 */}
         <div className="metric-card">
           <CardHeader
             label="CIRCUMPLEX MODEL"
             title="感情状態の象限分布（%）"
             info="円環モデルの4象限（覚醒度×感情価）に各フレームを分類し、その割合（%）を A/B で比較します。分割は固定中立点（Engagement=50／Valence=0）です。"
           />
-          <ResponsiveContainer width="100%" height={180}>
+          <ResponsiveContainer width="100%" height={240}>
             <BarChart data={quadrantData} layout="vertical" margin={{ top: 5, right: 20, bottom: 5, left: 100 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" horizontal={false} />
               <XAxis type="number" unit="%" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} />
@@ -305,25 +310,25 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
             </BarChart>
           </ResponsiveContainer>
         </div>
-      </div>
 
-      {/* Affect Dynamics レーダー */}
-      <div className="metric-card">
-        <CardHeader
-          label="AFFECT DYNAMICS — VARIABILITY"
-          title="感情変動性（SD）のレーダー比較"
-          info="主要な感情・指標の変動性（標準偏差＝時間的な揺れ幅）を、A/B 2セッションでレーダーチャートに重ねて比較します。外側ほど揺れが大きいことを示します。"
-        />
-        <ResponsiveContainer width="100%" height={240}>
-          <RadarChart data={radarData}>
-            <PolarGrid stroke="oklch(0.28 0.04 255)" />
-            <PolarAngleAxis dataKey="key" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.68rem', fill: 'oklch(0.65 0.015 255)' }} />
-            <Radar name={labelA} dataKey="A" stroke={COLOR_A} fill={COLOR_A} fillOpacity={0.2} strokeWidth={2} />
-            <Radar name={labelB} dataKey="B" stroke={COLOR_B} fill={COLOR_B} fillOpacity={0.15} strokeWidth={2} strokeDasharray="4 2" />
-            <Legend formatter={v => <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem' }}>{v}</span>} />
-            <Tooltip {...tooltipStyle} />
-          </RadarChart>
-        </ResponsiveContainer>
+        {/* Affect Dynamics レーダー */}
+        <div className="metric-card">
+          <CardHeader
+            label="AFFECT DYNAMICS — VARIABILITY"
+            title="感情変動性（SD）のレーダー比較"
+            info="主要な感情・指標の変動性（標準偏差＝時間的な揺れ幅）を、A/B 2セッションでレーダーチャートに重ねて比較します。外側ほど揺れが大きいことを示します。"
+          />
+          <ResponsiveContainer width="100%" height={240}>
+            <RadarChart data={radarData}>
+              <PolarGrid stroke="oklch(0.28 0.04 255)" />
+              <PolarAngleAxis dataKey="key" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.68rem', fill: 'oklch(0.65 0.015 255)' }} />
+              <Radar name={labelA} dataKey="A" stroke={COLOR_A} fill={COLOR_A} fillOpacity={0.2} strokeWidth={2} />
+              <Radar name={labelB} dataKey="B" stroke={COLOR_B} fill={COLOR_B} fillOpacity={0.15} strokeWidth={2} strokeDasharray="4 2" />
+              <Legend formatter={v => <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem' }}>{v}</span>} />
+              <Tooltip {...tooltipStyle} />
+            </RadarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
 
       {/* 時系列オーバーレイ（指標を選択してA/B重ね合わせ） */}

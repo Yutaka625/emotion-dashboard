@@ -227,6 +227,10 @@ export default function TimeseriesSection({ data, rawTimeseries }: Props) {
         </p>
       </div>
 
+      {/* ---- TIME RANGE FILTER + EVENT ANNOTATIONS: 2列グリッド ----
+          表示範囲フィルタとイベント登録カードを横並びに。高さは独立（items-start）。
+          1024px 未満（lg ブレークポイント以下）では1列スタックに戻る。 */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
       {/* ---- TIME RANGE FILTER ---- */}
       <CollapsibleCard
         label="TIME RANGE FILTER"
@@ -353,6 +357,15 @@ export default function TimeseriesSection({ data, rawTimeseries }: Props) {
         </div>
       </CollapsibleCard>
 
+      {/* ---- EVENT ANNOTATIONS カード（表示範囲フィルタと横並び） ---- */}
+      <EventAnnotationsCard
+        eventStats={eventStats}
+        maxTime={maxTime}
+        displayTimeseriesFull={displayTimeseriesFull}
+        onZoomEvent={(start, end) => setTimeRange([Math.max(0, start - 5), Math.min(maxTime, end + 5)])}
+      />
+      </div>
+
       {/* ---- BASELINE + SMOOTHING: 2列グリッド ----
           補正系の2カードを横並びに。片方だけ展開しても高さが独立するよう items-start を指定。
           1024px 未満（lg ブレークポイント以下）では自動的に1列スタックに戻る。 */}
@@ -365,14 +378,6 @@ export default function TimeseriesSection({ data, rawTimeseries }: Props) {
           fpsAvg={data.meta.fps_avg}
         />
       </div>
-
-      {/* ---- EVENT ANNOTATIONS カード ---- */}
-      <EventAnnotationsCard
-        eventStats={eventStats}
-        maxTime={maxTime}
-        displayTimeseriesFull={displayTimeseriesFull}
-        onZoomEvent={(start, end) => setTimeRange([Math.max(0, start - 5), Math.min(maxTime, end + 5)])}
-      />
 
       {/* ---- EMOTION CHARTS + SPECIAL METRICS カード ---- */}
       <EmotionChartsCard
