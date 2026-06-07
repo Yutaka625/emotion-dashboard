@@ -289,6 +289,83 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
         ))}
       </div>
 
+      {/* 時系列オーバーレイ（指標を選択してA/B重ね合わせ） */}
+      <div className="metric-card">
+        <CardHeader
+          label="TIMELINE OVERLAY"
+          title={`${overlayMeta.label} 時系列の重ね合わせ（${overlayNormalize ? '時間正規化' : '実時間'}）`}
+          info={overlayNormalize
+            ? '下のピルで選んだ1指標の時系列を、A/B 2セッションで重ねて比較します。各セッションの時間を0〜100%（進行率）に正規化し、Aは実線・Bは破線で表示します。録画長が違っても波形の形を比べられます。'
+            : '下のピルで選んだ1指標の時系列を、A/B 2セッションで重ねて比較します。横軸は実時間（秒）で、同じ時刻の反応が縦に揃います（例: 同じ動画を別々に視聴した反応タイミングの比較に最適）。Aは実線・Bは破線。短い方のセッションは録画終了時点で線が止まります。'}
+        />
+
+        {/* 指標選択ピル */}
+        <div className="flex flex-wrap gap-1.5 mb-4">
+          {OVERLAY_METRICS.map(m => {
+            const on = overlayMetric === m.key;
+            return (
+              <button
+                key={m.key}
+                onClick={() => setOverlayMetric(m.key)}
+                className="px-2.5 py-0.5 rounded-full text-xs transition-all"
+                style={{
+                  fontFamily: 'Noto Sans JP, sans-serif',
+                  fontSize: '0.72rem',
+                  background: on ? m.color : 'oklch(0.20 0.04 255)',
+                  color: on ? 'oklch(0.16 0.02 250)' : 'oklch(0.68 0.015 250)',
+                  border: `1px solid ${on ? m.color : 'oklch(0.28 0.04 255)'}`,
+                  fontWeight: on ? 700 : 400,
+                }}
+              >
+                {m.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* 横軸モード切替（実時間 / 正規化） */}
+        <div className="flex gap-2 mb-4">
+          {([
+            { id: 'abs',  label: '実時間（秒）', val: false },
+            { id: 'norm', label: '正規化（%）',  val: true  },
+          ] as const).map(opt => {
+            const on = overlayNormalize === opt.val;
+            return (
+              <button
+                key={opt.id}
+                onClick={() => setOverlayNormalize(opt.val)}
+                className="px-3 py-1 rounded-lg text-xs transition-all"
+                style={{
+                  fontFamily: 'Noto Sans JP, sans-serif',
+                  fontWeight: on ? 700 : 400,
+                  background: on ? 'oklch(0.30 0.10 270)' : 'oklch(0.22 0.04 255)',
+                  color: on ? 'oklch(0.85 0.18 285)' : 'oklch(0.66 0.015 255)',
+                  border: `1px solid ${on ? 'oklch(0.55 0.18 285)' : 'oklch(0.30 0.04 255)'}`,
+                }}
+              >
+                時間軸: {opt.label}
+              </button>
+            );
+          })}
+        </div>
+
+        <ResponsiveContainer width="100%" height={200}>
+          <LineChart data={overlayData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" />
+            {overlayNormalize ? (
+              <XAxis dataKey="pct" unit="%" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} />
+            ) : (
+              <XAxis dataKey="time" type="number" domain={[0, overlayMaxDuration]} tickFormatter={(t: number) => `${Number(t).toFixed(0)}s`} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} />
+            )}
+            <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} />
+            <Tooltip {...tooltipStyle} labelFormatter={v => (overlayNormalize ? `進行率 ${v}%` : `t = ${Number(v).toFixed(1)}s`)} />
+            <Legend formatter={v => <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem' }}>{v}</span>} />
+            <Line type="monotone" dataKey="A" name={`${overlayMeta.label} ${labelA}`} stroke={COLOR_A} strokeWidth={1.5} dot={false} connectNulls={false} />
+            <Line type="monotone" dataKey="B" name={`${overlayMeta.label} ${labelB}`} stroke={COLOR_B} strokeWidth={1.5} dot={false} strokeDasharray="5 3" connectNulls={false} />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+
       {/* Row1: 感情スコア平均値 + 特殊指標（Engagement/Valence/Attention）を横並び */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         {/* 感情平均値バーチャート */}
@@ -370,83 +447,6 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
             </RadarChart>
           </ResponsiveContainer>
         </div>
-      </div>
-
-      {/* 時系列オーバーレイ（指標を選択してA/B重ね合わせ） */}
-      <div className="metric-card">
-        <CardHeader
-          label="TIMELINE OVERLAY"
-          title={`${overlayMeta.label} 時系列の重ね合わせ（${overlayNormalize ? '時間正規化' : '実時間'}）`}
-          info={overlayNormalize
-            ? '下のピルで選んだ1指標の時系列を、A/B 2セッションで重ねて比較します。各セッションの時間を0〜100%（進行率）に正規化し、Aは実線・Bは破線で表示します。録画長が違っても波形の形を比べられます。'
-            : '下のピルで選んだ1指標の時系列を、A/B 2セッションで重ねて比較します。横軸は実時間（秒）で、同じ時刻の反応が縦に揃います（例: 同じ動画を別々に視聴した反応タイミングの比較に最適）。Aは実線・Bは破線。短い方のセッションは録画終了時点で線が止まります。'}
-        />
-
-        {/* 指標選択ピル */}
-        <div className="flex flex-wrap gap-1.5 mb-4">
-          {OVERLAY_METRICS.map(m => {
-            const on = overlayMetric === m.key;
-            return (
-              <button
-                key={m.key}
-                onClick={() => setOverlayMetric(m.key)}
-                className="px-2.5 py-0.5 rounded-full text-xs transition-all"
-                style={{
-                  fontFamily: 'Noto Sans JP, sans-serif',
-                  fontSize: '0.72rem',
-                  background: on ? m.color : 'oklch(0.20 0.04 255)',
-                  color: on ? 'oklch(0.16 0.02 250)' : 'oklch(0.68 0.015 250)',
-                  border: `1px solid ${on ? m.color : 'oklch(0.28 0.04 255)'}`,
-                  fontWeight: on ? 700 : 400,
-                }}
-              >
-                {m.label}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* 横軸モード切替（実時間 / 正規化） */}
-        <div className="flex gap-2 mb-4">
-          {([
-            { id: 'abs',  label: '実時間（秒）', val: false },
-            { id: 'norm', label: '正規化（%）',  val: true  },
-          ] as const).map(opt => {
-            const on = overlayNormalize === opt.val;
-            return (
-              <button
-                key={opt.id}
-                onClick={() => setOverlayNormalize(opt.val)}
-                className="px-3 py-1 rounded-lg text-xs transition-all"
-                style={{
-                  fontFamily: 'Noto Sans JP, sans-serif',
-                  fontWeight: on ? 700 : 400,
-                  background: on ? 'oklch(0.30 0.10 270)' : 'oklch(0.22 0.04 255)',
-                  color: on ? 'oklch(0.85 0.18 285)' : 'oklch(0.66 0.015 255)',
-                  border: `1px solid ${on ? 'oklch(0.55 0.18 285)' : 'oklch(0.30 0.04 255)'}`,
-                }}
-              >
-                時間軸: {opt.label}
-              </button>
-            );
-          })}
-        </div>
-
-        <ResponsiveContainer width="100%" height={200}>
-          <LineChart data={overlayData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" />
-            {overlayNormalize ? (
-              <XAxis dataKey="pct" unit="%" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} />
-            ) : (
-              <XAxis dataKey="time" type="number" domain={[0, overlayMaxDuration]} tickFormatter={(t: number) => `${Number(t).toFixed(0)}s`} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} />
-            )}
-            <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} />
-            <Tooltip {...tooltipStyle} labelFormatter={v => (overlayNormalize ? `進行率 ${v}%` : `t = ${Number(v).toFixed(1)}s`)} />
-            <Legend formatter={v => <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem' }}>{v}</span>} />
-            <Line type="monotone" dataKey="A" name={`${overlayMeta.label} ${labelA}`} stroke={COLOR_A} strokeWidth={1.5} dot={false} connectNulls={false} />
-            <Line type="monotone" dataKey="B" name={`${overlayMeta.label} ${labelB}`} stroke={COLOR_B} strokeWidth={1.5} dot={false} strokeDasharray="5 3" connectNulls={false} />
-          </LineChart>
-        </ResponsiveContainer>
       </div>
 
       {/* 差分テーブル */}
