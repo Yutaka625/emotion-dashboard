@@ -86,119 +86,122 @@ export default function MultiFaceComparisonSection() {
         </p>
       </div>
 
-      {/* 品質サマリ + 微小ID表示トグル */}
-      <div className="metric-card">
-        <CardHeader
-          label="DATA QUALITY"
-          title="データ品質（ノイズ除外）"
-          info="検出した顔の数と、少フレーム（検出が不安定で誤検出の可能性が高い顔）として除外した数を示します。除外しきい値（％・秒）は変更でき、「微小なIDも表示」で除外分も一覧に戻せます。除外はデータを消すものではなく表示・集計上の扱いです。"
-        />
-        <div className="flex items-center justify-between flex-wrap gap-3">
-          <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.82rem', color: 'oklch(0.78 0.012 250)', lineHeight: 1.7 }}>
-            FaceID を <strong style={{ color: 'oklch(0.88 0.005 250)' }}>{detected}</strong> 個検出。
-            {excluded > 0 ? (
-              <>うち <strong style={{ color: 'oklch(0.82 0.15 70)' }}>{excluded}</strong> 個は少フレーム（総フレームの5%未満または約3秒未満）のため、検出が不安定な可能性があり既定で解析対象から除外しています。</>
-            ) : (
-              <>すべて十分なフレーム数のため、全て解析対象です。</>
+      {/* DATA QUALITY + FACES を横並び */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        {/* 品質サマリ + 微小ID表示トグル */}
+        <div className="metric-card">
+          <CardHeader
+            label="DATA QUALITY"
+            title="データ品質（ノイズ除外）"
+            info="検出した顔の数と、少フレーム（検出が不安定で誤検出の可能性が高い顔）として除外した数を示します。除外しきい値（％・秒）は変更でき、「微小なIDも表示」で除外分も一覧に戻せます。除外はデータを消すものではなく表示・集計上の扱いです。"
+          />
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.82rem', color: 'oklch(0.78 0.012 250)', lineHeight: 1.7 }}>
+              FaceID を <strong style={{ color: 'oklch(0.88 0.005 250)' }}>{detected}</strong> 個検出。
+              {excluded > 0 ? (
+                <>うち <strong style={{ color: 'oklch(0.82 0.15 70)' }}>{excluded}</strong> 個は少フレーム（総フレームの5%未満または約3秒未満）のため、検出が不安定な可能性があり既定で解析対象から除外しています。</>
+              ) : (
+                <>すべて十分なフレーム数のため、全て解析対象です。</>
+              )}
+            </p>
+            {excluded > 0 && (
+              <label className="flex items-center gap-2 cursor-pointer" style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.72 0.012 250)', whiteSpace: 'nowrap' }}>
+                <input type="checkbox" checked={showMinor} onChange={e => setShowMinor(e.target.checked)} />
+                微小なIDも表示
+              </label>
             )}
-          </p>
-          {excluded > 0 && (
-            <label className="flex items-center gap-2 cursor-pointer" style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.72 0.012 250)', whiteSpace: 'nowrap' }}>
-              <input type="checkbox" checked={showMinor} onChange={e => setShowMinor(e.target.checked)} />
-              微小なIDも表示
-            </label>
-          )}
+          </div>
+
+          {/* 除外しきい値の調整 */}
+          <div className="flex items-center flex-wrap gap-2 mt-4 pt-3" style={{ borderTop: '1px solid oklch(0.26 0.04 255)' }}>
+            <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.68 0.015 255)' }}>
+              除外しきい値：総フレームの
+            </span>
+            <input
+              type="number" min={0} max={100} step={1}
+              value={Math.round(minFraction * 100)}
+              onChange={e => setThreshold((Number(e.target.value) || 0) / 100, minSeconds)}
+              className="px-2 py-1 rounded outline-none"
+              style={{ width: '64px', fontFamily: 'Roboto Mono, monospace', fontSize: '0.75rem', background: 'oklch(0.24 0.04 255)', border: '1px solid oklch(0.30 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
+            />
+            <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.68 0.015 255)' }}>%未満、または</span>
+            <input
+              type="number" min={0} step={0.5}
+              value={minSeconds}
+              onChange={e => setThreshold(minFraction, Number(e.target.value) || 0)}
+              className="px-2 py-1 rounded outline-none"
+              style={{ width: '64px', fontFamily: 'Roboto Mono, monospace', fontSize: '0.75rem', background: 'oklch(0.24 0.04 255)', border: '1px solid oklch(0.30 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
+            />
+            <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.68 0.015 255)' }}>秒未満を除外</span>
+            <button
+              onClick={resetThreshold}
+              className="px-2.5 py-1 rounded-lg text-xs transition-colors"
+              style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.68rem', background: 'oklch(0.24 0.04 255)', border: '1px solid oklch(0.32 0.04 255)', color: 'oklch(0.70 0.015 255)' }}
+            >
+              既定に戻す
+            </button>
+          </div>
         </div>
 
-        {/* 除外しきい値の調整 */}
-        <div className="flex items-center flex-wrap gap-2 mt-4 pt-3" style={{ borderTop: '1px solid oklch(0.26 0.04 255)' }}>
-          <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.68 0.015 255)' }}>
-            除外しきい値：総フレームの
-          </span>
-          <input
-            type="number" min={0} max={100} step={1}
-            value={Math.round(minFraction * 100)}
-            onChange={e => setThreshold((Number(e.target.value) || 0) / 100, minSeconds)}
-            className="px-2 py-1 rounded outline-none"
-            style={{ width: '64px', fontFamily: 'Roboto Mono, monospace', fontSize: '0.75rem', background: 'oklch(0.24 0.04 255)', border: '1px solid oklch(0.30 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
+        {/* 顔の管理リスト（色・フレーム数・ラベル編集・表示トグル） */}
+        <div className="metric-card">
+          <CardHeader
+            label="FACES"
+            title="顔（FaceID）の管理"
+            info="検出された各顔の識別色・フレーム数・少フレームバッジを一覧表示します。ラベル名（例：司会者・参加者A）を付けると凡例やセレクターに反映され、ブラウザに保存されます。表示トグルでグラフ・集計に含めるか切り替えられます。"
           />
-          <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.68 0.015 255)' }}>%未満、または</span>
-          <input
-            type="number" min={0} step={0.5}
-            value={minSeconds}
-            onChange={e => setThreshold(minFraction, Number(e.target.value) || 0)}
-            className="px-2 py-1 rounded outline-none"
-            style={{ width: '64px', fontFamily: 'Roboto Mono, monospace', fontSize: '0.75rem', background: 'oklch(0.24 0.04 255)', border: '1px solid oklch(0.30 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
-          />
-          <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.68 0.015 255)' }}>秒未満を除外</span>
-          <button
-            onClick={resetThreshold}
-            className="px-2.5 py-1 rounded-lg text-xs transition-colors"
-            style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.68rem', background: 'oklch(0.24 0.04 255)', border: '1px solid oklch(0.32 0.04 255)', color: 'oklch(0.70 0.015 255)' }}
-          >
-            既定に戻す
-          </button>
-        </div>
-      </div>
-
-      {/* 顔の管理リスト（色・フレーム数・ラベル編集・表示トグル） */}
-      <div className="metric-card">
-        <CardHeader
-          label="FACES"
-          title="顔（FaceID）の管理"
-          info="検出された各顔の識別色・フレーム数・少フレームバッジを一覧表示します。ラベル名（例：司会者・参加者A）を付けると凡例やセレクターに反映され、ブラウザに保存されます。表示トグルでグラフ・集計に含めるか切り替えられます。"
-        />
-        <div className="space-y-2">
-          {availableFaceIds.map(id => {
-            const isSel = selectedFaceIds.includes(id);
-            const isMinor = minorIds.has(id);
-            return (
-              <div key={id} className="flex items-center gap-3 px-3 py-2 rounded-lg" style={{ background: 'oklch(0.20 0.04 255)', border: '1px solid oklch(0.28 0.04 255)' }}>
-                {/* 色スウォッチ */}
-                <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: faceColor(id), flexShrink: 0 }} />
-                {/* FaceID */}
-                <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: 'oklch(0.75 0.008 250)', minWidth: '54px' }}>Face {id}</span>
-                {/* ラベル名入力 */}
-                <input
-                  type="text"
-                  defaultValue={labelOf(id)}
-                  placeholder={`Face ${id}`}
-                  onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
-                  onBlur={e => setFaceLabel(id, e.target.value.trim())}
-                  className="flex-1 px-2 py-1 rounded outline-none"
-                  style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', minWidth: '120px', background: 'oklch(0.24 0.04 255)', border: '1px solid oklch(0.30 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
-                />
-                {/* フレーム数 */}
-                <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.68rem', color: 'oklch(0.62 0.015 255)', whiteSpace: 'nowrap' }}>
-                  {faceFrameCount(id).toLocaleString()} f
-                </span>
-                {/* minor バッジ */}
-                {isMinor && (
-                  <span className="px-1.5 py-0.5 rounded" style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.6rem', background: 'oklch(0.75 0.16 70 / 0.15)', color: 'oklch(0.82 0.15 70)', border: '1px solid oklch(0.75 0.16 70 / 0.4)', whiteSpace: 'nowrap' }}>
-                    少フレーム
+          <div className="space-y-2">
+            {availableFaceIds.map(id => {
+              const isSel = selectedFaceIds.includes(id);
+              const isMinor = minorIds.has(id);
+              return (
+                <div key={id} className="flex items-center gap-3 px-3 py-2 rounded-lg" style={{ background: 'oklch(0.20 0.04 255)', border: '1px solid oklch(0.28 0.04 255)' }}>
+                  {/* 色スウォッチ */}
+                  <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: faceColor(id), flexShrink: 0 }} />
+                  {/* FaceID */}
+                  <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: 'oklch(0.75 0.008 250)', minWidth: '54px' }}>Face {id}</span>
+                  {/* ラベル名入力 */}
+                  <input
+                    type="text"
+                    defaultValue={labelOf(id)}
+                    placeholder={`Face ${id}`}
+                    onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
+                    onBlur={e => setFaceLabel(id, e.target.value.trim())}
+                    className="flex-1 px-2 py-1 rounded outline-none"
+                    style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', minWidth: '120px', background: 'oklch(0.24 0.04 255)', border: '1px solid oklch(0.30 0.04 255)', color: 'oklch(0.88 0.005 250)' }}
+                  />
+                  {/* フレーム数 */}
+                  <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.68rem', color: 'oklch(0.62 0.015 255)', whiteSpace: 'nowrap' }}>
+                    {faceFrameCount(id).toLocaleString()} f
                   </span>
-                )}
-                {/* 表示トグル */}
-                <button
-                  onClick={() => toggleFaceId(id)}
-                  className="px-2.5 py-1 rounded-full text-xs transition-colors"
-                  style={{
-                    fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.68rem', whiteSpace: 'nowrap',
-                    background: isSel ? faceColor(id) : 'transparent',
-                    color: isSel ? 'oklch(0.16 0.02 250)' : 'oklch(0.66 0.015 255)',
-                    border: `1px solid ${isSel ? faceColor(id) : 'oklch(0.35 0.03 255)'}`,
-                    fontWeight: isSel ? 700 : 400,
-                  }}
-                >
-                  {isSel ? '表示中' : '非表示'}
-                </button>
-              </div>
-            );
-          })}
+                  {/* minor バッジ */}
+                  {isMinor && (
+                    <span className="px-1.5 py-0.5 rounded" style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.6rem', background: 'oklch(0.75 0.16 70 / 0.15)', color: 'oklch(0.82 0.15 70)', border: '1px solid oklch(0.75 0.16 70 / 0.4)', whiteSpace: 'nowrap' }}>
+                      少フレーム
+                    </span>
+                  )}
+                  {/* 表示トグル */}
+                  <button
+                    onClick={() => toggleFaceId(id)}
+                    className="px-2.5 py-1 rounded-full text-xs transition-colors"
+                    style={{
+                      fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.68rem', whiteSpace: 'nowrap',
+                      background: isSel ? faceColor(id) : 'transparent',
+                      color: isSel ? 'oklch(0.16 0.02 250)' : 'oklch(0.66 0.015 255)',
+                      border: `1px solid ${isSel ? faceColor(id) : 'oklch(0.35 0.03 255)'}`,
+                      fontWeight: isSel ? 700 : 400,
+                    }}
+                  >
+                    {isSel ? '表示中' : '非表示'}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+          <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.68rem', color: 'oklch(0.58 0.015 255)', marginTop: '0.75rem' }}>
+            ラベル名は Enter または入力欄からフォーカスを外すと保存され、ブラウザに記憶されます（同一ファイル名で復元）。
+          </p>
         </div>
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.68rem', color: 'oklch(0.58 0.015 255)', marginTop: '0.75rem' }}>
-          ラベル名は Enter または入力欄からフォーカスを外すと保存され、ブラウザに記憶されます（同一ファイル名で復元）。
-        </p>
       </div>
 
       {/* 感情オーバーレイグラフ */}
