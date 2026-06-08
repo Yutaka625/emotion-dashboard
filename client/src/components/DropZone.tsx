@@ -348,6 +348,38 @@ export default function DropZone({ onDataLoaded, onComparisonSecondary }: DropZo
         利用規約・プライバシーポリシー
       </a>
 
+      {/* LPリンク */}
+      <a
+        href="KSDV_LP.html"
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={e => e.stopPropagation()}
+        className="hbd hfg"
+        style={{
+          marginTop: '8px',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '6px',
+          fontFamily: 'Noto Sans JP, sans-serif',
+          fontSize: '0.75rem',
+          textDecoration: 'none',
+          padding: '5px 12px',
+          borderRadius: '6px',
+          borderWidth: '1px',
+          borderStyle: 'solid',
+          background: 'oklch(0.22 0.04 255)',
+          ['--hbd']: 'oklch(0.28 0.04 255)',
+          ['--hbd-h']: 'oklch(0.70 0.14 195 / 0.4)',
+          ['--hfg']: 'oklch(0.68 0.015 255)',
+          ['--hfg-h']: 'oklch(0.70 0.14 195)',
+        } as CSSProperties}
+      >
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+        </svg>
+        製品紹介ページを見る
+      </a>
+
       {/* Error message */}
       {error && (
         <div

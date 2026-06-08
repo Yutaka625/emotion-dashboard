@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>KSDV — 顔表情ログを、研究で使える分析へ</title>
+<meta name="description" content="KSDVは心sensor（AFFDEX互換）の感情ログCSVをアップロードするだけで、時系列・学術指標・UXスコアまで自動分析するブラウザ完結のダッシュボード。研究・UXリサーチ・PoCに。" />
+<style>
+  :root{
+    --bg:#0b0e14;
+    --bg-soft:#11161f;
+    --panel:#151c28;
+    --panel-2:#1a2230;
+    --line:#243044;
+    --text:#e7ecf3;
+    --muted:#9aa6b8;
+    --accent:#4cc4ff;
+    --accent-2:#7c8bff;
+    --accent-3:#34e0c0;
+    --warn:#ffb454;
+    --radius:16px;
+    --maxw:1080px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Noto Sans JP",Meiryo,sans-serif;
+    line-height:1.75;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;text-decoration:none;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px;}
+  .eyebrow{
+    display:inline-block;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--accent);font-weight:700;margin-bottom:14px;
+  }
+  h1,h2,h3{line-height:1.3;margin:0;}
+  .section{padding:88px 0;border-top:1px solid var(--line);}
+  .muted{color:var(--muted);}
+
+  /* nav */
+  header.nav{
+    position:sticky;top:0;z-index:50;
+    background:rgba(11,14,20,.82);backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px;}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.02em;}
+  .brand .dot{width:11px;height:11px;border-radius:50%;
+    background:radial-gradient(circle at 30% 30%,var(--accent),var(--accent-2));
+    box-shadow:0 0 14px var(--accent);}
+  .nav-cta{
+    font-size:.9rem;font-weight:700;padding:9px 16px;border-radius:999px;
+    border:1px solid var(--line);color:var(--text);transition:.2s;
+  }
+  .nav-cta:hover{border-color:var(--accent);color:var(--accent);}
+
+  /* hero */
+  .hero{
+    position:relative;overflow:hidden;
+    padding:110px 0 96px;
+    background:
+      radial-gradient(900px 420px at 78% -8%,rgba(76,196,255,.16),transparent 60%),
+      radial-gradient(700px 380px at 8% 12%,rgba(124,139,255,.14),transparent 60%);
+  }
+  .hero h1{font-size:clamp(2rem,4.6vw,3.4rem);font-weight:850;letter-spacing:.01em;}
+  .hero h1 .grad{
+    background:linear-gradient(100deg,var(--accent),var(--accent-3));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .hero p.lead{font-size:1.18rem;color:var(--muted);max-width:640px;margin:22px 0 0;}
+  .hero .chips{display:flex;flex-wrap:wrap;gap:10px;margin:30px 0 36px;}
+  .chip{
+    font-size:.85rem;color:var(--text);background:var(--panel);
+    border:1px solid var(--line);border-radius:999px;padding:7px 14px;
+  }
+  .chip b{color:var(--accent-3);font-weight:700;}
+  .btn-row{display:flex;flex-wrap:wrap;gap:14px;}
+  .btn{
+    display:inline-flex;align-items:center;gap:9px;
+    font-weight:750;font-size:1rem;padding:14px 26px;border-radius:999px;
+    transition:.2s;cursor:pointer;border:1px solid transparent;
+  }
+  .btn-primary{
+    background:linear-gradient(100deg,var(--accent),var(--accent-2));
+    color:#06121c;box-shadow:0 10px 30px -8px rgba(76,196,255,.5);
+  }
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 36px -8px rgba(76,196,255,.6);}
+  .btn-ghost{border-color:var(--line);color:var(--text);}
+  .btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+
+  /* hero mock */
+  .mock{
+    margin-top:64px;border:1px solid var(--line);border-radius:var(--radius);
+    background:linear-gradient(180deg,var(--panel),var(--bg-soft));
+    padding:18px;box-shadow:0 30px 80px -30px rgba(0,0,0,.7);
+  }
+  .mock-bar{display:flex;gap:7px;margin-bottom:16px;}
+  .mock-bar i{width:11px;height:11px;border-radius:50%;background:#33405a;display:inline-block;}
+  .mock-grid{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:14px;}
+  .mock-card{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:16px;min-height:120px;}
+  .mock-card .k{font-size:.72rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;}
+  .mock-card .v{font-size:1.7rem;font-weight:800;margin-top:6px;}
+  .mock-card .v.pos{color:var(--accent-3);}
+  .spark{display:flex;align-items:flex-end;gap:5px;height:54px;margin-top:14px;}
+  .spark span{flex:1;border-radius:3px 3px 0 0;
+    background:linear-gradient(180deg,var(--accent),rgba(76,196,255,.25));}
+
+  /* problem */
+  .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;}
+  .pain{
+    background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px;
+    position:relative;
+  }
+  .pain .n{font-size:.8rem;font-weight:800;color:var(--warn);letter-spacing:.1em;}
+  .pain h3{font-size:1.1rem;margin:8px 0 8px;}
+  .pain p{margin:0;color:var(--muted);font-size:.96rem;}
+
+  /* value */
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+  .value{
+    background:linear-gradient(180deg,var(--panel),var(--bg-soft));
+    border:1px solid var(--line);border-radius:16px;padding:28px;
+  }
+  .value .ic{
+    width:46px;height:46px;border-radius:12px;display:grid;place-items:center;
+    background:rgba(76,196,255,.12);border:1px solid rgba(76,196,255,.3);
+    font-size:1.4rem;margin-bottom:16px;
+  }
+  .value h3{font-size:1.15rem;margin-bottom:10px;}
+  .value p{color:var(--muted);margin:0;font-size:.96rem;}
+
+  /* features */
+  .feat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+  .feat{
+    display:flex;gap:14px;align-items:flex-start;
+    background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;
+  }
+  .feat .tag{
+    flex-shrink:0;font-size:.7rem;font-weight:800;color:var(--accent);
+    background:rgba(76,196,255,.1);border:1px solid rgba(76,196,255,.25);
+    border-radius:7px;padding:4px 8px;letter-spacing:.05em;white-space:nowrap;
+  }
+  .feat h4{margin:0 0 4px;font-size:1rem;}
+  .feat p{margin:0;color:var(--muted);font-size:.88rem;line-height:1.6;}
+
+  /* steps */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;counter-reset:s;}
+  .step{
+    background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:28px 24px;position:relative;
+  }
+  .step::before{
+    counter-increment:s;content:counter(s);
+    font-size:2.4rem;font-weight:850;color:var(--accent-2);opacity:.5;line-height:1;
+  }
+  .step h3{font-size:1.08rem;margin:10px 0 8px;}
+  .step p{color:var(--muted);margin:0;font-size:.94rem;}
+
+  /* use cases */
+  .uc{
+    background:linear-gradient(180deg,var(--panel-2),var(--bg-soft));
+    border:1px solid var(--line);border-radius:16px;padding:28px;
+  }
+  .uc .label{font-size:.78rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-3);}
+  .uc h3{font-size:1.18rem;margin:10px 0 12px;}
+  .uc p{color:var(--muted);margin:0 0 14px;font-size:.95rem;}
+  .uc ul{margin:0;padding-left:18px;color:var(--muted);font-size:.9rem;}
+  .uc li{margin-bottom:6px;}
+
+  /* trust */
+  .trust{
+    background:var(--panel);border:1px solid var(--line);border-radius:16px;
+    padding:34px;display:grid;grid-template-columns:repeat(4,1fr);gap:24px;
+  }
+  .trust .item .t{font-weight:750;margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+  .trust .item .t::before{content:"✓";color:var(--accent-3);font-weight:900;}
+  .trust .item p{margin:0;color:var(--muted);font-size:.88rem;}
+
+  /* form / cta */
+  .cta-section{
+    background:
+      radial-gradient(700px 360px at 80% 0%,rgba(124,139,255,.16),transparent 60%),
+      var(--bg-soft);
+    border-top:1px solid var(--line);
+  }
+  .cta-card{
+    background:var(--panel);border:1px solid var(--line);border-radius:20px;
+    padding:44px;display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:start;
+  }
+  .cta-card h2{font-size:1.7rem;margin-bottom:14px;}
+  .cta-card .sub{color:var(--muted);margin:0 0 22px;}
+  form .field{margin-bottom:16px;}
+  form label{display:block;font-size:.85rem;font-weight:600;margin-bottom:6px;color:var(--text);}
+  form label .req{color:var(--warn);}
+  form input,form textarea,form select{
+    width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;
+    color:var(--text);padding:12px 14px;font-size:.95rem;font-family:inherit;transition:.2s;
+  }
+  form input:focus,form textarea:focus,form select:focus{
+    outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(76,196,255,.15);
+  }
+  form textarea{min-height:96px;resize:vertical;}
+  .form-note{font-size:.78rem;color:var(--muted);margin-top:10px;}
+  .btn-submit{width:100%;justify-content:center;margin-top:6px;}
+
+  /* real screenshots */
+  .shot{
+    border:1px solid var(--line);border-radius:14px;overflow:hidden;
+    background:var(--panel-2);box-shadow:0 24px 60px -28px rgba(0,0,0,.75);
+  }
+  .shot img{display:block;width:100%;height:auto;}
+  .shot.hero-shot{
+    margin-top:56px;border-radius:16px;
+    box-shadow:0 36px 90px -34px rgba(0,0,0,.8);
+  }
+  .shot-cap{
+    font-size:.8rem;color:var(--muted);margin:12px 2px 0;display:flex;gap:8px;align-items:center;
+  }
+  .shot-cap::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent-3);flex-shrink:0;}
+  .shot-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
+
+  /* showcase: 1セクション1ビジュアルを大きく見せる */
+  .showcase{display:flex;flex-direction:column;gap:64px;}
+  .show{
+    display:grid;grid-template-columns:0.82fr 1.18fr;gap:40px;align-items:center;
+  }
+  .show.flip .show-text{order:2;}
+  .show.flip .show-media{order:1;}
+  .show-text .tag2{
+    display:inline-block;font-size:.72rem;font-weight:800;letter-spacing:.08em;
+    color:var(--accent);background:rgba(76,196,255,.1);border:1px solid rgba(76,196,255,.25);
+    border-radius:7px;padding:5px 11px;margin-bottom:14px;
+  }
+  .show-text h3{font-size:1.4rem;margin-bottom:12px;}
+  .show-text p{color:var(--muted);margin:0 0 14px;font-size:.98rem;}
+  .show-text ul{margin:0;padding-left:18px;color:var(--muted);font-size:.92rem;}
+  .show-text li{margin-bottom:7px;}
+  .show-text li b{color:var(--text);font-weight:700;}
+  .show-media .shot{margin:0;}
+
+  footer{padding:40px 0;border-top:1px solid var(--line);color:var(--muted);font-size:.85rem;}
+  .foot-inner{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+
+  @media(max-width:860px){
+    .mock-grid{grid-template-columns:1fr;}
+    .grid-2,.grid-3,.feat-grid,.steps,.trust,.shot-grid{grid-template-columns:1fr;}
+    .show{grid-template-columns:1fr;gap:20px;}
+    .show.flip .show-text{order:1;}
+    .show.flip .show-media{order:2;}
+    .showcase{gap:48px;}
+    .cta-card{grid-template-columns:1fr;padding:30px;}
+    .section{padding:64px 0;}
+    .hero{padding:80px 0 64px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <div class="brand"><span class="dot"></span>KSDV</div>
+    <a href="#contact" class="nav-cta">問い合わせ</a>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap">
+    <span class="eyebrow">感情ログ分析ダッシュボード</span>
+    <h1>顔表情ログのCSVを、<br /><span class="grad">研究で使える分析</span>へ。</h1>
+    <p class="lead">
+      心sensor（AFFDEX互換）が出力する感情ログを、アップロードするだけ。
+      時系列・学術指標・UXスコアまで自動で計算し、ブラウザの中だけで完結します。
+    </p>
+    <div class="chips">
+      <span class="chip"><b>インストール不要</b>・ブラウザ完結</span>
+      <span class="chip">データは<b>外部送信なし</b></span>
+      <span class="chip">CSVを<b>入れるだけ</b></span>
+    </div>
+    <div class="btn-row">
+      <a href="#contact" class="btn btn-primary">資料・デモを相談する →</a>
+      <a href="#features" class="btn btn-ghost">できることを見る</a>
+    </div>
+
+    <figure class="shot hero-shot" style="margin-bottom:0;">
+      <img src="assets/lp/hero_overview.jpg" alt="KSDVの概要画面：記録時間・総フレーム数・Engagement・Valence・主要感情のKPIカードと、感情の占有率ドーナツ・感情プロファイルのレーダーチャート" loading="lazy" />
+    </figure>
+    <p class="shot-cap">実際の分析画面（サンプルデータ）。CSVをアップロードした直後の「概要」セクション。</p>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<section class="section" id="problem">
+  <div class="wrap">
+    <span class="eyebrow">こんなところで止まっていませんか</span>
+    <h2 style="font-size:1.9rem;margin-bottom:8px;">CSVは出た。でも、ここから何時間かかる？</h2>
+    <p class="muted" style="max-width:680px;margin:0 0 36px;">
+      感情認識ツールはログを吐き出すところまで。研究で使える形にするのは、いつも自分の仕事になりがちです。
+    </p>
+    <div class="grid-2">
+      <div class="pain">
+        <div class="n">PAIN 01</div>
+        <h3>生CSVから先に進めない</h3>
+        <p>平均・分散・相関・遷移——分析は結局すべて自前で書く必要がある。動画を見返して手作業で集計するのは、時間がかかり消耗する。</p>
+      </div>
+      <div class="pain">
+        <div class="n">PAIN 02</div>
+        <h3>学術指標の実装が重い</h3>
+        <p>Affect Dynamics（変動性・慣性・不安定性）や円環モデルを出すたびに、R / Python でコードを書き直す。理論は確立しているのに、毎回が負担。</p>
+      </div>
+      <div class="pain">
+        <div class="n">PAIN 03</div>
+        <h3>再現性と共有がしづらい</h3>
+        <p>手元のスクリプトは閉じがちで、除外基準や前処理がブラックボックスに。査読・共同研究で「どう処理したか」を示しにくい。</p>
+      </div>
+      <div class="pain">
+        <div class="n">PAIN 04</div>
+        <h3>データの素性が暴れる</h3>
+        <p>不規則なサンプリング、符号付き valence、1ファイルに混在する複数被験者、検出が不安定な少フレームのノイズ。前処理だけで消耗する。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VALUE -->
+<section class="section" id="value">
+  <div class="wrap">
+    <span class="eyebrow">KSDV が提供する価値</span>
+    <h2 style="font-size:1.9rem;margin-bottom:36px;">前処理でも実装でもなく、洞察に時間を使う。</h2>
+    <div class="grid-3">
+      <div class="value">
+        <div class="ic">⚡</div>
+        <h3>CSVを入れるだけで自動分析</h3>
+        <p>ドラッグ&ドロップした瞬間に、10種の感情・Engagement・Valence を時系列で可視化。FaceID の検出やノイズ除外も自動で判定します。</p>
+      </div>
+      <div class="value">
+        <div class="ic">🎓</div>
+        <h3>学術指標を標準搭載</h3>
+        <p>Affect Dynamics、円環モデル（Russell, 1980）、相関行列、感情遷移を計算済みで提供。コードを書かずに、論文に使える指標へ。</p>
+      </div>
+      <div class="value">
+        <div class="ic">🔒</div>
+        <h3>ブラウザ完結で安全・再現可能</h3>
+        <p>処理はすべて手元のブラウザ内。データは外部に送られません。除外基準は出力CSVに記録され、分析の再現性も担保します。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="wrap">
+    <span class="eyebrow">できること</span>
+    <h2 style="font-size:1.9rem;margin-bottom:8px;">10のセクションで、感情データを多角的に。</h2>
+    <p class="muted" style="max-width:680px;margin:0 0 36px;">
+      アップロードした1つのCSVから、研究に必要な視点をひと通り。セクションを切り替えるだけで深掘りできます。
+    </p>
+    <div class="feat-grid">
+      <div class="feat"><span class="tag">時系列</span><div><h4>タイムラインと範囲フィルタ</h4><p>10感情・Engagement・Valence の推移をイベント注釈付きで表示。時間範囲を絞って局所を分析。</p></div></div>
+      <div class="feat"><span class="tag">分布</span><div><h4>10種類の感情分布</h4><p>怒り・喜び・驚き・困惑ほか10感情の強度を分布で把握。セッション全体の傾向を一目で。</p></div></div>
+      <div class="feat"><span class="tag">遷移</span><div><h4>感情遷移マトリクス</h4><p>10×10のヒートマップで「どの感情からどの感情へ」を可視化。状態の流れを定量化。</p></div></div>
+      <div class="feat"><span class="tag">学術</span><div><h4>学術指標・相関行列</h4><p>変動性・慣性・不安定性などの動態指標と Pearson 相関行列を自動算出。</p></div></div>
+      <div class="feat"><span class="tag">AU</span><div><h4>アクションユニット22種</h4><p>smile・blink・brow furrow など顔表情単位の活性度を分析し、表情の構成要素まで踏み込む。</p></div></div>
+      <div class="feat"><span class="tag">頭部</span><div><h4>頭部動作の自動検知</h4><p>うなづき・首振り・首傾げを自動検出。発話やリアクションの手がかりに。</p></div></div>
+      <div class="feat"><span class="tag">変化点</span><div><h4>感情変化点の検出</h4><p>スコアが急変したポイント上位20件を自動抽出。注目すべき瞬間へ素早く到達。</p></div></div>
+      <div class="feat"><span class="tag">複数人</span><div><h4>マルチFaceID対応</h4><p>複数被験者が混在するCSVを人物別に切り替え。不安定な少フレームはノイズとして自動除外、ラベル付けも可能。</p></div></div>
+      <div class="feat"><span class="tag">補正</span><div><h4>ベースライン補正</h4><p>安静時セッションとの差分で補正済みスコアを表示。個人差を均して刺激の効果を見る。</p></div></div>
+      <div class="feat"><span class="tag">A/B</span><div><h4>セッション比較（A/B）</h4><p>2つのセッションを並列比較。指標選択式のタイムラインオーバーレイで差分を定量評価。</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- SCREENSHOTS -->
+<section class="section" id="screens">
+  <div class="wrap">
+    <span class="eyebrow">実際の画面</span>
+    <h2 style="font-size:1.9rem;margin-bottom:8px;">モックではありません。これが分析結果です。</h2>
+    <p class="muted" style="max-width:680px;margin:0 0 56px;">
+      すべてサンプルデータを読み込んだ実際の画面。アップロードするだけで、ここまで自動で揃います。
+    </p>
+
+    <div class="showcase">
+
+      <!-- 時系列 -->
+      <div class="show">
+        <div class="show-text">
+          <span class="tag2">時系列分析</span>
+          <h3>感情の動きを、タスク区間と重ねて読む</h3>
+          <p>10種の感情をひとつのグラフに重ね、ベースラインからの変化として表示。タスクやイベントの区間を色帯で重ねられます。</p>
+          <ul>
+            <li>タスクA/B/C区間を<b>そのまま重畳</b>して比較</li>
+            <li>急変ポイントを<b>変化点として自動検出</b></li>
+            <li>Engagement・Valence・Attention も同じ時間軸で</li>
+          </ul>
+        </div>
+        <div class="show-media">
+          <figure class="shot">
+            <img src="assets/lp/timeseries.jpg" alt="時系列分析：10感情のベースラインからの変化を重ねた時系列グラフと、タスク区間の重畳表示" loading="lazy" />
+          </figure>
+        </div>
+      </div>
+
+      <!-- UXリサーチ -->
+      <div class="show flip">
+        <div class="show-text">
+          <span class="tag2">UXリサーチ</span>
+          <h3>体験の良し悪しを、数値で言い切る</h3>
+          <p>フラストレーション・デライト・認知負荷から総合UXスコアを自動算出。感情強度のヒートマップで時間軸の起伏も把握できます。</p>
+          <ul>
+            <li><b>総合UXスコア</b>で課題の有無をひと目で</li>
+            <li>デライト指数・認知負荷を<b>定量化</b></li>
+            <li>感情強度ヒートマップで山場を特定</li>
+          </ul>
+        </div>
+        <div class="show-media">
+          <figure class="shot">
+            <img src="assets/lp/ux.jpg" alt="UXリサーチ：総合UXスコア52、フラストレーション・デライト指数・認知負荷のカードと感情強度ヒートマップ" loading="lazy" />
+          </figure>
+        </div>
+      </div>
+
+      <!-- 学術的分析 -->
+      <div class="show">
+        <div class="show-text">
+          <span class="tag2">学術的分析</span>
+          <h3>論文に使える指標を、コードなしで</h3>
+          <p>感情指標間の相関行列と、円環モデル（Russell, 1980）の象限分析を自動計算。Affect Dynamics の変動性・慣性も揃います。</p>
+          <ul>
+            <li>Pearson <b>相関行列</b>を自動算出</li>
+            <li>覚醒度×感情価の<b>4象限分類</b></li>
+            <li>変動性・慣性・不安定性の動態指標</li>
+          </ul>
+        </div>
+        <div class="show-media">
+          <figure class="shot">
+            <img src="assets/lp/academic.jpg" alt="学術的分析：感情指標間の相関行列と、Russell円環モデルの象限分析（高覚醒×低Valence 71.2%など）" loading="lazy" />
+          </figure>
+        </div>
+      </div>
+
+      <!-- 感情遷移 -->
+      <div class="show flip">
+        <div class="show-text">
+          <span class="tag2">感情遷移</span>
+          <h3>「どの感情からどの感情へ」を可視化</h3>
+          <p>10×10の遷移行列で状態の移り変わりを定量化。よく起きる遷移パターンを上位順にランキングします。</p>
+          <ul>
+            <li>10×10の<b>遷移マトリクス</b></li>
+            <li>主要な遷移パターン<b>上位10件</b></li>
+            <li>各感情の継続時間・累積時間も</li>
+          </ul>
+        </div>
+        <div class="show-media">
+          <figure class="shot">
+            <img src="assets/lp/transitions.jpg" alt="感情遷移分析：10×10の感情遷移行列ヒートマップと、主要な感情遷移パターン上位10件" loading="lazy" />
+          </figure>
+        </div>
+      </div>
+
+      <!-- セッション比較 -->
+      <div class="show">
+        <div class="show-text">
+          <span class="tag2">セッション比較（A/B）</span>
+          <h3>2つの条件を、統計的に比べる</h3>
+          <p>2セッションの感情反応を並列比較。タイムラインを実時間で重ね、Welch のt検定で有意差まで判定します。</p>
+          <ul>
+            <li>2セッションの<b>タイムライン重ね合わせ</b></li>
+            <li>感情差分ランキングで違いを一覧</li>
+            <li><b>Welch t検定</b>で有意差を判定</li>
+          </ul>
+        </div>
+        <div class="show-media">
+          <figure class="shot">
+            <img src="assets/lp/comparison.jpg" alt="セッション比較：2セッションのValence時系列を実時間で重ね合わせたタイムラインオーバーレイ" loading="lazy" />
+          </figure>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- STEPS -->
+<section class="section" id="how">
+  <div class="wrap">
+    <span class="eyebrow">使い方</span>
+    <h2 style="font-size:1.9rem;margin-bottom:36px;">3ステップ。コードは要りません。</h2>
+    <div class="steps">
+      <div class="step">
+        <h3>CSVをドラッグ&ドロップ</h3>
+        <p>心sensor が出力したCSVをそのまま投入。FaceID 列やデータ品質は自動で判定されます。</p>
+      </div>
+      <div class="step">
+        <h3>自動で分析・可視化</h3>
+        <p>感情の時系列・学術指標・UXスコアまで即座に計算。セクションを切り替えて深掘りします。</p>
+      </div>
+      <div class="step">
+        <h3>絞り込んでCSV出力</h3>
+        <p>必要な範囲をフィルタして書き出し。除外基準も併せて記録され、再現性のある分析結果に。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- USE CASES -->
+<section class="section" id="usecases">
+  <div class="wrap">
+    <span class="eyebrow">用途・シーン</span>
+    <h2 style="font-size:1.9rem;margin-bottom:36px;">研究から実務まで、同じ1ファイルで。</h2>
+    <div class="grid-3">
+      <div class="uc">
+        <div class="label">Research</div>
+        <h3>研究プロジェクト</h3>
+        <p>感情データの統計分析にプログラミングは不要。CSVを入れるだけで学術指標まで揃います。</p>
+        <ul>
+          <li>Affect Dynamics・円環モデルを自動計算</li>
+          <li>相関行列・遷移マトリクスで仮説検証</li>
+          <li>除外基準つき出力で再現性を確保</li>
+        </ul>
+      </div>
+      <div class="uc">
+        <div class="label">UX Research</div>
+        <h3>ユーザーテスト・UX改善</h3>
+        <p>UI変更が感情に与えた影響を定量化。フラストレーション・デライトで課題箇所を特定します。</p>
+        <ul>
+          <li>総合UXスコア・認知負荷を数値化</li>
+          <li>タスク区間ごとの感情反応を分析</li>
+          <li>A/B比較で改善効果を可視化</li>
+        </ul>
+      </div>
+      <div class="uc">
+        <div class="label">Marketing / PoC</div>
+        <h3>マーケ効果測定・PoC検証</h3>
+        <p>広告やコンテンツへの感情反応を定量化。定性的だった評価を、判断できる数値に。</p>
+        <ul>
+          <li>視聴中の関与度・感情価を測定</li>
+          <li>複数被験者を1ファイルで管理・比較</li>
+          <li>施策の前後をA/Bで検証</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST -->
+<section class="section" id="trust">
+  <div class="wrap">
+    <span class="eyebrow">安心して使えます</span>
+    <h2 style="font-size:1.9rem;margin-bottom:36px;">研究倫理とデータ管理に、先回りした設計。</h2>
+    <div class="trust">
+      <div class="item"><div class="t">ブラウザ側で処理</div><p>計算はすべて手元のブラウザ内で完結します。</p></div>
+      <div class="item"><div class="t">外部送信なし</div><p>アップロードしたデータがサーバーに送られることはありません。</p></div>
+      <div class="item"><div class="t">個人識別情報を扱わない</div><p>ログデータのみを対象とし、個人を特定する情報は扱いません。</p></div>
+      <div class="item"><div class="t">GDPR・個人情報保護に準拠</div><p>プライバシー保護の方針に沿って設計されています。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA / CONTACT -->
+<section class="section cta-section" id="contact">
+  <div class="wrap">
+    <div class="cta-card">
+      <div>
+        <span class="eyebrow">お問い合わせ</span>
+        <h2>あなたの心sensorデータを、<br />もう一段深い洞察へ。</h2>
+        <p class="sub">
+          デモのご依頼、導入のご相談、研究用途のご質問など、お気軽にお寄せください。
+          内容を確認のうえ、担当者よりご連絡します。
+        </p>
+        <p class="muted" style="font-size:.9rem;margin:0;">
+          ※ 心sensor をご契約中のお客様は、現在 KSDV をご利用いただけます。
+          詳細はお問い合わせ時にご案内します。
+        </p>
+      </div>
+      <form id="contactForm" action="#" method="post" novalidate>
+        <div class="field">
+          <label for="name">お名前 <span class="req">*</span></label>
+          <input type="text" id="name" name="name" required autocomplete="name" />
+        </div>
+        <div class="field">
+          <label for="org">ご所属（組織・研究室名）</label>
+          <input type="text" id="org" name="org" autocomplete="organization" />
+        </div>
+        <div class="field">
+          <label for="email">メールアドレス <span class="req">*</span></label>
+          <input type="email" id="email" name="email" required autocomplete="email" />
+        </div>
+        <div class="field">
+          <label for="purpose">ご利用目的</label>
+          <select id="purpose" name="purpose">
+            <option value="">選択してください</option>
+            <option>研究プロジェクト</option>
+            <option>UXリサーチ・ユーザーテスト</option>
+            <option>マーケティング・PoC検証</option>
+            <option>製品開発</option>
+            <option>その他</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="message">お問い合わせ内容</label>
+          <textarea id="message" name="message" placeholder="デモのご希望、ご質問などをご記入ください。"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-submit">送信する →</button>
+        <p class="form-note">
+          送信いただいた情報は、お問い合わせ対応の目的にのみ利用します。
+        </p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-inner">
+    <div class="brand"><span class="dot"></span>KSDV</div>
+    <div>感情分析ダッシュボード（旧称：emoSense）</div>
+  </div>
+</footer>
+
+<script>
+  // 問い合わせフォーム：送信先は未設定（プレースホルダー）。
+  // 実運用時は form の action 属性に送信先URLを設定するか、ここにPOST処理を実装してください。
+  document.getElementById('contactForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var name = document.getElementById('name').value.trim();
+    var email = document.getElementById('email').value.trim();
+    if (!name || !email) {
+      alert('お名前とメールアドレスをご入力ください。');
+      return;
+    }
+    alert('お問い合わせありがとうございます。\n（現在この送信先は未設定です。フォームの送信先を設定してください。）');
+  });
+</script>
+
+</body>
+</html>
