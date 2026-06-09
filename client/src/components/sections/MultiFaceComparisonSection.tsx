@@ -35,7 +35,10 @@ export default function MultiFaceComparisonSection() {
   const metricLabel = OVERLAY_METRICS.find(m => m.key === metric)?.label ?? metric;
   const minorIds = useMemo(() => new Set(quality.minor.map(m => m.id)), [quality]);
 
-  // 選択中の各顔の時系列を 0-100% に時間正規化して重ねる
+  // 横軸モード: false=実時間（秒）, true=進行率（%）。既定は実時間
+  const [overlayNormalize, setOverlayNormalize] = useState<boolean>(false);
+
+  // 選択中の各顔の時系列を重ねる（実時間 or 進行率）
   const overlayData = useMemo(() => {
     const sampled = selectedFaceIds
       .map(id => {
@@ -44,18 +47,49 @@ export default function MultiFaceComparisonSection() {
         return { id, pts: ts.filter((_, i) => i % step === 0) };
       })
       .filter(s => s.pts.length > 0);
-    const len = Math.max(1, ...sampled.map(s => s.pts.length));
-    const rows: Record<string, number>[] = [];
-    for (let i = 0; i < len; i++) {
-      const row: Record<string, number> = { pct: Math.round((i / Math.max(1, len - 1)) * 100) };
-      for (const s of sampled) {
-        const idx = Math.min(i, s.pts.length - 1);
-        row[s.id] = (s.pts[idx] as any)?.[metric] ?? 0;
+    if (sampled.length === 0) return [];
+
+    if (overlayNormalize) {
+      // ── 進行率（%）モード: インデックスベースで0〜100%に引き伸ばす ──
+      const len = Math.max(1, ...sampled.map(s => s.pts.length));
+      const rows: Record<string, number | null>[] = [];
+      for (let i = 0; i < len; i++) {
+        const row: Record<string, number | null> = { pct: Math.round((i / Math.max(1, len - 1)) * 100) };
+        for (const s of sampled) {
+          const idx = Math.min(i, s.pts.length - 1);
+          row[s.id] = (s.pts[idx] as any)?.[metric] ?? 0;
+        }
+        rows.push(row);
       }
+      return rows;
+    }
+
+    // ── 実時間（秒）モード: 実際のタイムスタンプで補間。検出外は null ──
+    const sampleAt = (pts: any[], t: number): number | null => {
+      const n = pts.length;
+      if (n === 0 || t < pts[0].time || t > pts[n - 1].time) return null;
+      let lo = 0, hi = n - 1;
+      while (hi - lo > 1) {
+        const mid = (lo + hi) >> 1;
+        if (pts[mid].time <= t) lo = mid; else hi = mid;
+      }
+      const t0 = pts[lo].time, t1 = pts[hi].time;
+      const v0 = pts[lo][metric] ?? 0, v1 = pts[hi][metric] ?? 0;
+      return t1 === t0 ? v0 : v0 + (v1 - v0) * ((t - t0) / (t1 - t0));
+    };
+    const allTimes = sampled.flatMap(s => [s.pts[0].time, s.pts[s.pts.length - 1].time]);
+    const minTime = Math.min(...allTimes);
+    const maxTime = Math.max(...allTimes);
+    const grid = 200;
+    const rows: Record<string, number | null>[] = [];
+    for (let i = 0; i < grid; i++) {
+      const t = minTime + (i / (grid - 1)) * (maxTime - minTime);
+      const row: Record<string, number | null> = { time: +t.toFixed(2) };
+      for (const s of sampled) row[s.id] = sampleAt(s.pts, t);
       rows.push(row);
     }
     return rows;
-  }, [selectedFaceIds, metric, getFaceData]);
+  }, [selectedFaceIds, metric, getFaceData, overlayNormalize]);
 
   if (!isMultiFace) {
     return (
@@ -208,12 +242,14 @@ export default function MultiFaceComparisonSection() {
       <div className="metric-card">
         <CardHeader
           label="EMOTION OVERLAY"
-          title={`${metricLabel} 時系列の重ね合わせ（時間正規化）`}
-          info="下のピルで選んだ1指標について、表示中の各顔の時系列を重ねて比較します。横軸の％は「各顔が映っていた区間の進行率」（0%＝最初の検出フレーム、100%＝最後のフレーム）。顔ごとに登場時刻も長さも異なるため、各顔をそれぞれの区間で0〜100%に引き伸ばして波形の形を比べます。実時間（秒）の同じ瞬間を指すものではありません。"
+          title={`${metricLabel} 時系列の重ね合わせ（${overlayNormalize ? '進行率' : '実時間'}）`}
+          info={overlayNormalize
+            ? '下のピルで選んだ1指標について、表示中の各顔の時系列を重ねて比較します。横軸の％は「各顔が映っていた区間の進行率」（0%＝最初の検出フレーム、100%＝最後のフレーム）。顔ごとに登場時刻も長さも異なるため、各顔をそれぞれの区間で0〜100%に引き伸ばして波形の形を比べます。実時間（秒）の同じ瞬間を指すものではありません。'
+            : '下のピルで選んだ1指標について、表示中の各顔の時系列を実時間（秒）で重ねて比較します。横軸は映像内の実際の時刻で、各顔が検出されていない区間は線が途切れます。顔ごとに登場・退場のタイミングが異なるため、同じ瞬間の反応を直接比べられます。'}
         />
 
         {/* 指標選択ピル */}
-        <div className="flex flex-wrap gap-1.5 mb-4">
+        <div className="flex flex-wrap gap-1.5 mb-3">
           {OVERLAY_METRICS.map(m => {
             const on = metric === m.key;
             return (
@@ -235,15 +271,48 @@ export default function MultiFaceComparisonSection() {
           })}
         </div>
 
+        {/* 横軸モード切替（実時間 / 正規化） */}
+        <div className="flex gap-2 mb-4">
+          {([
+            { id: 'abs',  label: '実時間（秒）', val: false },
+            { id: 'norm', label: '進行率（%）',  val: true  },
+          ] as const).map(opt => {
+            const on = overlayNormalize === opt.val;
+            return (
+              <button
+                key={opt.id}
+                onClick={() => setOverlayNormalize(opt.val)}
+                className="px-3 py-1 rounded-lg text-xs transition-all"
+                style={{
+                  fontFamily: 'Noto Sans JP, sans-serif',
+                  fontWeight: on ? 700 : 400,
+                  background: on ? 'oklch(0.30 0.10 270)' : 'oklch(0.22 0.04 255)',
+                  color: on ? 'oklch(0.85 0.18 285)' : 'oklch(0.66 0.015 255)',
+                  border: `1px solid ${on ? 'oklch(0.55 0.18 285)' : 'oklch(0.30 0.04 255)'}`,
+                }}
+              >
+                時間軸: {opt.label}
+              </button>
+            );
+          })}
+        </div>
+
         <ResponsiveContainer width="100%" height={240}>
           <LineChart data={overlayData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" />
-            <XAxis dataKey="pct" unit="%" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} />
+            <XAxis
+              dataKey={overlayNormalize ? 'pct' : 'time'}
+              unit={overlayNormalize ? '%' : 's'}
+              tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }}
+            />
             <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} />
-            <Tooltip {...rechartsTooltip} labelFormatter={v => `進行率 ${v}%`} />
+            <Tooltip
+              {...rechartsTooltip}
+              labelFormatter={v => overlayNormalize ? `進行率 ${v}%` : `${v}s`}
+            />
             <Legend formatter={v => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem' }}>{v}</span>} />
             {selectedFaceIds.map(id => (
-              <Line key={id} type="monotone" dataKey={id} name={displayName(id)} stroke={faceColor(id)} strokeWidth={1.5} dot={false} />
+              <Line key={id} type="monotone" dataKey={id} name={displayName(id)} stroke={faceColor(id)} strokeWidth={1.5} dot={false} connectNulls={false} />
             ))}
           </LineChart>
         </ResponsiveContainer>
