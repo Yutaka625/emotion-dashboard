@@ -18,8 +18,8 @@ import CardHeader from '@/components/ui/CardHeader';
 
 // オーバーレイで選べる指標（特殊指標3種＋非ニュートラル9感情）
 const OVERLAY_METRICS: { key: string; label: string }[] = [
-  { key: 'engagement', label: 'Engagement' },
   { key: 'valence', label: 'Valence' },
+  { key: 'engagement', label: 'Engagement' },
   { key: 'attention', label: 'Attention' },
   ...NON_NEUTRAL_EMOTIONS.map(e => ({ key: e, label: EMOTION_LABELS_JA[e] || e })),
 ];
