@@ -328,18 +328,18 @@
 <!-- VALUE -->
 <section class="section" id="value">
   <div class="wrap">
-    <span class="eyebrow">KSDV が提供する価値</span>
-    <h2 style="font-size:1.9rem;margin-bottom:36px;">前処理でも実装でもなく、洞察に時間を使う。</h2>
+    <span class="eyebrow">使うと何が変わるか</span>
+    <h2 style="font-size:1.9rem;margin-bottom:36px;">前処理とコード実装に使っていた時間が、分析と解釈に変わる。</h2>
     <div class="grid-3">
       <div class="value">
         <div class="ic">⚡</div>
         <h3>CSVを入れるだけで自動分析</h3>
-        <p>ドラッグ&ドロップした瞬間に、10種の感情・Engagement・Valence を時系列で可視化。FaceID の検出やノイズ除外も自動で判定します。</p>
+        <p>CSVをブラウザに投入すると、10感情・Engagement・Valence の時系列グラフがすぐに並びます。FaceID の検出状態やノイズフレームの除外も、手を加えずに処理されます。</p>
       </div>
       <div class="value">
         <div class="ic">🎓</div>
         <h3>学術指標を標準搭載</h3>
-        <p>Affect Dynamics、円環モデル（Russell, 1980）、相関行列、感情遷移を計算済みで提供。コードを書かずに、論文に使える指標へ。</p>
+        <p>Affect Dynamics（変動性・慣性・不安定性）、Russell の円環モデル、相関行列、感情遷移マトリクスが自動で計算されます。R や Python のスクリプトを書かずに、査読に耐える指標が揃います。</p>
       </div>
       <div class="value">
         <div class="ic">🔒</div>
@@ -354,9 +354,9 @@
 <section class="section" id="features">
   <div class="wrap">
     <span class="eyebrow">できること</span>
-    <h2 style="font-size:1.9rem;margin-bottom:8px;">10のセクションで、感情データを多角的に。</h2>
+    <h2 style="font-size:1.9rem;margin-bottom:8px;">1つのCSVから、10の視点で読む。</h2>
     <p class="muted" style="max-width:680px;margin:0 0 36px;">
-      アップロードした1つのCSVから、研究に必要な視点をひと通り。セクションを切り替えるだけで深掘りできます。
+      時系列・分布・遷移・学術指標・AUなど、それぞれ独立したセクションとして用意しています。必要な分析から開けば、余計な操作は要りません。
     </p>
     <div class="feat-grid">
       <div class="feat"><span class="tag">時系列</span><div><h4>タイムラインと範囲フィルタ</h4><p>10感情・Engagement・Valence の推移をイベント注釈付きで表示。時間範囲を絞って局所を分析。</p></div></div>
@@ -407,8 +407,8 @@
       <div class="show flip">
         <div class="show-text">
           <span class="tag2">UXリサーチ</span>
-          <h3>体験の良し悪しを、数値で言い切る</h3>
-          <p>フラストレーション・デライト・認知負荷から総合UXスコアを自動算出。感情強度のヒートマップで時間軸の起伏も把握できます。</p>
+          <h3>「このUIどこで詰まった？」を、感情データで確かめる</h3>
+          <p>フラストレーション・デライト・認知負荷を集計して総合UXスコアを出します。ヒートマップでは「どの操作タイミングで感情が動いたか」が時系列で見えます。</p>
           <ul>
             <li><b>総合UXスコア</b>で課題の有無をひと目で</li>
             <li>デライト指数・認知負荷を<b>定量化</b></li>
@@ -509,12 +509,12 @@
 <section class="section" id="usecases">
   <div class="wrap">
     <span class="eyebrow">用途・シーン</span>
-    <h2 style="font-size:1.9rem;margin-bottom:36px;">研究から実務まで、同じ1ファイルで。</h2>
+    <h2 style="font-size:1.9rem;margin-bottom:36px;">使っている場面は、おもに3つです。</h2>
     <div class="grid-3">
       <div class="uc">
         <div class="label">Research</div>
         <h3>研究プロジェクト</h3>
-        <p>感情データの統計分析にプログラミングは不要。CSVを入れるだけで学術指標まで揃います。</p>
+        <p>実験終了後にCSVをそのまま投入して、学術指標を確認する用途が中心です。Rで書いていた前処理コードを、毎回書き直す必要がなくなります。</p>
         <ul>
           <li>Affect Dynamics・円環モデルを自動計算</li>
           <li>相関行列・遷移マトリクスで仮説検証</li>
@@ -524,7 +524,7 @@
       <div class="uc">
         <div class="label">UX Research</div>
         <h3>ユーザーテスト・UX改善</h3>
-        <p>UI変更が感情に与えた影響を定量化。フラストレーション・デライトで課題箇所を特定します。</p>
+        <p>プロトタイプや改修後のUIを被験者に触ってもらい、どこでフラストレーションが上がったかを見るケースで使われています。</p>
         <ul>
           <li>総合UXスコア・認知負荷を数値化</li>
           <li>タスク区間ごとの感情反応を分析</li>
@@ -534,7 +534,7 @@
       <div class="uc">
         <div class="label">Marketing / PoC</div>
         <h3>マーケ効果測定・PoC検証</h3>
-        <p>広告やコンテンツへの感情反応を定量化。定性的だった評価を、判断できる数値に。</p>
+        <p>広告視聴中の感情変化を記録して、「この素材はどこで飽きられているか」を確かめるPoC用途に。クリエイティブの比較にA/B機能を使えます。</p>
         <ul>
           <li>視聴中の関与度・感情価を測定</li>
           <li>複数被験者を1ファイルで管理・比較</li>
@@ -548,13 +548,13 @@
 <!-- TRUST -->
 <section class="section" id="trust">
   <div class="wrap">
-    <span class="eyebrow">安心して使えます</span>
-    <h2 style="font-size:1.9rem;margin-bottom:36px;">研究倫理とデータ管理に、先回りした設計。</h2>
+    <span class="eyebrow">データの扱いについて</span>
+    <h2 style="font-size:1.9rem;margin-bottom:36px;">実験参加者のデータが、外部のサーバーに届くことはありません。</h2>
     <div class="trust">
-      <div class="item"><div class="t">ブラウザ側で処理</div><p>計算はすべて手元のブラウザ内で完結します。</p></div>
+      <div class="item"><div class="t">ブラウザ側で処理</div><p>解析処理はブラウザのみで動きます。インターネット接続がなくても動作します。</p></div>
       <div class="item"><div class="t">外部送信なし</div><p>アップロードしたデータがサーバーに送られることはありません。</p></div>
-      <div class="item"><div class="t">個人識別情報を扱わない</div><p>ログデータのみを対象とし、個人を特定する情報は扱いません。</p></div>
-      <div class="item"><div class="t">GDPR・個人情報保護に準拠</div><p>プライバシー保護の方針に沿って設計されています。</p></div>
+      <div class="item"><div class="t">個人識別情報を扱わない</div><p>扱うのは感情スコア・AUの数値データのみです。氏名・映像・音声は読み込みません。</p></div>
+      <div class="item"><div class="t">GDPR・個人情報保護に準拠</div><p>サーバーへのデータ送信がないため、GDPR・個人情報保護法の観点からもリスクが生じません。</p></div>
     </div>
   </div>
 </section>
@@ -565,10 +565,9 @@
     <div class="cta-card">
       <div>
         <span class="eyebrow">お問い合わせ</span>
-        <h2>あなたの心sensorデータを、<br />もう一段深い洞察へ。</h2>
+        <h2>デモや導入についての質問は、<br />このフォームからどうぞ。</h2>
         <p class="sub">
-          デモのご依頼、導入のご相談、研究用途のご質問など、お気軽にお寄せください。
-          内容を確認のうえ、担当者よりご連絡します。
+          デモの申し込み、導入前の確認、研究用途の相談など。内容を確認した上で、担当者からご連絡します。
         </p>
         <p class="muted" style="font-size:.9rem;margin:0;">
           ※ 心sensor をご契約中のお客様は、現在 KSDV をご利用いただけます。
