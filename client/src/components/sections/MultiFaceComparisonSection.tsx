@@ -49,23 +49,9 @@ export default function MultiFaceComparisonSection() {
       .filter(s => s.pts.length > 0);
     if (sampled.length === 0) return [];
 
-    if (overlayNormalize) {
-      // ── 進行率（%）モード: インデックスベースで0〜100%に引き伸ばす ──
-      const len = Math.max(1, ...sampled.map(s => s.pts.length));
-      const rows: Record<string, number | null>[] = [];
-      for (let i = 0; i < len; i++) {
-        const row: Record<string, number | null> = { pct: Math.round((i / Math.max(1, len - 1)) * 100) };
-        for (const s of sampled) {
-          const idx = Math.min(i, s.pts.length - 1);
-          row[s.id] = (s.pts[idx] as any)?.[metric] ?? 0;
-        }
-        rows.push(row);
-      }
-      return rows;
-    }
-
-    // ── 実時間（秒）モード: 実際のタイムスタンプで補間。検出外は null ──
-    const sampleAt = (pts: any[], t: number): number | null => {
+    // 共通補間ヘルパー: pts 内の時刻 t における値を線形補間。
+    // maxGap を超える区間（大きな空白）は null を返して線を途切れさせる。
+    const interpAt = (pts: any[], t: number, maxGap: number): number | null => {
       const n = pts.length;
       if (n === 0 || t < pts[0].time || t > pts[n - 1].time) return null;
       let lo = 0, hi = n - 1;
@@ -74,9 +60,38 @@ export default function MultiFaceComparisonSection() {
         if (pts[mid].time <= t) lo = mid; else hi = mid;
       }
       const t0 = pts[lo].time, t1 = pts[hi].time;
+      if (t1 - t0 > maxGap) return null; // 空白が大きすぎる区間は補間しない
       const v0 = pts[lo][metric] ?? 0, v1 = pts[hi][metric] ?? 0;
       return t1 === t0 ? v0 : v0 + (v1 - v0) * ((t - t0) / (t1 - t0));
     };
+
+    // 最小平均フレーム間隔 × 5 を「補間許容ギャップ」として使う。
+    // 連続データの通常の間隔は許容し、散発的なゴミ検出は途切れさせる。
+    const meanIntervals = sampled
+      .map(s => s.pts.length < 2 ? Infinity : (s.pts[s.pts.length-1].time - s.pts[0].time) / (s.pts.length - 1))
+      .filter(v => isFinite(v));
+    const maxGap = meanIntervals.length > 0 ? Math.min(...meanIntervals) * 5 : Infinity;
+
+    if (overlayNormalize) {
+      // ── 進行率（%）モード: 各顔の時間スパンを独立に 0〜100% に正規化 ──
+      // 旧実装（インデックスベース）は末尾値をクランプして誤って伸ばすバグがあったため
+      // 時間ベースの補間に変更。各顔が自身の区間で 0〜100% を使い切る。
+      const grid = 200;
+      const rows: Record<string, number | null>[] = [];
+      for (let i = 0; i < grid; i++) {
+        const frac = i / (grid - 1);
+        const row: Record<string, number | null> = { pct: Math.round(frac * 100) };
+        for (const s of sampled) {
+          if (s.pts.length === 1) { row[s.id] = (s.pts[0] as any)[metric] ?? 0; continue; }
+          const startT = s.pts[0].time, endT = s.pts[s.pts.length - 1].time;
+          row[s.id] = interpAt(s.pts, startT + frac * (endT - startT), maxGap);
+        }
+        rows.push(row);
+      }
+      return rows;
+    }
+
+    // ── 実時間（秒）モード: 実際のタイムスタンプで補間。大きな空白は null ──
     const allTimes = sampled.flatMap(s => [s.pts[0].time, s.pts[s.pts.length - 1].time]);
     const minTime = Math.min(...allTimes);
     const maxTime = Math.max(...allTimes);
@@ -85,7 +100,7 @@ export default function MultiFaceComparisonSection() {
     for (let i = 0; i < grid; i++) {
       const t = minTime + (i / (grid - 1)) * (maxTime - minTime);
       const row: Record<string, number | null> = { time: +t.toFixed(2) };
-      for (const s of sampled) row[s.id] = sampleAt(s.pts, t);
+      for (const s of sampled) row[s.id] = interpAt(s.pts, t, maxGap);
       rows.push(row);
     }
     return rows;
