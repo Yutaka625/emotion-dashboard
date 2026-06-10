@@ -6,7 +6,7 @@
 import type { DashboardData } from '@/lib/types';
 import { EMOTION_LABELS_JA, EMOTION_COLORS, NON_NEUTRAL_EMOTIONS, ALL_EMOTIONS } from '@/lib/types';
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ErrorBar,
 } from 'recharts';
 import { rechartsTooltip } from '@/lib/chartTooltip';
 import { formatScore } from '@/lib/utils';
@@ -26,6 +26,15 @@ export default function EmotionsSection({ data }: Props) {
     std: emotion_stats[e]?.std || 0,
     max: emotion_stats[e]?.max || 0,
     median: emotion_stats[e]?.median || 0,
+    n: emotion_stats[e]?.n || 0,
+    color: EMOTION_COLORS[e] || '#999',
+  }));
+
+  // 平均±SD（標準偏差）の可視化用データ。エラーバーで「ばらつき」を視覚化する（記述統計）。
+  const meanSdData = NON_NEUTRAL_EMOTIONS.map(e => ({
+    name: EMOTION_LABELS_JA[e] || e,
+    mean: emotion_stats[e]?.mean || 0,
+    std: emotion_stats[e]?.std || 0,
     color: EMOTION_COLORS[e] || '#999',
   }));
 
@@ -127,6 +136,35 @@ export default function EmotionsSection({ data }: Props) {
         </ResponsiveContainer>
       </div>
 
+      {/* Mean ± SD chart */}
+      <div className="metric-card">
+        <CardHeader
+          label="MEAN ± SD"
+          title="感情スコアの平均±標準偏差"
+          info="棒の高さが平均値、エラーバーが±1標準偏差（SD）です。SDが大きいほど、その感情はセッション内で大きく揺れ動いたことを示します（ばらつきの記述的可視化）。"
+        />
+        <ResponsiveContainer width="100%" height={240}>
+          <BarChart data={meanSdData} margin={{ top: 8, right: 10, bottom: 5, left: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" vertical={false} />
+            <XAxis dataKey="name" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fill: 'oklch(0.68 0.015 255)' }} />
+            <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.68 0.015 255)' }} />
+            <Tooltip
+              formatter={(v: number, _n: string, props: any) => [
+                `${formatScore(v)} ± ${formatScore(props.payload.std)}`,
+                '平均 ± SD',
+              ]}
+              {...rechartsTooltip}
+            />
+            <Bar dataKey="mean" radius={[4, 4, 0, 0]} activeBar={{ fill: 'oklch(0.55 0.04 255 / 0.6)', stroke: 'none' }}>
+              {meanSdData.map((entry, i) => (
+                <Cell key={i} fill={entry.color} />
+              ))}
+              <ErrorBar dataKey="std" width={4} strokeWidth={1.5} stroke="oklch(0.85 0.01 250)" direction="y" />
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
       {/* Stats Table */}
       <div className="metric-card">
         <CardHeader
@@ -138,15 +176,17 @@ export default function EmotionsSection({ data }: Props) {
           <table className="w-full">
             <thead>
               <tr style={{ borderBottom: '2px solid oklch(0.28 0.04 255)' }}>
-                {['感情', '平均値', '標準偏差', '中央値', '最大値', '変動性(SD)', '慣性(AR1)'].map(h => (
-                  <th key={h} className="text-left pb-2 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.68 0.015 255)', letterSpacing: '0.05em' }}>
+                {['感情', 'n', '平均値', '標準偏差', '中央値', '最大値', '変動性(SD)', '慣性(AR1)'].map(h => (
+                  <th key={h} className="text-left pb-2 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.68 0.015 255)', letterSpacing: '0.05em' }}
+                    title={h === 'n' ? 'NaN除外後の有効フレーム数' : undefined}
+                  >
                     {h}
                   </th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {statsTableData.map((row: { emotion: string; key: string; mean: number; std: number; max: number; median: number; color: string }, i: number) => (
+              {statsTableData.map((row: { emotion: string; key: string; mean: number; std: number; max: number; median: number; n: number; color: string }, i: number) => (
                 <tr key={i} className="row-hover" style={{ borderBottom: '1px solid oklch(0.20 0.04 255)' }}>
                   <td className="py-2 pr-4">
                     <div className="flex items-center gap-2">
@@ -155,6 +195,11 @@ export default function EmotionsSection({ data }: Props) {
                         {row.emotion}
                       </span>
                     </div>
+                  </td>
+                  <td className="py-2 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.75rem', color: 'oklch(0.55 0.015 255)' }}
+                    title="NaN除外後の有効フレーム数"
+                  >
+                    {row.n.toLocaleString()}
                   </td>
                   {[row.mean, row.std, row.median, row.max].map((v, j) => (
                     <td key={j} className="py-2 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.75rem', color: 'oklch(0.75 0.008 250)' }}>

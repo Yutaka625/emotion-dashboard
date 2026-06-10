@@ -7,7 +7,7 @@ import { useMemo, useState } from 'react';
 import { Download } from 'lucide-react';
 import type { DashboardData, TimeseriesPoint } from '@/lib/types';
 import { EMOTION_LABELS_JA, EMOTION_COLORS, NON_NEUTRAL_EMOTIONS } from '@/lib/types';
-import { welchTTest, mannWhitneyU } from '@/lib/statisticsUtils';
+import { welchTTest, mannWhitneyU, effectiveSampleSize } from '@/lib/statisticsUtils';
 import type { TTestResult, MannWhitneyResult } from '@/lib/statisticsUtils';
 import { formatScore } from '@/lib/utils';
 
@@ -15,7 +15,7 @@ import { formatScore } from '@/lib/utils';
 type TestMethod = 'welch' | 'mannwhitney';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  Cell, Legend, LineChart, Line, RadarChart, PolarGrid, PolarAngleAxis, Radar,
+  Cell, Legend, LineChart, Line, RadarChart, PolarGrid, PolarAngleAxis, Radar, ErrorBar,
 } from 'recharts';
 import { rechartsTooltip } from '@/lib/chartTooltip';
 import CardHeader from '@/components/ui/CardHeader';
@@ -139,8 +139,23 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
     name: EMOTION_LABELS_JA[e] || e,
     A: +(dataA.emotion_stats[e]?.mean || 0).toFixed(4),
     B: +(dataB.emotion_stats[e]?.mean || 0).toFixed(4),
+    sdA: +(dataA.emotion_stats[e]?.std || 0).toFixed(4),
+    sdB: +(dataB.emotion_stats[e]?.std || 0).toFixed(4),
     color: EMOTION_COLORS[e],
   }));
+
+  // ---- 実効サンプルサイズ（自己相関補正の目安） ----
+  // フレームは自己相関するため、AR1（代表値=中央値）でフレーム数を割り引く。
+  const medianAr1 = (d: DashboardData) => {
+    const rs = NON_NEUTRAL_EMOTIONS
+      .map(e => d.affect_dynamics[e]?.inertia_ar1 ?? 0)
+      .sort((a, b) => a - b);
+    return rs.length ? rs[Math.floor(rs.length / 2)] : 0;
+  };
+  const nFramesA = dataA.timeseries_full.length;
+  const nFramesB = dataB.timeseries_full.length;
+  const effNA = Math.max(1, Math.round(effectiveSampleSize(nFramesA, medianAr1(dataA))));
+  const effNB = Math.max(1, Math.round(effectiveSampleSize(nFramesB, medianAr1(dataB))));
 
   // ---- 差分テーブル（|B-A|の大きい順） ----
   const diffRows = NON_NEUTRAL_EMOTIONS.map(e => ({
@@ -382,10 +397,17 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
               <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} />
               <Tooltip {...tooltipStyle} />
               <Legend formatter={v => <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem' }}>{v}</span>} />
-              <Bar dataKey="A" name={labelA} fill={COLOR_A} radius={[3, 3, 0, 0]} opacity={0.85} />
-              <Bar dataKey="B" name={labelB} fill={COLOR_B} radius={[3, 3, 0, 0]} opacity={0.85} />
+              <Bar dataKey="A" name={labelA} fill={COLOR_A} radius={[3, 3, 0, 0]} opacity={0.85}>
+                <ErrorBar dataKey="sdA" width={3} strokeWidth={1.2} stroke="oklch(0.85 0.01 250)" direction="y" />
+              </Bar>
+              <Bar dataKey="B" name={labelB} fill={COLOR_B} radius={[3, 3, 0, 0]} opacity={0.85}>
+                <ErrorBar dataKey="sdB" width={3} strokeWidth={1.2} stroke="oklch(0.85 0.01 250)" direction="y" />
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
+          <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.62rem', color: 'oklch(0.55 0.015 255)', marginTop: '4px' }}>
+            エラーバーは±1標準偏差（SD）。棒＝平均値。
+          </p>
         </div>
 
         {/* 特殊指標 */}
@@ -604,10 +626,16 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
           </table>
         </div>
 
-        {/* サンプルサイズの注記 */}
-        <p style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.55 0.015 255)', marginTop: '8px' }}>
-          nA = {dataA.timeseries_full.length} frames ({labelA}) &nbsp;|&nbsp; nB = {dataB.timeseries_full.length} frames ({labelB})
-        </p>
+        {/* サンプルサイズの注記＋自己相関の警告 */}
+        <div style={{ marginTop: '8px' }}>
+          <p style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.55 0.015 255)' }}>
+            nA = {nFramesA} frames（実効n ≈ {effNA}）{labelA} &nbsp;|&nbsp; nB = {nFramesB} frames（実効n ≈ {effNB}）{labelB}
+          </p>
+          <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.62rem', color: 'oklch(0.70 0.12 70)', marginTop: '4px', lineHeight: 1.5 }}>
+            ⚠ 連続フレームは自己相関するため、フレーム単位のp値は有意差を過大評価します（実効nはAR1で割り引いた目安）。
+            確定的な群間比較には、複数セッション（被験者単位）での検定が必要です。
+          </p>
+        </div>
       </div>
     </div>
   );

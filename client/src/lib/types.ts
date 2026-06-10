@@ -8,6 +8,8 @@ export interface EmotionStats {
   median: number;
   q25: number;
   q75: number;
+  /** NaN除外後の有効フレーム数 */
+  n: number;
 }
 
 export interface SpecialStats extends EmotionStats {}

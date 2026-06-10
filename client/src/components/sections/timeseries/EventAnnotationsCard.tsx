@@ -386,6 +386,9 @@ export default function EventAnnotationsCard({ eventStats, maxTime, displayTimes
                     </tbody>
                   </table>
                 </div>
+                <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.62rem', color: 'oklch(0.70 0.12 70)', marginTop: '6px', lineHeight: 1.5 }}>
+                  ⚠ 検定はフレームを標本としています。連続フレームは自己相関するため、p値は有意差を過大評価します。探索的な目安として解釈してください。
+                </p>
               </div>
             );
           })()}

@@ -15,6 +15,7 @@ import {
 } from 'recharts';
 import { rechartsTooltip } from '@/lib/chartTooltip';
 import CollapsibleCard from '@/components/ui/CollapsibleCard';
+import SessionMetadataCard from '@/components/sections/SessionMetadataCard';
 import { formatScore, formatPct } from '@/lib/utils';
 
 interface Props {
@@ -211,6 +212,9 @@ export default function OverviewSection({ data }: Props) {
           sub={`${dominant_emotion_pct[topEmotion?.[0]]?.toFixed(1)}% の時間`}
         />
       </div>
+
+      {/* Session Metadata（記録条件・被験者メタデータ） */}
+      <SessionMetadataCard data={data} />
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

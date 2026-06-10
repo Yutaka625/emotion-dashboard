@@ -6,6 +6,21 @@
 
 import type { TimeseriesPoint } from './types';
 
+// ---- 自己相関を考慮した実効サンプルサイズ ----
+
+/**
+ * 1次自己相関 r を考慮した実効サンプルサイズ。
+ *   n_eff = n × (1 − r) / (1 + r)
+ * 連続フレームは自己相関するため、フレーム数 n をそのまま独立標本数として
+ * 扱うと有意差を過大評価する（擬似反復）。その目安を示すための近似値。
+ * r は [0, 1) にクランプ（負の自己相関は実効nを増やす方向だが保守的に0扱い）。
+ */
+export function effectiveSampleSize(n: number, r: number): number {
+  if (n <= 1) return n;
+  const rr = Math.min(0.999, Math.max(0, r));
+  return n * (1 - rr) / (1 + rr);
+}
+
 // ---- 基本統計 ----
 
 function mean(arr: number[]): number {
