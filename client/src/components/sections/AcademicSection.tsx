@@ -3,8 +3,8 @@
  * Academic analysis section with Affect Dynamics, Circumplex Model, etc.
  */
 
-import { useState } from 'react';
-import { Download, Printer } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Download, Printer, AlertTriangle } from 'lucide-react';
 import type { DashboardData } from '@/lib/types';
 import { EMOTION_LABELS_JA, EMOTION_COLORS, NON_NEUTRAL_EMOTIONS } from '@/lib/types';
 import {
@@ -20,9 +20,14 @@ interface Props {
   data: DashboardData;
 }
 
+const round4 = (v: number) => Math.round(v * 10000) / 10000;
+
 export default function AcademicSection({ data }: Props) {
   const { affect_dynamics, correlation_matrix, circumplex_summary, emotion_prevalence, special_stats, engagement_correlations, emotion_stats, meta } = data;
   const [_exporting, setExporting] = useState(false);
+  const [cpDeltaThreshold, setCpDeltaThreshold] = useState(0);
+  const [cpSortKey, setCpSortKey] = useState<'time' | 'delta'>('delta');
+  const [cpSortDir, setCpSortDir] = useState<'asc' | 'desc'>('desc');
   // マルチFaceID のノイズ除外情報（CSV へ再現性のため記録する）
   const { isMultiFace, quality, minFraction, minSeconds, faceFrameCount } = useFaceID();
 
@@ -45,21 +50,21 @@ export default function AcademicSection({ data }: Props) {
 
     // セクション2: 感情統計
     rows.push('## EMOTION STATISTICS');
-    rows.push('感情,mean,std,min,max,median,Q25,Q75');
+    rows.push('感情,n,mean,std,min,max,median,Q25,Q75');
     for (const e of NON_NEUTRAL_EMOTIONS) {
       const s = emotion_stats[e];
       if (!s) continue;
-      rows.push(`${EMOTION_LABELS_JA[e] || e},${s.mean},${s.std},${s.min},${s.max},${s.median},${s.q25},${s.q75}`);
+      rows.push(`${EMOTION_LABELS_JA[e] || e},${s.n},${s.mean},${s.std},${s.min},${s.max},${s.median},${s.q25},${s.q75}`);
     }
     rows.push('');
 
     // セクション2b: 特殊指標統計
     rows.push('## SPECIAL METRICS STATISTICS');
-    rows.push('指標,mean,std,min,max,median,Q25,Q75');
+    rows.push('指標,n,mean,std,min,max,median,Q25,Q75');
     for (const key of ['engagement', 'valence', 'attention']) {
       const s = (data.special_stats || {})[key] || (data.emotion_stats || {})[key];
       if (!s) continue;
-      rows.push(`${key},${s.mean},${s.std},${s.min},${s.max},${s.median},${s.q25},${s.q75}`);
+      rows.push(`${key},${s.n},${s.mean},${s.std},${s.min},${s.max},${s.median},${s.q25},${s.q75}`);
     }
     rows.push('');
 
@@ -91,12 +96,32 @@ export default function AcademicSection({ data }: Props) {
     rows.push(`低覚醒×低Valence,${circumplex_summary.low_arousal_negative}`);
     rows.push('');
 
-    // セクション6: 変化点
+    // セクション6: 外れ値サマリー
+    if (data.outlier_counts) {
+      rows.push('## OUTLIER SUMMARY (IQR法: Q1-1.5×IQR ～ Q3+1.5×IQR)');
+      rows.push('感情/指標,外れ値フレーム数,有効n,割合(%),下限フェンス,上限フェンス');
+      const allTargets = [...NON_NEUTRAL_EMOTIONS, 'neutral', 'attention', 'engagement', 'valence'];
+      for (const key of allTargets) {
+        const stats = emotion_stats[key] || data.special_stats[key];
+        if (!stats) continue;
+        const iqr = stats.q75 - stats.q25;
+        const lower = round4(stats.q25 - 1.5 * iqr);
+        const upper = round4(stats.q75 + 1.5 * iqr);
+        const count = data.outlier_counts[key] ?? 0;
+        const pct = stats.n > 0 ? round4(count / stats.n * 100) : 0;
+        rows.push(`${EMOTION_LABELS_JA[key] || key},${count},${stats.n},${pct},${lower},${upper}`);
+      }
+      rows.push('');
+    }
+
+    // セクション7: 変化点
     if (data.change_points && data.change_points.length > 0) {
       rows.push('## CHANGE POINTS');
-      rows.push('時刻(秒),感情,変化量,方向');
+      rows.push('時刻(秒),時刻(分:秒),感情,変化量,方向');
       for (const cp of data.change_points) {
-        rows.push(`${cp.time},${EMOTION_LABELS_JA[cp.emotion] || cp.emotion},${cp.delta},${cp.direction}`);
+        const mm = Math.floor(cp.time / 60).toString().padStart(2, '0');
+        const ss = Math.floor(cp.time % 60).toString().padStart(2, '0');
+        rows.push(`${cp.time},${mm}:${ss},${EMOTION_LABELS_JA[cp.emotion] || cp.emotion},${cp.delta},${cp.direction}`);
       }
       rows.push('');
     }
@@ -128,8 +153,40 @@ export default function AcademicSection({ data }: Props) {
     setExporting(false);
   };
 
+  // 外れ値サマリーデータ（IQR法）
+  const outlierSummary = useMemo(() => {
+    const targets = [...NON_NEUTRAL_EMOTIONS, 'neutral', 'attention', 'engagement', 'valence'];
+    return targets.map(key => {
+      const stats = emotion_stats[key] || special_stats[key];
+      if (!stats) return null;
+      const iqr = stats.q75 - stats.q25;
+      const lower = round4(stats.q25 - 1.5 * iqr);
+      const upper = round4(stats.q75 + 1.5 * iqr);
+      const count = (data.outlier_counts || {})[key] ?? 0;
+      const pct = stats.n > 0 ? count / stats.n * 100 : 0;
+      return { key, label: EMOTION_LABELS_JA[key] || key, count, n: stats.n, pct, lower, upper };
+    }).filter(Boolean) as { key: string; label: string; count: number; n: number; pct: number; lower: number; upper: number }[];
+  }, [emotion_stats, special_stats, data.outlier_counts]);
+
+  const outlierHasWarning = outlierSummary.some(row => row.pct > 5);
+
+  // 変化点フィルタ・ソート
+  const filteredChangePoints = useMemo(() => {
+    const pts = (data.change_points || []).filter(cp => Math.abs(cp.delta) >= cpDeltaThreshold);
+    return [...pts].sort((a, b) => {
+      const va = cpSortKey === 'time' ? a.time : Math.abs(a.delta);
+      const vb = cpSortKey === 'time' ? b.time : Math.abs(b.delta);
+      return cpSortDir === 'asc' ? va - vb : vb - va;
+    });
+  }, [data.change_points, cpDeltaThreshold, cpSortKey, cpSortDir]);
+
+  const cpMaxDelta = useMemo(() =>
+    Math.max(0, ...((data.change_points || []).map(cp => Math.abs(cp.delta)))),
+    [data.change_points]
+  );
+
   // Affect Dynamics comparison
-  const dynamicsCompare = [...NON_NEUTRAL_EMOTIONS, 'engagement', 'valence'].map(key => ({
+  const dynamicsCompare =[...NON_NEUTRAL_EMOTIONS, 'engagement', 'valence'].map(key => ({
     name: EMOTION_LABELS_JA[key] || key,
     key,
     sd: affect_dynamics[key]?.variability_sd || 0,
@@ -482,6 +539,176 @@ export default function AcademicSection({ data }: Props) {
           </div>
         </div>
       </CollapsibleCard>
+
+      {/* Outlier Summary */}
+      <CollapsibleCard
+        label="OUTLIER SUMMARY"
+        title="外れ値サマリー（IQR法）"
+        badge={outlierHasWarning ? (
+          <span className="flex items-center gap-1 px-2 py-0.5 rounded" style={{ background: 'oklch(0.28 0.12 70)', color: 'oklch(0.78 0.18 70)', fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem' }} title="外れ値割合が5%を超える指標があります">
+            <AlertTriangle size={11} />
+            要確認
+          </span>
+        ) : undefined}
+        info="IQR法（Q1 - 1.5×IQR ～ Q3 + 1.5×IQR）でフレームごとの外れ値を検出した結果です。数値はセッション全フレームから集計しています。割合が5%を超える場合（⚠）はデータ品質の確認を推奨します。"
+        storageKey="ksdv.collapse.academic.outliers"
+      >
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.55 0.015 255)', marginBottom: '0.75rem' }}>
+          検出手法: IQR法 — フェンス = Q1 − 1.5×IQR ／ Q3 + 1.5×IQR。n はNaN除外後の有効フレーム数。
+        </p>
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead>
+              <tr style={{ borderBottom: '2px solid oklch(0.28 0.04 255)' }}>
+                {['感情/指標', 'n', '外れ値数', '割合', '下限フェンス', '上限フェンス'].map(h => (
+                  <th key={h} className="text-left pb-2 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.68 0.015 255)', letterSpacing: '0.05em' }}>
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {outlierSummary.map(row => {
+                const isHigh = row.pct > 5;
+                return (
+                  <tr key={row.key} className="row-hover" style={{ borderBottom: '1px solid oklch(0.20 0.04 255)' }}>
+                    <td className="py-1.5 pr-4">
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: EMOTION_COLORS[row.key] || 'oklch(0.62 0.10 258)' }} />
+                        <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 500, fontSize: '0.78rem', color: 'oklch(0.88 0.005 250)' }}>
+                          {row.label}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-1.5 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: 'oklch(0.55 0.015 255)' }}>
+                      {row.n.toLocaleString()}
+                    </td>
+                    <td className="py-1.5 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: row.count > 0 ? 'oklch(0.75 0.008 250)' : 'oklch(0.45 0.015 255)' }}>
+                      {row.count.toLocaleString()}
+                    </td>
+                    <td className="py-1.5 pr-4">
+                      <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: isHigh ? 'oklch(0.78 0.18 70)' : 'oklch(0.75 0.008 250)' }}>
+                        {row.pct.toFixed(2)}%
+                        {isHigh && <span className="ml-1" title="5%超">⚠</span>}
+                      </span>
+                    </td>
+                    <td className="py-1.5 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: 'oklch(0.55 0.015 255)' }}>
+                      {row.lower.toFixed(4)}
+                    </td>
+                    <td className="py-1.5 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: 'oklch(0.55 0.015 255)' }}>
+                      {row.upper.toFixed(4)}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </CollapsibleCard>
+
+      {/* Change Points Table */}
+      {data.change_points && data.change_points.length > 0 && (
+        <CollapsibleCard
+          label="CHANGE POINTS — TIMELINE"
+          title="感情変化点の一覧"
+          info="セッション中に急激な感情変化が起きた時点を一覧表示します。delta値は前後フレームの差分です。列ヘッダーをクリックするとソートできます。"
+          storageKey="ksdv.collapse.academic.changepoints"
+        >
+          {/* フィルタ */}
+          <div className="flex items-center gap-3 mb-3">
+            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.55 0.015 255)' }}>
+              |delta| 閾値:
+            </span>
+            <input
+              type="range"
+              min={0}
+              max={cpMaxDelta}
+              step={round4(cpMaxDelta / 100) || 0.001}
+              value={cpDeltaThreshold}
+              onChange={e => setCpDeltaThreshold(parseFloat(e.target.value))}
+              className="flex-1 max-w-48"
+              style={{ accentColor: 'oklch(0.62 0.18 160)' }}
+            />
+            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.75 0.008 250)', minWidth: '3.5rem' }}>
+              ≥ {cpDeltaThreshold.toFixed(3)}
+            </span>
+            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', color: 'oklch(0.45 0.015 255)' }}>
+              {filteredChangePoints.length} / {data.change_points.length} 件
+            </span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead>
+                <tr style={{ borderBottom: '2px solid oklch(0.28 0.04 255)' }}>
+                  {[
+                    { key: 'time', label: '時刻 (秒)' },
+                    { key: 'time', label: '時刻 (分:秒)' },
+                    { key: null, label: '感情' },
+                    { key: 'delta', label: 'delta' },
+                    { key: null, label: '方向' },
+                  ].map((h, i) => (
+                    <th
+                      key={i}
+                      className="text-left pb-2 pr-4"
+                      style={{
+                        fontFamily: 'Roboto Mono, monospace',
+                        fontSize: '0.65rem',
+                        color: h.key && h.key === cpSortKey ? 'oklch(0.80 0.18 160)' : 'oklch(0.68 0.015 255)',
+                        letterSpacing: '0.05em',
+                        cursor: h.key ? 'pointer' : 'default',
+                        userSelect: 'none',
+                      }}
+                      onClick={() => {
+                        if (!h.key) return;
+                        if (cpSortKey === h.key) {
+                          setCpSortDir(d => d === 'asc' ? 'desc' : 'asc');
+                        } else {
+                          setCpSortKey(h.key as 'time' | 'delta');
+                          setCpSortDir('desc');
+                        }
+                      }}
+                    >
+                      {h.label}
+                      {h.key === cpSortKey && <span className="ml-1">{cpSortDir === 'desc' ? '▼' : '▲'}</span>}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {filteredChangePoints.map((cp, i) => {
+                  const mm = Math.floor(cp.time / 60).toString().padStart(2, '0');
+                  const ss = Math.floor(cp.time % 60).toString().padStart(2, '0');
+                  const isRise = cp.direction === 'rise';
+                  return (
+                    <tr key={i} className="row-hover" style={{ borderBottom: '1px solid oklch(0.20 0.04 255)' }}>
+                      <td className="py-1.5 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: 'oklch(0.55 0.015 255)' }}>
+                        {cp.time.toFixed(2)}
+                      </td>
+                      <td className="py-1.5 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: 'oklch(0.55 0.015 255)' }}>
+                        {mm}:{ss}
+                      </td>
+                      <td className="py-1.5 pr-4">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: EMOTION_COLORS[cp.emotion] || 'oklch(0.68 0.015 255)' }} />
+                          <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.88 0.005 250)' }}>
+                            {EMOTION_LABELS_JA[cp.emotion] || cp.emotion}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-1.5 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: isRise ? 'oklch(0.72 0.18 160)' : 'oklch(0.62 0.18 25)' }}>
+                        {cp.delta > 0 ? '+' : ''}{cp.delta.toFixed(4)}
+                      </td>
+                      <td className="py-1.5 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.8rem', color: isRise ? 'oklch(0.72 0.18 160)' : 'oklch(0.62 0.18 25)' }}>
+                        {isRise ? '↑' : '↓'}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </CollapsibleCard>
+      )}
 
       {/* Academic Interpretation */}
       <CollapsibleCard

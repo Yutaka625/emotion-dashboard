@@ -26,6 +26,7 @@ export default function EmotionsSection({ data }: Props) {
     std: emotion_stats[e]?.std || 0,
     max: emotion_stats[e]?.max || 0,
     median: emotion_stats[e]?.median || 0,
+    n: emotion_stats[e]?.n || 0,
     color: EMOTION_COLORS[e] || '#999',
   }));
 
@@ -138,15 +139,17 @@ export default function EmotionsSection({ data }: Props) {
           <table className="w-full">
             <thead>
               <tr style={{ borderBottom: '2px solid oklch(0.28 0.04 255)' }}>
-                {['感情', '平均値', '標準偏差', '中央値', '最大値', '変動性(SD)', '慣性(AR1)'].map(h => (
-                  <th key={h} className="text-left pb-2 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.68 0.015 255)', letterSpacing: '0.05em' }}>
+                {['感情', 'n', '平均値', '標準偏差', '中央値', '最大値', '変動性(SD)', '慣性(AR1)'].map(h => (
+                  <th key={h} className="text-left pb-2 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.68 0.015 255)', letterSpacing: '0.05em' }}
+                    title={h === 'n' ? 'NaN除外後の有効フレーム数' : undefined}
+                  >
                     {h}
                   </th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {statsTableData.map((row: { emotion: string; key: string; mean: number; std: number; max: number; median: number; color: string }, i: number) => (
+              {statsTableData.map((row: { emotion: string; key: string; mean: number; std: number; max: number; median: number; n: number; color: string }, i: number) => (
                 <tr key={i} className="row-hover" style={{ borderBottom: '1px solid oklch(0.20 0.04 255)' }}>
                   <td className="py-2 pr-4">
                     <div className="flex items-center gap-2">
@@ -155,6 +158,11 @@ export default function EmotionsSection({ data }: Props) {
                         {row.emotion}
                       </span>
                     </div>
+                  </td>
+                  <td className="py-2 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.75rem', color: 'oklch(0.55 0.015 255)' }}
+                    title="NaN除外後の有効フレーム数"
+                  >
+                    {row.n.toLocaleString()}
                   </td>
                   {[row.mean, row.std, row.median, row.max].map((v, j) => (
                     <td key={j} className="py-2 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.75rem', color: 'oklch(0.75 0.008 250)' }}>

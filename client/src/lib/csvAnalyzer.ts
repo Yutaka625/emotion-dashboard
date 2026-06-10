@@ -43,7 +43,7 @@ function quantile(sorted: number[], q: number): number {
 
 function computeStats(values: number[]): EmotionStats {
   const valid = values.filter(v => !isNaN(v));
-  if (valid.length === 0) return { mean: 0, std: 0, min: 0, max: 0, median: 0, q25: 0, q75: 0 };
+  if (valid.length === 0) return { mean: 0, std: 0, min: 0, max: 0, median: 0, q25: 0, q75: 0, n: 0 };
   const sorted = [...valid].sort((a, b) => a - b);
   return {
     mean: round(mean(valid), 4),
@@ -53,6 +53,7 @@ function computeStats(values: number[]): EmotionStats {
     median: round(quantile(sorted, 0.5), 4),
     q25: round(quantile(sorted, 0.25), 4),
     q75: round(quantile(sorted, 0.75), 4),
+    n: valid.length,
   };
 }
 
@@ -273,6 +274,40 @@ export function computeDashboardData(rows: Record<string, string>[], filename: s
     neutral: round(r.neutral as number, 4),
     dominant_emotion: r.dominant_emotion,
   }));
+
+  // ---- 4b. 外れ値フラグ（IQR法）: ダウンサンプル後の timeseries_full に付与 ----
+  // フェンス計算は全フレームから算出済みの emotion_stats / special_stats の q25/q75 を使用
+  const outlierTargetCols = [...EMOTION_COLS, 'attention', ...SPECIAL_COLS];
+  const outlier_counts: Record<string, number> = {};
+
+  // 全フレーム（df）を使って外れ値カウントを集計
+  for (const col of outlierTargetCols) {
+    const stats = col in emotion_stats ? emotion_stats[col] : special_stats[col];
+    if (!stats) continue;
+    const iqr = stats.q75 - stats.q25;
+    const lowerFence = stats.q25 - 1.5 * iqr;
+    const upperFence = stats.q75 + 1.5 * iqr;
+    outlier_counts[col] = df.filter(r => {
+      const v = r[col] as number;
+      return typeof v === 'number' && (v < lowerFence || v > upperFence);
+    }).length;
+  }
+
+  // ダウンサンプル後の timeseries_full にフラグを付与
+  for (const point of timeseries_full) {
+    for (const col of outlierTargetCols) {
+      const stats = col in emotion_stats ? emotion_stats[col] : special_stats[col];
+      if (!stats) continue;
+      const iqr = stats.q75 - stats.q25;
+      const lowerFence = stats.q25 - 1.5 * iqr;
+      const upperFence = stats.q75 + 1.5 * iqr;
+      const v = (point as Record<string, unknown>)[col] as number;
+      if (typeof v === 'number' && (v < lowerFence || v > upperFence)) {
+        if (!point.outlierFlags) point.outlierFlags = {};
+        point.outlierFlags[col] = true;
+      }
+    }
+  }
 
   // ---- 5. Time summary (10s bins) ----
   const binSize = 10;
@@ -536,6 +571,7 @@ export function computeDashboardData(rows: Record<string, string>[], filename: s
     head_motion_events,
     change_points,
     ux_scores,
+    outlier_counts,
   };
 }
 

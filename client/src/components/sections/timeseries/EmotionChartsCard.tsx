@@ -83,6 +83,7 @@ export default function EmotionChartsCard({
   const { baselineRange, isBaselineActive, displayMode } = useBaseline();
   const { events } = useEvents();
   const [showChangePoints, setShowChangePoints] = useState(false);
+  const [showOutliers, setShowOutliers] = useState(false);
 
   // 値フォーマッタ: NaN（変化率の算出不能）は「—」、それ以外は小数3桁＋補正中のみ単位を付与
   const fmtValue = (v: number) =>
@@ -258,10 +259,39 @@ export default function EmotionChartsCard({
                 {renderEventAreas()}
                 {renderChangePointLines()}
                 {selectedEmotions.map(emotion => (
-                  <Line key={emotion} type="monotone" dataKey={emotion} stroke={EMOTION_HEX[emotion]} strokeWidth={1.5} dot={false} name={EMOTION_LABELS_JA[emotion]} />
+                  <Line key={emotion} type="monotone" dataKey={emotion} stroke={EMOTION_HEX[emotion]} strokeWidth={1.5}
+                    dot={showOutliers ? (props: any) => {
+                      const { cx, cy, payload } = props;
+                      if (!payload?.outlierFlags?.[emotion]) return <g key={`od-${payload.time}-${emotion}`} />;
+                      return (
+                        <circle key={`od-${payload.time}-${emotion}`} cx={cx} cy={cy} r={5}
+                          fill="none" stroke={EMOTION_HEX[emotion]} strokeWidth={2} opacity={0.85} />
+                      );
+                    } : false}
+                    activeDot={{ r: 3 }}
+                    name={EMOTION_LABELS_JA[emotion]}
+                  />
                 ))}
               </LineChart>
             </ResponsiveContainer>
+
+            {/* 外れ値トグル */}
+            <div className="mt-2 mb-1">
+              <button
+                onClick={() => setShowOutliers(p => !p)}
+                className="flex items-center gap-2 text-xs px-3 py-1.5 rounded transition-all"
+                style={{ fontFamily: 'Roboto Mono, monospace', background: showOutliers ? 'oklch(0.28 0.08 60)' : 'oklch(0.22 0.04 255)', color: showOutliers ? 'oklch(0.80 0.18 70)' : 'oklch(0.68 0.015 255)', border: `1px solid ${showOutliers ? 'oklch(0.50 0.18 70)' : 'oklch(0.28 0.04 255)'}` }}
+                title="IQR法で検出した外れ値フレームをグラフ上に空丸でマーク表示します（デフォルト: OFF）"
+              >
+                <span style={{ fontSize: '0.9rem' }}>◯</span>
+                外れ値マーク ({showOutliers ? 'ON' : 'OFF'})
+              </button>
+              {showOutliers && (
+                <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.68rem', color: 'oklch(0.55 0.015 255)', marginTop: '4px' }}>
+                  IQR法（Q1 − 1.5×IQR ～ Q3 + 1.5×IQR）の外れ値フレームを空丸でマーク。詳細は「学術的分析」タブの外れ値サマリーを参照。
+                </p>
+              )}
+            </div>
 
             {/* 変化点トグル */}
             <div className="mt-3">
@@ -346,7 +376,16 @@ export default function EmotionChartsCard({
                           contentStyle={{ ...rechartsTooltip.contentStyle, fontSize: '0.72rem', border: `1px solid ${EMOTION_HEX[emotion]}50`, padding: '4px 8px' }}
                         />
                         {renderEventLines()}
-                        <Area type="monotone" dataKey={emotion} stroke={EMOTION_HEX[emotion]} fill={`url(#grad-${emotion})`} strokeWidth={1.5} dot={false} />
+                        <Area type="monotone" dataKey={emotion} stroke={EMOTION_HEX[emotion]} fill={`url(#grad-${emotion})`} strokeWidth={1.5}
+                          dot={showOutliers ? (props: any) => {
+                            const { cx, cy, payload } = props;
+                            if (!payload?.outlierFlags?.[emotion]) return <g key={`os-${payload.time}-${emotion}`} />;
+                            return (
+                              <circle key={`os-${payload.time}-${emotion}`} cx={cx} cy={cy} r={4}
+                                fill="none" stroke={EMOTION_HEX[emotion]} strokeWidth={1.8} opacity={0.85} />
+                            );
+                          } : false}
+                        />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
