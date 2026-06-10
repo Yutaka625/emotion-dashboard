@@ -30,8 +30,6 @@ export interface TimeseriesPoint {
   confusion: number;
   neutral: number;
   dominant_emotion: string;
-  /** IQR法による外れ値フラグ（感情名 → true）。外れ値がなければ undefined */
-  outlierFlags?: Partial<Record<string, boolean>>;
 }
 
 export interface TimeSummary {
@@ -160,8 +158,6 @@ export interface DashboardData {
   change_points: ChangePoint[];
   /** UXリサーチ向け複合指標 */
   ux_scores: UXScores;
-  /** IQR法による外れ値フレーム数（全フレームから集計）。感情名 → 外れ値フレーム数 */
-  outlier_counts: Record<string, number>;
 }
 
 export const EMOTION_COLORS: Record<string, string> = {

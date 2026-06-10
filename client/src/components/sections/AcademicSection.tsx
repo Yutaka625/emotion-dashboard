@@ -4,7 +4,7 @@
  */
 
 import { useState, useMemo } from 'react';
-import { Download, Printer, AlertTriangle } from 'lucide-react';
+import { Download, Printer } from 'lucide-react';
 import type { DashboardData } from '@/lib/types';
 import { EMOTION_LABELS_JA, EMOTION_COLORS, NON_NEUTRAL_EMOTIONS } from '@/lib/types';
 import {
@@ -96,25 +96,7 @@ export default function AcademicSection({ data }: Props) {
     rows.push(`低覚醒×低Valence,${circumplex_summary.low_arousal_negative}`);
     rows.push('');
 
-    // セクション6: 外れ値サマリー
-    if (data.outlier_counts) {
-      rows.push('## OUTLIER SUMMARY (IQR法: Q1-1.5×IQR ～ Q3+1.5×IQR)');
-      rows.push('感情/指標,外れ値フレーム数,有効n,割合(%),下限フェンス,上限フェンス');
-      const allTargets = [...NON_NEUTRAL_EMOTIONS, 'neutral', 'attention', 'engagement', 'valence'];
-      for (const key of allTargets) {
-        const stats = emotion_stats[key] || data.special_stats[key];
-        if (!stats) continue;
-        const iqr = stats.q75 - stats.q25;
-        const lower = round4(stats.q25 - 1.5 * iqr);
-        const upper = round4(stats.q75 + 1.5 * iqr);
-        const count = data.outlier_counts[key] ?? 0;
-        const pct = stats.n > 0 ? round4(count / stats.n * 100) : 0;
-        rows.push(`${EMOTION_LABELS_JA[key] || key},${count},${stats.n},${pct},${lower},${upper}`);
-      }
-      rows.push('');
-    }
-
-    // セクション7: 変化点
+    // セクション6: 変化点
     if (data.change_points && data.change_points.length > 0) {
       rows.push('## CHANGE POINTS');
       rows.push('時刻(秒),時刻(分:秒),感情,変化量,方向');
@@ -152,23 +134,6 @@ export default function AcademicSection({ data }: Props) {
     URL.revokeObjectURL(url);
     setExporting(false);
   };
-
-  // 外れ値サマリーデータ（IQR法）
-  const outlierSummary = useMemo(() => {
-    const targets = [...NON_NEUTRAL_EMOTIONS, 'neutral', 'attention', 'engagement', 'valence'];
-    return targets.map(key => {
-      const stats = emotion_stats[key] || special_stats[key];
-      if (!stats) return null;
-      const iqr = stats.q75 - stats.q25;
-      const lower = round4(stats.q25 - 1.5 * iqr);
-      const upper = round4(stats.q75 + 1.5 * iqr);
-      const count = (data.outlier_counts || {})[key] ?? 0;
-      const pct = stats.n > 0 ? count / stats.n * 100 : 0;
-      return { key, label: EMOTION_LABELS_JA[key] || key, count, n: stats.n, pct, lower, upper };
-    }).filter(Boolean) as { key: string; label: string; count: number; n: number; pct: number; lower: number; upper: number }[];
-  }, [emotion_stats, special_stats, data.outlier_counts]);
-
-  const outlierHasWarning = outlierSummary.some(row => row.pct > 5);
 
   // 変化点フィルタ・ソート
   const filteredChangePoints = useMemo(() => {
@@ -537,72 +502,6 @@ export default function AcademicSection({ data }: Props) {
           <div className="absolute top-1/2 right-1 -translate-y-1/2" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.68 0.015 255)', writingMode: 'vertical-rl' }}>
             高Valence →
           </div>
-        </div>
-      </CollapsibleCard>
-
-      {/* Outlier Summary */}
-      <CollapsibleCard
-        label="OUTLIER SUMMARY"
-        title="外れ値サマリー（IQR法）"
-        badge={outlierHasWarning ? (
-          <span className="flex items-center gap-1 px-2 py-0.5 rounded" style={{ background: 'oklch(0.28 0.12 70)', color: 'oklch(0.78 0.18 70)', fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem' }} title="外れ値割合が5%を超える指標があります">
-            <AlertTriangle size={11} />
-            要確認
-          </span>
-        ) : undefined}
-        info="IQR法（Q1 - 1.5×IQR ～ Q3 + 1.5×IQR）でフレームごとの外れ値を検出した結果です。数値はセッション全フレームから集計しています。割合が5%を超える場合（⚠）はデータ品質の確認を推奨します。"
-        storageKey="ksdv.collapse.academic.outliers"
-      >
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.55 0.015 255)', marginBottom: '0.75rem' }}>
-          検出手法: IQR法 — フェンス = Q1 − 1.5×IQR ／ Q3 + 1.5×IQR。n はNaN除外後の有効フレーム数。
-        </p>
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs">
-            <thead>
-              <tr style={{ borderBottom: '2px solid oklch(0.28 0.04 255)' }}>
-                {['感情/指標', 'n', '外れ値数', '割合', '下限フェンス', '上限フェンス'].map(h => (
-                  <th key={h} className="text-left pb-2 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.68 0.015 255)', letterSpacing: '0.05em' }}>
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {outlierSummary.map(row => {
-                const isHigh = row.pct > 5;
-                return (
-                  <tr key={row.key} className="row-hover" style={{ borderBottom: '1px solid oklch(0.20 0.04 255)' }}>
-                    <td className="py-1.5 pr-4">
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: EMOTION_COLORS[row.key] || 'oklch(0.62 0.10 258)' }} />
-                        <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 500, fontSize: '0.78rem', color: 'oklch(0.88 0.005 250)' }}>
-                          {row.label}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="py-1.5 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: 'oklch(0.55 0.015 255)' }}>
-                      {row.n.toLocaleString()}
-                    </td>
-                    <td className="py-1.5 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: row.count > 0 ? 'oklch(0.75 0.008 250)' : 'oklch(0.45 0.015 255)' }}>
-                      {row.count.toLocaleString()}
-                    </td>
-                    <td className="py-1.5 pr-4">
-                      <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: isHigh ? 'oklch(0.78 0.18 70)' : 'oklch(0.75 0.008 250)' }}>
-                        {row.pct.toFixed(2)}%
-                        {isHigh && <span className="ml-1" title="5%超">⚠</span>}
-                      </span>
-                    </td>
-                    <td className="py-1.5 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: 'oklch(0.55 0.015 255)' }}>
-                      {row.lower.toFixed(4)}
-                    </td>
-                    <td className="py-1.5 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: 'oklch(0.55 0.015 255)' }}>
-                      {row.upper.toFixed(4)}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
         </div>
       </CollapsibleCard>
 

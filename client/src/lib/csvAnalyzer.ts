@@ -275,40 +275,6 @@ export function computeDashboardData(rows: Record<string, string>[], filename: s
     dominant_emotion: r.dominant_emotion,
   }));
 
-  // ---- 4b. 外れ値フラグ（IQR法）: ダウンサンプル後の timeseries_full に付与 ----
-  // フェンス計算は全フレームから算出済みの emotion_stats / special_stats の q25/q75 を使用
-  const outlierTargetCols = [...EMOTION_COLS, 'attention', ...SPECIAL_COLS];
-  const outlier_counts: Record<string, number> = {};
-
-  // 全フレーム（df）を使って外れ値カウントを集計
-  for (const col of outlierTargetCols) {
-    const stats = col in emotion_stats ? emotion_stats[col] : special_stats[col];
-    if (!stats) continue;
-    const iqr = stats.q75 - stats.q25;
-    const lowerFence = stats.q25 - 1.5 * iqr;
-    const upperFence = stats.q75 + 1.5 * iqr;
-    outlier_counts[col] = df.filter(r => {
-      const v = r[col] as number;
-      return typeof v === 'number' && (v < lowerFence || v > upperFence);
-    }).length;
-  }
-
-  // ダウンサンプル後の timeseries_full にフラグを付与
-  for (const point of timeseries_full) {
-    for (const col of outlierTargetCols) {
-      const stats = col in emotion_stats ? emotion_stats[col] : special_stats[col];
-      if (!stats) continue;
-      const iqr = stats.q75 - stats.q25;
-      const lowerFence = stats.q25 - 1.5 * iqr;
-      const upperFence = stats.q75 + 1.5 * iqr;
-      const v = (point as Record<string, unknown>)[col] as number;
-      if (typeof v === 'number' && (v < lowerFence || v > upperFence)) {
-        if (!point.outlierFlags) point.outlierFlags = {};
-        point.outlierFlags[col] = true;
-      }
-    }
-  }
-
   // ---- 5. Time summary (10s bins) ----
   const binSize = 10;
   const startTime = times[0];
@@ -571,7 +537,6 @@ export function computeDashboardData(rows: Record<string, string>[], filename: s
     head_motion_events,
     change_points,
     ux_scores,
-    outlier_counts,
   };
 }
 
