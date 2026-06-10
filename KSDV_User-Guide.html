@@ -1063,12 +1063,12 @@
           <thead><tr><th>セクション</th><th>内容</th></tr></thead>
           <tbody>
             <tr><td><code>## SESSION META</code></td><td>ファイル名・総フレーム・録画時間・平均FPS・顔検出率・感情検出率</td></tr>
-            <tr><td><code>## EMOTION STATISTICS</code></td><td>9感情のmean / std / min / max / median / Q25 / Q75</td></tr>
+            <tr><td><code>## EMOTION STATISTICS</code></td><td>9感情のn（有効フレーム数）/ mean / std / min / max / median / Q25 / Q75</td></tr>
             <tr><td><code>## SPECIAL METRICS STATISTICS</code></td><td>Engagement / Valence / Attentionの同統計量</td></tr>
             <tr><td><code>## AFFECT DYNAMICS</code></td><td>全指標のvariability_SD / instability_MSSD / inertia_AR1 / range / mean_absolute_change</td></tr>
             <tr><td><code>## CORRELATION MATRIX</code></td><td>感情×感情・特殊指標のピアソン相関行列</td></tr>
             <tr><td><code>## CIRCUMPLEX MODEL (Russell 1980)</code></td><td>4象限のフレーム数</td></tr>
-            <tr><td><code>## CHANGE POINTS</code>（変化点がある場合のみ）</td><td>時刻（秒）・感情・変化量・方向</td></tr>
+            <tr><td><code>## CHANGE POINTS</code>（変化点がある場合のみ）</td><td>時刻（秒）・時刻（分:秒）・感情・変化量・方向</td></tr>
             <tr><td><code>## FACE FILTERING</code>（複数顔データの場合のみ）</td><td>ノイズ除外の判定基準（%・秒）・総フレーム数・解析対象(kept)／除外(excluded)の FaceID とフレーム数</td></tr>
           </tbody>
         </table>

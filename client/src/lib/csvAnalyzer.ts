@@ -43,7 +43,7 @@ function quantile(sorted: number[], q: number): number {
 
 function computeStats(values: number[]): EmotionStats {
   const valid = values.filter(v => !isNaN(v));
-  if (valid.length === 0) return { mean: 0, std: 0, min: 0, max: 0, median: 0, q25: 0, q75: 0 };
+  if (valid.length === 0) return { mean: 0, std: 0, min: 0, max: 0, median: 0, q25: 0, q75: 0, n: 0 };
   const sorted = [...valid].sort((a, b) => a - b);
   return {
     mean: round(mean(valid), 4),
@@ -53,6 +53,7 @@ function computeStats(values: number[]): EmotionStats {
     median: round(quantile(sorted, 0.5), 4),
     q25: round(quantile(sorted, 0.25), 4),
     q75: round(quantile(sorted, 0.75), 4),
+    n: valid.length,
   };
 }
 
