@@ -40,15 +40,25 @@
 - [ ] **データ保存・読み込み（localStorage）**
 - [ ] **感情閾値設定機能**（実装前に仕様確定）
   - 閾値設定UI（検出最小値）／表示フィルタか統計補正かの仕様検討／ベースライン・FaceIDとの併用整理
-- [ ] **学術研究者向け Phase 4（残作業）**
-  - ※ **Mann-Whitney U 検定**・**統計サマリー出力** は実装済み（下記「完了済み」参照）
-  - 残: **参加者間の感情平均グラフ（群平均±SD）＋ 複数セッション一括インポート** — 要: 任意Nセッションを保持する新規基盤（現状は1セッション内マルチFaceID と A/B 2セッションのみ）
+- [ ] **学術研究者向け Phase 4（残作業）= 任意Nセッション基盤と被験者単位の推論統計**
+  - ※ **Mann-Whitney U 検定**・**統計サマリー出力**・**セッションメタデータ記録（被験者属性・群・条件）**・**SD可視化**・**実効n注記** は実装済み（下記「完了済み」参照）
+  - **背景（重要）**: 現状のt検定/Mann-Whitneyは n＝フレーム数で、連続フレームの自己相関により擬似反復（pseudoreplication）となり有意差を過大評価する。**正しい推論統計の単位はフレームではなくセッション／被験者**。下記はすべて「任意Nセッションを保持する新規基盤」が前提（現状は1セッション内マルチFaceID と A/B 2セッションのみ）
+  - 残: **任意Nセッション保持基盤** — 任意N本のCSVを保持・管理する土台（現行のA/B 2枠を一般化）
+  - 残: **被験者単位の集約＋群間検定（ANOVA / Kruskal-Wallis）** — 各セッションを代表値に集約 → 群間で検定。前提チェック・多重比較補正（Bonferroni/FDR）込み
+  - 残: **テスト-再テスト信頼性（ICC）** — 同一被験者×複数セッションの一貫性評価
+  - 残: **参加者間の感情平均グラフ（群平均±SD）＋ 複数セッション一括インポート**
+  - 残: **メタデータのファイル取込** — 実装済みフォームと共通スキーマ（`schema_version`）のCSV/JSONを一括アップロードし各CSVと突合
   - 残: **実験条件ラベル付け ＋ 外部刺激との同期** — イベント注釈機能（`EventsContext` / `EventAnnotationsCard`）の拡張
-  - 残: **参加者群での検定** — 上記Nセッション基盤の上で Welch / Mann-Whitney を群適用
 
 ---
 
 # ✅ 完了済みタスク
+
+## 2026-06-10 セッション（学術機能 第2弾: メタデータ記録・SD可視化・実効n注記）
+- **セッションメタデータ記録フォーム**: 被験者属性（ID/年齢/性別/利き手）・実験設計（群/条件/刺激/測定回）・測定環境（照明/場所/デバイス/カメラ距離）・自由記述（プロトコル/備考）の4グループ・全任意項目。`schema_version` 付き・filenameキーで localStorage 永続化（外部送信なし）。概要タブに配置、学術CSVに `## SESSION METADATA` を追加（`sessionMeta.ts` / `SessionMetadataCard.tsx` / `OverviewSection.tsx` / `AcademicSection.tsx`）。将来のメタデータ「ファイル取込」と共通スキーマ
+- **SD（標準偏差）のエラーバー可視化**: 感情分布タブに「平均±SD」棒グラフ、比較タブのA/B平均比較に±SDエラーバーと注記を追加（記述的・SEではなくSD）（`EmotionsSection.tsx` / `ComparisonSection.tsx`）
+- **既存t検定の実効サンプルサイズ注記**: フレーム単位検定は自己相関で擬似反復になり有意差を過大評価する問題に対し、実効n `n_eff=n(1−r)/(1+r)`（r=AR1再利用）と警告を比較タブ・区間比較に併記（`statisticsUtils.ts: effectiveSampleSize` / `ComparisonSection.tsx` / `EventAnnotationsCard.tsx`）
+- **方針**: フレーム単位のCI/ANOVA追加は擬似反復を増幅するため見送り。設計判断を技術資料3.2.3に記録。ガイド画面解説は他機能とまとめて後日（残）
 
 ## 2026-06-10 セッション（学術機能: n数・変化点テーブル）
 - **記述統計に n（有効フレーム数）を追加**: `EmotionStats` に `n` を追加し、感情分布タブの記述統計テーブルと学術CSVの `## EMOTION STATISTICS` / `## SPECIAL METRICS STATISTICS` に n 列を表示（`types.ts` / `csvAnalyzer.ts` / `useCorrectedDashboardData.ts` / `EmotionsSection.tsx` / `AcademicSection.tsx`）
