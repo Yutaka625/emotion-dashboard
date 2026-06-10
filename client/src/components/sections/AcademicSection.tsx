@@ -15,6 +15,7 @@ import { rechartsTooltip } from '@/lib/chartTooltip';
 import AbsoluteScaleBadge from '@/components/ui/AbsoluteScaleBadge';
 import CollapsibleCard from '@/components/ui/CollapsibleCard';
 import { useFaceID } from '@/contexts/FaceIDContext';
+import { readSessionMeta, hasAnySessionMeta } from '@/lib/sessionMeta';
 
 interface Props {
   data: DashboardData;
@@ -47,6 +48,35 @@ export default function AcademicSection({ data }: Props) {
     rows.push(`顔検出率(%),${meta.face_detection_rate.toFixed(1)}`);
     rows.push(`感情検出率(%),${meta.emotion_detection_rate.toFixed(1)}`);
     rows.push('');
+
+    // セクション1b: 実験計画メタデータ（入力がある場合のみ・再現性のため）
+    const sessionMeta = readSessionMeta(meta.filename);
+    if (hasAnySessionMeta(sessionMeta)) {
+      rows.push(`## SESSION METADATA (schema_version=${sessionMeta.schema_version})`);
+      rows.push('グループ,項目,値');
+      const metaRows: [string, string, string | undefined][] = [
+        ['subject', '被験者ID', sessionMeta.subject.subject_id],
+        ['subject', '年齢', sessionMeta.subject.age],
+        ['subject', '性別', sessionMeta.subject.sex],
+        ['subject', '利き手', sessionMeta.subject.handedness],
+        ['design', '群', sessionMeta.design.group],
+        ['design', '条件', sessionMeta.design.condition],
+        ['design', '刺激・タスク', sessionMeta.design.stimulus],
+        ['design', '測定回', sessionMeta.design.session_number],
+        ['environment', '照明', sessionMeta.environment.lighting],
+        ['environment', '場所', sessionMeta.environment.location],
+        ['environment', 'デバイス・カメラ', sessionMeta.environment.device],
+        ['environment', 'カメラ距離', sessionMeta.environment.camera_distance],
+        ['notes', 'プロトコル要約', sessionMeta.notes.protocol],
+        ['notes', '備考', sessionMeta.notes.free_notes],
+      ];
+      for (const [group, label, value] of metaRows) {
+        if (value != null && String(value).trim() !== '') {
+          rows.push(`${group},${q(label)},${q(value)}`);
+        }
+      }
+      rows.push('');
+    }
 
     // セクション2: 感情統計
     rows.push('## EMOTION STATISTICS');
