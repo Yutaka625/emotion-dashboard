@@ -244,6 +244,12 @@ export interface MultiFaceData {
   filename: string;
   /** 録画全体のユニーク時刻数（＝総フレーム数） */
   totalFrames: number;
+  /** パース済みの全生行（CSV出力で全フレーム・FaceID別抽出に使う。単一Faceでも保持） */
+  allRows?: Record<string, string>[];
+  /** 時刻列のヘッダー名（通常は先頭列 "time stamp"） */
+  timeCol?: string;
+  /** FaceID 列のヘッダー名（無ければ null） */
+  faceIdCol?: string | null;
 }
 
 /** UXリサーチ向け複合指標スコア */
