@@ -133,6 +133,7 @@ export default function TimeseriesSection({ data, rawTimeseries }: Props) {
       emotion: row.dominant_emotion,
       color: EMOTION_HEX[row.dominant_emotion] || '#999',
       label: EMOTION_LABELS_JA[row.dominant_emotion] || row.dominant_emotion,
+      share: typeof row.dominant_share === 'number' ? row.dominant_share : 1,
     }));
   }, [time_summary_10s]);
 

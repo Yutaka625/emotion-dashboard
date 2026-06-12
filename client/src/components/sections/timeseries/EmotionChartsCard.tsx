@@ -39,7 +39,7 @@ const SPECIAL_COLORS: Record<string, string> = {
 
 type TabId = 'overlay' | 'sparklines' | 'heatmap' | 'stacked' | 'dominant';
 
-interface DominantEntry { time: string; emotion: string; color: string; label: string; }
+interface DominantEntry { time: string; emotion: string; color: string; label: string; share: number; }
 
 interface Props {
   displayData: TimeseriesPoint[];
@@ -464,63 +464,74 @@ export default function EmotionChartsCard({
         {activeTab === 'dominant' && (
           <div>
             <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.68 0.015 255)', marginBottom: '1rem' }}>
-              10秒区間ごとに最も高いスコアを示した「支配的感情」の推移を表示します。感情状態の遷移パターンを視覚的に把握できます。
+              <strong>棒グラフ「10秒区間の感情スコア」</strong>は各感情の<strong>平均強度</strong>を、<strong>支配感情タイムライン</strong>は10秒区間ごとに「最も多くの瞬間で1位になった感情（最頻＝支配的感情）」と、その<strong>占有率</strong>（区間内で1位を取ったフレームの割合）を示します。占有率はバーの高さ・濃さ・数値で表し、低いほど僅差（接戦）です。平均強度と最頻は観点が異なるため、両者の最大が一致しないことがあります（例：こまめに1位を取る感情と、平均値が高い感情が分かれる場合）。
             </p>
-            <div className="mb-4">
-              <div className="section-label mb-2">DOMINANT EMOTION TIMELINE</div>
-              {events.length > 0 && (
-                <div className="relative mb-1" style={{ height: '14px' }}>
-                  {events.map(ev => {
-                    const leftPct  = (ev.startTime / durationSeconds) * 100;
-                    const widthPct = ((ev.endTime - ev.startTime) / durationSeconds) * 100;
-                    return (
-                      <div key={ev.id} className="absolute h-full rounded-sm flex items-center justify-center overflow-hidden"
-                        style={{ left: `${leftPct}%`, width: `${widthPct}%`, background: ev.color, opacity: 0.75 }}
-                      >
-                        <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.55rem', color: 'oklch(0.90 0.005 250)', fontWeight: 700, whiteSpace: 'nowrap', padding: '0 2px' }}>
-                          {ev.name}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-              <div className="flex gap-0.5 rounded-lg overflow-hidden" style={{ height: '40px' }}>
-                {dominantTimeline.map((d, i) => (
-                  <div key={i} className="flex-1 flex items-center justify-center relative group" style={{ background: d.color, minWidth: '8px' }} title={`${d.time}: ${d.label}`}>
-                    <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 px-2 py-1 rounded text-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10"
-                      style={{ background: 'oklch(0.22 0.04 255)', color: 'oklch(0.90 0.005 250)', fontFamily: 'Noto Sans JP, sans-serif', whiteSpace: 'nowrap' }}>
-                      {d.time}: {d.label}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="flex justify-between mt-1">
-                <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.68 0.015 255)' }}>0s</span>
-                <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.68 0.015 255)' }}>{maxTime}s</span>
-              </div>
-            </div>
             <div className="section-label mb-2">10-SECOND WINDOW EMOTION SCORES</div>
-            <ResponsiveContainer width="100%" height={280}>
-              <BarChart data={stackedData} margin={{ top: 5, right: 10, bottom: 20, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" vertical={false} />
-                <XAxis dataKey="time" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', fill: 'oklch(0.68 0.015 255)' }} angle={-30} textAnchor="end" />
-                <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} />
-                <Tooltip {...rechartsTooltip}
-                  formatter={(v: number, name: string) => [v.toFixed(3), EMOTION_LABELS_JA[name] || name]} />
-                <Legend formatter={v => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem' }}>{EMOTION_LABELS_JA[v] || v}</span>} />
-                {NON_NEUTRAL_EMOTIONS.map(emotion => (
-                  <Bar key={emotion} dataKey={emotion} stackId="a" fill={EMOTION_HEX[emotion]} fillOpacity={0.85} name={emotion} />
-                ))}
-              </BarChart>
-            </ResponsiveContainer>
-            <div className="flex flex-wrap gap-3 mt-3">
+            <div className="flex flex-wrap justify-center gap-3 mb-3">
               {NON_NEUTRAL_EMOTIONS.map(e => (
                 <div key={e} className="flex items-center gap-1.5">
                   <div className="w-3 h-3 rounded-sm" style={{ background: EMOTION_HEX[e] }} />
                   <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.75 0.008 250)' }}>{EMOTION_LABELS_JA[e]}</span>
                 </div>
               ))}
+            </div>
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={stackedData} margin={{ top: 5, right: 10, bottom: 20, left: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" vertical={false} />
+                <XAxis dataKey="time" tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', fill: 'oklch(0.68 0.015 255)' }} angle={-30} textAnchor="end" />
+                <YAxis width={60} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }} />
+                <Tooltip {...rechartsTooltip}
+                  formatter={(v: number, name: string) => [v.toFixed(3), EMOTION_LABELS_JA[name] || name]} />
+                {NON_NEUTRAL_EMOTIONS.map(emotion => (
+                  <Bar key={emotion} dataKey={emotion} stackId="a" fill={EMOTION_HEX[emotion]} fillOpacity={0.85} name={emotion} />
+                ))}
+              </BarChart>
+            </ResponsiveContainer>
+            <div className="mt-2">
+              <div className="section-label mb-2">DOMINANT EMOTION TIMELINE</div>
+              {/* 上の棒グラフ(10-SECOND WINDOW)の描画域と横幅を一致させるため、
+                  Y軸幅(60px)＋右マージン(10px)を内側余白として合わせる */}
+              <div style={{ paddingLeft: '60px', paddingRight: '10px' }}>
+                {events.length > 0 && (
+                  <div className="relative mb-1" style={{ height: '14px' }}>
+                    {events.map(ev => {
+                      const leftPct  = (ev.startTime / durationSeconds) * 100;
+                      const widthPct = ((ev.endTime - ev.startTime) / durationSeconds) * 100;
+                      return (
+                        <div key={ev.id} className="absolute h-full rounded-sm flex items-center justify-center overflow-hidden"
+                          style={{ left: `${leftPct}%`, width: `${widthPct}%`, background: ev.color, opacity: 0.75 }}
+                        >
+                          <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.55rem', color: 'oklch(0.90 0.005 250)', fontWeight: 700, whiteSpace: 'nowrap', padding: '0 2px' }}>
+                            {ev.name}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                {/* 各区間: 高さ・濃さ・数値＝占有率（区間内で支配感情が1位を取ったフレーム割合）。低いほど僅差 */}
+                <div className="flex gap-0.5 rounded-lg overflow-hidden" style={{ height: '44px', background: 'oklch(0.17 0.03 255)' }}>
+                  {dominantTimeline.map((d, i) => {
+                    const pct = Math.round(d.share * 100);
+                    return (
+                      <div key={i} className="flex-1 relative flex items-end justify-center group" style={{ minWidth: '8px' }} title={`${d.time}: ${d.label}（占有率 ${pct}%）`}>
+                        <div className="w-full" style={{ height: `${Math.max(d.share * 100, 5)}%`, background: d.color, opacity: 0.35 + 0.65 * d.share }} />
+                        <span className="absolute inset-0 flex items-center justify-center" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.78rem', fontWeight: 600, color: 'oklch(0.95 0.005 250)', textShadow: '0 1px 3px oklch(0.10 0.02 255 / 0.95)', whiteSpace: 'nowrap', pointerEvents: 'none' }}>
+                          {pct}%
+                        </span>
+                        <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 px-2 py-1 rounded text-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10"
+                          style={{ background: 'oklch(0.22 0.04 255)', color: 'oklch(0.90 0.005 250)', fontFamily: 'Noto Sans JP, sans-serif', whiteSpace: 'nowrap' }}>
+                          {d.time}: {d.label}（{pct}%）
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="flex justify-between mt-1">
+                  <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.68 0.015 255)' }}>0s</span>
+                  <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.68 0.015 255)' }}>{maxTime}s</span>
+                </div>
+              </div>
             </div>
           </div>
         )}

@@ -40,6 +40,7 @@ export interface TimeSummary {
   valence_mean: number;
   attention_mean: number;
   dominant_emotion: string;
+  dominant_share: number;  // 区間内で支配感情が1位を取ったフレームの割合（0〜1）。低いほど僅差
   [key: string]: number | string;
 }
 
