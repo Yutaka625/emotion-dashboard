@@ -664,9 +664,11 @@
           <li><strong>TIME RANGE FILTER</strong> セクションで「開始秒」「終了秒」を入力します。</li>
           <li>プリセットボタン（全体 / 0-60s / 60-120s …）で素早く切り替えることもできます。</li>
           <li>指定後、グラフとすべての統計が選択範囲のデータに絞られます。</li>
-          <li><strong>「CSV出力」ボタン</strong>を押すと、絞り込んだ範囲のデータを <code>emotion_data_○-○s.csv</code> としてダウンロードできます（感情スコア9種〔ニュートラルを除く〕・Engagement・Valence・Attention・AU01〜AU45〔数値コード〕を含む）。</li>
+          <li><strong>「CSV出力」ボタン</strong>を押すと、<strong>出力設定の画面</strong>が開きます。条件を変えずに「そのまま出力」を押すと、標準のデータ（<code>time</code>・感情スコア9種〔ニュートラルを除く〕・Engagement・Valence・Attention）を <code>emotion_data_○-○s.csv</code> としてダウンロードできます。</li>
+          <li>出力設定の画面では、必要に応じて次の条件を選べます：<strong>FaceID（人物）の範囲</strong>（複数人データのとき：選択中の顔のみ／全員をまとめて／FaceIDごとに分割〔1ファイルに <code>FaceID</code> 列を付与〕）／<strong>時間範囲</strong>／<strong><code>time</code>列の表記</strong>（元の値そのまま〔加工なし。後から検知が始まった人物の開始時刻も保持〕／0秒始まりに揃える）／<strong>出力する列</strong>（感情9種・特殊指標3種・Action Units〔名前付き22種〕・ヘッドポーズ）／<strong>数値の精度・データ量</strong>（小数桁数・全フレームの生データ／最大600点に間引き）。</li>
         </ol>
         <div class="note">💡 ベースライン補正と組み合わせる場合は、先にタイムレンジを安静時区間に合わせて「ベースラインとして設定」を押します。</div>
+        <div class="note">📊 研究で使う場合：感情・表情などの値は元データそのまま（加工は小数桁の丸めのみ）。<code>time</code>の原点（元の値／0秒始まり）は平均・相関・検定などの値ベース統計には影響しません。複数人の時間整列を保ちたいときは「元の値そのまま」または「0秒始まり（全体基準）」を、刺激提示などへの時間ロックは出力後にご自身のイベント記録で整列してください。</div>
       </div>
     </div>
 

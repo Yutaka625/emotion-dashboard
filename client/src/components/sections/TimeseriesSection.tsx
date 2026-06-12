@@ -20,6 +20,7 @@ import { applySmoothing, type SmoothingMethod } from '@/lib/smoothingUtils';
 
 import CollapsibleCard       from '@/components/ui/CollapsibleCard';
 import CardHeader            from '@/components/ui/CardHeader';
+import ExportSettingsDialog  from '@/components/export/ExportSettingsDialog';
 import BaselineSettingsCard  from './timeseries/BaselineSettingsCard';
 import SmoothingSettingsCard from './timeseries/SmoothingSettingsCard';
 import EmotionChartsCard     from './timeseries/EmotionChartsCard';
@@ -181,27 +182,8 @@ export default function TimeseriesSection({ data, rawTimeseries }: Props) {
     setShowSpecial(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
   };
 
-  // CSV エクスポート（現在の表示範囲）
-  const exportFilteredDataToCSV = () => {
-    const filteredData = timeseries_full.filter(d => d.time >= timeRange[0] && d.time <= timeRange[1]);
-    if (filteredData.length === 0) { alert('フィルタリング範囲にデータがありません'); return; }
-    const headers = ['time', ...NON_NEUTRAL_EMOTIONS, 'engagement', 'valence', 'attention'];
-    for (let i = 1; i <= 45; i++) headers.push(`AU${String(i).padStart(2, '0')}`);
-    const rows = filteredData.map(row => {
-      const values: (string | number)[] = [row.time, ...NON_NEUTRAL_EMOTIONS.map(e => (row as any)[e] ?? 0), row.engagement ?? 0, row.valence ?? 0, row.attention ?? 0];
-      for (let i = 1; i <= 45; i++) values.push((row as any)[`AU${String(i).padStart(2, '0')}`] ?? 0);
-      return values;
-    });
-    const csvContent = [headers.join(','), ...rows.map(r => r.map(v => typeof v === 'number' ? v.toFixed(3) : v).join(','))].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.setAttribute('href', URL.createObjectURL(blob));
-    link.setAttribute('download', `emotion_data_${timeRange[0]}-${timeRange[1]}s.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+  // CSV エクスポート: 押下で出力設定モーダルを開く（抽出条件は ExportSettingsDialog 側で選ぶ）
+  const [exportOpen, setExportOpen] = useState(false);
 
   const { setBaseline, clearBaseline, baselineRange } = useBaseline();
 
@@ -342,15 +324,22 @@ export default function TimeseriesSection({ data, rawTimeseries }: Props) {
             {isCurrentRangeBaseline ? 'ベースライン解除' : 'ベースラインとして設定'}
           </button>
 
-          {/* CSV エクスポート */}
-          <button onClick={exportFilteredDataToCSV}
+          {/* CSV エクスポート: 出力設定モーダルを開く */}
+          <button onClick={() => setExportOpen(true)}
             className="px-3 py-1 rounded text-xs transition-all flex items-center gap-1 ml-auto"
             style={{ fontFamily: 'Noto Sans JP, sans-serif', background: 'oklch(0.50 0.13 70)', color: 'white', border: '1px solid oklch(0.70 0.15 70)' }}
-            title="フィルタリング範囲のデータをCSVでダウンロード"
+            title="抽出条件を選んでCSVでダウンロード"
           >
             <Download size={14} />
             CSV出力
           </button>
+          <ExportSettingsDialog
+            open={exportOpen}
+            onOpenChange={setExportOpen}
+            filename={data.meta.filename}
+            maxTime={maxTime}
+            initialTimeRange={timeRange}
+          />
           <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.68 0.015 255)', alignSelf: 'center', marginLeft: '4px' }}>
             {sampledData.length} pts表示中
           </span>

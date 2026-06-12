@@ -16,6 +16,7 @@ import AbsoluteScaleBadge from '@/components/ui/AbsoluteScaleBadge';
 import CollapsibleCard from '@/components/ui/CollapsibleCard';
 import { useFaceID } from '@/contexts/FaceIDContext';
 import { readSessionMeta, hasAnySessionMeta } from '@/lib/sessionMeta';
+import { downloadCSV } from '@/lib/csvExport';
 
 interface Props {
   data: DashboardData;
@@ -153,15 +154,7 @@ export default function AcademicSection({ data }: Props) {
       rows.push('');
     }
 
-    const blob = new Blob(['﻿' + rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `ksdv_report_${meta.filename.replace(/\.[^.]+$/, '')}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    downloadCSV(`ksdv_report_${meta.filename.replace(/\.[^.]+$/, '')}.csv`, rows.join('\n'));
     setExporting(false);
   };
 

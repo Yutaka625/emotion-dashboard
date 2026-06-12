@@ -10,13 +10,15 @@ const NON_NEUTRAL = ['anger', 'sadness', 'surprise', 'fear', 'joy', 'disgust', '
 const EMOTION_COLS = [...NON_NEUTRAL, 'neutral'];
 const SPECIAL_COLS = ['engagement', 'valence'];
 const FACIAL_COLS = [...EMOTION_COLS, 'attention']; // attention treated as facial expression metric
-const ACTION_UNIT_COLS = [
+// Action Unit（顔の筋肉の動き）の列名。CSV出力やデータ抽出でも再利用するため export する。
+export const ACTION_UNIT_COLS = [
   'inner brow raise', 'brow raise', 'brow furrow', 'eye widen', 'cheek raise',
   'lid tighten', 'nose wrinkle', 'upper lip raise', 'dimpler', 'lip corner depressor',
   'chin raise', 'lip pucker', 'lip stretch', 'lip press', 'mouth open', 'jaw drop',
   'lip suck', 'eye closure', 'smile', 'smirk', 'blink', 'blink rate'
 ];
-const HEAD_POSE_COLS = ['pitch', 'yaw', 'roll'];
+// 頭の向き（ピッチ・ヨー・ロール）の列名。CSV出力でも再利用するため export する。
+export const HEAD_POSE_COLS = ['pitch', 'yaw', 'roll'];
 
 // ---- Utility math functions ----
 

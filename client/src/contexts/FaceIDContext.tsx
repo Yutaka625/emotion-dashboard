@@ -63,6 +63,12 @@ interface FaceIDContextType {
   faceColor: (faceId: string) => string;
   getFaceData: (faceId: string) => DashboardData | null;
   faceFrameCount: (faceId: string) => number;
+  /** CSV出力用: パース済みの全生行（全フレーム）。未取得時は空配列 */
+  rawRows: Record<string, string>[];
+  /** CSV出力用: 時刻列のヘッダー名（無ければ null） */
+  rawTimeCol: string | null;
+  /** CSV出力用: FaceID 列のヘッダー名（無ければ null） */
+  rawFaceIdCol: string | null;
 }
 
 const FaceIDContext = createContext<FaceIDContextType | undefined>(undefined);
@@ -182,6 +188,19 @@ export function FaceIDProvider({ children }: { children: React.ReactNode }) {
     [multiFaceData],
   );
 
+  // CSV出力用の生データ。単一Face/マルチ問わず allRows に全行を保持しておく。
+  // allRows が無い（旧経路）場合は rawRowsByFace を平坦化してフォールバックする。
+  const rawRows = useMemo<Record<string, string>[]>(() => {
+    if (!multiFaceData) return [];
+    if (multiFaceData.allRows && multiFaceData.allRows.length > 0) return multiFaceData.allRows;
+    if (multiFaceData.rawRowsByFace.size > 0) {
+      return Array.from(multiFaceData.rawRowsByFace.values()).flat();
+    }
+    return [];
+  }, [multiFaceData]);
+  const rawTimeCol = multiFaceData?.timeCol ?? null;
+  const rawFaceIdCol = multiFaceData?.faceIdCol ?? null;
+
   // kept のみで合算した DashboardData（denoise）。kept が全件なら allCombined をそのまま使う
   const denoisedCombined = useMemo(() => {
     if (!multiFaceData) return null;
@@ -240,6 +259,9 @@ export function FaceIDProvider({ children }: { children: React.ReactNode }) {
       faceColor,
       getFaceData,
       faceFrameCount,
+      rawRows,
+      rawTimeCol,
+      rawFaceIdCol,
     }}>
       {children}
     </FaceIDContext.Provider>

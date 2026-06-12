@@ -10,6 +10,7 @@ import { EMOTION_LABELS_JA, EMOTION_COLORS, NON_NEUTRAL_EMOTIONS } from '@/lib/t
 import { welchTTest, mannWhitneyU, effectiveSampleSize } from '@/lib/statisticsUtils';
 import type { TTestResult, MannWhitneyResult } from '@/lib/statisticsUtils';
 import { formatScore } from '@/lib/utils';
+import { downloadCSV } from '@/lib/csvExport';
 
 // 統計検定の手法切替（パラメトリック / ノンパラメトリック）
 type TestMethod = 'welch' | 'mannwhitney';
@@ -123,15 +124,7 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
 
     // BOM 付きで出力（Excel 文字化け対策。他エクスポートと統一）
     const stamp = new Date().toISOString().slice(0, 16).replace(/[-:T]/g, '').replace(/(\d{8})(\d{4})/, '$1-$2');
-    const blob = new Blob(['﻿' + rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.setAttribute('href', URL.createObjectURL(blob));
-    link.setAttribute('download', `comparison_statistics_${labelA}_vs_${labelB}_${stamp}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(link.href);
+    downloadCSV(`comparison_statistics_${labelA}_vs_${labelB}_${stamp}.csv`, rows.join('\n'));
   };
 
   // ---- 感情統計バーチャート用データ ----
