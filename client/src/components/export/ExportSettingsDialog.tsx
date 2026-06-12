@@ -3,13 +3,13 @@
  * 「時系列生データ」CSV出力の前に、抽出条件を決めるモーダル。
  *
  * 設計方針（KSDVの思想＝非エンジニア運用・シンプルさ）:
- * - 触らずに「そのまま出力」を押せば、デフォルト条件（time＋感情9＋特殊指標3・全フレーム）で出る。
- * - 条件（FaceID範囲／時間範囲／列／精度）は上級者だけが触ればよい。
+ * - 触らずに「そのまま出力」を押せば、元データの全列を加工せず（time＝元の値・全フレーム）出す。
+ * - 条件（FaceID範囲／時間範囲／time表記／列／精度）は不要分だけ触ればよい。
  *
  * 実データの生成は純関数 buildTimeseriesCsv に委譲し、ダウンロードは csvExport.downloadCSV に集約する。
  */
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -23,6 +23,8 @@ import { useFaceID } from '@/contexts/FaceIDContext';
 import { downloadCSV } from '@/lib/csvExport';
 import {
   buildTimeseriesCsv,
+  categorizeColumns,
+  type ColumnGroupKey,
   type ColumnSelection,
   type FaceScope,
 } from '@/lib/buildTimeseriesCsv';
@@ -47,22 +49,39 @@ const subStyle = { fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.68rem', 
 export default function ExportSettingsDialog({ open, onOpenChange, filename, maxTime, initialTimeRange }: Props) {
   const { isMultiFace, selectedFaceIds, availableFaceIds, displayName, rawRows, rawTimeCol, rawFaceIdCol } = useFaceID();
 
-  // ---- 条件 state（デフォルト = 現状と互換の意味のある出力） ----
+  // 実データのヘッダーから、出力可能な列をグループ分けする（時刻・FaceID列は除外）。
+  // 元CSVに実在する列だけを対象にするため、座標・ランドマーク等も自動で「その他」に入る。
+  const groups = useMemo(() => {
+    const header = Object.keys(rawRows[0] ?? {});
+    return categorizeColumns(header, rawTimeCol ?? header[0] ?? 'time', rawFaceIdCol);
+  }, [rawRows, rawTimeCol, rawFaceIdCol]);
+
+  // ---- 条件 state（デフォルト = すべての列を出力。不要な分だけオフにする） ----
   const [faceScope, setFaceScope] = useState<FaceScopeKind>(isMultiFace ? 'selected' : 'all');
   const [timeRange, setTimeRange] = useState<[number, number]>(initialTimeRange);
-  const [columns, setColumns] = useState<ColumnSelection>({ emotions: true, special: true, actionUnits: false, headPose: false });
+  const [columns, setColumns] = useState<ColumnSelection>({ emotions: true, special: true, actionUnits: true, headPose: true, other: true });
   const [decimals, setDecimals] = useState(3);
   const [fullFrames, setFullFrames] = useState(true);
   // time 列の表記。既定は元の値そのまま（生データ出力として加工しない）
   const [timeMode, setTimeMode] = useState<'original' | 'zero'>('original');
 
-  const toggleColumn = (key: keyof ColumnSelection) =>
+  const toggleColumn = (key: ColumnGroupKey) =>
     setColumns(prev => ({ ...prev, [key]: !prev[key] }));
+
+  // 列グループの表示メタ（ラベル・補足）。実在する列があるグループだけ表示する。
+  const columnGroupMeta: { key: ColumnGroupKey; label: string; hint: (cols: string[]) => string }[] = [
+    { key: 'emotions',    label: '感情',          hint: cols => `${cols.length}種：${cols.slice(0, 3).join(' / ')} …` },
+    { key: 'special',     label: '特殊指標',      hint: cols => cols.join(' / ') },
+    { key: 'actionUnits', label: 'Action Units',  hint: cols => `${cols.length}種：${cols.slice(0, 2).join(' / ')} など顔の筋肉` },
+    { key: 'headPose',    label: 'ヘッドポーズ',  hint: cols => cols.join(' / ') },
+    { key: 'other',       label: 'その他の計測値', hint: cols => `${cols.length}列：輝度・瞳孔間距離・バウンディングボックス・ランドマーク座標など` },
+  ];
 
   const setStart = (v: number) => setTimeRange(([, e]) => [Math.max(0, Math.min(v, e)), e]);
   const setEnd = (v: number) => setTimeRange(([s]) => [s, Math.min(maxTime, Math.max(v, s))]);
 
-  const noColumns = !columns.emotions && !columns.special && !columns.actionUnits && !columns.headPose;
+  // 実在かつオンになっている列が1つもなければ出力不可
+  const noColumns = columnGroupMeta.every(({ key }) => groups[key].length === 0 || !columns[key]);
 
   const handleExport = () => {
     // FaceID 範囲を組み立てる
@@ -105,7 +124,7 @@ export default function ExportSettingsDialog({ open, onOpenChange, filename, max
           時系列データの出力設定
         </DialogTitle>
         <DialogDescription style={subStyle}>
-          条件を変えなければ、そのまま標準のCSV（time＋感情9種＋エンゲージメント/感情価/注意）が出力されます。
+          条件を変えなければ、元データの全列（感情・特殊指標・Action Units・ヘッドポーズ・座標等）を加工せず出力します。
         </DialogDescription>
 
         <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
@@ -162,14 +181,16 @@ export default function ExportSettingsDialog({ open, onOpenChange, filename, max
             </div>
           </SettingBox>
 
-          {/* 列の選択 */}
+          {/* 列の選択（既定はすべて出力。不要な分だけオフにする） */}
           <SettingBox>
-            <div style={labelStyle} className="mb-2">出力する列</div>
+            <div style={labelStyle} className="mb-1">出力する列</div>
+            <div style={{ ...subStyle, marginBottom: '8px' }}>既定で元データの全列を出力します。不要なグループだけチェックを外してください。</div>
             <div className="space-y-1.5">
-              <Check checked={columns.emotions} onChange={() => toggleColumn('emotions')} label="感情 9種" hint="anger / sadness / surprise …" />
-              <Check checked={columns.special} onChange={() => toggleColumn('special')} label="特殊指標 3種" hint="engagement / valence / attention" />
-              <Check checked={columns.actionUnits} onChange={() => toggleColumn('actionUnits')} label="Action Units 22種" hint="brow furrow / smile など顔の筋肉" />
-              <Check checked={columns.headPose} onChange={() => toggleColumn('headPose')} label="ヘッドポーズ" hint="pitch / yaw / roll" />
+              {columnGroupMeta
+                .filter(({ key }) => groups[key].length > 0)
+                .map(({ key, label, hint }) => (
+                  <Check key={key} checked={columns[key]} onChange={() => toggleColumn(key)} label={label} hint={hint(groups[key])} />
+                ))}
             </div>
             {noColumns && (
               <div style={{ ...subStyle, color: 'oklch(0.72 0.16 30)', marginTop: '6px' }}>

@@ -15,17 +15,40 @@ import { ACTION_UNIT_COLS, HEAD_POSE_COLS } from '@/lib/csvAnalyzer';
 import { csvQuote } from '@/lib/csvExport';
 
 const SPECIAL_COLS = ['engagement', 'valence', 'attention'];
+// 感情はニュートラルも含めた10種（生データを忠実に出すため neutral も対象）
+const EMOTION_COLS = [...NON_NEUTRAL_EMOTIONS, 'neutral'];
 
-/** どの列グループを出力に含めるか */
-export interface ColumnSelection {
-  /** 感情9種（anger〜confusion） */
-  emotions: boolean;
-  /** 特殊指標3種（engagement / valence / attention） */
-  special: boolean;
-  /** Action Units（名前付き22種） */
-  actionUnits: boolean;
-  /** ヘッドポーズ（pitch / yaw / roll） */
-  headPose: boolean;
+/** 列グループの種類。`other` は座標・ランドマーク・輝度など既知カテゴリ以外の全列。 */
+export type ColumnGroupKey = 'emotions' | 'special' | 'actionUnits' | 'headPose' | 'other';
+
+/** どの列グループを出力に含めるか（既定はすべて true ＝全データ出力） */
+export type ColumnSelection = Record<ColumnGroupKey, boolean>;
+
+/**
+ * CSVヘッダーを列グループに振り分ける（出力順は元ヘッダーの並びを保持）。
+ * time 列・FaceID 列は別扱いのため除外する。
+ * `other` は感情/特殊指標/AU/頭部姿勢のいずれにも属さない列（輝度・瞳孔間距離・
+ * バウンディングボックス・ランドマーク座標・未知の追加列など）をすべて拾う。
+ */
+export function categorizeColumns(
+  header: string[],
+  timeCol: string,
+  faceIdCol: string | null,
+): Record<ColumnGroupKey, string[]> {
+  const emoSet = new Set(EMOTION_COLS);
+  const spSet = new Set(SPECIAL_COLS);
+  const auSet = new Set(ACTION_UNIT_COLS);
+  const hpSet = new Set(HEAD_POSE_COLS);
+  const groups: Record<ColumnGroupKey, string[]> = { emotions: [], special: [], actionUnits: [], headPose: [], other: [] };
+  for (const h of header) {
+    if (h === timeCol || h === faceIdCol) continue;
+    if (emoSet.has(h)) groups.emotions.push(h);
+    else if (spSet.has(h)) groups.special.push(h);
+    else if (auSet.has(h)) groups.actionUnits.push(h);
+    else if (hpSet.has(h)) groups.headPose.push(h);
+    else groups.other.push(h);
+  }
+  return groups;
 }
 
 /** FaceID の抽出範囲 */
@@ -61,14 +84,18 @@ export interface TimeseriesExportInput {
   faceIdCol: string | null;
 }
 
-/** 出力する数値列（生CSVのキー名と、出力ヘッダー名）を条件から組み立てる */
-function buildValueColumns(columns: ColumnSelection): string[] {
-  const cols: string[] = [];
-  if (columns.emotions) cols.push(...NON_NEUTRAL_EMOTIONS);
-  if (columns.special) cols.push(...SPECIAL_COLS);
-  if (columns.actionUnits) cols.push(...ACTION_UNIT_COLS);
-  if (columns.headPose) cols.push(...HEAD_POSE_COLS);
-  return cols;
+/**
+ * 出力する値列を、元ヘッダーの並び順を保ったまま組み立てる。
+ * オフにされたグループの列だけを除外する（＝既定では全列が出力される）。
+ */
+function buildValueColumns(header: string[], timeCol: string, faceIdCol: string | null, columns: ColumnSelection): string[] {
+  const groups = categorizeColumns(header, timeCol, faceIdCol);
+  const enabled = new Set<string>();
+  (Object.keys(groups) as ColumnGroupKey[]).forEach(k => {
+    if (columns[k]) groups[k].forEach(c => enabled.add(c));
+  });
+  // 元ヘッダー順を維持（time/FaceID は別扱い）
+  return header.filter(h => h !== timeCol && h !== faceIdCol && enabled.has(h));
 }
 
 /**
@@ -151,7 +178,8 @@ export function buildTimeseriesCsv(
   //      - FaceID は2列目に置く（KSDVは列名で検出するので先頭でなくてよい）
   //      - ヘッダーはクォートしない（KSDVの簡易パーサは引用符を外さないため、
   //        クォートすると列名が一致しなくなる）。列名にカンマ等が無いので安全。
-  const valueCols = buildValueColumns(columns);
+  const csvHeader = Object.keys(rows[0] ?? {});
+  const valueCols = buildValueColumns(csvHeader, timeCol, faceIdCol, columns);
   const header: string[] = ['time'];
   if (split && faceIdCol) header.push('FaceID');
   header.push(...valueCols);
