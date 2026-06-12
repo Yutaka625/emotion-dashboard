@@ -85,13 +85,21 @@ export default function Home() {
   // ※ ノイズ判定（kept/minor）は固定せず、全 FaceID と totalFrames を詰めるだけにする。
   //    実際の除外判定は FaceIDContext がしきい値から動的に行う。
   const buildMultiFaceData = useCallback((csvText: string, fname: string, allCombined: DashboardData) => {
-    const setPlain = () => setMultiFaceData({ faceIds: [], perFace: new Map(), allCombined, rawRowsByFace: new Map(), filename: fname, totalFrames: 0 });
     try {
       const rows = parseCSV(csvText);
-      if (rows.length === 0) return;
+      // 生データなし → 最小構成（CSV出力もできない）
+      if (rows.length === 0) {
+        setMultiFaceData({ faceIds: [], perFace: new Map(), allCombined, rawRowsByFace: new Map(), filename: fname, totalFrames: 0 });
+        return;
+      }
       const headers = Object.keys(rows[0]);
       const timeCol = headers[0];
       const faceIdCol = detectFaceIdColumn(headers);
+      // 単一Face/通常モードでも CSV出力で使えるよう、全生行・時刻列・FaceID列を必ず保持する
+      const setPlain = () => setMultiFaceData({
+        faceIds: [], perFace: new Map(), allCombined, rawRowsByFace: new Map(),
+        filename: fname, totalFrames: 0, allRows: rows, timeCol, faceIdCol,
+      });
 
       if (faceIdCol) {
         const grouped = groupRowsByFaceId(rows, faceIdCol);
@@ -103,15 +111,15 @@ export default function Home() {
           grouped.forEach((faceRows, id) => {
             try { perFace.set(id, computeDashboardData(faceRows, fname)); } catch { /* 空/不正は登録しない */ }
           });
-          setMultiFaceData({ faceIds: allIds, perFace, allCombined, rawRowsByFace: grouped, filename: fname, totalFrames });
+          setMultiFaceData({ faceIds: allIds, perFace, allCombined, rawRowsByFace: grouped, filename: fname, totalFrames, allRows: rows, timeCol, faceIdCol });
           return;
         }
       }
-      // FaceID 列なし or 1人分のみ → 通常モード
+      // FaceID 列なし or 1人分のみ → 通常モード（生行は保持）
       setPlain();
     } catch {
-      // エラー時は通常モードにフォールバック
-      setPlain();
+      // エラー時は通常モードにフォールバック（生行なし）
+      setMultiFaceData({ faceIds: [], perFace: new Map(), allCombined, rawRowsByFace: new Map(), filename: fname, totalFrames: 0 });
     }
   }, [setMultiFaceData]);
 

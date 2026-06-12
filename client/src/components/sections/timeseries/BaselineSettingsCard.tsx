@@ -16,6 +16,7 @@ import { toast } from 'sonner';
 import CollapsibleCard from '@/components/ui/CollapsibleCard';
 import SettingBox from '@/components/ui/SettingBox';
 import SettingSubLabel from '@/components/ui/SettingSubLabel';
+import { downloadCSV } from '@/lib/csvExport';
 
 import type { BaselineCenter } from '@/lib/types';
 
@@ -77,15 +78,7 @@ export default function BaselineSettingsCard({ timeseriesFull }: Props) {
     }
 
     const stamp = new Date().toISOString().slice(0, 16).replace(/[-:T]/g, '').replace(/(\d{8})(\d{4})/, '$1-$2');
-    const blob = new Blob(['﻿' + rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.setAttribute('href', URL.createObjectURL(blob));
-    link.setAttribute('download', `ksdv_corrected_${centerMethod}_${displayMode}_${baselineRange[0]}-${baselineRange[1]}s_${stamp}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(link.href);
+    downloadCSV(`ksdv_corrected_${centerMethod}_${displayMode}_${baselineRange[0]}-${baselineRange[1]}s_${stamp}.csv`, rows.join('\n'));
   };
 
   // ベースライン区間の品質指標（区間長・フレーム数・安定性の警告）を算出する。
