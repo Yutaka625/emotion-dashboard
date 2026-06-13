@@ -23,13 +23,18 @@ import ComparisonSection from '@/components/sections/ComparisonSection';
 import UXResearchSection from '@/components/sections/UXResearchSection';
 import MultiFaceComparisonSection from '@/components/sections/MultiFaceComparisonSection';
 import FaceQualityBanner from '@/components/FaceQualityBanner';
-import { Upload, X, GitCompare, ArrowUp } from 'lucide-react';
+import SessionMetadataCard from '@/components/sections/SessionMetadataCard';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+import { hasAnySessionMeta, readSessionMeta } from '@/lib/sessionMeta';
+import { Upload, X, GitCompare, ArrowUp, Settings2 } from 'lucide-react';
 
 export default function Home() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [filename, setFilename] = useState<string>('');
   const [activeSection, setActiveSection] = useState('overview');
   const [isDragOverDashboard, setIsDragOverDashboard] = useState(false);
+  const [studySetupOpen, setStudySetupOpen] = useState(false);
+  const [metadataRevision, setMetadataRevision] = useState(0);
 
   // セクション切り替え時にメインエリアをスクロール先頭に戻す
   const mainRef = useRef<HTMLElement>(null);
@@ -206,10 +211,12 @@ export default function Home() {
   // safeSelected … 詳細タブ用（選択中セッション）／ safeA … 比較タブの dataA 用（常にA）
   const safeSelected = displaySelected ?? selectedBaseData ?? data;
   const safeA = displayA ?? aBaseData ?? data;
+  const metadataFilled = metadataRevision >= 0 && hasAnySessionMeta(readSessionMeta(safeSelected.meta.filename));
+  const selectedSessionLabel = detailSession === 'B' && secondaryData ? 'Session B' : 'Session A';
 
   const sectionIds = ['overview', 'timeseries', 'engagement', 'emotions', 'transitions', 'academic', 'actionunits', 'multiface', 'comparison', 'uxresearch'] as const;
   const sectionComponents: Record<string, React.ReactNode> = {
-    overview:    <OverviewSection data={safeSelected} />,
+    overview:    <OverviewSection data={safeSelected} onSectionChange={handleSectionChange} hasComparison={!!secondaryData} />,
     timeseries:  <TimeseriesSection data={safeSelected} rawTimeseries={(selectedBaseData ?? safeSelected).timeseries_full} />,
     engagement:  <EngagementValenceSection data={safeSelected} />,
     emotions:    <EmotionsSection data={safeSelected} />,
@@ -343,9 +350,6 @@ export default function Home() {
               </div>
             )}
 
-            <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.68 0.015 255)' }}>
-              {safeSelected.meta.total_frames.toLocaleString()} frames · {safeSelected.meta.duration_minutes.toFixed(2)} min
-            </div>
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: 'oklch(0.70 0.14 195 / 0.12)', border: '1px solid oklch(0.70 0.14 195 / 0.30)' }}>
               <div className="w-1.5 h-1.5 rounded-full" style={{ background: 'oklch(0.70 0.14 195)' }} />
               <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', color: 'oklch(0.70 0.14 195)' }}>
@@ -412,31 +416,84 @@ export default function Home() {
             />
           </div>
 
-          {/* ガイドリンク（右端） */}
-          <a
-            href="KSDV_User-Guide.html"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg hbd hfg"
-            style={{
-              background: 'oklch(0.27 0.04 255)',
-              borderWidth: '1px',
-              borderStyle: 'solid',
-              textDecoration: 'none',
-              flexShrink: 0,
-              ['--hbd']: 'oklch(0.32 0.04 255)',
-              ['--hbd-h']: 'oklch(0.70 0.14 195 / 0.5)',
-              ['--hfg']: 'oklch(0.72 0.008 250)',
-              ['--hfg-h']: 'oklch(0.70 0.14 195)',
-            } as React.CSSProperties}
-            title="使い方ガイドを開く"
-          >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
-            </svg>
-            <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem' }}>使い方</span>
-          </a>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              type="button"
+              onClick={() => setStudySetupOpen(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg hbd hfg"
+              style={{
+                background: 'oklch(0.27 0.04 255)',
+                borderWidth: '1px',
+                borderStyle: 'solid',
+                ['--hbd']: 'oklch(0.32 0.04 255)',
+                ['--hbd-h']: 'oklch(0.70 0.14 195 / 0.5)',
+                ['--hfg']: 'oklch(0.72 0.008 250)',
+                ['--hfg-h']: 'oklch(0.70 0.14 195)',
+              } as React.CSSProperties}
+              title="セッション設定を開く"
+            >
+              <Settings2 size={12} />
+              <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', whiteSpace: 'nowrap' }}>
+                セッション情報: {metadataFilled ? '入力あり' : '未入力'}
+              </span>
+            </button>
+          </div>
         </header>
+
+        <Sheet open={studySetupOpen} onOpenChange={setStudySetupOpen}>
+          <SheetContent
+            side="right"
+            className="w-[min(92vw,760px)] sm:max-w-[760px] overflow-hidden gap-0"
+            style={{
+              background: 'oklch(0.18 0.04 255)',
+              borderColor: 'oklch(0.30 0.04 255)',
+              color: 'oklch(0.88 0.005 250)',
+            }}
+          >
+            <SheetHeader className="pb-3 pr-12">
+              <div className="section-label">SESSION INFORMATION</div>
+              <SheetTitle style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.2rem', lineHeight: 1.35, color: 'oklch(0.88 0.005 250)' }}>
+                セッション情報
+              </SheetTitle>
+              <SheetDescription style={{ fontFamily: 'Noto Sans JP, sans-serif', color: 'oklch(0.66 0.015 250)', lineHeight: 1.6 }}>
+                被験者属性・実験条件・測定環境をセッション単位で管理します。A/B比較時は、上部の表示中セッション切替に連動して編集対象が変わります。
+              </SheetDescription>
+            </SheetHeader>
+
+            <div className="px-4 pb-6 space-y-4 overflow-y-auto min-h-0 flex-1">
+              <div
+                className="grid grid-cols-1 md:grid-cols-3 gap-3 rounded-xl p-3"
+                style={{ background: 'oklch(0.22 0.04 255)', border: '1px solid oklch(0.30 0.04 255)' }}
+              >
+                <div>
+                  <div className="section-label mb-1">SESSION</div>
+                  <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: 'oklch(0.70 0.14 195)' }}>
+                    {selectedSessionLabel}
+                  </div>
+                </div>
+                <div>
+                  <div className="section-label mb-1">FILE</div>
+                  <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: 'oklch(0.80 0.008 250)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {safeSelected.meta.filename}
+                  </div>
+                </div>
+                <div>
+                  <div className="section-label mb-1">METADATA</div>
+                  <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '0.78rem', color: metadataFilled ? 'oklch(0.78 0.16 160)' : 'oklch(0.74 0.14 70)' }}>
+                    {metadataFilled ? '入力あり' : '未入力'}
+                  </div>
+                </div>
+              </div>
+
+              <SessionMetadataCard
+                data={safeSelected}
+                defaultOpen
+                storageKey="ksdv.collapse.studySetup.sessionMeta"
+                onChange={() => setMetadataRevision(v => v + 1)}
+              />
+            </div>
+          </SheetContent>
+        </Sheet>
 
         {/* Scrollable Content */}
         {/* 各セクションを常時マウントし、非アクティブ時は display:none で隠す。

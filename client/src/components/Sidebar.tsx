@@ -5,7 +5,7 @@
  */
 
 import { useState, type CSSProperties } from 'react';
-import { BarChart2, Brain, GitBranch, Grid, Zap, ChevronRight, Activity, GitCompare, FlaskConical, Scan, Users } from 'lucide-react';
+import { BarChart2, Brain, GitBranch, Grid, Zap, ChevronRight, Activity, GitCompare, FlaskConical, Scan, Users, CircleHelp } from 'lucide-react';
 import FaceScanIcon from '@/components/FaceScanIcon';
 
 interface NavItem {
@@ -151,8 +151,36 @@ export default function Sidebar({ activeSection, onSectionChange, hasComparison,
       </nav>
 
       {/* Footer */}
-      {!collapsed && (
-        <div className="px-4 py-3" style={{ borderTop: '1px solid oklch(0.22 0.02 250)' }}>
+      <div className="px-4 py-3" style={{ borderTop: '1px solid oklch(0.22 0.02 250)' }}>
+        <a
+          href="KSDV_User-Guide.html"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`flex items-center ${collapsed ? 'justify-center' : 'gap-2'} rounded-lg hbd hfg`}
+          style={{
+            minHeight: 34,
+            padding: collapsed ? '0.5rem' : '0.5rem 0.65rem',
+            background: 'oklch(0.20 0.04 255)',
+            borderWidth: '1px',
+            borderStyle: 'solid',
+            textDecoration: 'none',
+            marginBottom: collapsed ? 0 : '0.75rem',
+            ['--hbd']: 'oklch(0.28 0.04 255)',
+            ['--hbd-h']: 'oklch(0.70 0.14 195 / 0.5)',
+            ['--hfg']: 'oklch(0.70 0.008 250)',
+            ['--hfg-h']: 'oklch(0.70 0.14 195)',
+          } as CSSProperties}
+          title="使い方ガイドを開く"
+        >
+          <CircleHelp size={15} style={{ flexShrink: 0 }} />
+          {!collapsed && (
+            <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600, fontSize: '0.76rem' }}>
+              使い方
+            </span>
+          )}
+        </a>
+
+        {!collapsed && (
           <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.6rem', color: 'oklch(0.58 0.01 255)', lineHeight: 1.6 }}>
             {meta ? (
               <>
@@ -163,8 +191,8 @@ export default function Sidebar({ activeSection, onSectionChange, hasComparison,
               <div>—</div>
             )}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </aside>
   );
 }

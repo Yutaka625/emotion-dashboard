@@ -289,6 +289,11 @@ export function computeDashboardData(rows: Record<string, string>[], filename: s
     const binRows = df.filter(r => r.time >= tStart && r.time < tEnd);
     if (binRows.length === 0) continue;
 
+    // 区間内の支配感情（フレーム単位1位の最頻）と、その占有率（勝者フレーム数 / 区間フレーム数）
+    const domCounts: Record<string, number> = {};
+    binRows.forEach(r => { domCounts[r.dominant_emotion] = (domCounts[r.dominant_emotion] || 0) + 1; });
+    const domSorted = Object.entries(domCounts).sort((a, b) => b[1] - a[1]);
+
     const entry: DashboardData['time_summary_10s'][0] = {
       time_start: round(tStart - startTime, 1),
       time_end: round(tEnd - startTime, 1),
@@ -296,11 +301,8 @@ export function computeDashboardData(rows: Record<string, string>[], filename: s
       engagement_mean: round(mean(binRows.map(r => r.engagement as number)), 4),
       valence_mean: round(mean(binRows.map(r => r.valence as number)), 4),
       attention_mean: round(mean(binRows.map(r => r.attention as number)), 4),
-      dominant_emotion: (() => {
-        const counts: Record<string, number> = {};
-        binRows.forEach(r => { counts[r.dominant_emotion] = (counts[r.dominant_emotion] || 0) + 1; });
-        return Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
-      })(),
+      dominant_emotion: domSorted[0][0],
+      dominant_share: round(domSorted[0][1] / binRows.length, 4),
     };
     for (const e of EMOTION_COLS) {
       entry[`${e}_mean`] = round(mean(binRows.map(r => r[e] as number)), 4);
