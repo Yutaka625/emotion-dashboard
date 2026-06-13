@@ -397,6 +397,7 @@ export default function Home() {
                   onClick={e => { e.stopPropagation(); setSecondaryData(null); setSecondaryFilename(''); setDetailSession('A'); }}
                   style={{ color: 'oklch(0.68 0.015 255)', lineHeight: 1 }}
                   title="比較データを削除"
+                  aria-label="比較データを削除"
                 >
                   <X size={10} />
                 </button>

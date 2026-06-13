@@ -101,6 +101,9 @@ export default function Sidebar({ activeSection, onSectionChange, hasComparison,
               <button
                 onClick={() => onSectionChange(item.id)}
                 data-active={isActive}
+                aria-label={item.label}
+                aria-current={isActive ? 'page' : undefined}
+                title={collapsed ? item.label : undefined}
                 className="nav-item w-full flex items-center gap-3 px-4 py-2.5 text-left"
                 style={{
                   // 背景・文字色は CSS（.nav-item[data-active])が所有。
