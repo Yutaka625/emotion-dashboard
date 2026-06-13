@@ -6,20 +6,22 @@
 import { useMemo } from 'react';
 import type { DashboardData } from '@/lib/types';
 import { EMOTION_LABELS_JA, EMOTION_COLORS } from '@/lib/types';
-import { Clock, Activity, Eye, Zap, TrendingUp, Brain, CheckCircle2, Info, AlertTriangle, AlertOctagon } from 'lucide-react';
+import { Clock, Activity, Eye, Zap, TrendingUp, Brain, CheckCircle2, Info, AlertTriangle, AlertOctagon, FlaskConical, Megaphone, ArrowRight } from 'lucide-react';
 import { useBaseline } from '@/contexts/BaselineContext';
 import { generateInsights, type InsightTone } from '@/lib/insightEngine';
+import { generatePurposeSummaries, type PurposeSummaryTone } from '@/lib/purposeSummaryEngine';
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend, Label,
   RadarChart, PolarGrid, PolarAngleAxis, Radar,
 } from 'recharts';
 import { rechartsTooltip } from '@/lib/chartTooltip';
 import CollapsibleCard from '@/components/ui/CollapsibleCard';
-import SessionMetadataCard from '@/components/sections/SessionMetadataCard';
 import { formatScore, formatPct } from '@/lib/utils';
 
 interface Props {
   data: DashboardData;
+  onSectionChange?: (id: string) => void;
+  hasComparison?: boolean;
 }
 
 function MetricCard({ label, value, unit, icon, color, sub }: {
@@ -74,6 +76,25 @@ function toneIcon(tone: InsightTone, color: string) {
   }
 }
 
+function purposeToneColor(tone: PurposeSummaryTone): string {
+  switch (tone) {
+    case 'positive': return 'oklch(0.70 0.16 150)';
+    case 'caution':  return 'oklch(0.76 0.15 70)';
+    case 'alert':    return 'oklch(0.62 0.20 25)';
+    default:         return 'oklch(0.64 0.10 250)';
+  }
+}
+
+function purposeIcon(icon: string, color: string) {
+  const props = { size: 18, style: { color } };
+  switch (icon) {
+    case 'Brain': return <Brain {...props} />;
+    case 'FlaskConical': return <FlaskConical {...props} />;
+    case 'Megaphone': return <Megaphone {...props} />;
+    default: return <Info {...props} />;
+  }
+}
+
 const RADIAN = Math.PI / 180;
 const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
   if (percent < 0.03) return null;
@@ -90,7 +111,7 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
   );
 };
 
-export default function OverviewSection({ data }: Props) {
+export default function OverviewSection({ data, onSectionChange, hasComparison }: Props) {
   const { meta, special_stats, dominant_emotion_counts, dominant_emotion_pct, emotion_stats } = data;
   const { isBaselineActive, baselineRange, displayMode } = useBaseline();
   // attention is treated as a facial expression metric (in emotion_stats)
@@ -129,6 +150,10 @@ export default function OverviewSection({ data }: Props) {
   const keyInsights = useMemo(
     () => generateInsights(data, { isBaselineActive, displayMode }, 4),
     [data, isBaselineActive, displayMode],
+  );
+  const purposeSummaries = useMemo(
+    () => generatePurposeSummaries(data, { isBaselineActive, displayMode }, { hasComparison }),
+    [data, isBaselineActive, displayMode, hasComparison],
   );
 
   return (
@@ -213,8 +238,76 @@ export default function OverviewSection({ data }: Props) {
         />
       </div>
 
-      {/* Session Metadata（記録条件・被験者メタデータ） */}
-      <SessionMetadataCard data={data} />
+      {/* Purpose Summary Cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {purposeSummaries.map(card => (
+          <div
+            key={card.kind}
+            className="p-4 rounded-xl flex flex-col gap-3"
+            style={{
+              background: 'oklch(0.22 0.04 255)',
+              border: `1px solid ${card.accentColor}40`,
+              boxShadow: `0 0 0 1px ${card.accentColor}10 inset`,
+            }}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="section-label mb-1">PURPOSE SUMMARY</div>
+                <div className="flex items-center gap-2">
+                  {purposeIcon(card.icon, card.accentColor)}
+                  <h2 style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1rem', color: 'oklch(0.88 0.005 250)' }}>
+                    {card.title}
+                  </h2>
+                </div>
+                <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.66 0.015 250)', marginTop: '0.35rem', lineHeight: 1.5 }}>
+                  {card.subtitle}
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              {card.items.map(item => {
+                const toneColor = purposeToneColor(item.tone);
+                return (
+                  <div key={item.label} className="flex items-start gap-2">
+                    <span
+                      className="mt-1 rounded-full"
+                      style={{ width: 7, height: 7, background: toneColor, boxShadow: `0 0 8px ${toneColor}70`, flexShrink: 0 }}
+                    />
+                    <div className="min-w-0">
+                      <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.58rem', color: 'oklch(0.58 0.015 255)', letterSpacing: '0.04em' }}>
+                        {item.label}
+                      </div>
+                      <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.76rem', color: 'oklch(0.80 0.008 250)', lineHeight: 1.45 }}>
+                        {item.value}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => onSectionChange?.(card.action.targetSection)}
+              className="mt-auto flex items-center justify-center gap-1.5 rounded-lg hbg"
+              style={{
+                height: 34,
+                border: `1px solid ${card.accentColor}70`,
+                color: card.accentColor,
+                fontFamily: 'Noto Sans JP, sans-serif',
+                fontWeight: 700,
+                fontSize: '0.76rem',
+                ['--hbg']: `${card.accentColor}12`,
+                ['--hbg-h']: `${card.accentColor}20`,
+              } as React.CSSProperties}
+            >
+              {card.action.label}
+              <ArrowRight size={14} />
+            </button>
+          </div>
+        ))}
+      </div>
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

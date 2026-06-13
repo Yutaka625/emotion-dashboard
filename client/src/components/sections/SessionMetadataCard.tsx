@@ -15,6 +15,9 @@ import CollapsibleCard from '@/components/ui/CollapsibleCard';
 
 interface Props {
   data: DashboardData;
+  onChange?: () => void;
+  defaultOpen?: boolean;
+  storageKey?: string;
 }
 
 const labelStyle: React.CSSProperties = {
@@ -79,7 +82,12 @@ const FIELDS: Record<FieldGroup, { title: string; fields: FieldDef[] }> = {
   },
 };
 
-export default function SessionMetadataCard({ data }: Props) {
+export default function SessionMetadataCard({
+  data,
+  onChange,
+  defaultOpen = false,
+  storageKey = 'ksdv.collapse.overview.sessionMeta',
+}: Props) {
   const filename = data.meta.filename;
   const [meta, setMeta] = useState<SessionMetadata>(() => readSessionMeta(filename));
 
@@ -96,6 +104,7 @@ export default function SessionMetadataCard({ data }: Props) {
         [group]: { ...prev[group], [key]: value },
       };
       writeSessionMeta(filename, next);
+      onChange?.();
       return next;
     });
   };
@@ -112,8 +121,8 @@ export default function SessionMetadataCard({ data }: Props) {
           入力あり
         </span>
       ) : undefined}
-      defaultOpen={false}
-      storageKey="ksdv.collapse.overview.sessionMeta"
+      defaultOpen={defaultOpen}
+      storageKey={storageKey}
     >
       {/* 自動取得情報（読み取り専用） */}
       <div className="mb-4 flex flex-wrap gap-x-6 gap-y-1" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.66rem', color: 'oklch(0.58 0.015 255)' }}>
