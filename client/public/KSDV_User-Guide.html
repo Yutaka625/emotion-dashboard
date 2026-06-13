@@ -997,6 +997,8 @@
 
       <p><strong>感情出現率</strong>は「その感情が有意に出現した時間の割合」で、平均スコアとは異なる指標です。閾値は<strong>スコア 0.3</strong>（0〜100スケール）で、低めに設定されているためわずかな表出も出現として数えます。例：喜び 68% → セッションの68%の時間で喜びスコアが 0.3 以上だった。</p>
 
+      <p><strong>記述統計表</strong>には各感情の <strong>n（有効フレーム数）</strong> 列があります。これは統計の計算に使われた「欠損を除いた実際のフレーム数」で、検定や平均値の信頼性を判断する材料になります（n が極端に少ない感情は値が不安定）。あわせて 平均±SD のエラーバー付き棒グラフで、ばらつき（標準偏差）も確認できます。</p>
+
       <table class="tab-table" style="margin-top:12px">
         <thead>
           <tr><th>感情</th><th>英語名</th><th>イメージ</th></tr>
@@ -1048,6 +1050,7 @@
         <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">相関行列ヒートマップ（全感情×Engagement×Valence）</span>
         <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(251,191,36,.25);">Circumplex Model 象限分析</span>
         <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(192,132,252,.25);">学術的解釈コメント（自動生成）</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">変化点一覧テーブル（閾値スライダー・列ソート）</span>
       </div>
 
       <table class="tab-table" style="margin-top:12px">
@@ -1058,6 +1061,8 @@
           <tr><td>FACS</td><td>Ekman & Friesen (1978)</td><td>顔の筋肉動作をAction Unitで体系化。アクションユニットタブと連携</td></tr>
         </tbody>
       </table>
+
+      <p><strong>変化点一覧テーブル</strong>では、感情スコアが急変したタイミング（変化点）を一覧で確認できます。<strong>変化量（delta）の閾値スライダー</strong>で表示する変化点を絞り込め、<strong>列ヘッダーのクリック</strong>で「時刻」または「変化量」の昇順／降順に並べ替えできます。時刻は秒と「分:秒」の両方で表示し、変化の方向を ↑（増加）／↓（減少）で色分けします。検出はグローバルSDの2.5倍を閾値にした探索的な手法です（詳細は<a href="#academic-guide">学術活用ガイド</a>）。</p>
 
       <div class="howto">
         <div class="howto-title">CSVレポート出力</div>
