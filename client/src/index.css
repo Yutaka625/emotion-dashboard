@@ -142,6 +142,18 @@
   * {
     @apply border-border outline-ring/50;
   }
+  /* キーボード操作時のみフォーカスリングを表示（マウスクリックでは出ない）。
+     アプリ独自の inline スタイルなボタン/リンクにも一貫した可視フォーカスを与える a11y 対応。 */
+  button:focus-visible,
+  a:focus-visible,
+  [role="button"]:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid oklch(0.80 0.14 195);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
   body {
     @apply bg-background text-foreground;
     font-family: 'Noto Sans JP', sans-serif;
@@ -255,22 +267,6 @@
   }
   .signal-pulse {
     animation: signal-pulse 2s ease-in-out infinite;
-  }
-
-  @keyframes scan-line {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
-  }
-  .scan-line {
-    animation: scan-line 3s linear infinite;
-  }
-
-  @keyframes count-up {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .count-up {
-    animation: count-up 0.6s ease-out forwards;
   }
 
   /* セクション切替時のフェードイン。
