@@ -15,8 +15,9 @@ async function startServer() {
   app.use(express.json({ limit: "512kb" }));
 
   // AIインサイト API（本番）。dev では vite.config.ts のミドルウェアが同じ処理を担う。
+  // プロバイダ選択(KSDV_AI_PROVIDER)とAPIキーは process.env から読む。
   app.post("/api/ai-insight", async (req, res) => {
-    const result = await handleAiInsight(req.body, process.env.ANTHROPIC_API_KEY);
+    const result = await handleAiInsight(req.body, process.env);
     res.status(result.status).json(result.body);
   });
 

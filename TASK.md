@@ -69,7 +69,7 @@
 ## 2026-06-14 セッション（AIインサイト AI-0: 単一セッションのAI解釈・有償機能の初手）
 - **戦略ロードマップ＋初手実装**: 「心sensor感情ログ × KSDV」をAIで専門知識化／予測・最適化／異常検知する有料機能の方針を整理（プランファイル `ai-sensor-ksdv-giggly-marble.md`）。3本柱（①解釈・ナラティブ ②予測・最適化 ③異常・パターン検知）× 3層横断（研究者/UX/マーケ）。初手として**単一セッションのAIインサイト**を実装
 - **送信ペイロードは集計指標のみ**: `client/src/lib/buildAiPayload.ts` が `DashboardData` から集計値だけを抽出（メタ・統計量・Affect Dynamics・n_eff・変化点・UXスコア・相関要約・Circumplex・10秒推移）。**映像・顔座標・ランドマーク・interocular・brightness・個票フレーム・被験者メタは送らない**。スキーマ `ksdv.ai-insight.payload.v1`、実測 約4.8KB／leaks 0 を検証
-- **共有ハンドラ＋両環境配線**: `server/aiInsight.ts`（Anthropic REST を fetch で呼ぶ・追加依存なし／既定 `claude-sonnet-4-6`／許可リストに `claude-opus-4-8`／誠実ガードレールのシステムプロンプト／構造化JSON出力／サイズ上限）。本番＝Express `POST /api/ai-insight`、開発＝Vite devミドルウェア（`vite.config.ts`）で同一ハンドラを使用。キーは `.env` の `ANTHROPIC_API_KEY`（サーバ専用・gitignore済み、`.env.example` 追加）
+- **共有ハンドラ＋両環境配線（プロバイダ・アダプタ方式）**: `server/aiInsight.ts`。LLMプロバイダは env `KSDV_AI_PROVIDER` で切替＝**既定 Gemini**（`gemini-2.5-flash`／`GEMINI_API_KEY`／responseMimeType=JSON）・**代替 Anthropic**（`claude-sonnet-4-6`／`ANTHROPIC_API_KEY`）。REST を fetch で呼ぶ・追加依存なし／プロバイダ非依存の誠実ガードレールsystem prompt／構造化JSON／サイズ上限。本番＝Express `POST /api/ai-insight`、開発＝Vite devミドルウェア（`vite.config.ts`）で同一ハンドラ（署名 `handleAiInsight(body, env)`）。キーはサーバ専用・gitignore済み、`.env.example` 追加
 - **AI専用同意ゲート＋追補規約**: `client/src/lib/aiConsent.ts`（versioned localStorage `ksdv.aiConsent`）と `KSDV_AI-terms.html`（直下＋`client/public/` 同期、※法務レビュー要のドラフト）。データ外部送信のため本体規約と分離
 - **UI**: `client/src/components/sections/AiInsightSection.tsx`（ペルソナ切替・生成/再生成・所見カード[確度]・次のアクション・限界・コピー）。`Sidebar.tsx`／`Home.tsx` にセクション追加
 - **誠実さの担保**: 因果非断定・n_eff引用・1セッション記述/ゼロ過多/擬似反復の明示をプロンプトとUI注記の両方に内蔵（メモリ `ksdv-frame-pseudoreplication` / `ksdv-no-iqr-outliers` と整合）

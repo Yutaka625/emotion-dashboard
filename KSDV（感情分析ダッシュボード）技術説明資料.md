@@ -343,8 +343,8 @@ emotion-dashboard/
 
 通常のKSDVは全処理がブラウザ内で完結し、データを外部送信しない。**例外は「AIインサイト」機能のみ**で、利用者が当該タブで明示的に「生成」を押したときに限り、外部AIサービスへ送信が発生する。
 
-- **送信先**：Anthropic社 Claude API（`https://api.anthropic.com/v1/messages`）。APIキーは**サーバ側のみ**（環境変数 `ANTHROPIC_API_KEY`）で保持し、クライアントには露出しない。
-- **送信経路**：開発時は Vite devミドルウェア、本番は Express の `POST /api/ai-insight`。両者は共有ハンドラ `server/aiInsight.ts` を使用（モデル既定 `claude-sonnet-4-6`、深い解析用に `claude-opus-4-8` を許可リストで受ける）。
+- **送信先（プロバイダ・アダプタ方式）**：LLMプロバイダは環境変数 `KSDV_AI_PROVIDER` で切り替える。**既定は Google Gemini API**（`gemini-2.5-flash`、キー `GEMINI_API_KEY`）、**代替は Anthropic Claude API**（`claude-sonnet-4-6`、キー `ANTHROPIC_API_KEY`）。APIキーは**サーバ側のみ**で保持し、クライアントには露出しない。プロバイダ依存コードは共有ハンドラ内のアダプタに隔離され、ペイロード構築・UI・同意は不変。
+- **送信経路**：開発時は Vite devミドルウェア、本番は Express の `POST /api/ai-insight`。両者は共有ハンドラ `server/aiInsight.ts` を使用。モデルはアクティブなプロバイダの許可リスト（Gemini: `gemini-2.5-flash` / `gemini-2.5-pro` / `gemini-2.0-flash`、Anthropic: `claude-sonnet-4-6` / `claude-opus-4-8`）でのみ受け付ける。
 - **送信するデータ（集計指標のみ）**：`client/src/lib/buildAiPayload.ts` が `DashboardData` から抽出した集計値（メタ情報・感情/特殊指標の統計量・Affect Dynamics・実効サンプルサイズ n_eff・変化点・UXスコア・相関の要約・Circumplex・10秒区間の推移）。スキーマ識別子は `ksdv.ai-insight.payload.v1`。
 - **送信しないデータ**：映像・画像、顔の座標／バウンディングボックス／ランドマーク／瞳孔間距離（interocular）／明るさ（brightness）、個々のフレーム（生時系列）、セッションメタデータ（被験者属性・自由記述）。`DashboardData` はそもそも前者の生体/環境の生値を保持しないため、これを母体にすることで構造的に除外している。
 - **防御**：ペイロード上限（共有ハンドラ256KB / Express body 512KB）、モデル許可リスト、リクエスト内容をサーバログに残さない方針。

@@ -155,16 +155,17 @@ function vitePluginManusDebugCollector(): Plugin {
  * 開発サーバ用 AIインサイト API。
  * 本番は Express(server/index.ts) が同じ handleAiInsight を担うが、
  * dev は Vite 単独稼働のためここでミドルウェアとして /api/ai-insight を処理する。
- * APIキーは .env の ANTHROPIC_API_KEY を loadEnv で読み（クライアントには出さない）。
+ * プロバイダ選択(KSDV_AI_PROVIDER)とAPIキー(GEMINI_API_KEY / ANTHROPIC_API_KEY)は
+ * .env を loadEnv で読み、env マップごとハンドラへ渡す（クライアントには出さない）。
  */
 function vitePluginAiInsightApi(): Plugin {
-  let apiKey: string | undefined;
+  let env: Record<string, string | undefined> = {};
   return {
     name: "ksdv-ai-insight-api",
     config(_conf, { mode }) {
-      // VITE_ 接頭辞なしの環境変数も含めて読み込む（第4引数 ''）
-      const env = loadEnv(mode, PROJECT_ROOT, "");
-      apiKey = env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_API_KEY;
+      // VITE_ 接頭辞なしの環境変数も含めて読み込む（第4引数 ''）。process.env を下地にマージ。
+      const loaded = loadEnv(mode, PROJECT_ROOT, "");
+      env = { ...process.env, ...loaded };
     },
     configureServer(server: ViteDevServer) {
       server.middlewares.use("/api/ai-insight", (req, res, next) => {
@@ -174,7 +175,7 @@ function vitePluginAiInsightApi(): Plugin {
           body += chunk.toString();
         });
         req.on("end", async () => {
-          const result = await handleAiInsight(body, apiKey);
+          const result = await handleAiInsight(body, env);
           res.statusCode = result.status;
           res.setHeader("Content-Type", "application/json");
           res.end(JSON.stringify(result.body));
