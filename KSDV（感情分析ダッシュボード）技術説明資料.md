@@ -145,7 +145,7 @@ KSDVは、顔表情認識データをCSV形式でアップロードし、感情�
 | **Transitions** | 感情遷移パターン（10×10行列） | HeatMap（明度補間）|
 | **Academic** | 学術的指標（動態、相関行列） | BarChart、CorrelationHeatMap |
 | **ActionUnits** | 顔表情単位22種の活性度 | BarChart |
-| **UXResearch** | UXスコア、フリクション/デライト、タスク別分析 | GaugeBar、HeatMap、Timeline |
+| **UXResearch** | UXスコア、フリクション/デライト、頭部動作検知イベント（nod/shake/tilt）、タスク別分析 | GaugeBar、HeatMap、Timeline |
 | **MultiFaceComparison** | 複数顔データ時のみ表示。データ品質（ノイズ除外）管理・FaceIDラベル付け・顔ごとの感情オーバーレイ | LineChart（顔別オーバーレイ）|
 | **Comparison** | 2セッションA/B比較。タイムラインオーバーレイは指標選択式（Engagement/Valence/Attention＋9感情）＋時間軸モード切替（実時間秒でt=30sがA/Bで縦揃い／正規化%で波形の形を比較、いずれも時間ベースリサンプリング） | 並列BarChart、RadarChart、LineChart |
 

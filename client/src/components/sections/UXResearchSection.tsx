@@ -10,11 +10,25 @@ import { EMOTION_LABELS_JA, EMOTION_COLORS, NON_NEUTRAL_EMOTIONS } from '@/lib/t
 import AbsoluteScaleBadge from '@/components/ui/AbsoluteScaleBadge';
 import CardHeader from '@/components/ui/CardHeader';
 import { useEvents } from '@/contexts/EventsContext';
-import { AlertTriangle, Star, Zap, Brain, Trophy, Filter } from 'lucide-react';
+import { AlertTriangle, Star, Zap, Brain, Trophy, Filter, ArrowUpDown, ArrowLeftRight, RotateCcw } from 'lucide-react';
 
 interface Props {
   data: DashboardData;
 }
+
+// 頭部動作検知イベント（アクションユニットタブから移設）。非言語サイン＝行動の解釈レイヤーのため UXリサーチに配置
+// 時刻を MM:SS 形式に変換
+const formatTime = (sec: number) => {
+  const m = Math.floor(sec / 60);
+  const s = (sec % 60).toFixed(1).padStart(4, '0');
+  return `${m}:${s}`;
+};
+
+const MOTION_CONFIG = {
+  nod:   { label: 'うなづき', axis: 'Pitch（上下）', color: 'oklch(0.75 0.14 195)', Icon: ArrowUpDown },
+  shake: { label: '首振り',   axis: 'Yaw（左右）',   color: 'oklch(0.82 0.18 80)',  Icon: ArrowLeftRight },
+  tilt:  { label: '首傾げ',   axis: 'Roll（傾き）',  color: 'oklch(0.78 0.14 300)', Icon: RotateCcw },
+} as const;
 
 // ---- 感情カラーから HUE 成分を抽出するヘルパー ----
 // EMOTION_COLORS は "oklch(L C H)" 形式
@@ -54,7 +68,7 @@ function SeverityBadge({ level }: { level: 'LOW' | 'MED' | 'HIGH' }) {
 }
 
 export default function UXResearchSection({ data }: Props) {
-  const { ux_scores, change_points, timeseries_full, time_summary_10s } = data;
+  const { ux_scores, change_points, timeseries_full, time_summary_10s, head_motion_events } = data;
   const { events } = useEvents();
   const [frictionFilter, setFrictionFilter] = useState<'all' | 'friction' | 'delight'>('all');
 
@@ -484,6 +498,109 @@ export default function UXResearchSection({ data }: Props) {
                 </div>
               );
             })}
+          </div>
+        )}
+      </div>
+
+      {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          Panel 3.5: 頭部動作検知イベント（非言語サイン）
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+      <div style={cardStyle}>
+        <CardHeader
+          label="HEAD MOTION EVENTS"
+          title="頭部動作検知イベント"
+          info="明確なうなづき（Pitch ≥8°）・首振り（Yaw ≥12°）・首傾げ（Roll ≥15°）を自動検知し、発生した時刻の一覧を示します。同意・否定・思考などの非言語サインの手がかりになります。"
+        />
+
+        {/* 凡例 */}
+        <div className="flex gap-4 mb-4">
+          {(Object.entries(MOTION_CONFIG) as [keyof typeof MOTION_CONFIG, typeof MOTION_CONFIG[keyof typeof MOTION_CONFIG]][]).map(([type, cfg]) => {
+            const count = head_motion_events.filter(e => e.type === type).length;
+            return (
+              <div key={type} className="flex items-center gap-1.5">
+                <cfg.Icon size={13} style={{ color: cfg.color }} />
+                <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.75 0.008 250)' }}>
+                  {cfg.label}
+                </span>
+                <span className="px-1.5 py-0.5 rounded-full" style={{ background: cfg.color + '22', color: cfg.color, fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fontWeight: 700 }}>
+                  {count}回
+                </span>
+              </div>
+            );
+          })}
+        </div>
+
+        {head_motion_events.length === 0 ? (
+          <div className="py-8 text-center" style={{ color: 'oklch(0.60 0.015 255)', fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.82rem' }}>
+            明確な頭部動作は検知されませんでした
+            <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.55 0.01 255)', marginTop: '4px' }}>
+              （CSV に pitch / yaw / roll 列がない場合も表示されません）
+            </div>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr style={{ borderBottom: '2px solid oklch(0.28 0.04 255)' }}>
+                  {['動作', '開始時刻', '終了時刻', '持続時間', '変化量'].map(h => (
+                    <th key={h} className="text-left pb-2 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.68 0.015 255)', letterSpacing: '0.05em' }}>
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {head_motion_events.map((ev, i) => {
+                  const cfg = MOTION_CONFIG[ev.type];
+                  const duration = (ev.time_end - ev.time_start).toFixed(2);
+                  return (
+                    <tr
+                      key={i}
+                      className="row-hover"
+                      style={{ borderBottom: '1px solid oklch(0.20 0.04 255)' }}
+                    >
+                      {/* 動作種別 */}
+                      <td className="py-2 pr-4">
+                        <div className="flex items-center gap-1.5">
+                          <cfg.Icon size={13} style={{ color: cfg.color, flexShrink: 0 }} />
+                          <span className="px-2 py-0.5 rounded-full" style={{ background: cfg.color + '1a', color: cfg.color, fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                            {cfg.label}
+                          </span>
+                        </div>
+                      </td>
+                      {/* 開始時刻 */}
+                      <td className="py-2 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.75rem', color: 'oklch(0.88 0.005 250)' }}>
+                        {formatTime(ev.time_start)}
+                      </td>
+                      {/* 終了時刻 */}
+                      <td className="py-2 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.75rem', color: 'oklch(0.72 0.008 250)' }}>
+                        {formatTime(ev.time_end)}
+                      </td>
+                      {/* 持続時間 */}
+                      <td className="py-2 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.75rem', color: 'oklch(0.65 0.015 255)' }}>
+                        {duration}s
+                      </td>
+                      {/* 変化量 */}
+                      <td className="py-2 pr-4">
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="h-1.5 rounded-full"
+                            style={{
+                              width: `${Math.min(60, (ev.magnitude / 40) * 60)}px`,
+                              background: cfg.color,
+                              opacity: 0.7,
+                            }}
+                          />
+                          <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.75rem', color: 'oklch(0.75 0.008 250)', fontWeight: 600 }}>
+                            {ev.magnitude}°
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
