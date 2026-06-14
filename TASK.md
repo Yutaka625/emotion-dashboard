@@ -63,6 +63,14 @@
 
 # ✅ 完了済みタスク
 
+## 2026-06-15 セッション（マルチFaceID Emotion Overlay の機能強化）
+- **スムージング連動**: overlay の各顔時系列に SMA/EMA を適用（サンプリング前に `applySmoothing` を適用）。UIは時系列タブの `SmoothingSettingsCard` を流用（`MultiFaceComparisonSection.tsx`）
+- **集団平均±SDバンド**: トグルで「表示中の顔＝人物単位」の各時点の平均線＋±SD帯を重ねて表示。各時点で値のある顔のみで算出、n＜2の時点は非表示。誠実注記つき。描画のためチャートを `LineChart`→`ComposedChart` 化（範囲Area＋平均Line）
+- **イベント帯の重ね描画**: `useEvents()` のイベント区間を `ReferenceArea` で重ねる。**実時間モードのみ**（進行率モードは顔ごとに時間→%対応が異なるため非表示＋注記）。XAxis を `type="number"` 化して値ベース配置に対応
+- **オーバーレイのCSV出力**: 見出し右に「CSV出力」。表示グリッド（time/pct＋各顔＋バンドON時 mean/sd、数値は3桁丸め）を `downloadCSV` で出力。生フレーム出力（時系列タブ）とは別物である旨を `title` に明記
+- **検証**: `tsc` 通過。CSV傍受で4機能のデータ経路を確認（time_sec/progress_pct ヘッダー・各顔列・mean/sd列・SMAで値変化・3桁丸め）。※チャートの視覚確認はプレビュー環境のResponsiveContainer不具合（display:none区間＋ウィンドウ0px化）で未touchの時系列タブ含め全ナビ先で描画されず、環境要因と切り分け済み
+- **資料同期**: ユーザーガイド両版タブ（マルチFaceID）の感情オーバーレイ節を更新（時間軸切替・スムージング・集団平均±SD・イベント帯・CSV出力）、技術資料のセクション表（MultiFace行）と機能一覧を更新
+
 ## 2026-06-14 セッション（TASK整理: マルチFaceID実時間トグルは実装済みを確認）
 - **🅰「マルチFaceID Emotion Overlay の実時間/進行率トグル」は既に実装済みであることを確認し、TASKを完了へ整理**: 実体は `MultiFaceComparisonSection.tsx` のコミット `19143d5`（その後 `a16f538` でピル初期値=Valence、`2478c9c` でゴミデータ顔の誤延長バグ修正）。既定=実時間（秒）、トグルで進行率（%）へ切替。「顔ごとに登場時刻・長さが異なり実時間では同じ瞬間に揃わない」旨の補足も `EMOTION OVERLAY` カードの `info` に記載済み。マルチFaceIDサンプルでライブ動作（タイトルが実時間↔進行率に切替）を確認。コード変更は不要のためドキュメント整合の対象なし
 

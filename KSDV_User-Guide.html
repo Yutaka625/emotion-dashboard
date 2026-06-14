@@ -1149,7 +1149,11 @@
       <div class="pill-list">
         <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(251,191,36,.25);">データ品質サマリ＋しきい値調整</span>
         <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">顔の管理リスト（色・フレーム数・ラベル名・表示トグル）</span>
-        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(192,132,252,.25);">感情オーバーレイ（指標選択式）</span>
+        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(192,132,252,.25);">感情オーバーレイ（指標選択式・時間軸切替）</span>
+        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">スムージング（SMA/EMA）</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">集団平均±SDバンド</span>
+        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(251,191,36,.25);">イベント帯の重ね描画（実時間モード）</span>
+        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">オーバーレイのCSV出力</span>
       </div>
 
       <div class="howto">
@@ -1174,9 +1178,23 @@
       <div class="howto">
         <div class="howto-title">感情オーバーレイ（顔どうしの比較）</div>
         <ul>
-          <li><strong>指標ピル</strong>（Engagement / Valence / Attention ＋ 非ニュートラル9感情）から1つを選びます。</li>
-          <li>表示中の各顔の時系列を<strong>時間0-100%に正規化</strong>して、1本ずつ色分けで重ね描画します（凡例はラベル名）。録画長が異なる顔どうしでも進行率で比較できます。</li>
-          <li>横軸の<strong>％は「各顔が映っていた区間の進行率」</strong>です（0%＝その顔が最初に検出されたフレーム、100%＝最後のフレーム）。顔ごとに登場時刻も長さも異なるため、各顔をそれぞれの登場区間で0〜100%に引き伸ばして波形の形を比較します。<strong>実時間（秒）の同じ瞬間を指すものではありません。</strong></li>
+          <li><strong>指標ピル</strong>（Engagement / Valence / Attention ＋ 非ニュートラル9感情）から1つを選びます。表示中の各顔の時系列を1本ずつ色分けで重ね描画します（凡例はラベル名）。</li>
+          <li><strong>時間軸トグル</strong>で横軸を切り替えられます。
+            <ul>
+              <li><strong>実時間（秒）（既定）</strong>：映像内の実際の時刻で重ねます。各顔の登場・退場のタイミングが異なるため、同じ瞬間の反応を直接比べられます（検出のない区間は線が途切れます）。</li>
+              <li><strong>進行率（%）</strong>：各顔の登場区間を 0〜100% に引き伸ばして波形の形を比較します（0%＝最初の検出フレーム、100%＝最後）。<strong>実時間の同じ瞬間を指すものではありません。</strong></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+
+      <div class="howto">
+        <div class="howto-title">スムージング・集団平均・イベント帯・CSV出力</div>
+        <ul>
+          <li><strong>スムージング（SMA/EMA）</strong>：フレーム間のノイズを抑えてトレンドを見やすくします（時系列分析タブと同じUI）。元データは保持され、表示のみ平滑化されます。</li>
+          <li><strong>集団平均±SD</strong>：トグルをオンにすると、表示中の顔（＝人物単位）の各時点の<strong>平均線</strong>と<strong>±標準偏差の帯</strong>を重ねて表示します。各時点で値のある顔だけで計算し、顔が2つ未満の時点は表示しません。少人数では参考程度にご覧ください。</li>
+          <li><strong>イベント帯</strong>：時系列分析タブで登録した刺激・タスク区間を、オーバーレイ上に色帯で重ねます。<strong>実時間（秒）モードのときのみ表示</strong>します（進行率モードでは顔ごとに時間→%の対応が異なるため表示しません）。</li>
+          <li><strong>CSV出力</strong>：見出し右の「CSV出力」で、いま表示しているグラフ（整列・間引き済みの各顔×選択指標、集団平均オン時は mean・sd 列も）をCSVに書き出します。<strong>生フレームの出力は「時系列分析」タブのCSV出力</strong>を使ってください（用途が異なります）。</li>
         </ul>
         <div class="note">💡 顔の識別色は一覧・凡例・FaceIDセレクターで共通です。グラフ見出しの ⓘ にも同じ説明があります。</div>
       </div>

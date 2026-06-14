@@ -8,13 +8,17 @@
 
 import { useMemo, useState } from 'react';
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+  ComposedChart, Line, Area, ReferenceArea, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from 'recharts';
-import { Users } from 'lucide-react';
+import { Users, Download } from 'lucide-react';
 import { useFaceID } from '@/contexts/FaceIDContext';
+import { useEvents } from '@/contexts/EventsContext';
 import { NON_NEUTRAL_EMOTIONS, EMOTION_LABELS_JA } from '@/lib/types';
 import { rechartsTooltip } from '@/lib/chartTooltip';
+import { applySmoothing, type SmoothingMethod } from '@/lib/smoothingUtils';
+import { downloadCSV } from '@/lib/csvExport';
 import CardHeader from '@/components/ui/CardHeader';
+import SmoothingSettingsCard from '@/components/sections/timeseries/SmoothingSettingsCard';
 
 // オーバーレイで選べる指標（特殊指標3種＋非ニュートラル9感情）
 const OVERLAY_METRICS: { key: string; label: string }[] = [
@@ -23,6 +27,46 @@ const OVERLAY_METRICS: { key: string; label: string }[] = [
   { key: 'attention', label: 'Attention' },
   ...NON_NEUTRAL_EMOTIONS.map(e => ({ key: e, label: EMOTION_LABELS_JA[e] || e })),
 ];
+
+// overlay の1行（横軸キー＋各顔の値＋集団平均バンド）
+type OverlayRow = Record<string, number | number[] | null>;
+
+// CSVセル用の最小エスケープ。数値は最大3桁へ丸め、文字列はカンマ・引用符・改行を含む場合のみクォート。
+function csvCell(v: unknown): string {
+  if (v == null) return '';
+  if (typeof v === 'number') return String(Math.round(v * 1000) / 1000);
+  const s = String(v);
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+/**
+ * overlay の表示グリッド（overlayData）をそのままCSV文字列にする。
+ * 先頭列＝time(秒) or progress(%)、続けて選択中の各顔列、バンドON時は mean/sd 列。
+ * ※これは「整列・間引き済みの表示データ」。生フレームの出力は時系列タブのCSV出力を使う。
+ */
+function buildOverlayCsv(
+  rows: OverlayRow[],
+  xKey: 'time' | 'pct',
+  faceIds: string[],
+  nameOf: (id: string) => string,
+  withBand: boolean,
+): string {
+  const header = [
+    xKey === 'pct' ? 'progress_pct' : 'time_sec',
+    ...faceIds.map(id => nameOf(id)),
+    ...(withBand ? ['mean', 'sd'] : []),
+  ];
+  const lines = [header.map(csvCell).join(',')];
+  for (const row of rows) {
+    const cells: unknown[] = [
+      row[xKey],
+      ...faceIds.map(id => row[id]),
+      ...(withBand ? [row.__mean, row.__sd] : []),
+    ];
+    lines.push(cells.map(csvCell).join(','));
+  }
+  return lines.join('\n');
+}
 
 export default function MultiFaceComparisonSection() {
   const {
@@ -38,11 +82,32 @@ export default function MultiFaceComparisonSection() {
   // 横軸モード: false=実時間（秒）, true=進行率（%）。既定は実時間
   const [overlayNormalize, setOverlayNormalize] = useState<boolean>(false);
 
-  // 選択中の各顔の時系列を重ねる（実時間 or 進行率）
-  const overlayData = useMemo(() => {
+  // スムージング設定（時系列タブと同じ既定値・UIを流用）
+  const [smoothingMethod, setSmoothingMethod] = useState<SmoothingMethod>('none');
+  const [smoothingWindow, setSmoothingWindow] = useState<number>(15);
+  const [smoothingAlpha, setSmoothingAlpha] = useState<number>(0.25);
+
+  // 集団平均±SDバンドの表示（顔＝人物単位の集約）
+  const [showMeanBand, setShowMeanBand] = useState<boolean>(false);
+
+  // イベント注釈（時系列タブで登録した刺激/タスク区間）
+  const { events } = useEvents();
+
+  // SMA のウィンドウ秒換算表示用 fps（いずれかの顔の平均fpsを使う。無ければ30）
+  const fpsAvg = getFaceData(selectedFaceIds[0] ?? availableFaceIds[0] ?? '')?.meta.fps_avg ?? 30;
+
+  // 横軸キー（実時間=time / 進行率=pct）
+  const xKey: 'time' | 'pct' = overlayNormalize ? 'pct' : 'time';
+
+  // 選択中の各顔の時系列を重ねる（実時間 or 進行率）。スムージング・集団バンドも付与
+  const overlayData = useMemo<OverlayRow[]>(() => {
     const sampled = selectedFaceIds
       .map(id => {
-        const ts = getFaceData(id)?.timeseries_full ?? [];
+        let ts = getFaceData(id)?.timeseries_full ?? [];
+        // スムージングはサンプリング前に全長へ適用（実時間・進行率で共通）
+        if (smoothingMethod !== 'none') {
+          ts = applySmoothing(ts, smoothingMethod, smoothingMethod === 'ema' ? smoothingAlpha : smoothingWindow);
+        }
         const step = Math.max(1, Math.floor(ts.length / 200));
         return { id, pts: ts.filter((_, i) => i % step === 0) };
       })
@@ -72,15 +137,16 @@ export default function MultiFaceComparisonSection() {
       .filter(v => isFinite(v));
     const maxGap = meanIntervals.length > 0 ? Math.min(...meanIntervals) * 5 : Infinity;
 
+    const grid = 200;
+    const rows: OverlayRow[] = [];
+
     if (overlayNormalize) {
       // ── 進行率（%）モード: 各顔の時間スパンを独立に 0〜100% に正規化 ──
       // 旧実装（インデックスベース）は末尾値をクランプして誤って伸ばすバグがあったため
       // 時間ベースの補間に変更。各顔が自身の区間で 0〜100% を使い切る。
-      const grid = 200;
-      const rows: Record<string, number | null>[] = [];
       for (let i = 0; i < grid; i++) {
         const frac = i / (grid - 1);
-        const row: Record<string, number | null> = { pct: Math.round(frac * 100) };
+        const row: OverlayRow = { pct: Math.round(frac * 100) };
         for (const s of sampled) {
           if (s.pts.length === 1) { row[s.id] = (s.pts[0] as any)[metric] ?? 0; continue; }
           const startT = s.pts[0].time, endT = s.pts[s.pts.length - 1].time;
@@ -88,23 +154,43 @@ export default function MultiFaceComparisonSection() {
         }
         rows.push(row);
       }
-      return rows;
+    } else {
+      // ── 実時間（秒）モード: 実際のタイムスタンプで補間。大きな空白は null ──
+      const allTimes = sampled.flatMap(s => [s.pts[0].time, s.pts[s.pts.length - 1].time]);
+      const minTime = Math.min(...allTimes);
+      const maxTime = Math.max(...allTimes);
+      for (let i = 0; i < grid; i++) {
+        const t = minTime + (i / (grid - 1)) * (maxTime - minTime);
+        const row: OverlayRow = { time: +t.toFixed(2) };
+        for (const s of sampled) row[s.id] = interpAt(s.pts, t, maxGap);
+        rows.push(row);
+      }
     }
 
-    // ── 実時間（秒）モード: 実際のタイムスタンプで補間。大きな空白は null ──
-    const allTimes = sampled.flatMap(s => [s.pts[0].time, s.pts[s.pts.length - 1].time]);
-    const minTime = Math.min(...allTimes);
-    const maxTime = Math.max(...allTimes);
-    const grid = 200;
-    const rows: Record<string, number | null>[] = [];
-    for (let i = 0; i < grid; i++) {
-      const t = minTime + (i / (grid - 1)) * (maxTime - minTime);
-      const row: Record<string, number | null> = { time: +t.toFixed(2) };
-      for (const s of sampled) row[s.id] = interpAt(s.pts, t, maxGap);
-      rows.push(row);
+    // 集団平均±SDバンド: 各時点で値のある顔だけで平均・標本SDを算出（顔＝人物単位）。
+    // n<2 の時点はバンドを描かない（null）。
+    if (showMeanBand) {
+      for (const row of rows) {
+        const vals = sampled
+          .map(s => row[s.id])
+          .filter((v): v is number => typeof v === 'number');
+        if (vals.length >= 2) {
+          const mean = vals.reduce((a, b) => a + b, 0) / vals.length;
+          const variance = vals.reduce((a, b) => a + (b - mean) ** 2, 0) / (vals.length - 1);
+          const sd = Math.sqrt(variance);
+          row.__mean = +mean.toFixed(2);
+          row.__sd = +sd.toFixed(2);
+          row.__band = [+(mean - sd).toFixed(2), +(mean + sd).toFixed(2)];
+        } else {
+          row.__mean = null;
+          row.__sd = null;
+          row.__band = null;
+        }
+      }
     }
+
     return rows;
-  }, [selectedFaceIds, metric, getFaceData, overlayNormalize]);
+  }, [selectedFaceIds, metric, getFaceData, overlayNormalize, smoothingMethod, smoothingWindow, smoothingAlpha, showMeanBand]);
 
   if (!isMultiFace) {
     return (
@@ -261,6 +347,26 @@ export default function MultiFaceComparisonSection() {
           info={overlayNormalize
             ? '下のピルで選んだ1指標について、表示中の各顔の時系列を重ねて比較します。横軸の％は「各顔が映っていた区間の進行率」（0%＝最初の検出フレーム、100%＝最後のフレーム）。顔ごとに登場時刻も長さも異なるため、各顔をそれぞれの区間で0〜100%に引き伸ばして波形の形を比べます。実時間（秒）の同じ瞬間を指すものではありません。'
             : '下のピルで選んだ1指標について、表示中の各顔の時系列を実時間（秒）で重ねて比較します。横軸は映像内の実際の時刻で、各顔が検出されていない区間は線が途切れます。顔ごとに登場・退場のタイミングが異なるため、同じ瞬間の反応を直接比べられます。'}
+          right={
+            <button
+              onClick={() => {
+                const csv = buildOverlayCsv(overlayData, xKey, selectedFaceIds, displayName, showMeanBand);
+                const mode = overlayNormalize ? 'progress' : 'realtime';
+                downloadCSV(`overlay_${metric}_${mode}.csv`, csv);
+              }}
+              disabled={overlayData.length === 0 || selectedFaceIds.length === 0}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs transition-colors"
+              title="今表示しているグラフ（整列・間引き済みの各顔×選択指標）をCSV出力します。生フレームの出力は「時系列分析」タブのCSV出力を使ってください。"
+              style={{
+                fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', whiteSpace: 'nowrap',
+                background: 'oklch(0.24 0.04 255)', border: '1px solid oklch(0.32 0.04 255)', color: 'oklch(0.72 0.012 250)',
+                opacity: overlayData.length === 0 ? 0.5 : 1,
+              }}
+            >
+              <Download size={13} />
+              CSV出力
+            </button>
+          }
         />
 
         {/* 指標選択ピル */}
@@ -310,13 +416,56 @@ export default function MultiFaceComparisonSection() {
               </button>
             );
           })}
+
+          {/* 集団平均±SDバンド トグル */}
+          <button
+            onClick={() => setShowMeanBand(v => !v)}
+            className="px-3 py-1 rounded-lg text-xs transition-all"
+            title="表示中の顔（＝人物単位）の各時点の平均と±標準偏差の帯を重ねます。"
+            style={{
+              fontFamily: 'Noto Sans JP, sans-serif',
+              fontWeight: showMeanBand ? 700 : 400,
+              background: showMeanBand ? 'oklch(0.30 0.08 200)' : 'oklch(0.22 0.04 255)',
+              color: showMeanBand ? 'oklch(0.85 0.14 200)' : 'oklch(0.66 0.015 255)',
+              border: `1px solid ${showMeanBand ? 'oklch(0.55 0.14 200)' : 'oklch(0.30 0.04 255)'}`,
+            }}
+          >
+            集団平均±SD: {showMeanBand ? 'ON' : 'OFF'}
+          </button>
         </div>
 
+        {/* スムージング設定（時系列タブと共通UI） */}
+        <div className="mb-3">
+          <SmoothingSettingsCard
+            smoothingMethod={smoothingMethod}
+            setSmoothingMethod={setSmoothingMethod}
+            smoothingWindow={smoothingWindow}
+            setSmoothingWindow={setSmoothingWindow}
+            smoothingAlpha={smoothingAlpha}
+            setSmoothingAlpha={setSmoothingAlpha}
+            fpsAvg={fpsAvg}
+          />
+        </div>
+
+        {/* 進行率モードではイベント帯を描けない旨の補足 */}
+        {overlayNormalize && events.length > 0 && (
+          <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', color: 'oklch(0.66 0.12 70)', marginBottom: '0.5rem' }}>
+            ⚠ 進行率（%）モードでは、顔ごとに時間→進行率の対応が異なるためイベント帯は表示しません（実時間モードでのみ表示）。
+          </p>
+        )}
+        {showMeanBand && (
+          <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', color: 'oklch(0.62 0.015 255)', marginBottom: '0.5rem' }}>
+            集団平均±SDは「表示中の顔＝人物単位」の集約です（各時点で値のある顔のみ、n＜2の時点は非表示）。少人数では参考程度にご覧ください。
+          </p>
+        )}
+
         <ResponsiveContainer width="100%" height={240}>
-          <LineChart data={overlayData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
+          <ComposedChart data={overlayData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" />
             <XAxis
-              dataKey={overlayNormalize ? 'pct' : 'time'}
+              dataKey={xKey}
+              type="number"
+              domain={['dataMin', 'dataMax']}
               unit={overlayNormalize ? '%' : 's'}
               tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', fill: 'oklch(0.68 0.015 255)' }}
             />
@@ -326,10 +475,65 @@ export default function MultiFaceComparisonSection() {
               labelFormatter={v => overlayNormalize ? `進行率 ${v}%` : `${v}s`}
             />
             <Legend formatter={v => <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem' }}>{v}</span>} />
-            {selectedFaceIds.map(id => (
-              <Line key={id} type="monotone" dataKey={id} name={displayName(id)} stroke={faceColor(id)} strokeWidth={1.5} dot={false} connectNulls={false} />
+
+            {/* イベント帯（実時間モードのみ。横軸が秒のときだけ x1/x2 が一致する） */}
+            {!overlayNormalize && events.map(ev => (
+              <ReferenceArea
+                key={ev.id}
+                x1={ev.startTime}
+                x2={ev.endTime}
+                fill={ev.color}
+                fillOpacity={0.12}
+                stroke={ev.color}
+                strokeOpacity={0.5}
+                strokeDasharray="4 2"
+              />
             ))}
-          </LineChart>
+
+            {/* 集団平均±SDバンド（範囲エリア）＋平均線 */}
+            {showMeanBand && (
+              <Area
+                type="monotone"
+                dataKey="__band"
+                name="平均±SD"
+                stroke="none"
+                fill="oklch(0.82 0.03 255)"
+                fillOpacity={0.18}
+                connectNulls={false}
+                isAnimationActive={false}
+                activeDot={false}
+              />
+            )}
+
+            {/* 各顔の線（バンドON時は主役を譲るため少し薄く） */}
+            {selectedFaceIds.map(id => (
+              <Line
+                key={id}
+                type="monotone"
+                dataKey={id}
+                name={displayName(id)}
+                stroke={faceColor(id)}
+                strokeWidth={1.5}
+                strokeOpacity={showMeanBand ? 0.5 : 1}
+                dot={false}
+                connectNulls={false}
+                isAnimationActive={false}
+              />
+            ))}
+
+            {showMeanBand && (
+              <Line
+                type="monotone"
+                dataKey="__mean"
+                name="平均"
+                stroke="oklch(0.94 0.02 255)"
+                strokeWidth={2.5}
+                dot={false}
+                connectNulls={false}
+                isAnimationActive={false}
+              />
+            )}
+          </ComposedChart>
         </ResponsiveContainer>
       </div>
     </div>
