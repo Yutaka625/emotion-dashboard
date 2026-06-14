@@ -21,6 +21,7 @@ import AcademicSection from '@/components/sections/AcademicSection';
 import ActionUnitsSection from '@/components/sections/ActionUnitsSection';
 import ComparisonSection from '@/components/sections/ComparisonSection';
 import UXResearchSection from '@/components/sections/UXResearchSection';
+import AiInsightSection from '@/components/sections/AiInsightSection';
 import MultiFaceComparisonSection from '@/components/sections/MultiFaceComparisonSection';
 import FaceQualityBanner from '@/components/FaceQualityBanner';
 import SessionMetadataCard from '@/components/sections/SessionMetadataCard';
@@ -214,7 +215,7 @@ export default function Home() {
   const metadataFilled = metadataRevision >= 0 && hasAnySessionMeta(readSessionMeta(safeSelected.meta.filename));
   const selectedSessionLabel = detailSession === 'B' && secondaryData ? 'Session B' : 'Session A';
 
-  const sectionIds = ['overview', 'timeseries', 'engagement', 'emotions', 'transitions', 'academic', 'actionunits', 'multiface', 'comparison', 'uxresearch'] as const;
+  const sectionIds = ['overview', 'timeseries', 'engagement', 'emotions', 'transitions', 'academic', 'actionunits', 'multiface', 'comparison', 'uxresearch', 'aiinsight'] as const;
   const sectionComponents: Record<string, React.ReactNode> = {
     overview:    <OverviewSection data={safeSelected} onSectionChange={handleSectionChange} hasComparison={!!secondaryData} />,
     timeseries:  <TimeseriesSection data={safeSelected} rawTimeseries={(selectedBaseData ?? safeSelected).timeseries_full} />,
@@ -263,6 +264,7 @@ export default function Home() {
         </div>
       ),
     uxresearch: <UXResearchSection data={safeSelected} />,
+    aiinsight:  <AiInsightSection data={safeSelected} />,
   };
 
   return (

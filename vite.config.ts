@@ -3,8 +3,9 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import fs from "node:fs";
 import path from "node:path";
-import { defineConfig, type Plugin, type ViteDevServer } from "vite";
+import { defineConfig, loadEnv, type Plugin, type ViteDevServer } from "vite";
 import { vitePluginManusRuntime } from "vite-plugin-manus-runtime";
+import { handleAiInsight } from "./server/aiInsight";
 
 // =============================================================================
 // Manus Debug Collector - Vite Plugin
@@ -150,7 +151,40 @@ function vitePluginManusDebugCollector(): Plugin {
   };
 }
 
-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()];
+/**
+ * 開発サーバ用 AIインサイト API。
+ * 本番は Express(server/index.ts) が同じ handleAiInsight を担うが、
+ * dev は Vite 単独稼働のためここでミドルウェアとして /api/ai-insight を処理する。
+ * APIキーは .env の ANTHROPIC_API_KEY を loadEnv で読み（クライアントには出さない）。
+ */
+function vitePluginAiInsightApi(): Plugin {
+  let apiKey: string | undefined;
+  return {
+    name: "ksdv-ai-insight-api",
+    config(_conf, { mode }) {
+      // VITE_ 接頭辞なしの環境変数も含めて読み込む（第4引数 ''）
+      const env = loadEnv(mode, PROJECT_ROOT, "");
+      apiKey = env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_API_KEY;
+    },
+    configureServer(server: ViteDevServer) {
+      server.middlewares.use("/api/ai-insight", (req, res, next) => {
+        if (req.method !== "POST") return next();
+        let body = "";
+        req.on("data", (chunk) => {
+          body += chunk.toString();
+        });
+        req.on("end", async () => {
+          const result = await handleAiInsight(body, apiKey);
+          res.statusCode = result.status;
+          res.setHeader("Content-Type", "application/json");
+          res.end(JSON.stringify(result.body));
+        });
+      });
+    },
+  };
+}
+
+const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector(), vitePluginAiInsightApi()];
 
 export default defineConfig({
   // GitHub Pages の公開パス（リポジトリ名に合わせる）

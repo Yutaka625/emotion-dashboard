@@ -339,6 +339,18 @@ emotion-dashboard/
 - **OWASP Top 10**：XSS対策（React自動エスケープ）、Injection対策、CSP設定
 - **ESLint / TypeScript Strict Mode**：コード品質と潜在的なセキュリティ問題を継続的に検出
 
+### 4.5 AIインサイト機能のデータ送信（有償・任意・ベータ）
+
+通常のKSDVは全処理がブラウザ内で完結し、データを外部送信しない。**例外は「AIインサイト」機能のみ**で、利用者が当該タブで明示的に「生成」を押したときに限り、外部AIサービスへ送信が発生する。
+
+- **送信先**：Anthropic社 Claude API（`https://api.anthropic.com/v1/messages`）。APIキーは**サーバ側のみ**（環境変数 `ANTHROPIC_API_KEY`）で保持し、クライアントには露出しない。
+- **送信経路**：開発時は Vite devミドルウェア、本番は Express の `POST /api/ai-insight`。両者は共有ハンドラ `server/aiInsight.ts` を使用（モデル既定 `claude-sonnet-4-6`、深い解析用に `claude-opus-4-8` を許可リストで受ける）。
+- **送信するデータ（集計指標のみ）**：`client/src/lib/buildAiPayload.ts` が `DashboardData` から抽出した集計値（メタ情報・感情/特殊指標の統計量・Affect Dynamics・実効サンプルサイズ n_eff・変化点・UXスコア・相関の要約・Circumplex・10秒区間の推移）。スキーマ識別子は `ksdv.ai-insight.payload.v1`。
+- **送信しないデータ**：映像・画像、顔の座標／バウンディングボックス／ランドマーク／瞳孔間距離（interocular）／明るさ（brightness）、個々のフレーム（生時系列）、セッションメタデータ（被験者属性・自由記述）。`DashboardData` はそもそも前者の生体/環境の生値を保持しないため、これを母体にすることで構造的に除外している。
+- **防御**：ペイロード上限（共有ハンドラ256KB / Express body 512KB）、モデル許可リスト、リクエスト内容をサーバログに残さない方針。
+- **同意**：データが端末外に出るため、KSDV本体規約とは別の**AI機能専用の同意（追補規約 `KSDV_AI-terms.html`）**をバージョン付き localStorage（`ksdv.aiConsent`）で管理。規約改訂時に再同意を求める。
+- **誠実ガードレール**：システムプロンプトに「因果を断定しない／n_eff を引用しフレーム数=独立標本ではない旨を添える／ゼロ過多分布・1セッション記述の限界を明示」を内蔵（設計判断メモ 3.2「擬似反復」・「IQR外れ値不採用」と整合）。出力は構造化JSON（summary / findings[confidence,caveats] / suggestions / limitations）。
+
 ---
 
 ## 第5章 パフォーマンス・スケーラビリティ

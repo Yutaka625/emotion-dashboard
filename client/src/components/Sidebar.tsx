@@ -5,7 +5,7 @@
  */
 
 import { useState, type CSSProperties } from 'react';
-import { BarChart2, Brain, GitBranch, Grid, Zap, ChevronRight, Activity, GitCompare, FlaskConical, Scan, Users, CircleHelp } from 'lucide-react';
+import { BarChart2, Brain, GitBranch, Grid, Zap, ChevronRight, Activity, GitCompare, FlaskConical, Scan, Users, CircleHelp, Sparkles } from 'lucide-react';
 import FaceScanIcon from '@/components/FaceScanIcon';
 
 interface NavItem {
@@ -25,6 +25,7 @@ const baseNavItems: NavItem[] = [
   { id: 'academic', label: '学術的分析', icon: <Brain size={16} />, description: 'Affect Dynamics等' },
   { id: 'actionunits', label: 'アクションユニット', icon: <Scan size={16} />, description: '表情筋動作分析' },
   { id: 'uxresearch', label: 'UXリサーチ', icon: <FlaskConical size={16} />, description: 'フリクション・デライト分析', highlight: true },
+  { id: 'aiinsight', label: 'AIインサイト', icon: <Sparkles size={16} />, description: 'AIによる解釈・示唆', highlight: true },
 ];
 
 interface SidebarProps {

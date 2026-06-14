@@ -40,8 +40,11 @@
 - [ ] **KEY INSIGHTS Phase 2: フルセット・ルール拡張**
   - 遷移パターン・circumplex 象限の偏り・相関・頭部動作イベントの活用
   - 「もっと見る」で全インサイト展開、各カードから該当セクションへのジャンプ導線
-- [ ] **Before/After AI 比較機能 Phase 3B（Claude API）**
-  - `.env` に `ANTHROPIC_API_KEY`、`@anthropic-ai/sdk`、`POST /api/ai-compare`、`AiInsightSection.tsx`、ナビ追加
+- [ ] **AIインサイト AI-1: A/B比較のAI解釈（旧 Before/After Phase 3B）**
+  - AI-0（単一セッション・実装済み／下記完了欄）のペイロード／エンドポイント／同意基盤を**2セッションへ拡張**。`buildAiPayload` を A/B 2本受けに一般化し、比較タブから生成
+- [ ] **AIインサイト AI-2: 異常・パターン検知をペイロードに同梱**（連続指標の外れ・非典型遷移・センサーアーティファクトの多指標判定）
+- [ ] **AIインサイト AI-3: イベント/オンセット時間ロックの軌跡最適化ヒント**（`EventsContext` 拡張と連動）
+- [ ] **AIインサイト AI-4: Phase 4基盤上で被験者単位集約・群間所見のAI要約**（ANOVA/ICCの解釈層。擬似反復を回避した正しい推論の上に乗せる）
 - [ ] **データ保存・読み込み（localStorage）**
 - [ ] **感情閾値設定機能**（実装前に仕様確定）
   - 閾値設定UI（検出最小値）／表示フィルタか統計補正かの仕様検討／ベースライン・FaceIDとの併用整理
@@ -62,6 +65,15 @@
 ---
 
 # ✅ 完了済みタスク
+
+## 2026-06-14 セッション（AIインサイト AI-0: 単一セッションのAI解釈・有償機能の初手）
+- **戦略ロードマップ＋初手実装**: 「心sensor感情ログ × KSDV」をAIで専門知識化／予測・最適化／異常検知する有料機能の方針を整理（プランファイル `ai-sensor-ksdv-giggly-marble.md`）。3本柱（①解釈・ナラティブ ②予測・最適化 ③異常・パターン検知）× 3層横断（研究者/UX/マーケ）。初手として**単一セッションのAIインサイト**を実装
+- **送信ペイロードは集計指標のみ**: `client/src/lib/buildAiPayload.ts` が `DashboardData` から集計値だけを抽出（メタ・統計量・Affect Dynamics・n_eff・変化点・UXスコア・相関要約・Circumplex・10秒推移）。**映像・顔座標・ランドマーク・interocular・brightness・個票フレーム・被験者メタは送らない**。スキーマ `ksdv.ai-insight.payload.v1`、実測 約4.8KB／leaks 0 を検証
+- **共有ハンドラ＋両環境配線**: `server/aiInsight.ts`（Anthropic REST を fetch で呼ぶ・追加依存なし／既定 `claude-sonnet-4-6`／許可リストに `claude-opus-4-8`／誠実ガードレールのシステムプロンプト／構造化JSON出力／サイズ上限）。本番＝Express `POST /api/ai-insight`、開発＝Vite devミドルウェア（`vite.config.ts`）で同一ハンドラを使用。キーは `.env` の `ANTHROPIC_API_KEY`（サーバ専用・gitignore済み、`.env.example` 追加）
+- **AI専用同意ゲート＋追補規約**: `client/src/lib/aiConsent.ts`（versioned localStorage `ksdv.aiConsent`）と `KSDV_AI-terms.html`（直下＋`client/public/` 同期、※法務レビュー要のドラフト）。データ外部送信のため本体規約と分離
+- **UI**: `client/src/components/sections/AiInsightSection.tsx`（ペルソナ切替・生成/再生成・所見カード[確度]・次のアクション・限界・コピー）。`Sidebar.tsx`／`Home.tsx` にセクション追加
+- **誠実さの担保**: 因果非断定・n_eff引用・1セッション記述/ゼロ過多/擬似反復の明示をプロンプトとUI注記の両方に内蔵（メモリ `ksdv-frame-pseudoreplication` / `ksdv-no-iqr-outliers` と整合）
+- **資料同期**: ユーザーガイド（両版）にタブ⑪を追加、技術説明資料に §4.5 を追加。**`KSDV_AI-terms.html` は法務レビュー要**
 
 ## 2026-06-13 セッション（頭部動作検知イベントをUXリサーチへ移設）
 - **頭部動作検知イベント（nod/shake/tilt）をアクションユニット→UXリサーチへ移動**: うなづき・首振り・首傾げは「同意・否定・思考」などの非言語サイン＝行動の解釈レイヤーのため、生信号寄りのアクションユニットタブではなくUXリサーチタブが適切と判断。フリクション＆デライトの直後・タスク別サマリーの前に配置（`ActionUnitsSection.tsx` から削除し `UXResearchSection.tsx` へ。MOTION_CONFIG/formatTime/アイコンimportも移設）。**頭部姿勢分析（Pitch/Yaw/Roll の生統計）はアクションユニットに据え置き**（生信号＝AUタブ／解釈された行動＝UXタブ、の線引き）

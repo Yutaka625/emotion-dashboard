@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KSDV AIインサイト機能 利用規約（追補）</title>
+<style>
+  :root {
+    --text:    #1a1a1a;
+    --text-sub:#444;
+    --muted:   #6b7280;
+    --line:    #e2e2e2;
+    --bg:      #ffffff;
+    --bg-soft: #f7f7f8;
+    --accent:  #1f5fae;
+    --note-bg: #f0f5fb;
+    --note-bd: #c5d9ef;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg-soft); color: var(--text);
+    font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "游ゴシック", "Yu Gothic", "メイリオ", Meiryo, sans-serif;
+    font-size: 16px; line-height: 1.9;
+  }
+  .page {
+    max-width: 800px; margin: 0 auto; background: var(--bg);
+    padding: 56px 48px 80px; border-left: 1px solid var(--line); border-right: 1px solid var(--line); min-height: 100vh;
+  }
+  header { border-bottom: 2px solid var(--text); padding-bottom: 20px; margin-bottom: 28px; }
+  header h1 { font-size: 1.5rem; line-height: 1.45; margin: 0 0 10px; font-weight: 700; }
+  header .meta { font-size: 0.85rem; color: var(--muted); }
+  .callout {
+    background: var(--note-bg); border: 1px solid var(--note-bd); border-radius: 8px;
+    padding: 16px 20px; margin: 24px 0; font-size: 0.92rem; color: var(--text-sub);
+  }
+  .callout strong { color: var(--text); }
+  h2 { font-size: 1.1rem; margin: 32px 0 10px; padding-left: 10px; border-left: 4px solid var(--accent); }
+  ul { padding-left: 1.3em; }
+  li { margin: 6px 0; }
+  .draft {
+    background: #fff7ed; border: 1px solid #fdba74; border-radius: 8px;
+    padding: 12px 16px; margin: 16px 0; font-size: 0.88rem; color: #7c2d12;
+  }
+  footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 0.82rem; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1>KSDV「AIインサイト」機能 利用規約（追補）</h1>
+    <div class="meta">対象: KSDV AIインサイト機能（有償）／ バージョン 1 ／ 最終更新: 2026-06-14</div>
+  </header>
+
+  <div class="draft">
+    ※ 本ページは追補規約の<strong>ドラフト</strong>です。対外配布前に法務レビューを受けてください。
+    プレースホルダー（提供者名・準拠法・問い合わせ先等）は確定情報に差し替えが必要です。
+  </div>
+
+  <div class="callout">
+    本追補は、KSDV本体の<strong>利用規約・プライバシーポリシー</strong>を補完するものです。
+    AIインサイト機能を利用する場合のみ適用され、本機能を使わない通常のKSDV利用には影響しません。
+    通常のKSDVは全処理がブラウザ内で完結し、データを外部送信しません。
+    <strong>AIインサイト機能を実行したときのみ</strong>、下記の集計データが外部のAIサービスへ送信されます。
+  </div>
+
+  <h2>1. 機能の概要</h2>
+  <p>
+    AIインサイト機能は、利用者がアップロードした感情ログから KSDV が計算した
+    <strong>集計済みの統計指標</strong>を外部のAIサービス（Anthropic社の Claude API）に送信し、
+    その解釈・所見・示唆をテキストで生成して表示する有償機能です。
+  </p>
+
+  <h2>2. 外部に送信されるデータ／送信されないデータ</h2>
+  <p><strong>送信されるもの（集計指標のみ）:</strong></p>
+  <ul>
+    <li>セッションの基本情報（ファイル名・総フレーム数・記録長・検出率）</li>
+    <li>感情・特殊指標（engagement/valence/attention）の統計量（平均・SD・最大・有効フレーム数 等）</li>
+    <li>感情動態指標（AR1・MSSD・実効サンプルサイズ n_eff）、変化点、UXスコア、相関の要約、10秒区間の推移</li>
+  </ul>
+  <p><strong>送信されないもの:</strong></p>
+  <ul>
+    <li>映像・画像・音声などの生メディア（KSDVはそもそも扱いません）</li>
+    <li>顔の座標・バウンディングボックス・ランドマーク・瞳孔間距離・明るさ等の生体/環境の生データ</li>
+    <li>個々のフレーム（時系列の生レコード）</li>
+    <li>セッションメタデータ（被験者属性・自由記述など利用者入力情報）</li>
+  </ul>
+
+  <h2>3. 送信先・データの取扱い</h2>
+  <ul>
+    <li>送信先は Anthropic社の Claude API です。送信先のデータ取扱いは同社のポリシーに従います。</li>
+    <li>APIキーはサーバ側でのみ保持し、利用者のブラウザには露出しません。</li>
+    <li>提供者はリクエスト内容を解析目的を超えて保存・二次利用しません（具体的な保持方針は提供者が別途定めます）。</li>
+  </ul>
+
+  <h2>4. 同意</h2>
+  <p>
+    本機能の初回利用時に、本追補への同意を求めます。同意はバージョン管理され、規約改訂時には再同意を求めます。
+    同意状態は利用者のブラウザ（localStorage）にのみ保存されます。
+  </p>
+
+  <h2>5. 結果の性質と免責</h2>
+  <ul>
+    <li>生成される所見は<strong>1セッションの記述的な観察に基づく参考情報</strong>であり、被験者集団への一般化や因果の証明ではありません。</li>
+    <li>フレーム単位の指標は自己相関により実質的な独立標本数が小さくなるため、統計的有意性を保証するものではありません。</li>
+    <li>マーケティング等のKPIや成果を保証するものではありません。最終的な判断は利用者の責任で行ってください。</li>
+    <li>AIの出力には誤りが含まれる可能性があります。重要な意思決定では原データと併せて検証してください。</li>
+  </ul>
+
+  <h2>6. 被験者からの同意取得</h2>
+  <p>
+    利用者は、感情ログの取得・分析・本機能による外部送信について、必要な範囲で被験者から適法な同意を得る責任を負います。
+  </p>
+
+  <footer>
+    本追補に定めのない事項は、KSDV本体の利用規約・プライバシーポリシーに従います。
+  </footer>
+</div>
+</body>
+</html>

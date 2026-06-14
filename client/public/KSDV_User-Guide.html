@@ -467,6 +467,7 @@
       <a href="#tab-uxresearch">UXリサーチ</a>
       <a href="#tab-multiface">マルチFaceID</a>
       <a href="#tab-comparison">比較分析</a>
+      <a href="#tab-aiinsight">AIインサイト</a>
 
       <div class="section-heading">参考資料</div>
       <a href="#reference">指標クイックリファレンス</a>
@@ -1257,6 +1258,47 @@
       </div>
     </div>
 
+
+    <!-- ═══════════════════════════════════════
+         タブ⑪：AIインサイト
+    ═══════════════════════════════════════ -->
+    <hr>
+    <div class="doc-section" id="tab-aiinsight">
+      <h2>
+        <span class="h2-icon" style="background:var(--purple-dim); color:var(--purple);">✦</span>
+        タブ⑪：AIインサイト（AI Insight・有償／ベータ）
+      </h2>
+      <p>
+        このセッションの<strong>集計指標</strong>をAI（Claude）が解釈し、所見・示唆・注意点を日本語の文章で生成する機能です。
+        統計の数値を「読み解いた言葉」に変換し、意思決定の入口を素早くするのが狙いです。
+      </p>
+
+      <div class="note" style="border-color:rgba(192,132,252,.35)">
+        🔐 <strong>データの取り扱い（重要）</strong>：通常のKSDVは全処理がブラウザ内で完結し外部送信しません。
+        本機能を<strong>実行したときのみ</strong>、KSDVが計算した<strong>集計済みの統計指標だけ</strong>が外部のAIサービス（Anthropic社 Claude API）へ送信されます。
+        <strong>映像・顔の座標・ランドマーク・瞳孔間距離・明るさ・個々のフレーム・被験者メタデータは送信しません。</strong>
+        初回利用時に専用の<a href="KSDV_AI-terms.html" target="_blank" rel="noopener">利用規約（追補）</a>への同意を求めます。
+      </div>
+
+      <div class="pill-list">
+        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(192,132,252,.25);">読み手（研究者／UX／マーケター）の切替</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">要約・所見カード（確度ラベル付き）</span>
+        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">次に取りうるアクション（提案）</span>
+        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(251,191,36,.25);">この解析の限界（注意点）</span>
+      </div>
+
+      <div class="howto">
+        <div class="howto-title">使い方</div>
+        <p>① 「読み手（フレーミング）」で研究者／UXリサーチャー／マーケターのいずれかを選びます（解説のトーンが変わります）。</p>
+        <p style="margin-top:6px">② 「生成する」を押すと集計指標がAIに送られ、要約・所見・次のアクション・限界が表示されます。コストと同意のため<strong>自動実行はしません</strong>（押したときだけ動きます）。</p>
+        <p style="margin-top:6px">③ 「再生成」で取り直し、「結果をコピー」でテキストを書き出せます。</p>
+      </div>
+
+      <div class="note" style="border-color:rgba(251,191,36,.35)">
+        ⚠️ 生成結果は<strong>1セッションの記述的な観察</strong>に基づく参考情報です。因果やKPI（成果）を保証するものではなく、フレーム単位の指標は自己相関により実質的な独立標本数（n_eff）が小さくなります。
+        AIには「因果を断定しない」「n_effを引用する」「一般化しない」などの制約を持たせていますが、出力に誤りが含まれる可能性はあります。重要な判断は原データと併せて検証してください。
+      </div>
+    </div>
 
     <!-- ═══════════════════════════════════════
          指標クイックリファレンス
