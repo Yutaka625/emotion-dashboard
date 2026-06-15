@@ -125,8 +125,8 @@ KSDVは、顔表情認識データをCSV形式でアップロードし、感情�
 - **責務**：全ての統計計算ロジック
 - **実装関数（主要）**：
   - `mean()`, `std()`, `quantile()` — 基本統計量
-  - `ar1()` — AR(1)自己相関（慣性指標）
-  - `mssd()` — Mean Squared Successive Difference（不安定性指標）
+  - `ar1()` — AR(1)自己相関（慣性指標）※ フレーム単位（ラグ1＝次フレーム）で算出。fpsが高いほど隣接フレームが似て値が高めに出るため、絶対値での断定は避け同一fps・同一条件の相対比較で解釈する（学術タブ・ユーザーガイドにも同趣旨を明記）。不規則サンプリング下の厳密な時間的持続性には、一定間隔への整列や連続時間AR／Ornstein–Uhlenbeck が本来適する
+  - `mssd()` — Mean Squared Successive Difference（不安定性指標）※ AR1同様に隣接フレーム依存でfpsの影響を受ける
   - `computeStats()` — 感情別統計
   - `computeAffectDynamics()` — 動態指標
   - `detectHeadMotionEvents()` — 頭部動作検知

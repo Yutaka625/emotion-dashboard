@@ -246,7 +246,7 @@ export default function AcademicSection({ data }: Props) {
   const interpretationCards = [
     {
       heading: '1. 感情の安定性と慣性',
-      content: `Affect Dynamicsの分析から、本セッションでは「${topInertia.name}」が最も高い慣性（AR1: ${topInertia.ar1.toFixed(4)}）を示しており、一度この状態に入ると持続しやすいことが示唆されます。一方、${topVariability.name}は最も高い変動性（SD: ${topVariability.sd.toFixed(4)}）を示し、瞬間的な変化が頻繁に発生していました。`,
+      content: `Affect Dynamicsの分析から、本セッションでは「${topInertia.name}」が最も高い慣性（AR1: ${topInertia.ar1.toFixed(4)}）を示しており、一度この状態に入ると持続しやすいことが示唆されます。一方、${topVariability.name}は最も高い変動性（SD: ${topVariability.sd.toFixed(4)}）を示し、瞬間的な変化が頻繁に発生していました。なお AR1 はフレーム単位（ラグ1＝次フレーム）で算出し fps が高いほど高めに出るため、絶対値での断定は避け、同一条件のセッション間・被験者間の相対比較として解釈してください。`,
       color: 'oklch(0.62 0.18 160)',
     },
     {
@@ -389,11 +389,15 @@ export default function AcademicSection({ data }: Props) {
       <CollapsibleCard
         label="AFFECT DYNAMICS — INERTIA (AR1)"
         title="感情慣性（1次自己相関係数）"
-        info="1つ前のフレームとの自己相関（AR1）。1に近いほど状態が持続しやすく、負の値は振動（揺り戻し）を示します。"
+        info="1つ前のフレームとの自己相関（AR1）。1に近いほど状態が持続しやすく、負の値は振動（揺り戻し）を示します。算出は『1フレーム＝ラグ1』のフレーム単位で、フレームレート(fps)が高いほど値は高めに出ます。絶対値の大小ではなく、同一fps・同一条件のセッション間／被験者間の相対比較で解釈してください（不安定性MSSD・変動性SDも同じくフレーム単位の指標です）。"
         storageKey="ksdv.collapse.academic.inertia"
       >
-        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.68 0.015 255)', marginBottom: '1rem' }}>
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.68 0.015 255)', marginBottom: '0.5rem' }}>
           高い慣性（AR1が1に近い）は感情状態が持続しやすいことを示します。負の値は振動パターンを示します。
+        </p>
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', color: 'oklch(0.66 0.12 70)', marginBottom: '1rem', lineHeight: 1.7 }}>
+          ⚠ 算出は「1フレーム＝ラグ1」のフレーム単位です。フレームレート(fps)が高いほど隣接フレームが似るため AR1 は高めに出ます。
+          <strong>絶対値の大小で断定せず</strong>、同一fps・同一条件での<strong>セッション間／被験者間の相対比較</strong>として解釈してください。
         </p>
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={dynamicsCompare} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>

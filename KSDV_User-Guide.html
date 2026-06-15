@@ -1296,7 +1296,7 @@
           <tr><td>Attention</td><td>0〜100%</td><td>視線・注意の向き</td></tr>
           <tr><td>frames（フレーム）</td><td>整数</td><td>データの行数。1フレーム = 1回の計測</td></tr>
           <tr><td>sec（秒）</td><td>秒</td><td>時間軸の単位</td></tr>
-          <tr><td>AR1（慣性）</td><td>−1〜+1</td><td>前のフレームの状態が次に引き継がれる度合い。正=持続、負=振動パターン</td></tr>
+          <tr><td>AR1（慣性）</td><td>−1〜+1</td><td>前のフレームの状態が次に引き継がれる度合い。正=持続、負=振動パターン。<strong>フレーム単位・fps依存</strong>のため絶対値でなく同一条件の相対比較で解釈</td></tr>
           <tr><td>SD（変動性）</td><td>—</td><td>標準偏差。感情スコアのばらつきの大きさ</td></tr>
           <tr><td>MSSD（不安定性）</td><td>—</td><td>平均二乗連続差。隣接フレーム間の急激な変動の頻度を示す</td></tr>
           <tr><td>支配的感情</td><td>感情名</td><td>そのフレームで最もスコアが高かった感情</td></tr>
@@ -1343,6 +1343,7 @@
             <tr><td>負値</td><td>振動パターン（↑↓↑↓と交互に変化する）</td></tr>
           </tbody>
         </table>
+        <div class="note">⚠️ <strong>AR1の読み方の前提</strong>：AR1は<strong>「1フレーム＝ラグ1」のフレーム単位</strong>で計算しています。フレームレート(fps)が高いほど隣接フレームが似るため、AR1は機械的に高めに出ます（不安定性MSSDも隣接フレームに依存するため同様）。したがって<strong>上の目安表は同一fps・同一条件での相対比較の指針</strong>として用い、<strong>絶対値だけで「慣性が高い／低い」と断定しないでください</strong>。異なるfpsのデータどうしのAR1値は直接比較できません。厳密な時間的持続性を扱う場合は、一定間隔への整列や連続時間モデル（例：連続時間AR／Ornstein–Uhlenbeck）が本来は適しています。</div>
         <p style="margin-top:10px; margin-bottom:4px"><strong>MSSD と SD² の比較</strong>（不安定性の解釈）：</p>
         <table class="tab-table">
           <thead><tr><th>比較</th><th>解釈</th></tr></thead>
