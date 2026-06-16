@@ -5,8 +5,9 @@
  */
 
 import { useState, type CSSProperties } from 'react';
-import { BarChart2, Brain, GitBranch, Grid, Zap, ChevronRight, Activity, GitCompare, FlaskConical, Scan, Users, CircleHelp } from 'lucide-react';
+import { BarChart2, Brain, GitBranch, Grid, Zap, ChevronRight, Activity, GitCompare, FlaskConical, Scan, Users, CircleHelp, Sparkles, Lock } from 'lucide-react';
 import FaceScanIcon from '@/components/FaceScanIcon';
+import { BASE_DASHBOARD_SECTIONS, type DashboardSectionDefinition } from '@/lib/dashboardSections';
 
 interface NavItem {
   id: string;
@@ -14,18 +15,26 @@ interface NavItem {
   icon: React.ReactNode;
   description: string;
   highlight?: boolean;
+  locked?: boolean;
+  tier?: DashboardSectionDefinition['tier'];
 }
 
-const baseNavItems: NavItem[] = [
-  { id: 'overview', label: '概要', icon: <Grid size={16} />, description: 'セッションサマリー' },
-  { id: 'timeseries', label: '時系列分析', icon: <Activity size={16} />, description: '感情・指標の推移' },
-  { id: 'engagement', label: '特殊指標', icon: <Zap size={16} />, description: '関与度・感情価の詳細分析' },
-  { id: 'emotions', label: '感情分布', icon: <BarChart2 size={16} />, description: '10感情の統計' },
-  { id: 'transitions', label: '感情遷移', icon: <GitBranch size={16} />, description: '状態遷移パターン' },
-  { id: 'actionunits', label: 'アクションユニット', icon: <Scan size={16} />, description: '表情筋動作分析' },
-  { id: 'academic', label: '学術的分析', icon: <Brain size={16} />, description: 'Affect Dynamics等' },
-  { id: 'uxresearch', label: 'UXリサーチ', icon: <FlaskConical size={16} />, description: 'フリクション・デライト分析', highlight: true },
-];
+const SECTION_ICONS: Record<string, React.ReactNode> = {
+  overview: <Grid size={16} />,
+  timeseries: <Activity size={16} />,
+  engagement: <Zap size={16} />,
+  emotions: <BarChart2 size={16} />,
+  transitions: <GitBranch size={16} />,
+  actionunits: <Scan size={16} />,
+  academic: <Brain size={16} />,
+  uxresearch: <FlaskConical size={16} />,
+  aiinsights: <Sparkles size={16} />,
+};
+
+const baseNavItems: NavItem[] = BASE_DASHBOARD_SECTIONS.map(section => ({
+  ...section,
+  icon: SECTION_ICONS[section.id] ?? <Grid size={16} />,
+}));
 
 interface SidebarProps {
   activeSection: string;
@@ -117,7 +126,7 @@ export default function Sidebar({ activeSection, onSectionChange, hasComparison,
                   {item.icon}
                 </span>
                 {!collapsed && (
-                  <div className="overflow-hidden">
+                  <div className="overflow-hidden flex-1 min-w-0">
                     <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 500, fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
                       {item.label}
                     </div>
@@ -125,6 +134,9 @@ export default function Sidebar({ activeSection, onSectionChange, hasComparison,
                       {item.description}
                     </div>
                   </div>
+                )}
+                {!collapsed && item.locked && (
+                  <Lock size={12} style={{ color: 'oklch(0.78 0.18 60)', flexShrink: 0 }} aria-label="ロック中" />
                 )}
               </button>
               {/* 折りたたみ時のみ: ホバーでラベルを右側にポップアップ表示 */}
