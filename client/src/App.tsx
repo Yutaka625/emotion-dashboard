@@ -9,6 +9,7 @@ import { FaceIDProvider } from "./contexts/FaceIDContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { EventsProvider } from "./contexts/EventsContext";
 import Home from "./pages/Home";
+import LandingPage from "./pages/LandingPage";
 
 // Viteのbase設定からwouterのベースパスを導出する
 // ローカル開発: BASE_URL = '/'              → basePath = ''（変換なし）
@@ -19,6 +20,7 @@ function AppRouter() {
   return (
     <Switch>
       <Route path={"/"} component={Home} />
+      <Route path={"/landing"} component={LandingPage} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>
