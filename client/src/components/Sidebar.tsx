@@ -22,8 +22,8 @@ const baseNavItems: NavItem[] = [
   { id: 'engagement', label: '特殊指標', icon: <Zap size={16} />, description: '関与度・感情価の詳細分析' },
   { id: 'emotions', label: '感情分布', icon: <BarChart2 size={16} />, description: '10感情の統計' },
   { id: 'transitions', label: '感情遷移', icon: <GitBranch size={16} />, description: '状態遷移パターン' },
-  { id: 'academic', label: '学術的分析', icon: <Brain size={16} />, description: 'Affect Dynamics等' },
   { id: 'actionunits', label: 'アクションユニット', icon: <Scan size={16} />, description: '表情筋動作分析' },
+  { id: 'academic', label: '学術的分析', icon: <Brain size={16} />, description: 'Affect Dynamics等' },
   { id: 'uxresearch', label: 'UXリサーチ', icon: <FlaskConical size={16} />, description: 'フリクション・デライト分析', highlight: true },
 ];
 

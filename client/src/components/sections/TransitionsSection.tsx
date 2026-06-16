@@ -2,6 +2,7 @@
  * DESIGN: Neuro-Signal Interface
  * Emotion transition analysis
  */
+import { useMemo } from 'react';
 
 import type { DashboardData } from '@/lib/types';
 import { EMOTION_LABELS_JA, EMOTION_COLORS, NON_NEUTRAL_EMOTIONS } from '@/lib/types';
@@ -15,12 +16,49 @@ interface Props {
   data: DashboardData;
 }
 
+function extractOklchHue(color: string): string {
+  const m = color.match(/oklch\([\d.]+\s+[\d.]+\s+([\d.]+)/);
+  return m ? m[1] : '255';
+}
+
 export default function TransitionsSection({ data }: Props) {
-  const { emotion_transitions, emotion_duration_stats, dominant_emotion_pct } = data;
+  const { emotion_transitions, emotion_duration_stats, dominant_emotion_pct, time_summary_10s, timeseries_full } = data;
 
   // 遷移行列の最大値を計算
   const allValues = Object.values(emotion_transitions).flatMap(row => Object.values(row));
   const maxVal = Math.max(...allValues);
+
+  // ---- 感情ヒートマップデータ（time_summary_10s を使用、最大40ビン） ----
+  const heatmapBins = useMemo(() => {
+    if (time_summary_10s.length <= 40) return time_summary_10s;
+    // 40超ならtimeseries_fullから20ビンに再集計
+    const n = timeseries_full.length;
+    const binCount = 20;
+    const binSize = Math.ceil(n / binCount);
+    return Array.from({ length: binCount }, (_, bi) => {
+      const slice = timeseries_full.slice(bi * binSize, (bi + 1) * binSize);
+      if (slice.length === 0) return null;
+      const entry: Record<string, number> = {
+        time_start: slice[0].time - timeseries_full[0].time,
+        time_end: slice[slice.length - 1].time - timeseries_full[0].time,
+      };
+      for (const e of NON_NEUTRAL_EMOTIONS) {
+        const vals = slice.map(f => (f as any)[e] as number ?? 0);
+        entry[`${e}_mean`] = vals.reduce((a, b) => a + b, 0) / vals.length;
+      }
+      return entry;
+    }).filter(Boolean) as typeof time_summary_10s;
+  }, [time_summary_10s, timeseries_full]);
+
+  // 各感情の全ビン最大値（正規化用）
+  const heatmapMaxPerEmotion = useMemo(() => {
+    const maxMap: Record<string, number> = {};
+    for (const e of NON_NEUTRAL_EMOTIONS) {
+      maxMap[e] = Math.max(0.001, ...heatmapBins.map(b => ((b as any)[`${e}_mean`] ?? 0) as number));
+    }
+    return maxMap;
+  }, [heatmapBins]);
+
 
   // 持続時間データ
   const durationData = NON_NEUTRAL_EMOTIONS
@@ -58,6 +96,95 @@ export default function TransitionsSection({ data }: Props) {
         <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.68 0.015 255)', marginTop: '0.25rem' }}>
           感情状態間の遷移パターンと持続時間の分析
         </p>
+      </div>
+
+      {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          Panel 2: 感情ヒートマップ
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+      <div className="metric-card">
+        <CardHeader
+          label="EMOTION HEATMAP"
+          title="感情強度ヒートマップ（時間 × 感情）"
+          info="横軸=時間、縦軸=感情種別のマス目で、各時間帯にどの感情がどれだけ強く出たかを色の明るさで示します。明るいマスほど感情強度が高く、時間に沿った感情の盛り上がりを把握できます。"
+        />
+
+        {/* グリッド本体 */}
+        <div className="overflow-x-auto">
+          <div style={{ minWidth: `${Math.max(400, heatmapBins.length * 18)}px` }}>
+            {NON_NEUTRAL_EMOTIONS.map(emotion => {
+              const hue = extractOklchHue(EMOTION_COLORS[emotion] ?? 'oklch(0.62 0.18 255)');
+              const maxVal = heatmapMaxPerEmotion[emotion];
+              return (
+                <div key={emotion} className="flex items-center gap-1 mb-0.5">
+                  {/* 感情ラベル */}
+                  <div
+                    style={{
+                      fontFamily: 'Noto Sans JP, sans-serif',
+                      fontSize: '0.65rem',
+                      color: EMOTION_COLORS[emotion],
+                      width: '56px',
+                      flexShrink: 0,
+                      textAlign: 'right',
+                    }}
+                  >
+                    {EMOTION_LABELS_JA[emotion]}
+                  </div>
+                  {/* セル列 */}
+                  <div className="flex gap-px flex-1">
+                    {heatmapBins.map((bin, bi) => {
+                      const val = ((bin as any)[`${emotion}_mean`] ?? 0) as number;
+                      const intensity = val / maxVal; // 0〜1
+                      const opacity = 0.08 + intensity * 0.88; // 最小 0.08 で常に見える
+                      return (
+                        <div
+                          key={bi}
+                          className="flex-1 rounded-sm group relative"
+                          style={{
+                            height: '22px',
+                            background: `oklch(0.62 0.18 ${hue} / ${opacity.toFixed(2)})`,
+                            cursor: 'default',
+                          }}
+                          title={`${EMOTION_LABELS_JA[emotion]} @ ${Math.round((bin as any).time_start ?? 0)}s — 強度: ${(val * 100).toFixed(1)}%`}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+            {/* X軸ラベル */}
+            <div className="flex items-center gap-1 mt-1">
+              <div style={{ width: '56px', flexShrink: 0 }} />
+              <div className="flex gap-px flex-1">
+                {heatmapBins.filter((_, i) => i % Math.max(1, Math.floor(heatmapBins.length / 8)) === 0).map((bin, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      fontFamily: 'Roboto Mono, monospace',
+                      fontSize: '0.55rem',
+                      color: 'oklch(0.58 0.01 255)',
+                      flex: Math.max(1, Math.floor(heatmapBins.length / 8)),
+                    }}
+                  >
+                    {Math.round((bin as any).time_start ?? 0)}s
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 凡例 */}
+        <div className="flex items-center gap-3 mt-3 flex-wrap">
+          {NON_NEUTRAL_EMOTIONS.map(e => (
+            <div key={e} className="flex items-center gap-1">
+              <div className="w-2.5 h-2.5 rounded-sm" style={{ background: EMOTION_COLORS[e] }} />
+              <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.65rem', color: 'oklch(0.60 0.01 255)' }}>
+                {EMOTION_LABELS_JA[e]}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Transition Matrix + Top Transitions */}
