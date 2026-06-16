@@ -302,6 +302,7 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
         <CardHeader
           label="TIMELINE OVERLAY"
           title={`${overlayMeta.label} 時系列の重ね合わせ（${overlayNormalize ? '時間正規化' : '実時間'}）`}
+          tier="pro"
           info={overlayNormalize
             ? '下のピルで選んだ1指標の時系列を、A/B 2セッションで重ねて比較します。各セッションの時間を0〜100%（進行率）に正規化し、Aは実線・Bは破線で表示します。録画長が違っても波形の形を比べられます。'
             : '下のピルで選んだ1指標の時系列を、A/B 2セッションで重ねて比較します。横軸は実時間（秒）で、同じ時刻の反応が縦に揃います（例: 同じ動画を別々に視聴した反応タイミングの比較に最適）。Aは実線・Bは破線。短い方のセッションは録画終了時点で線が止まります。'}
@@ -381,6 +382,7 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
           <CardHeader
             label="EMOTION MEANS"
             title="感情スコア平均値の比較"
+            tier="pro"
             info="2つのセッション（A/B）について、各感情の平均スコアを並べて比較します。どの感情がどちらのセッションで強く出たかを把握できます。"
           />
           <ResponsiveContainer width="100%" height={260}>
@@ -408,6 +410,7 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
           <CardHeader
             label="SPECIAL METRICS"
             title="Engagement / Valence / Attention"
+            tier="pro"
             info="特殊指標3種（Engagement=関与度、Valence=感情価、Attention=注視度）の平均値を、A/B 2セッションで比較します。"
           />
           <ResponsiveContainer width="100%" height={180}>
@@ -430,6 +433,7 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
           <CardHeader
             label="CIRCUMPLEX MODEL"
             title="感情状態の象限分布（%）"
+            tier="pro"
             info="円環モデルの4象限（覚醒度×感情価）に各フレームを分類し、その割合（%）を A/B で比較します。分割は固定中立点（Engagement=50／Valence=0）です。"
           />
           <ResponsiveContainer width="100%" height={240}>
@@ -449,6 +453,7 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
           <CardHeader
             label="AFFECT DYNAMICS — VARIABILITY"
             title="感情変動性（SD）のレーダー比較"
+            tier="pro"
             info="主要な感情・指標の変動性（標準偏差＝時間的な揺れ幅）を、A/B 2セッションでレーダーチャートに重ねて比較します。外側ほど揺れが大きいことを示します。"
           />
           <ResponsiveContainer width="100%" height={240}>
@@ -469,6 +474,7 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
         <CardHeader
           label="DIFFERENCE TABLE"
           title="感情差分ランキング（|B − A|の大きい順）"
+          tier="pro"
           info="各感情の平均スコアについて B − A の差を計算し、差の大きい順に並べます。正の差（B＞A）はB優勢、負の差（A＞B）はA優勢を示します。2セッションで最も違いが出た感情がひと目で分かります。"
         />
         <div className="overflow-x-auto">
@@ -516,6 +522,7 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
           label="STATISTICAL COMPARISON — SESSION LEVEL"
           labelColor="oklch(0.65 0.20 270)"
           title="セッション間 統計的検定"
+          tier="pro"
           info={testMethod === 'welch'
             ? '両セッションの全フレームを標本としてWelchのt検定を実施し、感情ごとに差が統計的に有意かを判定します。効果量はCohen\'s dで評価。下のトグルでMann-Whitney U検定にも切り替えられます。'
             : '両セッションの全フレームを標本としてMann-Whitney U検定（ノンパラメトリック）を実施します。正規性を仮定せず、効果量はランク二列相関 r で評価。下のトグルでWelch t検定にも切り替えられます。'}

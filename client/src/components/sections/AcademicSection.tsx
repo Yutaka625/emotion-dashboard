@@ -361,6 +361,7 @@ export default function AcademicSection({ data }: Props) {
       <CollapsibleCard
         label="AFFECT DYNAMICS — VARIABILITY"
         title="感情変動性（Standard Deviation）"
+        tier="pro"
         info="各指標の標準偏差（SD）。値が大きいほど、その感情・指標が時間とともに大きく揺れ動いたことを示します。"
         storageKey="ksdv.collapse.academic.variability"
       >
@@ -389,6 +390,7 @@ export default function AcademicSection({ data }: Props) {
       <CollapsibleCard
         label="AFFECT DYNAMICS — INERTIA (AR1)"
         title="感情慣性（1次自己相関係数）"
+        tier="pro"
         info="1つ前のフレームとの自己相関（AR1）。1に近いほど状態が持続しやすく、負の値は振動（揺り戻し）を示します。算出は『1フレーム＝ラグ1』のフレーム単位で、フレームレート(fps)が高いほど値は高めに出ます。絶対値の大小ではなく、同一fps・同一条件のセッション間／被験者間の相対比較で解釈してください（不安定性MSSD・変動性SDも同じくフレーム単位の指標です）。"
         storageKey="ksdv.collapse.academic.inertia"
       >
@@ -422,6 +424,7 @@ export default function AcademicSection({ data }: Props) {
       <CollapsibleCard
         label="CORRELATION MATRIX"
         title="感情指標間の相関行列"
+        tier="pro"
         info="2つの指標が一緒に増減する度合い（ピアソン相関係数 −1〜+1）。+1に近いほど同調、−1に近いほど逆方向に動きます。"
         storageKey="ksdv.collapse.academic.correlation"
       >
@@ -481,6 +484,7 @@ export default function AcademicSection({ data }: Props) {
       <CollapsibleCard
         label="CIRCUMPLEX MODEL — QUADRANT ANALYSIS"
         title="感情の円環モデル象限分析（Russell, 1980）"
+        tier="pro"
         info="覚醒度（縦）×感情価（横）の2軸で感情を4象限に分類し、各象限に該当したフレーム数と割合を示します。"
         storageKey="ksdv.collapse.academic.circumplex"
       >
@@ -537,6 +541,7 @@ export default function AcademicSection({ data }: Props) {
         <CollapsibleCard
           label="CHANGE POINTS — TIMELINE"
           title="感情変化点の一覧"
+          tier="pro"
           info="セッション中に急激な感情変化が起きた時点を一覧表示します。delta値は前後フレームの差分です。列ヘッダーをクリックするとソートできます。"
           storageKey="ksdv.collapse.academic.changepoints"
         >
@@ -640,6 +645,7 @@ export default function AcademicSection({ data }: Props) {
       <CollapsibleCard
         label="ACADEMIC INTERPRETATION"
         title="学術的解釈と考察"
+        tier="pro"
         info="上記の各分析結果を統合し、本セッションの感情ダイナミクスを文章で考察したものです。"
         storageKey="ksdv.collapse.academic.interpretation"
       >

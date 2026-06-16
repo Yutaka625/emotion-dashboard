@@ -175,6 +175,16 @@ export const EMOTION_COLORS: Record<string, string> = {
   attention:      'oklch(0.80 0.18 160)',   /* エメラルドグリーン — 注意 */
 };
 
+/**
+ * 料金ティアのバッジ色（お試し期間中は全機能無償。将来有料になり得る機能の予告表示用）。
+ * pro=紫（解釈指標・状態・比較・レポート出力）／biz=オレンジ（AI予測・インサイト・まとめ）。
+ * Core はバッジなし（無印）のため定義しない。
+ */
+export const TIER_COLORS = {
+  pro: 'oklch(0.62 0.20 290)', /* ビビッドパープル — Pro */
+  biz: 'oklch(0.70 0.17 60)',  /* ビビッドオレンジ — Biz */
+} as const;
+
 export const EMOTION_LABELS_JA: Record<string, string> = {
   anger: '怒り',
   contempt: '軽蔑',

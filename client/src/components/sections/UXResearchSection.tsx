@@ -219,6 +219,7 @@ export default function UXResearchSection({ data }: Props) {
         <CardHeader
           label="UX SCORE DASHBOARD"
           title="UX複合指標スコア"
+          tier="pro"
           info="感情データから算出した4つのUX指標（フラストレーション・デライト・エンゲージメント品質・認知負荷）と、それらを合成した総合UXスコア（0〜100）を表示します。数値が高いほど良好な体験を示します。"
         />
 
@@ -402,43 +403,36 @@ export default function UXResearchSection({ data }: Props) {
         <CardHeader
           label="FRICTION & DELIGHT ANALYSIS"
           title="フリクション＆デライト検出"
-          info="ネガティブ感情が強まった瞬間（フリクション＝つまずき）と、ポジティブ感情が高まった瞬間（デライト＝喜び）を時系列から自動検出し一覧します。下のトグルで種類を絞り込めます。UX改善の着目点を見つけられます。"
-          right={(
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: 'oklch(0.62 0.22 25 / 0.12)', border: '1px solid oklch(0.62 0.22 25 / 0.3)' }}>
-                <AlertTriangle size={12} style={{ color: 'oklch(0.62 0.22 25)' }} />
-                <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.7rem', color: 'oklch(0.62 0.22 25)' }}>
-                  Friction: {frictionCount}
-                </span>
-              </div>
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: 'oklch(0.78 0.14 82 / 0.12)', border: '1px solid oklch(0.78 0.14 82 / 0.3)' }}>
-                <Star size={12} style={{ color: 'oklch(0.78 0.14 82)' }} />
-                <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.7rem', color: 'oklch(0.78 0.14 82)' }}>
-                  Delight: {delightCount}
-                </span>
-              </div>
-            </div>
-          )}
+          tier="pro"
+          info="ネガティブ感情が強まった瞬間（フリクション＝つまずき）と、ポジティブ感情が高まった瞬間（デライト＝喜び）を時系列から自動検出し一覧します。下のフィルタで種類を絞り込めます（各ボタンに検出件数を表示）。UX改善の着目点を見つけられます。"
         />
 
-        {/* フィルタートグル */}
+        {/* フィルタートグル（種別の検出件数を融合表示） */}
         <div className="flex gap-2 mb-4">
-          {(['all', 'friction', 'delight'] as const).map(f => (
-            <button
-              key={f}
-              onClick={() => setFrictionFilter(f)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all"
-              style={{
-                fontFamily: 'Noto Sans JP, sans-serif',
-                background: frictionFilter === f ? 'oklch(0.28 0.04 255)' : 'transparent',
-                border: `1px solid ${frictionFilter === f ? 'oklch(0.40 0.06 255)' : 'oklch(0.28 0.04 255)'}`,
-                color: frictionFilter === f ? 'oklch(0.88 0.005 250)' : 'oklch(0.66 0.015 255)',
-              }}
-            >
-              <Filter size={11} />
-              {f === 'all' ? 'すべて' : f === 'friction' ? 'フリクションのみ' : 'デライトのみ'}
-            </button>
-          ))}
+          {([
+            { id: 'all',      label: 'すべて',       count: frictionDelightItems.length, color: 'oklch(0.70 0.03 255)', icon: Filter },
+            { id: 'friction', label: 'フリクション', count: frictionCount,               color: 'oklch(0.62 0.22 25)', icon: AlertTriangle },
+            { id: 'delight',  label: 'デライト',     count: delightCount,                color: 'oklch(0.78 0.14 82)', icon: Star },
+          ] as const).map(({ id, label, count, color, icon: Icon }) => {
+            const active = frictionFilter === id;
+            return (
+              <button
+                key={id}
+                onClick={() => setFrictionFilter(id)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all"
+                style={{
+                  fontFamily: 'Noto Sans JP, sans-serif',
+                  background: active ? color.replace(')', ' / 0.16)') : 'transparent',
+                  border: `1px solid ${active ? color.replace(')', ' / 0.55)') : 'oklch(0.28 0.04 255)'}`,
+                  color: active ? color : 'oklch(0.66 0.015 255)',
+                }}
+              >
+                <Icon size={11} style={{ color }} />
+                {label}
+                <span style={{ fontFamily: 'Roboto Mono, monospace', color, opacity: active ? 1 : 0.85 }}>{count}</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* タイムライン */}
@@ -509,6 +503,7 @@ export default function UXResearchSection({ data }: Props) {
         <CardHeader
           label="HEAD MOTION EVENTS"
           title="頭部動作検知イベント"
+          tier="pro"
           info="明確なうなづき（Pitch ≥8°）・首振り（Yaw ≥12°）・首傾げ（Roll ≥15°）を自動検知し、発生した時刻の一覧を示します。同意・否定・思考などの非言語サインの手がかりになります。"
         />
 
@@ -612,6 +607,7 @@ export default function UXResearchSection({ data }: Props) {
         <CardHeader
           label="TASK SUMMARY"
           title="タスク別UX指標"
+          tier="pro"
           info="「時系列分析」タブで登録したイベント（タスク区間）ごとに、UXスコアや主要指標を集計します。『どのタスクで最もフラストレーションが高かったか』などをタスク単位で比較できます。"
         />
 

@@ -213,6 +213,8 @@ export default function Home() {
   const safeA = displayA ?? aBaseData ?? data;
   const metadataFilled = metadataRevision >= 0 && hasAnySessionMeta(readSessionMeta(safeSelected.meta.filename));
   const selectedSessionLabel = detailSession === 'B' && secondaryData ? 'Session B' : 'Session A';
+  // 比較分析タブはA・B両セッションを同時に表示するため、トップバーのセッション表示は片方の切替ではなく両方をフォーカス（色表示）する
+  const isComparisonView = activeSection === 'comparison';
 
   const sectionIds = ['overview', 'timeseries', 'engagement', 'emotions', 'transitions', 'academic', 'actionunits', 'multiface', 'comparison', 'uxresearch'] as const;
   const sectionComponents: Record<string, React.ReactNode> = {
@@ -321,18 +323,19 @@ export default function Home() {
             {/* A/B 表示切替（比較データがある時のみ）。詳細タブにどちらのセッションを出すかを切り替える */}
             {secondaryData && (
               <div className="flex items-center gap-1 px-1.5 py-1 rounded-lg" style={{ background: 'oklch(0.25 0.03 255)', border: '1px solid oklch(0.32 0.04 255)' }}>
-                <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.58rem', color: 'oklch(0.60 0.015 255)', marginLeft: '2px', marginRight: '1px', whiteSpace: 'nowrap' }}>表示中</span>
+                <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.58rem', color: 'oklch(0.60 0.015 255)', marginLeft: '2px', marginRight: '1px', whiteSpace: 'nowrap' }}>{isComparisonView ? '比較中' : '表示中'}</span>
                 {([
                   { id: 'A' as const, name: filename || 'Session A', color: 'oklch(0.70 0.14 195)' },
                   { id: 'B' as const, name: secondaryFilename || 'Session B', color: 'oklch(0.78 0.22 340)' },
                 ]).map(({ id, name, color }) => {
-                  const on = detailSession === id;
+                  // 比較タブでは両セッションを同時表示するため両方を点灯。それ以外は選択中のみ点灯し、クリックで詳細タブの表示対象を切替。
+                  const on = isComparisonView || detailSession === id;
                   return (
                     <button
                       key={id}
-                      onClick={() => setDetailSession(id)}
+                      onClick={isComparisonView ? undefined : () => setDetailSession(id)}
                       className="px-2 py-0.5 rounded-full transition-colors"
-                      title={`${name} のデータを詳細タブに表示`}
+                      title={isComparisonView ? `${name}（比較対象）` : `${name} のデータを詳細タブに表示`}
                       style={{
                         background: on ? color : 'transparent',
                         color: on ? 'oklch(0.16 0.02 250)' : 'oklch(0.66 0.015 255)',
@@ -341,6 +344,7 @@ export default function Home() {
                         fontSize: '0.62rem',
                         fontWeight: on ? 700 : 400,
                         whiteSpace: 'nowrap',
+                        cursor: isComparisonView ? 'default' : 'pointer',
                       }}
                     >
                       {id}

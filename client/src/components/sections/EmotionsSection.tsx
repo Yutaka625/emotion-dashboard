@@ -224,6 +224,7 @@ export default function EmotionsSection({ data }: Props) {
         <CardHeader
           label="AFFECT DYNAMICS COMPARISON"
           title="感情動態指標の比較"
+          tier="pro"
           info="感情の時間的な動きを2指標で比較します。変動性（SD＝揺れ幅の大きさ）と不安定性（√MSSD＝隣り合うフレーム間の急変の起きやすさ）を感情ごとに並べています。慣性（AR1）は「学術的分析」タブに集約しています。"
         />
         <ResponsiveContainer width="100%" height={220}>

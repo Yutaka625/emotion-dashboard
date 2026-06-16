@@ -13,6 +13,7 @@
 import { useState, useEffect, type ReactNode, type CSSProperties } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import InfoTooltip from '@/components/ui/InfoTooltip';
+import TierBadge, { type Tier } from '@/components/ui/TierBadge';
 
 interface Props {
   /** セクションラベル（例: BASELINE SETTINGS） */
@@ -25,6 +26,8 @@ interface Props {
   titleColor?: string;
   /** 説明文（指定するとタイトル横に ⓘ ツールチップを表示） */
   info?: string;
+  /** 料金ティアのバッジ（Pro/Biz）。Core は省略（無印）。 */
+  tier?: Tier;
   /** 状態バッジ（例: 「⚡ 補正適用中」）。折りたたみ中も表示される */
   badge?: ReactNode;
   /** カード左端の色帯（省略時は色帯なし） */
@@ -56,6 +59,7 @@ export default function CollapsibleCard({
   title,
   titleColor = 'oklch(0.88 0.005 250)',
   info,
+  tier,
   badge,
   borderLeftColor,
   defaultOpen = true,
@@ -92,7 +96,8 @@ export default function CollapsibleCard({
           </div>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          {/* バッジは折りたたみ中も表示し、状態を一目で確認できるようにする */}
+          {/* ティアバッジ・状態バッジは折りたたみ中も表示し、一目で確認できるようにする */}
+          {tier && <TierBadge tier={tier} />}
           {badge}
           <button
             type="button"

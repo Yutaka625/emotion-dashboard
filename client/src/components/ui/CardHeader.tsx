@@ -11,6 +11,7 @@
 
 import type { ReactNode } from 'react';
 import InfoTooltip from '@/components/ui/InfoTooltip';
+import TierBadge, { type Tier } from '@/components/ui/TierBadge';
 
 interface Props {
   /** 英語ラベル（例: DISTRIBUTION） */
@@ -23,6 +24,8 @@ interface Props {
   labelColor?: string;
   /** タイトルの文字色 */
   titleColor?: string;
+  /** 料金ティアのバッジ（Pro/Biz）。Core は省略（無印）。 */
+  tier?: Tier;
   /** ヘッダー右側に置く要素（ボタン等） */
   right?: ReactNode;
 }
@@ -33,6 +36,7 @@ export default function CardHeader({
   info,
   labelColor = 'oklch(0.68 0.015 255)',
   titleColor = 'oklch(0.88 0.005 250)',
+  tier,
   right,
 }: Props) {
   return (
@@ -46,7 +50,12 @@ export default function CardHeader({
           {info && <InfoTooltip text={info} />}
         </div>
       </div>
-      {right && <div className="flex-shrink-0">{right}</div>}
+      {(tier || right) && (
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {tier && <TierBadge tier={tier} />}
+          {right}
+        </div>
+      )}
     </div>
   );
 }
