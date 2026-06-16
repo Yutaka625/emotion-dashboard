@@ -22,10 +22,12 @@ import ActionUnitsSection from '@/components/sections/ActionUnitsSection';
 import ComparisonSection from '@/components/sections/ComparisonSection';
 import UXResearchSection from '@/components/sections/UXResearchSection';
 import MultiFaceComparisonSection from '@/components/sections/MultiFaceComparisonSection';
+import AIInsightsSection from '@/components/sections/AIInsightsSection';
 import FaceQualityBanner from '@/components/FaceQualityBanner';
 import SessionMetadataCard from '@/components/sections/SessionMetadataCard';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { hasAnySessionMeta, readSessionMeta } from '@/lib/sessionMeta';
+import { AI_INSIGHTS_SECTION_ID } from '@/lib/dashboardSections';
 import { Upload, X, GitCompare, ArrowUp, Settings2 } from 'lucide-react';
 
 export default function Home() {
@@ -216,7 +218,7 @@ export default function Home() {
   // 比較分析タブはA・B両セッションを同時に表示するため、トップバーのセッション表示は片方の切替ではなく両方をフォーカス（色表示）する
   const isComparisonView = activeSection === 'comparison';
 
-  const sectionIds = ['overview', 'timeseries', 'engagement', 'emotions', 'transitions', 'academic', 'actionunits', 'multiface', 'comparison', 'uxresearch'] as const;
+  const sectionIds = ['overview', 'timeseries', 'engagement', 'emotions', 'transitions', 'actionunits', 'academic', 'multiface', 'comparison', 'uxresearch', AI_INSIGHTS_SECTION_ID] as const;
   const sectionComponents: Record<string, React.ReactNode> = {
     overview:    <OverviewSection data={safeSelected} onSectionChange={handleSectionChange} hasComparison={!!secondaryData} />,
     timeseries:  <TimeseriesSection data={safeSelected} rawTimeseries={(selectedBaseData ?? safeSelected).timeseries_full} />,
@@ -265,6 +267,7 @@ export default function Home() {
         </div>
       ),
     uxresearch: <UXResearchSection data={safeSelected} />,
+    [AI_INSIGHTS_SECTION_ID]: <AIInsightsSection />,
   };
 
   return (
