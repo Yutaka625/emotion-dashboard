@@ -5,6 +5,7 @@
 
 import { Bot, KeyRound, Lock, Sparkles } from 'lucide-react';
 import CardHeader from '@/components/ui/CardHeader';
+import { AI_INSIGHTS_COPY } from '@/lib/aiInsightsCopy';
 
 const cardStyle = {
   background: 'oklch(0.22 0.04 255)',
@@ -33,16 +34,16 @@ export default function AIInsightsSection() {
           AIインサイト
         </h2>
         <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.68 0.015 255)', marginTop: '0.25rem' }}>
-          Gemini APIによる感情ログの自動要約・改善仮説・注目区間抽出を予定しています。
+          {AI_INSIGHTS_COPY.intro}
         </p>
       </div>
 
       <div style={cardStyle}>
         <CardHeader
-          label="GEMINI INSIGHT ENGINE"
+          label="AI INSIGHT ENGINE"
           title="AI解析インサイト"
           tier="biz"
-          info="将来のBizティア機能として、Gemini APIを使った解析コメント、改善仮説、注目シーン抽出を提供予定です。"
+          info={AI_INSIGHTS_COPY.cardInfo}
         />
 
         <div className="flex flex-col items-center justify-center text-center py-10">
@@ -63,7 +64,7 @@ export default function AIInsightsSection() {
             この機能は現在ロックされています
           </h3>
           <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.68 0.015 255)', lineHeight: 1.8, maxWidth: '560px' }}>
-            AIインサイトはBizティア向けの将来機能です。現段階では解析は実行できませんが、今後Gemini APIと連携してセッション全体の要約や改善ポイントを自動生成する予定です。
+            {AI_INSIGHTS_COPY.lockMessage}
           </p>
         </div>
 
@@ -71,7 +72,7 @@ export default function AIInsightsSection() {
           {[
             { icon: Sparkles, label: 'セッション要約', lines: ['86%', '64%', '72%'] },
             { icon: Bot, label: '改善仮説', lines: ['74%', '92%', '58%'] },
-            { icon: KeyRound, label: 'Gemini API連携', lines: ['68%', '80%', '52%'] },
+            { icon: KeyRound, label: AI_INSIGHTS_COPY.integrationLabel, lines: ['68%', '80%', '52%'] },
           ].map(({ icon: Icon, label, lines }) => (
             <div
               key={label}

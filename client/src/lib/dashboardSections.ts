@@ -1,3 +1,5 @@
+import { AI_INSIGHTS_COPY } from './aiInsightsCopy';
+
 export type DashboardSectionTier = 'biz';
 
 export interface DashboardSectionDefinition {
@@ -23,7 +25,7 @@ export const BASE_DASHBOARD_SECTIONS: DashboardSectionDefinition[] = [
   {
     id: AI_INSIGHTS_SECTION_ID,
     label: 'AIインサイト',
-    description: 'Gemini解析インサイト',
+    description: AI_INSIGHTS_COPY.navDescription,
     tier: 'biz',
     locked: true,
     highlight: true,
