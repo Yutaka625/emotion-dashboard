@@ -8,9 +8,10 @@
  */
 
 import { useEffect, useState } from 'react';
+import { Trash2 } from 'lucide-react';
 import type { DashboardData } from '@/lib/types';
 import type { SessionMetadata } from '@/lib/sessionMeta';
-import { readSessionMeta, writeSessionMeta, hasAnySessionMeta } from '@/lib/sessionMeta';
+import { readSessionMeta, writeSessionMeta, clearSessionMeta, emptySessionMetadata, hasAnySessionMeta } from '@/lib/sessionMeta';
 import CollapsibleCard from '@/components/ui/CollapsibleCard';
 
 interface Props {
@@ -90,10 +91,13 @@ export default function SessionMetadataCard({
 }: Props) {
   const filename = data.meta.filename;
   const [meta, setMeta] = useState<SessionMetadata>(() => readSessionMeta(filename));
+  // クリア操作の2段階確認（誤操作防止）。ファイル切替時はリセット。
+  const [confirmingClear, setConfirmingClear] = useState(false);
 
   // CSV を切り替えたら、そのファイルのメタデータを読み直す
   useEffect(() => {
     setMeta(readSessionMeta(filename));
+    setConfirmingClear(false);
   }, [filename]);
 
   // 入力のたびに localStorage へ保存（filename キー）
@@ -109,12 +113,21 @@ export default function SessionMetadataCard({
     });
   };
 
+  // このセッション（filename）ぶんのメタデータのみ削除しフォームを空に戻す
+  const handleClear = () => {
+    clearSessionMeta(filename);
+    setMeta(emptySessionMetadata());
+    onChange?.();
+    setConfirmingClear(false);
+  };
+
   const filled = hasAnySessionMeta(meta);
 
   return (
     <CollapsibleCard
       label="SESSION METADATA"
       title="記録条件・被験者メタデータ"
+      tier="pro"
       info="実験の再現性のため、被験者属性・実験設計・測定環境を記録します。全項目は任意で、入力はこのブラウザに自動保存され（外部送信なし）、学術CSV出力にも含まれます。録画日時はCSVから自動取得しています。"
       badge={filled ? (
         <span className="px-2 py-0.5 rounded" style={{ background: 'oklch(0.25 0.06 160)', color: 'oklch(0.80 0.18 160)', fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem' }}>
@@ -124,11 +137,49 @@ export default function SessionMetadataCard({
       defaultOpen={defaultOpen}
       storageKey={storageKey}
     >
-      {/* 自動取得情報（読み取り専用） */}
-      <div className="mb-4 flex flex-wrap gap-x-6 gap-y-1" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.66rem', color: 'oklch(0.58 0.015 255)' }}>
-        <span>ファイル: {filename}</span>
-        <span>録画日時: {data.meta.recording_date || '—'} {data.meta.recording_time}</span>
-        <span>総フレーム: {data.meta.total_frames.toLocaleString()}</span>
+      {/* 自動取得情報（読み取り専用）＋このセッションのメタデータをクリア */}
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <div className="flex flex-wrap gap-x-6 gap-y-1" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.66rem', color: 'oklch(0.58 0.015 255)' }}>
+          <span>ファイル: {filename}</span>
+          <span>録画日時: {data.meta.recording_date || '—'} {data.meta.recording_time}</span>
+          <span>総フレーム: {data.meta.total_frames.toLocaleString()}</span>
+        </div>
+        {filled && (
+          <div className="flex-shrink-0">
+            {confirmingClear ? (
+              <div className="flex items-center gap-2">
+                <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', color: 'oklch(0.72 0.16 30)', whiteSpace: 'nowrap' }}>このセッションの記録を消去しますか？</span>
+                <button
+                  type="button"
+                  onClick={handleClear}
+                  className="px-2.5 py-1 rounded text-xs transition-colors"
+                  style={{ fontFamily: 'Noto Sans JP, sans-serif', whiteSpace: 'nowrap', background: 'oklch(0.45 0.18 25)', color: 'oklch(0.97 0.01 25)', border: '1px solid oklch(0.55 0.20 25)' }}
+                >
+                  はい、消去
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmingClear(false)}
+                  className="px-2.5 py-1 rounded text-xs transition-colors"
+                  style={{ fontFamily: 'Noto Sans JP, sans-serif', whiteSpace: 'nowrap', background: 'transparent', color: 'oklch(0.66 0.015 255)', border: '1px solid oklch(0.32 0.04 255)' }}
+                >
+                  キャンセル
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setConfirmingClear(true)}
+                className="flex items-center gap-1 px-2.5 py-1 rounded text-xs transition-colors"
+                style={{ fontFamily: 'Noto Sans JP, sans-serif', whiteSpace: 'nowrap', background: 'transparent', color: 'oklch(0.70 0.14 30)', border: '1px solid oklch(0.45 0.12 30)' }}
+                title="このセッション（このファイル）のメタデータを消去します。他のファイルの記録は残ります。録画日時など自動取得情報は対象外です。"
+              >
+                <Trash2 size={12} />
+                クリア
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="space-y-5">

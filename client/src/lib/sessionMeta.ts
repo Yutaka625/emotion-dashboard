@@ -105,6 +105,15 @@ export function writeSessionMeta(filename: string, meta: SessionMetadata): void 
   writeAll(all);
 }
 
+/** filename のメタデータを削除する（このセッションぶんのみ。他ファイルの記録は残す）。 */
+export function clearSessionMeta(filename: string): void {
+  const all = readAll();
+  if (filename in all) {
+    delete all[filename];
+    writeAll(all);
+  }
+}
+
 /** メタデータに1つでも入力があるか（CSV出力の要否判定などに使う） */
 export function hasAnySessionMeta(meta: SessionMetadata): boolean {
   const groups = [meta.subject, meta.design, meta.environment, meta.notes];

@@ -53,11 +53,11 @@ export default function TierBadge({ tier, size = 13 }: Props) {
           style={{
             background: color,
             color: 'oklch(0.99 0 0)',
-            padding: '2px 8px',
+            padding: '5px 9px',
             fontFamily: 'Noto Sans JP, sans-serif',
             fontWeight: 600,
             fontSize: `${size * 0.85}px`,
-            lineHeight: 1,
+            lineHeight: 1.1,
             cursor: 'help',
             whiteSpace: 'nowrap',
           } as CSSProperties}
