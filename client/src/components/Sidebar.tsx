@@ -7,7 +7,7 @@
 import { useState, type CSSProperties } from 'react';
 import { BarChart2, Brain, GitBranch, Grid, Zap, ChevronRight, Activity, GitCompare, FlaskConical, Scan, Users, CircleHelp, Sparkles, Lock } from 'lucide-react';
 import FaceScanIcon from '@/components/FaceScanIcon';
-import { BASE_DASHBOARD_SECTIONS, type DashboardSectionDefinition } from '@/lib/dashboardSections';
+import { BASE_DASHBOARD_SECTIONS, AI_INSIGHTS_SECTION_ID, type DashboardSectionDefinition } from '@/lib/dashboardSections';
 
 interface NavItem {
   id: string;
@@ -31,10 +31,14 @@ const SECTION_ICONS: Record<string, React.ReactNode> = {
   aiinsights: <Sparkles size={16} />,
 };
 
-const baseNavItems: NavItem[] = BASE_DASHBOARD_SECTIONS.map(section => ({
+const allNavItems: NavItem[] = BASE_DASHBOARD_SECTIONS.map(section => ({
   ...section,
   icon: SECTION_ICONS[section.id] ?? <Grid size={16} />,
 }));
+
+// AIインサイトは常にナビの最下部に置くため、基本ナビからは切り出しておく。
+const baseNavItems: NavItem[] = allNavItems.filter(item => item.id !== AI_INSIGHTS_SECTION_ID);
+const aiInsightsNavItem: NavItem | undefined = allNavItems.find(item => item.id === AI_INSIGHTS_SECTION_ID);
 
 interface SidebarProps {
   activeSection: string;
@@ -51,6 +55,8 @@ export default function Sidebar({ activeSection, onSectionChange, hasComparison,
     ...baseNavItems,
     ...(hasMultiFace ? [{ id: 'multiface', label: 'マルチFaceID', icon: <Users size={16} />, description: '顔ごとの比較', highlight: true }] : []),
     ...(hasComparison ? [{ id: 'comparison', label: '比較分析', icon: <GitCompare size={16} />, description: 'セッション間比較', highlight: true }] : []),
+    // AIインサイトは（マルチFaceID・比較分析を含む）すべての項目の最下部に配置する。
+    ...(aiInsightsNavItem ? [aiInsightsNavItem] : []),
   ];
 
   return (

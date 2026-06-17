@@ -329,6 +329,7 @@ export default function OverviewSection({ data, onSectionChange, hasComparison }
                 dataKey="value"
                 labelLine={false}
                 label={renderCustomizedLabel}
+                stroke="none"
               >
                 {dominantPieData.map((entry, index) => (
                   <Cell key={index} fill={entry.color} />

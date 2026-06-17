@@ -184,6 +184,14 @@ export default function AcademicSection({ data }: Props) {
     color: EMOTION_COLORS[key] || (key === 'engagement' ? 'oklch(0.72 0.18 80)' : 'oklch(0.62 0.18 25)'),
   }));
 
+  // 感情動態指標の比較カード用（変動性SD・不安定性√MSSD）。非ニュートラル10感情のみを対象にする。
+  const dynamicsComparisonData = NON_NEUTRAL_EMOTIONS.map(e => ({
+    emotion: EMOTION_LABELS_JA[e] || e,
+    variability: affect_dynamics[e]?.variability_sd || 0,
+    instability: Math.sqrt(affect_dynamics[e]?.instability_mssd || 0),
+    color: EMOTION_COLORS[e] || '#999',
+  }));
+
   // Correlation heatmap data
   const corrLabels = correlation_matrix.labels;
   const corrData = correlation_matrix.data;
@@ -416,6 +424,28 @@ export default function AcademicSection({ data }: Props) {
                 <Cell key={i} fill={entry.ar1 >= 0 ? 'oklch(0.62 0.18 160)' : 'oklch(0.62 0.18 25)'} />
               ))}
             </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </CollapsibleCard>
+
+      {/* Affect Dynamics - Variability vs Instability Comparison（旧・感情分布タブから移設） */}
+      <CollapsibleCard
+        label="AFFECT DYNAMICS COMPARISON"
+        title="感情動態指標の比較"
+        tier="pro"
+        info="感情の時間的な動きを2指標で比較します。変動性（SD＝揺れ幅の大きさ）と不安定性（√MSSD＝隣り合うフレーム間の急変の起きやすさ）を感情ごとに並べています。慣性（AR1）は上の「感情慣性」カードを参照してください。"
+        storageKey="ksdv.collapse.academic.dynamics-comparison"
+      >
+        <ResponsiveContainer width="100%" height={220}>
+          <BarChart data={dynamicsComparisonData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" vertical={false} />
+            <XAxis dataKey="emotion" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', fill: 'oklch(0.68 0.015 255)' }} />
+            <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.68 0.015 255)' }} />
+            <Tooltip
+              {...rechartsTooltip}
+            />
+            <Bar dataKey="variability" name="変動性(SD)" fill="oklch(0.62 0.18 160)" radius={[4, 4, 0, 0]} opacity={0.85} activeBar={{ fill: "oklch(0.55 0.04 255 / 0.6)", stroke: "none" }} />
+            <Bar dataKey="instability" name="不安定性(√MSSD)" fill="oklch(0.62 0.18 25)" radius={[4, 4, 0, 0]} opacity={0.85} activeBar={{ fill: "oklch(0.55 0.04 255 / 0.6)", stroke: "none" }} />
           </BarChart>
         </ResponsiveContainer>
       </CollapsibleCard>
