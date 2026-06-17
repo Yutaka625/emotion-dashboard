@@ -170,8 +170,9 @@ export default defineConfig({
     emptyOutDir: true,
   },
   server: {
-    port: 3000,
-    strictPort: false, // Will find next available port if 3000 is busy
+    // 環境変数 PORT が指定されていればそれを使い、なければ 3000 を使う
+    port: Number(process.env.PORT) || 3000,
+    strictPort: false, // 指定ポートが使用中なら空いている次のポートを使う
     host: true,
     allowedHosts: [
       ".manuspre.computer",
