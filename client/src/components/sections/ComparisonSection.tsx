@@ -262,17 +262,8 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
         <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem', color: 'oklch(0.68 0.015 255)', marginTop: '0.25rem' }}>
           2つのCSVセッションの感情反応を多角的に比較します
         </p>
-        {/* Legend */}
-        <div className="flex gap-4 mt-2">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full" style={{ background: COLOR_A }} />
-            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: COLOR_A }}>{labelA}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full" style={{ background: COLOR_B }} />
-            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.72rem', color: COLOR_B }}>{labelB}</span>
-          </div>
-        </div>
+        {/* セッション名（A/Bの色分け凡例）は直下のメタ比較カードに同じ色分けで表示されるため、
+            重複を避けてここでは省略する。 */}
       </div>
 
       {/* Meta comparison */}
