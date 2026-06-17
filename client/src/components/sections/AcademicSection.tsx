@@ -184,14 +184,6 @@ export default function AcademicSection({ data }: Props) {
     color: EMOTION_COLORS[key] || (key === 'engagement' ? 'oklch(0.72 0.18 80)' : 'oklch(0.62 0.18 25)'),
   }));
 
-  // 感情動態指標の比較カード用（変動性SD・不安定性√MSSD）。非ニュートラル10感情のみを対象にする。
-  const dynamicsComparisonData = NON_NEUTRAL_EMOTIONS.map(e => ({
-    emotion: EMOTION_LABELS_JA[e] || e,
-    variability: affect_dynamics[e]?.variability_sd || 0,
-    instability: Math.sqrt(affect_dynamics[e]?.instability_mssd || 0),
-    color: EMOTION_COLORS[e] || '#999',
-  }));
-
   // Correlation heatmap data
   const corrLabels = correlation_matrix.labels;
   const corrData = correlation_matrix.data;
@@ -214,6 +206,7 @@ export default function AcademicSection({ data }: Props) {
   // 変動性(SD)が最も高い指標／慣性(AR1)が最も高い＝最も持続しやすい指標
   const topVariability = [...dynamicsCompare].sort((a, b) => b.sd - a.sd)[0];
   const topInertia = [...dynamicsCompare].sort((a, b) => b.ar1 - a.ar1)[0];
+  const topInstability = [...dynamicsCompare].sort((a, b) => b.mssd - a.mssd)[0];
   // 2番目に変動性が高い指標（変動性の一文で補足に使う。無ければ undefined）
   const secondVariability = [...dynamicsCompare].sort((a, b) => b.sd - a.sd)[1];
 
@@ -249,6 +242,11 @@ export default function AcademicSection({ data }: Props) {
     `高い変動性は感情の揺れ幅が大きいことを示します。`
     + `本セッションでは${topVariability.name}の変動性が最も高く（SD: ${topVariability.sd.toFixed(4)}）`
     + (secondVariability ? `、次いで${secondVariability.name}が高い変動性を示しています。` : `。`);
+
+  // 不安定性（√MSSD）の一文（グラフ直上の説明）をデータ駆動で生成
+  const instabilityLead =
+    `高い不安定性は、隣り合う瞬間どうしでスコアが急に変わりやすい（突発的な変化が多い）ことを示します。`
+    + `本セッションでは${topInstability.name}が最も不安定でした（√MSSD: ${topInstability.mssd.toFixed(4)}）。`;
 
   // 解釈カード4枚の本文をデータ駆動で生成
   const interpretationCards = [
@@ -428,24 +426,31 @@ export default function AcademicSection({ data }: Props) {
         </ResponsiveContainer>
       </CollapsibleCard>
 
-      {/* Affect Dynamics - Variability vs Instability Comparison（旧・感情分布タブから移設） */}
+      {/* Affect Dynamics - Instability（旧「感情動態指標の比較」を移設。SD重複を解消し√MSSD単独に） */}
       <CollapsibleCard
-        label="AFFECT DYNAMICS COMPARISON"
-        title="感情動態指標の比較"
+        label="AFFECT DYNAMICS — INSTABILITY (√MSSD)"
+        title="感情の不安定性（√MSSD）"
         tier="pro"
-        info="感情の時間的な動きを2指標で比較します。変動性（SD＝揺れ幅の大きさ）と不安定性（√MSSD＝隣り合うフレーム間の急変の起きやすさ）を感情ごとに並べています。慣性（AR1）は上の「感情慣性」カードを参照してください。"
-        storageKey="ksdv.collapse.academic.dynamics-comparison"
+        info="連続するフレーム間の差の二乗平均の平方根（√MSSD）。隣り合う瞬間どうしでスコアが急変しやすいほど大きくなります。静的なばらつきを表す変動性（SD）とは別の観点で、上の2カード（変動性SD・慣性AR1）と並べて感情動態を比較できます。算出は『隣接フレーム差』のフレーム単位で、変動性SD・慣性AR1と同様にfps依存のため同一条件での相対比較で解釈してください。"
+        storageKey="ksdv.collapse.academic.instability"
       >
+        <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.68 0.015 255)', marginBottom: '1rem' }}>
+          {instabilityLead}
+        </p>
         <ResponsiveContainer width="100%" height={220}>
-          <BarChart data={dynamicsComparisonData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
+          <BarChart data={dynamicsCompare} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" vertical={false} />
-            <XAxis dataKey="emotion" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', fill: 'oklch(0.68 0.015 255)' }} />
+            <XAxis dataKey="name" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.68rem', fill: 'oklch(0.68 0.015 255)' }} />
             <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.68 0.015 255)' }} />
             <Tooltip
+              formatter={(v: number) => [v.toFixed(4), '√MSSD（不安定性）']}
               {...rechartsTooltip}
             />
-            <Bar dataKey="variability" name="変動性(SD)" fill="oklch(0.62 0.18 160)" radius={[4, 4, 0, 0]} opacity={0.85} activeBar={{ fill: "oklch(0.55 0.04 255 / 0.6)", stroke: "none" }} />
-            <Bar dataKey="instability" name="不安定性(√MSSD)" fill="oklch(0.62 0.18 25)" radius={[4, 4, 0, 0]} opacity={0.85} activeBar={{ fill: "oklch(0.55 0.04 255 / 0.6)", stroke: "none" }} />
+            <Bar dataKey="mssd" radius={[4, 4, 0, 0]} activeBar={{ fill: 'oklch(0.55 0.04 255 / 0.6)', stroke: 'none' }}>
+              {dynamicsCompare.map((entry, i) => (
+                <Cell key={i} fill={entry.color} />
+              ))}
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       </CollapsibleCard>
