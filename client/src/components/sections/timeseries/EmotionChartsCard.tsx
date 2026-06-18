@@ -230,7 +230,7 @@ export default function EmotionChartsCard({
                 const textColor = isActive ? (LIGHT_EMOTIONS.has(emotion) ? 'oklch(0.15 0.02 250)' : 'white') : 'oklch(0.68 0.015 250)';
                 return (
                   <button key={emotion} onClick={() => toggleEmotion(emotion)}
-                    className="interactive-pill px-2.5 py-0.5 rounded-full text-xs transition-all"
+                    className="interactive-pill px-2.5 py-0.5 rounded-md text-xs transition-all"
                     style={{ fontFamily: 'Noto Sans JP, sans-serif', background: isActive ? EMOTION_HEX[emotion] : 'oklch(0.20 0.04 255)', color: textColor, border: `1px solid ${isActive ? EMOTION_HEX[emotion] : 'oklch(0.28 0.04 255)'}`, fontSize: '0.72rem' }}
                   >
                     {EMOTION_LABELS_JA[emotion]}
@@ -549,7 +549,7 @@ export default function EmotionChartsCard({
           <div className="flex gap-2">
             {(['engagement', 'valence', 'attention'] as const).map(key => (
               <button key={key} onClick={() => toggleSpecial(key)}
-                className="interactive-pill px-3 py-1 rounded-full text-xs transition-all"
+                className="interactive-pill px-3 py-1 rounded-md text-xs transition-all"
                 style={{
                   fontFamily: 'Roboto Mono, monospace',
                   background: showSpecial.includes(key) ? SPECIAL_COLORS[key] : 'oklch(0.20 0.04 255)',

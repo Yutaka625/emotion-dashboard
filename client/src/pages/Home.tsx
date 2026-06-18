@@ -337,7 +337,7 @@ export default function Home() {
                     <button
                       key={id}
                       onClick={isComparisonView ? undefined : () => setDetailSession(id)}
-                      className={`px-2 py-0.5 rounded-full transition-colors ${isComparisonView ? 'status-pill' : 'interactive-pill'}`}
+                      className={`px-2 py-0.5 transition-colors ${isComparisonView ? 'status-pill rounded-full' : 'interactive-pill rounded-md'}`}
                       title={isComparisonView ? `${name}（比較対象）` : `${name} のデータを詳細タブに表示`}
                       style={{
                         background: on ? color : 'transparent',
@@ -367,7 +367,7 @@ export default function Home() {
             {/* 別のファイルを読み込むボタン */}
             <button
               type="button"
-              className="interactive-pill flex items-center gap-1.5 px-2.5 py-1 rounded-full transition-colors"
+              className="interactive-pill flex items-center gap-1.5 px-2.5 py-1 rounded-md transition-colors"
               style={{ background: 'oklch(0.27 0.04 255)', border: '1px solid oklch(0.32 0.04 255)' }}
               onClick={handleReset}
               title="別のCSVファイルを読み込む"
