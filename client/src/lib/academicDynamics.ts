@@ -13,9 +13,14 @@ export interface AcademicDynamicsRow {
   color: string;
 }
 
+const SPECIAL_METRIC_LABELS: Record<string, string> = {
+  engagement: 'Engagement',
+  valence: 'Valence',
+};
+
 export function buildAcademicDynamicsCompare(data: Pick<DashboardData, 'affect_dynamics'>): AcademicDynamicsRow[] {
   return [...NON_NEUTRAL_EMOTIONS, 'engagement', 'valence'].map(key => ({
-    name: EMOTION_LABELS_JA[key] || key,
+    name: SPECIAL_METRIC_LABELS[key] || EMOTION_LABELS_JA[key] || key,
     key,
     kind: key === 'engagement' || key === 'valence' ? 'special' : 'emotion',
     sd: data.affect_dynamics[key]?.variability_sd || 0,

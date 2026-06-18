@@ -29,10 +29,12 @@ describe('buildAcademicDynamicsCompare', () => {
     });
     expect(rows.find(row => row.key === 'engagement')).toMatchObject({
       kind: 'special',
+      name: 'Engagement',
       sd: 2.3,
     });
     expect(rows.find(row => row.key === 'valence')).toMatchObject({
       kind: 'special',
+      name: 'Valence',
       sd: 3.4,
     });
   });

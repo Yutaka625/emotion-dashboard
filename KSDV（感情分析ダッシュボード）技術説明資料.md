@@ -117,7 +117,7 @@ KSDVは、顔表情認識データをCSV形式でアップロードし、感情�
 4. **統計計算**：TypeScriptで実装された分析エンジンが以下を計算
    - 基本統計量（平均、標準偏差、中央値、四分位数）
    - 相関係数（Pearson相関）
-   - 感情動態指標（変動性、不安定性、慣性）
+   - 感情動態指標（慣性、変動性、不安定性）
    - 頭部動作検知イベント（nod/shake/tilt）
    - 感情変化点（change points、上位20件）
    - UXスコア複合指標（フラストレーション・デライト・認知負荷・総合スコア）
@@ -155,7 +155,7 @@ KSDVは、顔表情認識データをCSV形式でアップロードし、感情�
 | **EngagementValence** | Engagement/Valenceタブ切り替え分析 | BarChart、ScatterChart |
 | **Emotions** | 10種類の感情分布 | BarChart、PieChart |
 | **Transitions** | 感情遷移パターン（10×10行列） | HeatMap（明度補間）|
-| **Academic** | 学術的指標（動態、相関行列）。感情系列と Engagement / Valence などの特殊指標は同一グラフ上で比較するが、特殊指標は斜線パターン付きの棒で区別 | BarChart、CorrelationHeatMap |
+| **Academic** | 学術的指標（動態、相関行列）。Affect Dynamics は慣性（AR1）→変動性（SD）→不安定性（√MSSD）の順に表示し、感情系列と Engagement / Valence などの特殊指標は同一グラフ上で比較するが、特殊指標は薄い塗りと点線枠の棒で区別 | BarChart、CorrelationHeatMap |
 | **ActionUnits** | 顔表情単位22種の活性度 | BarChart |
 | **UXResearch** | UXスコア、フリクション/デライト、頭部動作検知イベント（nod/shake/tilt、種別フィルタ対応）、タスク別分析 | GaugeBar、HeatMap、Timeline |
 | **MultiFaceComparison** | 複数顔データ時のみ表示。データ品質（ノイズ除外）管理・FaceIDラベル付け・顔ごとの感情オーバーレイ（時間軸切替＝実時間/進行率、スムージングSMA/EMA、集団平均±SDバンド、イベント帯の重ね描画＝実時間モードのみ、表示データのCSV出力） | ComposedChart（顔別Line＋平均線＋±SD範囲Area＋イベントReferenceArea）|
