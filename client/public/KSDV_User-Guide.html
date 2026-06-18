@@ -1091,6 +1091,17 @@
         </tbody>
       </table>
 
+      <p style="margin-top:14px"><strong>3つの理論的枠組み（詳しい説明）</strong></p>
+      <ul style="line-height:1.85; padding-left:1.2em; margin-top:6px">
+        <li><strong>Affect Dynamics（感情動態 / Kuppens et al., 2010）</strong>：感情を「平均的な強さ」だけでなく<em>時間的な動き方</em>でとらえる枠組み。本アプリでは次の3指標を算出します。
+          <br>・<strong>変動性（SD）</strong>＝セッション全体での揺れ幅の大きさ。
+          <br>・<strong>不安定性（√MSSD）</strong>＝隣り合うフレーム間の急変の起きやすさ（突発的な変化が多いほど大きい）。
+          <br>・<strong>慣性（AR1）</strong>＝1つ前のフレームとの自己相関。1に近いほど状態が持続し、負の値は揺り戻し（振動）を示します。
+          <br>※ SD・√MSSD・AR1 はいずれもフレーム単位の指標で、フレームレート(fps)が高いほど隣接フレームが似るため値が高めに出ます。<strong>絶対値での断定は避け、同一fps・同一条件でのセッション間／被験者間の相対比較</strong>として解釈してください。</li>
+        <li><strong>Circumplex Model of Affect（感情の円環モデル / Russell, 1980）</strong>：感情を「覚醒度（Arousal）× 感情価（Valence）」の2次元平面で表すモデル。本アプリでは Engagement を覚醒度の代理指標として用い、<strong>固定中立点（Engagement=50／Valence=0）</strong>で4象限（高覚醒×ポジティブ／高覚醒×ネガティブ／低覚醒×ポジティブ／低覚醒×ネガティブ）に分類します。中央値ではなく固定点で分割するため、各象限の偏りをセッション間で比較できます。</li>
+        <li><strong>Facial Action Coding System（FACS / Ekman &amp; Friesen, 1978）</strong>：表情を、眉を上げる・口角を引く等の「アクションユニット（AU）」という最小の筋肉動作の組み合わせとして体系的に記述する手法。本データのアクションユニット列は FACS に基づく表情筋活動の定量値で、「アクションユニット」タブで確認できます。</li>
+      </ul>
+
       <p><strong>変化点一覧テーブル</strong>では、感情スコアが急変したタイミング（変化点）を一覧で確認できます。<strong>変化量（delta）の閾値スライダー</strong>で表示する変化点を絞り込め、<strong>列ヘッダーのクリック</strong>で「時刻」または「変化量」の昇順／降順に並べ替えできます。時刻は秒と「分:秒」の両方で表示し、変化の方向を ↑（増加）／↓（減少）で色分けします。検出はグローバルSDの2.5倍を閾値にした探索的な手法です（詳細は<a href="#academic-guide">学術活用ガイド</a>）。</p>
 
       <div class="howto">
