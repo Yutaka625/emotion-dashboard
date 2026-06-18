@@ -318,7 +318,7 @@ export default function MultiFaceComparisonSection() {
                   {/* 表示トグル */}
                   <button
                     onClick={() => toggleFaceId(id)}
-                    className="interactive-pill px-2.5 py-1 rounded-full text-xs transition-colors"
+                    className="interactive-pill px-2.5 py-1 rounded-md text-xs transition-colors"
                     style={{
                       fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.68rem', whiteSpace: 'nowrap',
                       background: isSel ? faceColor(id) : 'transparent',
@@ -378,7 +378,7 @@ export default function MultiFaceComparisonSection() {
               <button
                 key={m.key}
                 onClick={() => setMetric(m.key)}
-                className="interactive-pill px-2.5 py-0.5 rounded-full text-xs transition-all"
+                className="interactive-pill px-2.5 py-0.5 rounded-md text-xs transition-all"
                 style={{
                   fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem',
                   background: on ? 'oklch(0.70 0.14 195)' : 'oklch(0.20 0.04 255)',

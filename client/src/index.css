@@ -184,27 +184,21 @@
 }
 
 @layer components {
+  /* クリックできるコントロール（選択トグル・ボタン）の共通アフォーダンス。
+     役割の使い分け: クリック可＝角丸ボタン（rounded-md 等）に .interactive-pill を付与 /
+     クリック不可のバッジ＝ピル（rounded-full）に .status-pill を付与。
+     旧実装の下線（::after）は見栄えが悪いため廃止し、ホバーの明度変化と押下の沈み込みで「押せる」ことを示す。 */
   .interactive-pill {
-    position: relative;
-    box-shadow:
-      inset 0 0 0 1px oklch(0.92 0.01 250 / 0.12),
-      0 0 0 1px oklch(0.70 0.14 195 / 0.10);
+    cursor: pointer;
+    transition: filter 0.15s ease, transform 0.05s ease;
   }
 
-  .interactive-pill::after {
-    content: "";
-    position: absolute;
-    left: 0.55rem;
-    right: 0.55rem;
-    bottom: 0.18rem;
-    height: 1px;
-    border-radius: 999px;
-    background: currentColor;
-    opacity: 0.42;
+  .interactive-pill:hover {
+    filter: brightness(1.12);
   }
 
-  .status-pill {
-    box-shadow: none;
+  .interactive-pill:active {
+    transform: translateY(0.5px);
   }
 
   .landing-page {

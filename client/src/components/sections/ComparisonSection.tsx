@@ -307,7 +307,7 @@ export default function ComparisonSection({ dataA, dataB, labelA, labelB }: Prop
               <button
                 key={m.key}
                 onClick={() => setOverlayMetric(m.key)}
-                className="interactive-pill px-2.5 py-0.5 rounded-full text-xs transition-all"
+                className="interactive-pill px-2.5 py-0.5 rounded-md text-xs transition-all"
                 style={{
                   fontFamily: 'Noto Sans JP, sans-serif',
                   fontSize: '0.72rem',
