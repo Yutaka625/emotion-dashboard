@@ -79,6 +79,7 @@ export default function EngagementValenceSection({ data }: Props) {
     }));
 
   const engDynamics = affect_dynamics.engagement;
+  const valDynamics = affect_dynamics.valence;
   // 散布図の各点に「表示用の色」と「支配的感情の日本語名」を付与する。
   // 生成側（scatter_eng_val）は dominant（感情キー）だけを持ち color/emotion が無いため、
   // 旧コードでは点が全て同色・ツールチップの感情が常に「N/A」になっていた。
@@ -349,6 +350,36 @@ export default function EngagementValenceSection({ data }: Props) {
                 { label: '慣性 (AR1)', value: engDynamics.inertia_ar1.toFixed(4), desc: '状態の持続性' },
                 { label: 'レンジ', value: engDynamics.range.toFixed(4), desc: '最大-最小' },
                 { label: '平均絶対変化量', value: engDynamics.mean_absolute_change.toFixed(4), desc: '1フレームあたりの変化' },
+              ].map((m, i) => (
+                <div key={i} className="p-3 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', border: '1px solid oklch(0.22 0.04 255)' }}>
+                  <div className="section-label mb-1">{m.label}</div>
+                  <div style={{ fontFamily: 'Roboto Mono, monospace', fontWeight: 600, fontSize: '1rem', color: 'oklch(0.88 0.005 250)' }}>
+                    {m.value}
+                  </div>
+                  <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.68rem', color: 'oklch(0.68 0.015 255)', marginTop: '2px' }}>
+                    {m.desc}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Affect Dynamics（Valence）— Engagement の動態指標と対になる読み出し */}
+        {valDynamics && (
+          <div className="metric-card">
+            <CardHeader
+              label="AFFECT DYNAMICS"
+              title="Valence の動態指標"
+              info="Valence（感情価）の時間的な動きを5つの指標で示します。変動性(SD)=揺れ幅、不安定性(MSSD)=連続変化の激しさ、慣性(AR1)=状態の持続性、レンジ=最大−最小、平均絶対変化量=1フレームあたりの平均変化量。なお SD・MSSD・AR1 は学術的分析タブの動態指標カード（全指標の比較）にも valence として含まれます。"
+            />
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              {[
+                { label: '変動性 (SD)', value: valDynamics.variability_sd.toFixed(4), desc: '特殊指標の変動幅' },
+                { label: '不安定性 (MSSD)', value: valDynamics.instability_mssd.toFixed(4), desc: '連続変化の激しさ' },
+                { label: '慣性 (AR1)', value: valDynamics.inertia_ar1.toFixed(4), desc: '状態の持続性' },
+                { label: 'レンジ', value: valDynamics.range.toFixed(4), desc: '最大-最小' },
+                { label: '平均絶対変化量', value: valDynamics.mean_absolute_change.toFixed(4), desc: '1フレームあたりの変化' },
               ].map((m, i) => (
                 <div key={i} className="p-3 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', border: '1px solid oklch(0.22 0.04 255)' }}>
                   <div className="section-label mb-1">{m.label}</div>
