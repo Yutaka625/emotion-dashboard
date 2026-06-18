@@ -12,7 +12,7 @@ import { generateInsights, type InsightTone } from '@/lib/insightEngine';
 import { generatePurposeSummaries, type PurposeSummaryTone } from '@/lib/purposeSummaryEngine';
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend, Label,
-  RadarChart, PolarGrid, PolarAngleAxis, Radar, LabelList,
+  RadarChart, PolarGrid, PolarAngleAxis, Radar,
 } from 'recharts';
 import { rechartsTooltip } from '@/lib/chartTooltip';
 import CollapsibleCard from '@/components/ui/CollapsibleCard';
@@ -376,6 +376,7 @@ export default function OverviewSection({ data, onSectionChange, hasComparison }
                 dataKey="emotion"
                 tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fill: 'oklch(0.80 0.01 250)' }}
               />
+              {/* 各点の数値ラベルは非表示（ホバー時のツールチップで確認できる） */}
               <Radar
                 name="平均値"
                 dataKey="value"
@@ -383,19 +384,7 @@ export default function OverviewSection({ data, onSectionChange, hasComparison }
                 fill="oklch(0.62 0.18 160)"
                 fillOpacity={0.25}
                 strokeWidth={2}
-              >
-                <LabelList
-                  dataKey="valueLabel"
-                  position="outside"
-                  fill="oklch(0.88 0.005 250)"
-                  stroke="rgba(0,0,0,0.65)"
-                  strokeWidth={3}
-                  paintOrder="stroke"
-                  fontFamily="Roboto Mono, monospace"
-                  fontSize={10}
-                  fontWeight={700}
-                />
-              </Radar>
+              />
               <Tooltip
                 {...rechartsTooltip}
                 formatter={(v: number) => [formatScore(v), '平均値']}
