@@ -105,85 +105,6 @@ export default function EngagementValenceSection({ data }: Props) {
 
       {/* Special Indicators Tab */}
       <div className="space-y-6">
-        {/* ===== Engagement（関与度）ブロック ===== */}
-        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1.1rem', color: 'oklch(0.78 0.16 80)', borderLeft: '3px solid oklch(0.72 0.18 80)', paddingLeft: '0.6rem' }}>
-          Engagement（関与度）
-        </div>
-        {/* Key Metrics - Engagement */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            { label: 'Engagement 平均値', value: formatPct(eng.mean), unit: '%', color: 'oklch(0.72 0.18 80)' },
-            { label: 'Engagement 最大値', value: formatPct(eng.max), unit: '%', color: 'oklch(0.68 0.26 22)' },
-            { label: 'Engagement 中央値', value: formatPct(eng.median), unit: '%', color: 'oklch(0.70 0.14 195)' },
-            { label: 'Engagement 標準偏差', value: formatPct(eng.std), unit: '%', color: 'oklch(0.55 0.18 300)' },
-          ].map((m, i) => (
-            <div key={i} className="metric-card">
-              <div className="section-label mb-2">{m.label}</div>
-              <div className="flex items-baseline gap-1">
-                <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.75rem', color: m.color, lineHeight: 1 }}>
-                  {m.value}
-                </span>
-                <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.7rem', color: 'oklch(0.68 0.015 255)' }}>
-                  {m.unit}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Distribution + Correlation */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Distribution */}
-          <div className="metric-card">
-            <CardHeader
-              label="ENGAGEMENT DISTRIBUTION"
-              title="Engagement レベル分布"
-              info="Engagement（関与度・0〜100）を5段階（非常に低い〜非常に高い）に区切り、各レベルに該当したフレーム数を示します。関与度の高低の偏りを把握できます。"
-            />
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={engDistData} margin={{ top: 5, right: 10, bottom: 20, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" vertical={false} />
-                <XAxis dataKey="label" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.65rem', fill: 'oklch(0.68 0.015 255)' }} />
-                <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.68 0.015 255)' }} />
-                <Tooltip
-                  formatter={(v: number) => [`${v.toLocaleString()} フレーム`, 'フレーム数']}
-                  {...rechartsTooltip}
-                />
-                <Bar dataKey="value" radius={[4, 4, 0, 0]} activeBar={{ fill: 'oklch(0.55 0.04 255 / 0.6)', stroke: 'none' }}>
-                  {engDistData.map((entry, i) => (
-                    <Cell key={i} fill={entry.color} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-
-          {/* Correlation */}
-          <div className="metric-card">
-            <CardHeader
-              label="ENGAGEMENT CORRELATIONS"
-              title="Engagement と各指標の相関"
-              info="Engagement（関与度）と各感情・指標のピアソン相関係数（−1〜+1）です。+1に近いほど Engagement と同時に増減し、−1に近いほど逆方向に動きます（0は無関係）。どの感情が関与度と連動するかを把握できます。"
-            />
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={engCorrData} layout="vertical" margin={{ top: 5, right: 30, bottom: 5, left: 60 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" horizontal={false} />
-                <XAxis type="number" domain={[-1, 1]} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.68 0.015 255)' }} />
-                <YAxis type="category" dataKey="name" interval={0} tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fill: 'oklch(0.75 0.008 250)' }} width={64} />
-                <Tooltip
-                  formatter={(v: number) => [v.toFixed(4), '相関係数']}
-                  {...rechartsTooltip}
-                />
-                <Bar dataKey="value" radius={[0, 4, 4, 0]} activeBar={{ fill: 'oklch(0.55 0.04 255 / 0.6)', stroke: 'none' }}>
-                  {engCorrData.map((entry, i) => (
-                    <Cell key={i} fill={entry.color} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
         {/* ===== Valence（感情価）ブロック ===== */}
         <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1.1rem', color: 'oklch(0.74 0.14 195)', borderLeft: '3px solid oklch(0.70 0.14 195)', paddingLeft: '0.6rem', marginTop: '0.5rem' }}>
           Valence（感情価）
@@ -209,6 +130,36 @@ export default function EngagementValenceSection({ data }: Props) {
             </div>
           ))}
         </div>
+
+        {/* Affect Dynamics（Valence）— レベル分布の上に配置。Engagement の動態指標と対になる読み出し */}
+        {valDynamics && (
+          <div className="metric-card">
+            <CardHeader
+              label="AFFECT DYNAMICS"
+              title="Valence の動態指標"
+              info="Valence（感情価）の時間的な動きを5つの指標で示します。変動性(SD)=揺れ幅、不安定性(MSSD)=連続変化の激しさ、慣性(AR1)=状態の持続性、レンジ=最大−最小、平均絶対変化量=1フレームあたりの平均変化量。なお SD・MSSD・AR1 は学術的分析タブの動態指標カード（全指標の比較）にも valence として含まれます。"
+            />
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              {[
+                { label: '変動性 (SD)', value: valDynamics.variability_sd.toFixed(4), desc: '特殊指標の変動幅' },
+                { label: '不安定性 (MSSD)', value: valDynamics.instability_mssd.toFixed(4), desc: '連続変化の激しさ' },
+                { label: '慣性 (AR1)', value: valDynamics.inertia_ar1.toFixed(4), desc: '状態の持続性' },
+                { label: 'レンジ', value: valDynamics.range.toFixed(4), desc: '最大-最小' },
+                { label: '平均絶対変化量', value: valDynamics.mean_absolute_change.toFixed(4), desc: '1フレームあたりの変化' },
+              ].map((m, i) => (
+                <div key={i} className="p-3 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', border: '1px solid oklch(0.22 0.04 255)' }}>
+                  <div className="section-label mb-1">{m.label}</div>
+                  <div style={{ fontFamily: 'Roboto Mono, monospace', fontWeight: 600, fontSize: '1rem', color: 'oklch(0.88 0.005 250)' }}>
+                    {m.value}
+                  </div>
+                  <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.68rem', color: 'oklch(0.68 0.015 255)', marginTop: '2px' }}>
+                    {m.desc}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Valence Distribution + Correlation */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -263,7 +214,141 @@ export default function EngagementValenceSection({ data }: Props) {
           </div>
         </div>
 
-        {/* Engagement vs Valence Scatter */}
+        {/* ===== Engagement（関与度）ブロック ===== */}
+        <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '1.1rem', color: 'oklch(0.78 0.16 80)', borderLeft: '3px solid oklch(0.72 0.18 80)', paddingLeft: '0.6rem', marginTop: '0.5rem' }}>
+          Engagement（関与度）
+        </div>
+        {/* Key Metrics - Engagement */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[
+            { label: 'Engagement 平均値', value: formatPct(eng.mean), unit: '%', color: 'oklch(0.72 0.18 80)' },
+            { label: 'Engagement 最大値', value: formatPct(eng.max), unit: '%', color: 'oklch(0.68 0.26 22)' },
+            { label: 'Engagement 中央値', value: formatPct(eng.median), unit: '%', color: 'oklch(0.70 0.14 195)' },
+            { label: 'Engagement 標準偏差', value: formatPct(eng.std), unit: '%', color: 'oklch(0.55 0.18 300)' },
+          ].map((m, i) => (
+            <div key={i} className="metric-card">
+              <div className="section-label mb-2">{m.label}</div>
+              <div className="flex items-baseline gap-1">
+                <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 800, fontSize: '1.75rem', color: m.color, lineHeight: 1 }}>
+                  {m.value}
+                </span>
+                <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.7rem', color: 'oklch(0.68 0.015 255)' }}>
+                  {m.unit}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Affect Dynamics（Engagement）— レベル分布の上に配置 */}
+        {engDynamics && (
+          <div className="metric-card">
+            <CardHeader
+              label="AFFECT DYNAMICS"
+              title="Engagement の動態指標"
+              info="Engagement（関与度）の時間的な動きを5つの指標で示します。変動性(SD)=揺れ幅、不安定性(MSSD)=連続変化の激しさ、慣性(AR1)=状態の持続性、レンジ=最大−最小、平均絶対変化量=1フレームあたりの平均変化量。"
+            />
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              {[
+                { label: '変動性 (SD)', value: engDynamics.variability_sd.toFixed(4), desc: '特殊指標の変動幅' },
+                { label: '不安定性 (MSSD)', value: engDynamics.instability_mssd.toFixed(4), desc: '連続変化の激しさ' },
+                { label: '慣性 (AR1)', value: engDynamics.inertia_ar1.toFixed(4), desc: '状態の持続性' },
+                { label: 'レンジ', value: engDynamics.range.toFixed(4), desc: '最大-最小' },
+                { label: '平均絶対変化量', value: engDynamics.mean_absolute_change.toFixed(4), desc: '1フレームあたりの変化' },
+              ].map((m, i) => (
+                <div key={i} className="p-3 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', border: '1px solid oklch(0.22 0.04 255)' }}>
+                  <div className="section-label mb-1">{m.label}</div>
+                  <div style={{ fontFamily: 'Roboto Mono, monospace', fontWeight: 600, fontSize: '1rem', color: 'oklch(0.88 0.005 250)' }}>
+                    {m.value}
+                  </div>
+                  <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.68rem', color: 'oklch(0.68 0.015 255)', marginTop: '2px' }}>
+                    {m.desc}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Distribution + Correlation */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Distribution */}
+          <div className="metric-card">
+            <CardHeader
+              label="ENGAGEMENT DISTRIBUTION"
+              title="Engagement レベル分布"
+              info="Engagement（関与度・0〜100）を5段階（非常に低い〜非常に高い）に区切り、各レベルに該当したフレーム数を示します。関与度の高低の偏りを把握できます。"
+            />
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={engDistData} margin={{ top: 5, right: 10, bottom: 20, left: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" vertical={false} />
+                <XAxis dataKey="label" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.65rem', fill: 'oklch(0.68 0.015 255)' }} />
+                <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.68 0.015 255)' }} />
+                <Tooltip
+                  formatter={(v: number) => [`${v.toLocaleString()} フレーム`, 'フレーム数']}
+                  {...rechartsTooltip}
+                />
+                <Bar dataKey="value" radius={[4, 4, 0, 0]} activeBar={{ fill: 'oklch(0.55 0.04 255 / 0.6)', stroke: 'none' }}>
+                  {engDistData.map((entry, i) => (
+                    <Cell key={i} fill={entry.color} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Correlation */}
+          <div className="metric-card">
+            <CardHeader
+              label="ENGAGEMENT CORRELATIONS"
+              title="Engagement と各指標の相関"
+              info="Engagement（関与度）と各感情・指標のピアソン相関係数（−1〜+1）です。+1に近いほど Engagement と同時に増減し、−1に近いほど逆方向に動きます（0は無関係）。どの感情が関与度と連動するかを把握できます。"
+            />
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={engCorrData} layout="vertical" margin={{ top: 5, right: 30, bottom: 5, left: 60 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" horizontal={false} />
+                <XAxis type="number" domain={[-1, 1]} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.68 0.015 255)' }} />
+                <YAxis type="category" dataKey="name" interval={0} tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fill: 'oklch(0.75 0.008 250)' }} width={64} />
+                <Tooltip
+                  formatter={(v: number) => [v.toFixed(4), '相関係数']}
+                  {...rechartsTooltip}
+                />
+                <Bar dataKey="value" radius={[0, 4, 4, 0]} activeBar={{ fill: 'oklch(0.55 0.04 255 / 0.6)', stroke: 'none' }}>
+                  {engCorrData.map((entry, i) => (
+                    <Cell key={i} fill={entry.color} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Emotion Profile */}
+        <div className="metric-card">
+          <CardHeader
+            label="EMOTION PROFILE"
+            title="Engagement レベル別の感情プロファイル"
+            info="Engagement が高いとき（50以上）と低いとき（50未満）で、各感情の平均スコアがどう違うかを比較します。関与度が高い場面でどんな感情が伴いやすいかを把握できます。"
+          />
+          <ResponsiveContainer width="100%" height={240}>
+            <BarChart data={profileData} margin={{ top: 5, right: 20, bottom: 20, left: 60 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" />
+              <XAxis dataKey="name" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.65rem', fill: 'oklch(0.68 0.015 255)' }} />
+              <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.68 0.015 255)' }} />
+              <Tooltip
+                formatter={(v: number) => [v.toFixed(2), '割合']}
+                {...rechartsTooltip}
+              />
+              <Legend wrapperStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem' }} />
+              <Bar dataKey="high" fill="oklch(0.68 0.26 22)" name="高レベル時" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="low" fill="oklch(0.70 0.14 195)" name="低レベル時" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Circumplex Model は学術的分析タブに集約したため、特殊指標タブからは削除 */}
+
+        {/* Engagement vs Valence Scatter — 一番下に配置 */}
         <div className="metric-card">
           <CardHeader
             label="ENGAGEMENT × VALENCE"
@@ -309,91 +394,6 @@ export default function EngagementValenceSection({ data }: Props) {
             </ScatterChart>
           </ResponsiveContainer>
         </div>
-
-        {/* Emotion Profile */}
-        <div className="metric-card">
-          <CardHeader
-            label="EMOTION PROFILE"
-            title="Engagement レベル別の感情プロファイル"
-            info="Engagement が高いとき（50以上）と低いとき（50未満）で、各感情の平均スコアがどう違うかを比較します。関与度が高い場面でどんな感情が伴いやすいかを把握できます。"
-          />
-          <ResponsiveContainer width="100%" height={240}>
-            <BarChart data={profileData} margin={{ top: 5, right: 20, bottom: 20, left: 60 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" />
-              <XAxis dataKey="name" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.65rem', fill: 'oklch(0.68 0.015 255)' }} />
-              <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.68 0.015 255)' }} />
-              <Tooltip
-                formatter={(v: number) => [v.toFixed(2), '割合']}
-                {...rechartsTooltip}
-              />
-              <Legend wrapperStyle={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem' }} />
-              <Bar dataKey="high" fill="oklch(0.68 0.26 22)" name="高レベル時" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="low" fill="oklch(0.70 0.14 195)" name="低レベル時" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Circumplex Model は学術的分析タブに集約したため、特殊指標タブからは削除 */}
-
-        {/* Affect Dynamics */}
-        {engDynamics && (
-          <div className="metric-card">
-            <CardHeader
-              label="AFFECT DYNAMICS"
-              title="Engagement の動態指標"
-              info="Engagement（関与度）の時間的な動きを5つの指標で示します。変動性(SD)=揺れ幅、不安定性(MSSD)=連続変化の激しさ、慣性(AR1)=状態の持続性、レンジ=最大−最小、平均絶対変化量=1フレームあたりの平均変化量。"
-            />
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-              {[
-                { label: '変動性 (SD)', value: engDynamics.variability_sd.toFixed(4), desc: '特殊指標の変動幅' },
-                { label: '不安定性 (MSSD)', value: engDynamics.instability_mssd.toFixed(4), desc: '連続変化の激しさ' },
-                { label: '慣性 (AR1)', value: engDynamics.inertia_ar1.toFixed(4), desc: '状態の持続性' },
-                { label: 'レンジ', value: engDynamics.range.toFixed(4), desc: '最大-最小' },
-                { label: '平均絶対変化量', value: engDynamics.mean_absolute_change.toFixed(4), desc: '1フレームあたりの変化' },
-              ].map((m, i) => (
-                <div key={i} className="p-3 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', border: '1px solid oklch(0.22 0.04 255)' }}>
-                  <div className="section-label mb-1">{m.label}</div>
-                  <div style={{ fontFamily: 'Roboto Mono, monospace', fontWeight: 600, fontSize: '1rem', color: 'oklch(0.88 0.005 250)' }}>
-                    {m.value}
-                  </div>
-                  <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.68rem', color: 'oklch(0.68 0.015 255)', marginTop: '2px' }}>
-                    {m.desc}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Affect Dynamics（Valence）— Engagement の動態指標と対になる読み出し */}
-        {valDynamics && (
-          <div className="metric-card">
-            <CardHeader
-              label="AFFECT DYNAMICS"
-              title="Valence の動態指標"
-              info="Valence（感情価）の時間的な動きを5つの指標で示します。変動性(SD)=揺れ幅、不安定性(MSSD)=連続変化の激しさ、慣性(AR1)=状態の持続性、レンジ=最大−最小、平均絶対変化量=1フレームあたりの平均変化量。なお SD・MSSD・AR1 は学術的分析タブの動態指標カード（全指標の比較）にも valence として含まれます。"
-            />
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-              {[
-                { label: '変動性 (SD)', value: valDynamics.variability_sd.toFixed(4), desc: '特殊指標の変動幅' },
-                { label: '不安定性 (MSSD)', value: valDynamics.instability_mssd.toFixed(4), desc: '連続変化の激しさ' },
-                { label: '慣性 (AR1)', value: valDynamics.inertia_ar1.toFixed(4), desc: '状態の持続性' },
-                { label: 'レンジ', value: valDynamics.range.toFixed(4), desc: '最大-最小' },
-                { label: '平均絶対変化量', value: valDynamics.mean_absolute_change.toFixed(4), desc: '1フレームあたりの変化' },
-              ].map((m, i) => (
-                <div key={i} className="p-3 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', border: '1px solid oklch(0.22 0.04 255)' }}>
-                  <div className="section-label mb-1">{m.label}</div>
-                  <div style={{ fontFamily: 'Roboto Mono, monospace', fontWeight: 600, fontSize: '1rem', color: 'oklch(0.88 0.005 250)' }}>
-                    {m.value}
-                  </div>
-                  <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.68rem', color: 'oklch(0.68 0.015 255)', marginTop: '2px' }}>
-                    {m.desc}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
