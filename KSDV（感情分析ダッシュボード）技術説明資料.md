@@ -155,9 +155,9 @@ KSDVは、顔表情認識データをCSV形式でアップロードし、感情�
 | **EngagementValence** | Engagement/Valenceタブ切り替え分析 | BarChart、ScatterChart |
 | **Emotions** | 10種類の感情分布 | BarChart、PieChart |
 | **Transitions** | 感情遷移パターン（10×10行列） | HeatMap（明度補間）|
-| **Academic** | 学術的指標（動態、相関行列） | BarChart、CorrelationHeatMap |
+| **Academic** | 学術的指標（動態、相関行列）。感情系列と Engagement / Valence などの特殊指標は同一グラフ上で比較するが、特殊指標は斜線パターン付きの棒で区別 | BarChart、CorrelationHeatMap |
 | **ActionUnits** | 顔表情単位22種の活性度 | BarChart |
-| **UXResearch** | UXスコア、フリクション/デライト、頭部動作検知イベント（nod/shake/tilt）、タスク別分析 | GaugeBar、HeatMap、Timeline |
+| **UXResearch** | UXスコア、フリクション/デライト、頭部動作検知イベント（nod/shake/tilt、種別フィルタ対応）、タスク別分析 | GaugeBar、HeatMap、Timeline |
 | **MultiFaceComparison** | 複数顔データ時のみ表示。データ品質（ノイズ除外）管理・FaceIDラベル付け・顔ごとの感情オーバーレイ（時間軸切替＝実時間/進行率、スムージングSMA/EMA、集団平均±SDバンド、イベント帯の重ね描画＝実時間モードのみ、表示データのCSV出力） | ComposedChart（顔別Line＋平均線＋±SD範囲Area＋イベントReferenceArea）|
 | **Comparison** | 2セッションA/B比較。タイムラインオーバーレイは指標選択式（Engagement/Valence/Attention＋9感情）＋時間軸モード切替（実時間秒でt=30sがA/Bで縦揃い／正規化%で波形の形を比較、いずれも時間ベースリサンプリング） | 並列BarChart、RadarChart、LineChart |
 

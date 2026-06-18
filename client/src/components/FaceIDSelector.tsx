@@ -56,7 +56,7 @@ export default function FaceIDSelector() {
       {/* 「全員」ボタン */}
       <button
         onClick={selectAll}
-        className="flex items-center gap-1 px-2 py-0.5 rounded-full transition-colors"
+        className="interactive-pill flex items-center gap-1 px-2 py-0.5 rounded-full transition-colors"
         style={{
           background: isAllSelected ? 'oklch(0.70 0.14 195 / 0.20)' : 'transparent',
           border: isAllSelected
@@ -81,7 +81,7 @@ export default function FaceIDSelector() {
           <button
             key={faceId}
             onClick={(e) => handleChipClick(faceId, e)}
-            className="flex items-center gap-1 px-2 py-0.5 rounded-full transition-colors"
+            className="interactive-pill flex items-center gap-1 px-2 py-0.5 rounded-full transition-colors"
             style={{
               background: isSelected ? 'oklch(0.70 0.14 195 / 0.20)' : 'transparent',
               border: isSelected

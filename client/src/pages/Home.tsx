@@ -337,7 +337,7 @@ export default function Home() {
                     <button
                       key={id}
                       onClick={isComparisonView ? undefined : () => setDetailSession(id)}
-                      className="px-2 py-0.5 rounded-full transition-colors"
+                      className={`px-2 py-0.5 rounded-full transition-colors ${isComparisonView ? 'status-pill' : 'interactive-pill'}`}
                       title={isComparisonView ? `${name}（比較対象）` : `${name} のデータを詳細タブに表示`}
                       style={{
                         background: on ? color : 'transparent',
@@ -357,37 +357,26 @@ export default function Home() {
               </div>
             )}
 
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: 'oklch(0.70 0.14 195 / 0.12)', border: '1px solid oklch(0.70 0.14 195 / 0.30)' }}>
+            <div className="status-pill flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: 'oklch(0.70 0.14 195 / 0.12)', border: '1px solid oklch(0.70 0.14 195 / 0.30)' }}>
               <div className="w-1.5 h-1.5 rounded-full" style={{ background: 'oklch(0.70 0.14 195)' }} />
               <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', color: 'oklch(0.70 0.14 195)' }}>
                 {safeSelected.meta.recording_date}
               </span>
             </div>
 
-            {/* ファイル名 + 別のファイルを読み込むボタン（統合済み） */}
-            <div
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg cursor-pointer transition-colors"
+            {/* 別のファイルを読み込むボタン */}
+            <button
+              type="button"
+              className="interactive-pill flex items-center gap-1.5 px-2.5 py-1 rounded-full transition-colors"
               style={{ background: 'oklch(0.27 0.04 255)', border: '1px solid oklch(0.32 0.04 255)' }}
               onClick={handleReset}
               title="別のCSVファイルを読み込む"
             >
               <Upload size={12} style={{ color: 'oklch(0.68 0.015 255)', flexShrink: 0 }} />
-              <span
-                style={{
-                  fontFamily: 'Roboto Mono, monospace',
-                  fontSize: '0.6rem',
-                  color: 'oklch(0.72 0.008 250)',
-                  maxWidth: '180px',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
-                title={filename}
-              >
-                {filename}
+              <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.7rem', color: 'oklch(0.72 0.008 250)', whiteSpace: 'nowrap' }}>
+                別CSV
               </span>
-              <X size={12} style={{ color: 'oklch(0.68 0.015 255)', flexShrink: 0 }} />
-            </div>
+            </button>
 
             {/* 比較CSV追加ボタン */}
             <div

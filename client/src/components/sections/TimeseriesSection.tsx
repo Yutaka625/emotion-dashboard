@@ -451,7 +451,7 @@ export default function TimeseriesSection({ data, rawTimeseries }: Props) {
                       );
                     })}
                     <td className="py-1.5">
-                      <span className="px-1.5 py-0.5 rounded-full" style={{ background: EMOTION_HEX[row.dominant_emotion] + '25', color: EMOTION_HEX[row.dominant_emotion], fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
+                      <span className="status-pill px-1.5 py-0.5 rounded-full" style={{ background: EMOTION_HEX[row.dominant_emotion] + '25', color: EMOTION_HEX[row.dominant_emotion], fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
                         {EMOTION_LABELS_JA[row.dominant_emotion] || row.dominant_emotion}
                       </span>
                     </td>

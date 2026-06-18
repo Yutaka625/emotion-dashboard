@@ -375,7 +375,7 @@ export default function TransitionsSection({ data }: Props) {
                     <td className="py-2 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.75rem' }}>{row.max_duration.toFixed(3)}s</td>
                     <td className="py-2 pr-4" style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.75rem' }}>{row.total_duration.toFixed(2)}s</td>
                     <td className="py-2 pr-4">
-                      <span className="px-2 py-0.5 rounded-full text-xs" style={{ background: row.color + '20', color: row.color, fontFamily: 'Roboto Mono, monospace' }}>
+                      <span className="status-pill px-2 py-0.5 rounded-full text-xs" style={{ background: row.color + '20', color: row.color, fontFamily: 'Roboto Mono, monospace' }}>
                         {(dominant_emotion_pct[key] || 0).toFixed(2)}%
                       </span>
                     </td>

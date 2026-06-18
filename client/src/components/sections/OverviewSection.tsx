@@ -12,11 +12,12 @@ import { generateInsights, type InsightTone } from '@/lib/insightEngine';
 import { generatePurposeSummaries, type PurposeSummaryTone } from '@/lib/purposeSummaryEngine';
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend, Label,
-  RadarChart, PolarGrid, PolarAngleAxis, Radar,
+  RadarChart, PolarGrid, PolarAngleAxis, Radar, LabelList,
 } from 'recharts';
 import { rechartsTooltip } from '@/lib/chartTooltip';
 import CollapsibleCard from '@/components/ui/CollapsibleCard';
 import { formatScore, formatPct } from '@/lib/utils';
+import { buildEmotionProfileRadarData } from '@/lib/emotionProfile';
 
 interface Props {
   data: DashboardData;
@@ -128,14 +129,9 @@ export default function OverviewSection({ data, onSectionChange, hasComparison }
   }, [dominant_emotion_counts]);
 
   const radarData = useMemo(() => {
-    const emotions = ['anger', 'contempt', 'disgust', 'fear', 'joy', 'sadness', 'surprise', 'sentimentality', 'confusion'];
-    return emotions.map(e => ({
-      emotion: EMOTION_LABELS_JA[e] || e,
-      // 生の平均値をそのまま使用（×10スケール廃止）
-      // signed モード時に mean がマイナスになっても RadarChart が崩れないよう 0 でクリップ（表示用のみ）
-      value: Math.max(0, emotion_stats[e]?.mean ?? 0),
-      max: Math.max(0, emotion_stats[e]?.max ?? 0),
-    }));
+    // 生の平均値をそのまま使用（×10スケール廃止）
+    // signed モード時に mean がマイナスになっても RadarChart が崩れないよう 0 でクリップ（表示用のみ）
+    return buildEmotionProfileRadarData(emotion_stats);
   }, [emotion_stats]);
 
   const engMean = special_stats.engagement?.mean || 0;
@@ -172,19 +168,13 @@ export default function OverviewSection({ data, onSectionChange, hasComparison }
         <div className="flex items-center gap-2">
           {/* ベースライン補正アクティブ表示 */}
           {isBaselineActive && baselineRange && (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ background: 'oklch(0.75 0.18 60 / 0.12)', border: '1px solid oklch(0.75 0.18 60 / 0.4)' }}>
+            <div className="status-pill flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ background: 'oklch(0.75 0.18 60 / 0.12)', border: '1px solid oklch(0.75 0.18 60 / 0.4)' }}>
               <div className="w-1.5 h-1.5 rounded-full" style={{ background: 'oklch(0.75 0.18 60)' }} />
               <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.75 0.18 60)' }}>
                 BASELINE CORRECTED
               </span>
             </div>
           )}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full" style={{ background: 'oklch(0.62 0.18 160 / 0.1)', border: '1px solid oklch(0.62 0.18 160 / 0.3)' }}>
-            <div className="w-1.5 h-1.5 rounded-full signal-pulse" style={{ background: 'oklch(0.62 0.18 160)' }} />
-            <span style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.42 0.12 160)' }}>
-              ANALYZED
-            </span>
-          </div>
         </div>
       </div>
 
@@ -393,7 +383,19 @@ export default function OverviewSection({ data, onSectionChange, hasComparison }
                 fill="oklch(0.62 0.18 160)"
                 fillOpacity={0.25}
                 strokeWidth={2}
-              />
+              >
+                <LabelList
+                  dataKey="valueLabel"
+                  position="outside"
+                  fill="oklch(0.88 0.005 250)"
+                  stroke="rgba(0,0,0,0.65)"
+                  strokeWidth={3}
+                  paintOrder="stroke"
+                  fontFamily="Roboto Mono, monospace"
+                  fontSize={10}
+                  fontWeight={700}
+                />
+              </Radar>
               <Tooltip
                 {...rechartsTooltip}
                 formatter={(v: number) => [formatScore(v), '平均値']}
@@ -412,7 +414,7 @@ export default function OverviewSection({ data, onSectionChange, hasComparison }
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {keyInsights.map(insight => (
-            <div key={insight.id} className="p-4 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', borderTop: `1px solid ${insight.color}30`, borderRight: `1px solid ${insight.color}30`, borderBottom: `1px solid ${insight.color}30`, borderLeft: `3px solid ${insight.color}` }}>
+            <div key={insight.id} className="p-4 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', border: '1px solid oklch(0.30 0.035 255)' }}>
               <div className="flex items-center gap-2 mb-2">
                 {toneIcon(insight.tone, insight.color)}
                 <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 600, fontSize: '0.85rem', color: 'oklch(0.88 0.005 250)' }}>

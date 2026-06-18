@@ -184,6 +184,29 @@
 }
 
 @layer components {
+  .interactive-pill {
+    position: relative;
+    box-shadow:
+      inset 0 0 0 1px oklch(0.92 0.01 250 / 0.12),
+      0 0 0 1px oklch(0.70 0.14 195 / 0.10);
+  }
+
+  .interactive-pill::after {
+    content: "";
+    position: absolute;
+    left: 0.55rem;
+    right: 0.55rem;
+    bottom: 0.18rem;
+    height: 1px;
+    border-radius: 999px;
+    background: currentColor;
+    opacity: 0.42;
+  }
+
+  .status-pill {
+    box-shadow: none;
+  }
+
   .landing-page {
     min-height: 100vh;
     overflow: hidden;

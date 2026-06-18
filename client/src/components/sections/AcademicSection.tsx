@@ -17,12 +17,40 @@ import CollapsibleCard from '@/components/ui/CollapsibleCard';
 import { useFaceID } from '@/contexts/FaceIDContext';
 import { readSessionMeta, hasAnySessionMeta } from '@/lib/sessionMeta';
 import { downloadCSV } from '@/lib/csvExport';
+import { buildAcademicDynamicsCompare, type AcademicDynamicsRow } from '@/lib/academicDynamics';
 
 interface Props {
   data: DashboardData;
 }
 
 const round4 = (v: number) => Math.round(v * 10000) / 10000;
+
+function dynamicsCellProps(entry: AcademicDynamicsRow, patternId: string, color = entry.color) {
+  if (entry.kind === 'special') {
+    return {
+      fill: `url(#${patternId})`,
+      stroke: color,
+      strokeWidth: 1.5,
+    };
+  }
+
+  return {
+    fill: color,
+    stroke: 'none',
+    strokeWidth: 0,
+  };
+}
+
+function SpecialMetricPattern({ id }: { id: string }) {
+  return (
+    <defs>
+      <pattern id={id} patternUnits="userSpaceOnUse" width={6} height={6} patternTransform="rotate(45)">
+        <rect width={6} height={6} fill="oklch(0.24 0.04 255 / 0.78)" />
+        <path d="M 0 0 L 0 6" stroke="oklch(0.80 0.02 250 / 0.55)" strokeWidth={2} />
+      </pattern>
+    </defs>
+  );
+}
 
 export default function AcademicSection({ data }: Props) {
   const { affect_dynamics, correlation_matrix, circumplex_summary, emotion_prevalence, special_stats, engagement_correlations, emotion_stats, meta } = data;
@@ -174,15 +202,7 @@ export default function AcademicSection({ data }: Props) {
   );
 
   // Affect Dynamics comparison
-  const dynamicsCompare =[...NON_NEUTRAL_EMOTIONS, 'engagement', 'valence'].map(key => ({
-    name: EMOTION_LABELS_JA[key] || key,
-    key,
-    sd: affect_dynamics[key]?.variability_sd || 0,
-    mssd: Math.sqrt(affect_dynamics[key]?.instability_mssd || 0),
-    ar1: affect_dynamics[key]?.inertia_ar1 || 0,
-    mac: affect_dynamics[key]?.mean_absolute_change || 0,
-    color: EMOTION_COLORS[key] || (key === 'engagement' ? 'oklch(0.72 0.18 80)' : 'oklch(0.62 0.18 25)'),
-  }));
+  const dynamicsCompare = buildAcademicDynamicsCompare({ affect_dynamics });
 
   // Correlation heatmap data
   const corrLabels = correlation_matrix.labels;
@@ -194,6 +214,7 @@ export default function AcademicSection({ data }: Props) {
     variability: d.sd,
     inertia: d.ar1,
     color: d.color,
+    kind: d.kind,
   }));
 
   // ============================================================
@@ -328,7 +349,7 @@ export default function AcademicSection({ data }: Props) {
           {
             title: 'Affect Dynamics',
             author: 'Kuppens et al. (2010)',
-            desc: '感情の変動性（SD）・不安定性（MSSD）・慣性（AR1）を用いて感情の動的特性を定量化する枠組み。変動性は感情の揺れ幅、慣性は状態の持続性を示す。',
+            desc: '感情の変動性（SD）・不安定性（MSSD）・慣性（AR1）を用いて感情の動的特性を定量化する枠組み。変動性は全体の揺れ幅、不安定性は隣接フレーム間の急変、慣性は状態の持続性を示す。',
             color: 'oklch(0.62 0.18 160)',
           },
           {
@@ -373,9 +394,12 @@ export default function AcademicSection({ data }: Props) {
       >
         <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.68 0.015 255)', marginBottom: '1rem' }}>
           {variabilityLead}
+          {' '}SDはセッション全体でどれだけ広い範囲に散らばったかを見る指標で、変化の順序や急変の有無は直接見ません。
+          Engagement / Valence は感情そのものではないため、斜線パターンで区別しています。
         </p>
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={dynamicsCompare} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
+            <SpecialMetricPattern id="variability-special-metric-pattern" />
             <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" vertical={false} />
             <XAxis dataKey="name" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.68rem', fill: 'oklch(0.68 0.015 255)' }} />
             <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.68 0.015 255)' }} />
@@ -385,7 +409,7 @@ export default function AcademicSection({ data }: Props) {
             />
             <Bar dataKey="sd" radius={[4, 4, 0, 0]} activeBar={{ fill: 'oklch(0.55 0.04 255 / 0.6)', stroke: 'none' }}>
               {dynamicsCompare.map((entry, i) => (
-                <Cell key={i} fill={entry.color} />
+                <Cell key={i} {...dynamicsCellProps(entry, 'variability-special-metric-pattern')} />
               ))}
             </Bar>
           </BarChart>
@@ -409,6 +433,7 @@ export default function AcademicSection({ data }: Props) {
         </p>
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={dynamicsCompare} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
+            <SpecialMetricPattern id="inertia-special-metric-pattern" />
             <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" vertical={false} />
             <XAxis dataKey="name" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.68rem', fill: 'oklch(0.68 0.015 255)' }} />
             <YAxis domain={[-1, 1]} tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.68 0.015 255)' }} />
@@ -419,7 +444,14 @@ export default function AcademicSection({ data }: Props) {
             <ReferenceLine y={0} stroke="oklch(0.68 0.015 255)" strokeDasharray="4 4" />
             <Bar dataKey="ar1" radius={[4, 4, 0, 0]} activeBar={{ fill: 'oklch(0.55 0.04 255 / 0.6)', stroke: 'none' }}>
               {dynamicsCompare.map((entry, i) => (
-                <Cell key={i} fill={entry.ar1 >= 0 ? 'oklch(0.62 0.18 160)' : 'oklch(0.62 0.18 25)'} />
+                <Cell
+                  key={i}
+                  {...dynamicsCellProps(
+                    entry,
+                    'inertia-special-metric-pattern',
+                    entry.ar1 >= 0 ? 'oklch(0.62 0.18 160)' : 'oklch(0.62 0.18 25)',
+                  )}
+                />
               ))}
             </Bar>
           </BarChart>
@@ -436,9 +468,12 @@ export default function AcademicSection({ data }: Props) {
       >
         <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.78rem', color: 'oklch(0.68 0.015 255)', marginBottom: '1rem' }}>
           {instabilityLead}
+          {' '}√MSSDは隣接フレーム差を見るため、同じ揺れ幅でも「ゆっくり変わる」場合は低く、「短時間で上下する」場合は高く出ます。
+          Engagement / Valence は感情そのものではないため、斜線パターンで区別しています。
         </p>
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={dynamicsCompare} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
+            <SpecialMetricPattern id="instability-special-metric-pattern" />
             <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.04 255)" vertical={false} />
             <XAxis dataKey="name" tick={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.68rem', fill: 'oklch(0.68 0.015 255)' }} />
             <YAxis tick={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fill: 'oklch(0.68 0.015 255)' }} />
@@ -448,7 +483,7 @@ export default function AcademicSection({ data }: Props) {
             />
             <Bar dataKey="mssd" radius={[4, 4, 0, 0]} activeBar={{ fill: 'oklch(0.55 0.04 255 / 0.6)', stroke: 'none' }}>
               {dynamicsCompare.map((entry, i) => (
-                <Cell key={i} fill={entry.color} />
+                <Cell key={i} {...dynamicsCellProps(entry, 'instability-special-metric-pattern')} />
               ))}
             </Bar>
           </BarChart>

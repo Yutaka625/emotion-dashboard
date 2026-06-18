@@ -11,6 +11,11 @@ import AbsoluteScaleBadge from '@/components/ui/AbsoluteScaleBadge';
 import CardHeader from '@/components/ui/CardHeader';
 import { useEvents } from '@/contexts/EventsContext';
 import { AlertTriangle, Star, Zap, Brain, Trophy, Filter, ArrowUpDown, ArrowLeftRight, RotateCcw } from 'lucide-react';
+import {
+  countHeadMotionEventsByType,
+  filterHeadMotionEvents,
+  type HeadMotionFilter,
+} from '@/lib/uxResearchFilters';
 
 interface Props {
   data: DashboardData;
@@ -65,6 +70,7 @@ export default function UXResearchSection({ data }: Props) {
   const { ux_scores, change_points, timeseries_full, head_motion_events } = data;
   const { events } = useEvents();
   const [frictionFilter, setFrictionFilter] = useState<'all' | 'friction' | 'delight'>('all');
+  const [headMotionFilter, setHeadMotionFilter] = useState<HeadMotionFilter>('all');
 
   // ---- UXスコア段階評価 ----
   const uxRating = useMemo(() => {
@@ -107,6 +113,15 @@ export default function UXResearchSection({ data }: Props) {
 
   const frictionCount = frictionDelightItems.filter(i => i.kind === 'friction').length;
   const delightCount  = frictionDelightItems.filter(i => i.kind === 'delight').length;
+
+  const headMotionCounts = useMemo(
+    () => countHeadMotionEventsByType(head_motion_events),
+    [head_motion_events],
+  );
+  const filteredHeadMotionEvents = useMemo(
+    () => filterHeadMotionEvents(head_motion_events, headMotionFilter),
+    [head_motion_events, headMotionFilter],
+  );
 
   // ---- タスク別サマリー計算 ----
   const taskSummaries = useMemo(() => {
@@ -378,23 +393,39 @@ export default function UXResearchSection({ data }: Props) {
           label="HEAD MOTION EVENTS"
           title="頭部動作検知イベント"
           tier="pro"
-          info="明確なうなづき（Pitch ≥8°）・首振り（Yaw ≥12°）・首傾げ（Roll ≥15°）を自動検知し、発生した時刻の一覧を示します。同意・否定・思考などの非言語サインの手がかりになります。"
+          info="明確なうなづき（Pitch ≥8°）・首振り（Yaw ≥12°）・首傾げ（Roll ≥15°）を自動検知し、発生した時刻の一覧を示します。下のフィルタで動作種別を絞り込めます。同意・否定・思考などの非言語サインの手がかりになります。"
         />
 
-        {/* 凡例 */}
-        <div className="flex gap-4 mb-4">
-          {(Object.entries(MOTION_CONFIG) as [keyof typeof MOTION_CONFIG, typeof MOTION_CONFIG[keyof typeof MOTION_CONFIG]][]).map(([type, cfg]) => {
-            const count = head_motion_events.filter(e => e.type === type).length;
+        {/* フィルタートグル（動作種別の検出件数を融合表示） */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          {([
+            { id: 'all' as const, label: 'すべて', count: headMotionCounts.all, color: 'oklch(0.70 0.03 255)', Icon: Filter },
+            ...((Object.entries(MOTION_CONFIG) as [keyof typeof MOTION_CONFIG, typeof MOTION_CONFIG[keyof typeof MOTION_CONFIG]][]).map(([type, cfg]) => ({
+              id: type,
+              label: cfg.label,
+              count: headMotionCounts[type],
+              color: cfg.color,
+              Icon: cfg.Icon,
+            }))),
+          ] as const).map(({ id, label, count, color, Icon }) => {
+            const active = headMotionFilter === id;
             return (
-              <div key={type} className="flex items-center gap-1.5">
-                <cfg.Icon size={13} style={{ color: cfg.color }} />
-                <span style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.75 0.008 250)' }}>
-                  {cfg.label}
-                </span>
-                <span className="px-1.5 py-0.5 rounded-full" style={{ background: cfg.color + '22', color: cfg.color, fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', fontWeight: 700 }}>
-                  {count}回
-                </span>
-              </div>
+              <button
+                key={id}
+                type="button"
+                onClick={() => setHeadMotionFilter(id)}
+                className="interactive-pill flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all"
+                style={{
+                  fontFamily: 'Noto Sans JP, sans-serif',
+                  background: active ? color.replace(')', ' / 0.16)') : 'transparent',
+                  border: `1px solid ${active ? color.replace(')', ' / 0.55)') : 'oklch(0.28 0.04 255)'}`,
+                  color: active ? color : 'oklch(0.66 0.015 255)',
+                }}
+              >
+                <Icon size={11} style={{ color }} />
+                {label}
+                <span style={{ fontFamily: 'Roboto Mono, monospace', color, opacity: active ? 1 : 0.85 }}>{count}</span>
+              </button>
             );
           })}
         </div>
@@ -405,6 +436,10 @@ export default function UXResearchSection({ data }: Props) {
             <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.65rem', color: 'oklch(0.55 0.01 255)', marginTop: '4px' }}>
               （CSV に pitch / yaw / roll 列がない場合も表示されません）
             </div>
+          </div>
+        ) : filteredHeadMotionEvents.length === 0 ? (
+          <div className="py-8 text-center" style={{ color: 'oklch(0.58 0.01 255)', fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.85rem' }}>
+            該当する頭部動作イベントがありません。
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -419,7 +454,7 @@ export default function UXResearchSection({ data }: Props) {
                 </tr>
               </thead>
               <tbody>
-                {head_motion_events.map((ev, i) => {
+                {filteredHeadMotionEvents.map((ev, i) => {
                   const cfg = MOTION_CONFIG[ev.type];
                   const duration = (ev.time_end - ev.time_start).toFixed(2);
                   return (
@@ -432,7 +467,7 @@ export default function UXResearchSection({ data }: Props) {
                       <td className="py-2 pr-4">
                         <div className="flex items-center gap-1.5">
                           <cfg.Icon size={13} style={{ color: cfg.color, flexShrink: 0 }} />
-                          <span className="px-2 py-0.5 rounded-full" style={{ background: cfg.color + '1a', color: cfg.color, fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                          <span className="status-pill px-2 py-0.5 rounded-full" style={{ background: cfg.color + '1a', color: cfg.color, fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.72rem', fontWeight: 600, whiteSpace: 'nowrap' }}>
                             {cfg.label}
                           </span>
                         </div>
