@@ -384,46 +384,8 @@ export default function AcademicSection({ data }: Props) {
         </div>
       </div>
 
-      {/* Theoretical Framework */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {[
-          {
-            title: 'Affect Dynamics',
-            author: 'Kuppens et al. (2010)',
-            desc: '感情の変動性（SD）・不安定性（MSSD）・慣性（AR1）を用いて感情の動的特性を定量化する枠組み。変動性は全体の揺れ幅、不安定性は隣接フレーム間の急変、慣性は状態の持続性を示す。',
-            color: 'oklch(0.62 0.18 160)',
-          },
-          {
-            title: 'Circumplex Model of Affect',
-            author: 'Russell (1980)',
-            desc: '感情を覚醒度（Arousal）と感情価（Valence）の2次元空間で表現するモデル。EngagementをArousalの代理指標として使用し、感情状態を4象限に分類。',
-            color: 'oklch(0.62 0.18 25)',
-          },
-          {
-            title: 'Facial Action Coding System',
-            author: 'Ekman & Friesen (1978)',
-            desc: 'アクションユニット（AU）を用いて顔の筋肉動作を体系的に記述するシステム。本データのアクションユニット列はFACSに基づく表情筋活動の定量化。',
-            color: 'oklch(0.55 0.18 300)',
-          },
-        ].map((f, i) => (
-          <div key={i} className="p-4 rounded-lg" style={{ background: 'oklch(0.22 0.04 255)', border: `1px solid ${f.color}30` }}>
-            <div className="flex items-start gap-2 mb-2">
-              <div className="w-1 h-full min-h-12 rounded-full flex-shrink-0" style={{ background: f.color }} />
-              <div>
-                <div style={{ fontFamily: 'Noto Sans JP, sans-serif', fontWeight: 700, fontSize: '0.85rem', color: 'oklch(0.88 0.005 250)' }}>
-                  {f.title}
-                </div>
-                <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '0.62rem', color: f.color, marginTop: '2px' }}>
-                  {f.author}
-                </div>
-              </div>
-            </div>
-            <p style={{ fontFamily: 'Noto Sans JP, sans-serif', fontSize: '0.75rem', color: 'oklch(0.68 0.015 250)', lineHeight: 1.6 }}>
-              {f.desc}
-            </p>
-          </div>
-        ))}
-      </div>
+      {/* 理論的枠組み（Affect Dynamics / Circumplex / FACS）の概説は各カードの説明と重複するため削除。
+          詳しい解説はユーザーガイドの「学術活用ガイド」に集約している。 */}
 
       {/* Affect Dynamics - Inertia */}
       <CollapsibleCard
