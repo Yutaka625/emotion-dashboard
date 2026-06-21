@@ -447,7 +447,6 @@
       <a href="#quickstart">クイックスタート</a>
       <a href="#plan-badges">カードのプランバッジ</a>
       <a href="#features">できること</a>
-
       <div class="section-heading">操作方法</div>
       <a href="#upload">ファイルのアップロード</a>
       <a href="#timerange">タイムレンジ指定</a>
@@ -469,9 +468,12 @@
       <a href="#tab-multiface">マルチFaceID</a>
       <a href="#tab-comparison">比較分析</a>
 
+      <div class="section-heading">活用シナリオ</div>
+      <a href="#usecases">ユースケース</a>
+      <a href="#academic-guide">学術活用ガイド</a>
+
       <div class="section-heading">参考資料</div>
       <a href="#reference">指標クイックリファレンス</a>
-      <a href="#academic-guide">学術活用ガイド</a>
     </nav>
     <div class="sidenav-footer">KSDV v2.2 · 2026-06</div>
   </div>
@@ -1317,33 +1319,99 @@
 
 
     <!-- ═══════════════════════════════════════
-         指標クイックリファレンス
+         利用シーン別ユースケース
     ═══════════════════════════════════════ -->
-    <hr>
-    <div class="doc-section" id="reference">
+    <div class="doc-section" id="usecases">
       <h2>
-        <span class="h2-icon" style="background:var(--teal-dim); color:var(--teal);">📖</span>
-        指標クイックリファレンス
+        <span class="h2-icon" style="background:var(--green-dim); color:var(--green);">◎</span>
+        利用シーン別ユースケース
       </h2>
-      <table class="tab-table">
-        <thead>
-          <tr><th>指標</th><th>単位/範囲</th><th>説明</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>感情スコア（10種）</td><td>0〜100%</td><td>anger / contempt / disgust / fear / joy / sadness / surprise / sentimentality / confusion / neutral</td></tr>
-          <tr><td>Engagement</td><td>0〜100%</td><td>関与度・集中度。顔の動き・表情の複雑さ・目の動きを総合して算出</td></tr>
-          <tr><td>Valence</td><td>0〜100%（50=中立）</td><td>感情の快/不快の度合い。50超がポジティブ、50未満がネガティブ</td></tr>
-          <tr><td>Attention</td><td>0〜100%</td><td>視線・注意の向き</td></tr>
-          <tr><td>frames（フレーム）</td><td>整数</td><td>データの行数。1フレーム = 1回の計測</td></tr>
-          <tr><td>sec（秒）</td><td>秒</td><td>時間軸の単位</td></tr>
-          <tr><td>AR1（慣性）</td><td>−1〜+1</td><td>前のフレームの状態が次に引き継がれる度合い。正=持続、負=振動パターン。<strong>フレーム単位・fps依存</strong>のため絶対値でなく同一条件の相対比較で解釈</td></tr>
-          <tr><td>SD（変動性）</td><td>—</td><td>標準偏差。感情スコアがセッション全体でどれだけ広い範囲に散らばったかを示す。時間順序や急変の有無は直接見ない</td></tr>
-          <tr><td>MSSD（不安定性）</td><td>—</td><td>平均二乗連続差。隣接フレーム間の急激な変動の頻度を示す。同じSDでも、短時間で上下するほど大きくなる</td></tr>
-          <tr><td>支配的感情</td><td>感情名</td><td>そのフレームで最もスコアが高かった感情</td></tr>
-          <tr><td>Pitch / Yaw / Roll</td><td>度（°）</td><td>頭部姿勢の角度。Pitch=上下（＋=上向き）、Yaw=左右（＋=右向き）、Roll=傾き（＋=右傾き）</td></tr>
-        </tbody>
-      </table>
+      <p>KSDVは、心sensorの表情データを「どの瞬間に、どの条件で、どのような反応が起きたか」を読むための分析ツールです。ここでは、研究者・UXリサーチャー・マーケターが、表情データをどのような業務で使い、KSDVでどのように可視化・比較・レポート化できるかを例示します。</p>
+
+      <div class="note">💡 表情データは、アンケートやインタビューで後から聞く評価では取りこぼしやすい、短時間の反応・迷い・驚き・関与の高まりを補助的に捉えるために使います。結論は表情データだけで断定せず、発話、行動ログ、タスク成否、自己申告と合わせて解釈してください。</div>
+
+      <div class="feature-grid" style="margin-top:16px; margin-bottom:18px">
+        <div class="feature-card">
+          <span class="fc-icon">🎓</span>
+          <div class="fc-title">研究者：説明UI A/Bが感情動態に与える影響</div>
+          <div class="fc-desc">学習者や被験者が、異なる説明UIに触れたときの不安定性・Engagement・Valenceを比較し、認知的負荷や感情的負荷の違いを検討します。</div>
+          <span class="fc-tag tag-green">Academic / Comparison</span>
+        </div>
+        <div class="feature-card">
+          <span class="fc-icon">🧪</span>
+          <div class="fc-title">UXリサーチャー：申込フォーム改善前後の検証</div>
+          <div class="fc-desc">入力、エラー、確認、完了などのタスク区間に表情変化を重ね、迷い・苛立ち・安心がどの操作で起きたかを可視化します。</div>
+          <span class="fc-tag tag-purple">UX Research / Events</span>
+        </div>
+        <div class="feature-card">
+          <span class="fc-icon">📣</span>
+          <div class="fc-title">マーケター：広告動画A/Bの感情ピーク評価</div>
+          <div class="fc-desc">動画やLPの訴求パートごとに、Engagement、Valence、喜び、困惑、嫌悪などのピークと落ち込みを比較し、改善案を検討します。</div>
+          <span class="fc-tag tag-gold">Timeseries / MultiFace</span>
+        </div>
+      </div>
+
+      <div class="howto">
+        <div class="howto-title">
+          ユースケース1：研究者向け — 説明UI A/Bが学習者の反応に与える影響
+          <span class="howto-badge tag-green">研究・論文化</span>
+        </div>
+        <table class="tab-table">
+          <tbody>
+            <tr><td><strong>目的</strong></td><td>説明UI A（文章中心）と説明UI B（図解中心）で、学習者の困惑、不安定性、Engagement、Valenceに違いが出るかを検討する。</td></tr>
+            <tr><td><strong>実験計画</strong></td><td>被験者内A/Bデザイン。各条件の前に15〜30秒の安静時ベースラインを取り、説明閲覧、課題回答、フィードバック確認の区間をイベント登録する。</td></tr>
+            <tr><td><strong>KSDVで見る画面</strong></td><td>ベースライン補正、時系列分析、CSV比較、学術的分析、Affect Dynamics、学術CSVレポート。</td></tr>
+            <tr><td><strong>読み取る指標</strong></td><td>困惑・驚き・喜びの時系列、Engagement / Valence、AR1（慣性）、SD（変動性）、√MSSD（不安定性）、条件間の効果量。</td></tr>
+            <tr><td><strong>レポート記述例</strong></td><td>図解中心UIでは説明閲覧区間の困惑ピークと√MSSDが低く、Valence低下も小さかった。これは、文章中心UIよりも感情的負荷が低い可能性を示唆する。ただし、理解度テストや主観評価と合わせた確認が必要である。</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="howto">
+        <div class="howto-title">
+          ユースケース2：UXリサーチャー向け — 申込フォーム改善前後のフリクション検証
+          <span class="howto-badge tag-purple">UX改善</span>
+        </div>
+        <table class="tab-table">
+          <tbody>
+            <tr><td><strong>目的</strong></td><td>現行フォームと改善版フォームを比較し、ユーザーがどの画面・操作で迷い、どこで安心して完了できたかを把握する。</td></tr>
+            <tr><td><strong>実験計画</strong></td><td>同じ申込タスクを現行版と改善版で実施。入力開始、必須項目、エラー表示、修正、確認画面、完了画面をイベントとして登録する。</td></tr>
+            <tr><td><strong>KSDVで見る画面</strong></td><td>UXリサーチ、タスク別サマリー、頭部動作検知イベント、時系列分析、比較分析。</td></tr>
+            <tr><td><strong>読み取る指標</strong></td><td>フラストレーション指数、デライト指数、認知負荷、困惑、怒り、Valence、首傾げ・首振りなどの頭部動作、感情変化点。</td></tr>
+            <tr><td><strong>レポート記述例</strong></td><td>改善版ではエラー表示区間の困惑と首傾げイベントが減少し、完了直前のValenceとデライト指数が上昇した。フォーム改善により、入力途中の迷いが軽減された可能性がある。</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="howto">
+        <div class="howto-title">
+          ユースケース3：マーケター向け — 広告動画A/Bの感情ピークと離脱リスク評価
+          <span class="howto-badge tag-gold">広告・訴求改善</span>
+        </div>
+        <table class="tab-table">
+          <tbody>
+            <tr><td><strong>目的</strong></td><td>15秒広告動画A/Bについて、冒頭の引き込み、商品提示、価格・CTAの提示で感情反応がどう変わるかを比較する。</td></tr>
+            <tr><td><strong>実験計画</strong></td><td>複数参加者に動画A/Bを提示し、冒頭、課題提示、商品提示、価格表示、CTAの秒数をイベント登録する。FaceID列がある場合は人物ごとの反応も確認する。</td></tr>
+            <tr><td><strong>KSDVで見る画面</strong></td><td>時系列分析、時間範囲フィルタ、Engagement / Valence、感情変化点、マルチFaceID、比較分析、CSV出力。</td></tr>
+            <tr><td><strong>読み取る指標</strong></td><td>冒頭3秒のEngagement、商品提示時の喜び・驚き、価格表示時の困惑・嫌悪、Valenceの落ち込み、被験者間で共通するピーク。</td></tr>
+            <tr><td><strong>レポート記述例</strong></td><td>B案は冒頭3秒のEngagementが高く、商品提示直後に喜びのピークが見られた。一方、価格表示では両案ともValence低下が確認されたため、価格訴求の見せ方は追加検証が望ましい。</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="howto">
+        <div class="howto-title">表情データを業務で使うときの基本手順</div>
+        <ol>
+          <li><strong>仮説を決める</strong>：例「改善版は困惑を減らす」「動画Bは冒頭のEngagementを高める」。</li>
+          <li><strong>区間を設計する</strong>：刺激、タスク、画面、CTAなど、後で比較したい時間帯を事前に決める。</li>
+          <li><strong>心sensorで収録する</strong>：安静時ベースライン、条件A/B、必要に応じて複数参加者を記録する。</li>
+          <li><strong>KSDVで可視化する</strong>：時系列、イベント、UXリサーチ、学術的分析、比較分析で反応の場所と大きさを確認する。</li>
+          <li><strong>結論を慎重にまとめる</strong>：表情データの傾向を、行動ログ、発話、アンケート、成果指標と照合して報告する。</li>
+        </ol>
+        <div class="note">📚 関連する背景知見として、Facial Codingは広告・Web・キャンペーン評価で瞬間的な感情反応やValence / Engagementを見る用途があり、広告共有やHCI研究でも表情反応の活用が報告されています。</div>
+      </div>
     </div>
+
 
     <hr>
     <div class="doc-section" id="academic-guide">
@@ -1478,7 +1546,37 @@
       </div>
     </div>
 
-  </div><!-- /.main -->
+
+    <!-- ═══════════════════════════════════════
+         指標クイックリファレンス
+    ═══════════════════════════════════════ -->
+    <hr>
+    <div class="doc-section" id="reference">
+      <h2>
+        <span class="h2-icon" style="background:var(--teal-dim); color:var(--teal);">📖</span>
+        指標クイックリファレンス
+      </h2>
+      <table class="tab-table">
+        <thead>
+          <tr><th>指標</th><th>範囲</th><th>説明</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>感情スコア（10種）</td><td>0〜100</td><td>anger / contempt / disgust / fear / joy / sadness / surprise / sentimentality / confusion / neutral</td></tr>
+          <tr><td>Engagement</td><td>0〜100</td><td>関与度・集中度。顔の動き・表情の複雑さ・目の動きを総合して算出</td></tr>
+          <tr><td>Valence</td><td>-100〜+100（0=中立）</td><td>感情の快/不快の度合い。マイナスがネガティブ、プラスがポジティブ</td></tr>
+          <tr><td>Attention</td><td>0〜100</td><td>注目度（顔の向き）。正面を向いていると100。視線は影響しない</td></tr>
+          <tr><td>frames（フレーム）</td><td>整数</td><td>データの行数。1フレーム = 1回の計測</td></tr>
+          <tr><td>sec（秒）</td><td>秒</td><td>時間軸の単位</td></tr>
+          <tr><td>AR1（慣性）</td><td>−1〜+1</td><td>前のフレームの状態が次に引き継がれる度合い。正=持続、負=振動パターン。<strong>フレーム単位・fps依存</strong>のため絶対値でなく同一条件の相対比較で解釈</td></tr>
+          <tr><td>SD（変動性）</td><td>—</td><td>標準偏差。感情スコアがセッション全体でどれだけ広い範囲に散らばったかを示す。時間順序や急変の有無は直接見ない</td></tr>
+          <tr><td>MSSD（不安定性）</td><td>—</td><td>平均二乗連続差。隣接フレーム間の急激な変動の頻度を示す。同じSDでも、短時間で上下するほど大きくなる</td></tr>
+          <tr><td>支配的感情</td><td>感情名</td><td>そのフレームで最もスコアが高かった感情</td></tr>
+          <tr><td>Pitch / Yaw / Roll</td><td>度（°）</td><td>頭部姿勢の角度。Pitch=上下（＋=上向き）、Yaw=左右（＋=右向き）、Roll=傾き（＋=右傾き）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+</div><!-- /.main -->
 </div><!-- /.layout -->
 
 <script>
