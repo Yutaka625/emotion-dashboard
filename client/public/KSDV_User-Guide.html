@@ -4,27 +4,35 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KSDV 使い方ガイド</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
+  /* 心sensor（kokoro sensor）デザインシステム v1.0 — ライト/暖色テーマ。
+     既存の変数名を維持しつつ、値を心sensorトークンへ差し替え（kokoro-design-tokens.css 準拠）。
+     主アクセント＝kokoro Orange、文字＝チャコール、背景＝暖色オフホワイト。 */
   :root {
-    --bg:        #0f1117;
-    --bg2:       #161b27;
-    --bg3:       #1e2535;
-    --border:    #2a3347;
-    --text:      #d8e0f0;
-    --text-dim:  #9aaec8;
-    --text-mute: #6b7a99;
-    --teal:      #38bdf8;
-    --teal-dim:  rgba(56,189,248,0.12);
-    --gold:      #fbbf24;
-    --gold-dim:  rgba(251,191,36,0.12);
-    --purple:    #c084fc;
-    --purple-dim:rgba(192,132,252,0.12);
-    --green:     #4ade80;
-    --green-dim: rgba(74,222,128,0.10);
-    --red:       #f87171;
-    --accent:    #38bdf8;
-    --radius:    10px;
-    --radius-sm: 6px;
+    --bg:        #FAF8F6; /* ページ背景（暖色オフホワイト） */
+    --bg2:       #FFFFFF; /* サイドバー・カード面 */
+    --bg3:       #EFEDEB; /* 薄い下地（表ヘッダー・コード・ホバー） */
+    --border:    #D6D2D0;
+    --text:      #4C4949; /* 公式チャコール */
+    --text-dim:  #6E6A6A;
+    --text-mute: #9A9696;
+    --teal:      #F3981E; /* 旧teal→kokoro Orange（主アクセント・リンク・強調） */
+    --teal-dim:  rgba(243,152,30,0.12);
+    --gold:      #C77D11; /* 旧gold→濃いめの暖色オレンジ（可読） */
+    --gold-dim:  rgba(224,138,30,0.14);
+    --purple:    #8E5BBF; /* 驚き紫（可読） */
+    --purple-dim:rgba(142,91,191,0.12);
+    --green:     #3F9142; /* 成功 */
+    --green-dim: rgba(63,145,66,0.12);
+    --red:       #D7402F; /* エラー */
+    --accent:    #F3981E; /* kokoro Orange */
+    --radius:    14px;    /* ボタン・カード（ロゴの丸みに合わせ大きめ） */
+    --radius-sm: 8px;
+    --font-heading: "M PLUS Rounded 1c", "Yu Gothic", sans-serif; /* 見出し：丸ゴシック */
+    --font-body: "Noto Sans JP", "Yu Gothic", "Meiryo", sans-serif; /* 本文 */
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -32,9 +40,15 @@
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans JP', sans-serif;
+    font-family: var(--font-body);
     font-size: 14px;
     line-height: 1.7;
+  }
+
+  /* 見出しは丸ゴシック（M PLUS Rounded 1c）でブランドの丸みに合わせる */
+  .app-name, .hero h1, .doc-section h2, .doc-section h3,
+  .howto-title, .feature-card .fc-title, .tab-card-title {
+    font-family: var(--font-heading);
   }
 
   /* ─── LAYOUT ─── */
@@ -60,14 +74,14 @@
   .sidenav-logo .app-name {
     font-size: 1.2rem;
     font-weight: 800;
-    color: #f0f4ff;
+    color: var(--text);
     letter-spacing: -.02em;
   }
   .sidenav-logo .app-sub {
     font-size: 0.6rem;
     color: var(--teal);
     letter-spacing: .08em;
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-body);
     margin-top: 2px;
   }
   .sidenav-logo .guide-badge {
@@ -76,11 +90,11 @@
     font-size: 0.62rem;
     background: var(--teal-dim);
     color: var(--teal);
-    border: 1px solid rgba(56,189,248,.3);
+    border: 1px solid rgba(243,152,30,.3);
     border-radius: 4px;
     padding: 2px 8px;
     letter-spacing: .06em;
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-body);
   }
   .sidenav nav { padding: 10px 0; flex: 1; }
   .sidenav nav a {
@@ -105,14 +119,14 @@
     letter-spacing: .12em;
     color: var(--text-mute);
     padding: 14px 18px 4px;
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-body);
   }
   .sidenav-footer {
     padding: 12px 18px;
     border-top: 1px solid var(--border);
     font-size: 0.6rem;
     color: var(--text-mute);
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-body);
   }
 
   /* ─── MAIN ─── */
@@ -132,13 +146,13 @@
     font-size: 0.65rem;
     letter-spacing: .14em;
     color: var(--teal);
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-body);
     margin-bottom: 10px;
   }
   .hero h1 {
     font-size: 2rem;
     font-weight: 800;
-    color: #f0f4ff;
+    color: var(--text);
     line-height: 1.2;
     margin-bottom: 12px;
     letter-spacing: -.02em;
@@ -154,7 +168,7 @@
   .doc-section h2 {
     font-size: 1.15rem;
     font-weight: 700;
-    color: #f0f4ff;
+    color: var(--text);
     margin-bottom: 20px;
     padding-bottom: 10px;
     border-bottom: 1px solid var(--border);
@@ -210,14 +224,14 @@
     height: 28px;
     border-radius: 50%;
     background: var(--teal-dim);
-    border: 1px solid rgba(56,189,248,.35);
+    border: 1px solid rgba(243,152,30,.35);
     color: var(--teal);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 0.75rem;
     font-weight: 700;
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-body);
     margin-top: 1px;
   }
   .step-body { flex: 1; }
@@ -237,7 +251,7 @@
     padding: 16px 18px;
     transition: border-color .2s;
   }
-  .feature-card:hover { border-color: rgba(56,189,248,.4); }
+  .feature-card:hover { border-color: rgba(243,152,30,.4); }
   .feature-card .fc-icon {
     font-size: 1.3rem;
     margin-bottom: 8px;
@@ -260,13 +274,13 @@
     font-size: 0.62rem;
     border-radius: 4px;
     padding: 2px 7px;
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-body);
     letter-spacing: .04em;
   }
-  .tag-teal   { background: var(--teal-dim);   color: var(--teal);   border: 1px solid rgba(56,189,248,.25); }
-  .tag-gold   { background: var(--gold-dim);   color: var(--gold);   border: 1px solid rgba(251,191,36,.25); }
-  .tag-purple { background: var(--purple-dim); color: var(--purple); border: 1px solid rgba(192,132,252,.25); }
-  .tag-green  { background: var(--green-dim);  color: var(--green);  border: 1px solid rgba(74,222,128,.25); }
+  .tag-teal   { background: var(--teal-dim);   color: var(--teal);   border: 1px solid rgba(243,152,30,.25); }
+  .tag-gold   { background: var(--gold-dim);   color: var(--gold);   border: 1px solid rgba(199,125,17,.30); }
+  .tag-purple { background: var(--purple-dim); color: var(--purple); border: 1px solid rgba(142,91,191,.30); }
+  .tag-green  { background: var(--green-dim);  color: var(--green);  border: 1px solid rgba(63,145,66,.30); }
 
   /* ─── HOW-TO BLOCKS ─── */
   .howto {
@@ -290,7 +304,7 @@
     font-size: 0.6rem;
     border-radius: 4px;
     padding: 2px 7px;
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-body);
     font-weight: 600;
     letter-spacing: .04em;
   }
@@ -330,7 +344,7 @@
     color: var(--text-dim);
     font-size: 0.7rem;
     letter-spacing: .06em;
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-body);
     border-bottom: 1px solid var(--border);
   }
   .tab-table td {
@@ -352,7 +366,7 @@
     font-size: 0.72rem;
     border-radius: 20px;
     padding: 3px 10px;
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-body);
     border: 1px solid;
   }
 
@@ -381,7 +395,7 @@
     justify-content: center;
     font-size: 0.72rem;
     font-weight: 700;
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-body);
     flex-shrink: 0;
   }
   .tab-card-title {
@@ -392,7 +406,7 @@
   .tab-card-sub {
     font-size: 0.7rem;
     color: var(--text-dim);
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-body);
     margin-left: auto;
   }
   .tab-card-body { padding: 14px 18px; overflow-x: auto; }
@@ -401,13 +415,13 @@
     font-size: 0.65rem;
     letter-spacing: .1em;
     color: var(--text-mute);
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-body);
     margin-bottom: 6px;
   }
 
   /* ─── INLINE CODE ─── */
   code {
-    font-family: 'Courier New', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Courier New', monospace;
     font-size: 0.8em;
     background: var(--bg3);
     border: 1px solid var(--border);
@@ -904,16 +918,16 @@
       <p>CSVを読み込んだ直後に表示される全体サマリーです。セッションの「顔」を確認するのに使います。</p>
 
       <div class="pill-list">
-        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">総フレーム数</span>
-        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">記録時間</span>
-        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">平均Engagement</span>
-        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">平均Attention</span>
-        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(251,191,36,.25);">支配的感情</span>
-        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(251,191,36,.25);">感情多様性</span>
-        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(192,132,252,.25);">感情分布ドーナツチャート</span>
-        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(192,132,252,.25);">感情プロファイル（レーダー）</span>
-        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">KEY INSIGHTS（自動コメント）</span>
-        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">DATA QUALITY（顔検出率・fps）</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(243,152,30,.25);">総フレーム数</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(243,152,30,.25);">記録時間</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(243,152,30,.25);">平均Engagement</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(243,152,30,.25);">平均Attention</span>
+        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(199,125,17,.30);">支配的感情</span>
+        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(199,125,17,.30);">感情多様性</span>
+        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(142,91,191,.30);">感情分布ドーナツチャート</span>
+        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(142,91,191,.30);">感情プロファイル（レーダー）</span>
+        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(63,145,66,.30);">KEY INSIGHTS（自動コメント）</span>
+        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(63,145,66,.30);">DATA QUALITY（顔検出率・fps）</span>
       </div>
 
       <p><strong>支配的感情</strong>はそのフレームで最もスコアが高かった感情です。ドーナツチャートで全体に占める割合が確認できます。</p>
@@ -953,16 +967,16 @@
       </div>
 
       <div class="pill-list">
-        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(251,191,36,.25);">BASELINE SETTINGS</span>
-        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">SMOOTHING SETTINGS</span>
-        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">EVENT ANNOTATIONS（イベント登録）</span>
-        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">TIME RANGE FILTER</span>
-        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">CSV出力</span>
-        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(192,132,252,.25);">5種チャートタイプ</span>
-        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(192,132,252,.25);">特殊指標オーバーレイ（Engagement / Valence / Attention）</span>
-        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">10秒ウィンドウ集計表</span>
-        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">区間t検定</span>
-        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(251,191,36,.25);">補正後データCSV出力（ベースライン有効時）</span>
+        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(199,125,17,.30);">BASELINE SETTINGS</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(243,152,30,.25);">SMOOTHING SETTINGS</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(243,152,30,.25);">EVENT ANNOTATIONS（イベント登録）</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(243,152,30,.25);">TIME RANGE FILTER</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(243,152,30,.25);">CSV出力</span>
+        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(142,91,191,.30);">5種チャートタイプ</span>
+        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(142,91,191,.30);">特殊指標オーバーレイ（Engagement / Valence / Attention）</span>
+        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(63,145,66,.30);">10秒ウィンドウ集計表</span>
+        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(63,145,66,.30);">区間t検定</span>
+        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(199,125,17,.30);">補正後データCSV出力（ベースライン有効時）</span>
       </div>
 
       <div class="howto">
@@ -1019,9 +1033,9 @@
       <p>10種類の感情スコアの統計的分布と出現パターンを横断的に分析します。</p>
 
       <div class="pill-list">
-        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">感情カード × 10枚（平均・最大・支配率）</span>
-        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(251,191,36,.25);">感情出現率（Prevalence）</span>
-        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(192,132,252,.25);">記述統計表（全感情×平均・SD・最大・中央値）</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(243,152,30,.25);">感情カード × 10枚（平均・最大・支配率）</span>
+        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(199,125,17,.30);">感情出現率（Prevalence）</span>
+        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(142,91,191,.30);">記述統計表（全感情×平均・SD・最大・中央値）</span>
       </div>
 
       <p><strong>感情出現率</strong>は「その感情が有意に出現した時間の割合」で、平均スコアとは異なる指標です。閾値は<strong>スコア 0.3</strong>（0〜100スケール）で、低めに設定されているためわずかな表出も出現として数えます。例：喜び 68% → セッションの68%の時間で喜びスコアが 0.3 以上だった。</p>
@@ -1056,10 +1070,10 @@
       <p>感情が「どの感情からどの感情へ」移り変わったかのパターンを分析します。</p>
 
       <div class="pill-list">
-        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(192,132,252,.25);">遷移行列（10×10 ヒートマップ）</span>
-        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">主要遷移パターン上位10件</span>
-        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(251,191,36,.25);">持続時間分析（平均・最大・合計）</span>
-        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">持続時間統計表</span>
+        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(142,91,191,.30);">遷移行列（10×10 ヒートマップ）</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(243,152,30,.25);">主要遷移パターン上位10件</span>
+        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(199,125,17,.30);">持続時間分析（平均・最大・合計）</span>
+        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(63,145,66,.30);">持続時間統計表</span>
       </div>
 
       <p><strong>遷移行列</strong>は行が「遷移元」、列が「遷移先」です。セルの色が濃いほど遷移回数が多いことを示します（明度補間方式で視認性を確保）。対角線は同じ感情が連続したフレームです。</p>
@@ -1075,13 +1089,13 @@
       <p>Affect Dynamics は、状態の持続性を示す感情慣性（AR1）、セッション全体の揺れ幅を示す感情変動性（SD）、隣接フレーム間の急変しやすさを示す不安定性（√MSSD）の順に表示します。変動性と不安定性は似た傾向になることもありますが、ゆっくり大きく変化する反応と、短時間で細かく上下する反応を区別するために併記しています。Engagement / Valence は感情カテゴリそのものではないため、動態グラフでは薄い塗りと点線枠の棒で感情系列と区別しています。</p>
 
       <div class="pill-list">
-        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">Affect Dynamics 慣性比較（AR1）</span>
-        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">Affect Dynamics 変動性比較（SD）</span>
-        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">Affect Dynamics 不安定性比較（√MSSD）</span>
-        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">相関行列ヒートマップ（全感情×Engagement×Valence）</span>
-        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(251,191,36,.25);">Circumplex Model 象限分析</span>
-        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(192,132,252,.25);">学術的解釈コメント（自動生成）</span>
-        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">変化点一覧テーブル（閾値スライダー・列ソート）</span>
+        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(63,145,66,.30);">Affect Dynamics 慣性比較（AR1）</span>
+        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(63,145,66,.30);">Affect Dynamics 変動性比較（SD）</span>
+        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(63,145,66,.30);">Affect Dynamics 不安定性比較（√MSSD）</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(243,152,30,.25);">相関行列ヒートマップ（全感情×Engagement×Valence）</span>
+        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(199,125,17,.30);">Circumplex Model 象限分析</span>
+        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(142,91,191,.30);">学術的解釈コメント（自動生成）</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(243,152,30,.25);">変化点一覧テーブル（閾値スライダー・列ソート）</span>
       </div>
 
       <table class="tab-table" style="margin-top:12px">
@@ -1135,10 +1149,10 @@
       <p>顔の表情筋（アクションユニット、AU）の動きを詳細に分析します。FACSシステムに基づき22種類のAUを追跡します。</p>
 
       <div class="pill-list">
-        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">AU別平均活性化値（棒グラフ）</span>
-        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(251,191,36,.25);">AU活動率（有意に動いていた時間の割合）</span>
-        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(192,132,252,.25);">AUリファレンス表</span>
-        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">頭部姿勢分析（Pitch / Yaw / Roll）</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(243,152,30,.25);">AU別平均活性化値（棒グラフ）</span>
+        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(199,125,17,.30);">AU活動率（有意に動いていた時間の割合）</span>
+        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(142,91,191,.30);">AUリファレンス表</span>
+        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(63,145,66,.30);">頭部姿勢分析（Pitch / Yaw / Roll）</span>
       </div>
 
       <p>追跡するAU：<code>smile</code> / <code>blink</code> / <code>brow raise</code> / <code>brow furrow</code> / <code>eye widen</code> / <code>nose wrinkle</code> / <code>mouth open</code> / <code>jaw drop</code> / <code>smirk</code> など22種類。</p>
@@ -1169,11 +1183,11 @@
       </div>
 
       <div class="pill-list">
-        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">感情ヒートマップ（10秒×感情の2D）</span>
+        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(63,145,66,.30);">感情ヒートマップ（10秒×感情の2D）</span>
         <span class="pill" style="background:var(--red);color:#fff;border-color:rgba(248,113,113,.25);background:rgba(248,113,113,.1);">フリクション（ネガティブ急変）タイムライン</span>
-        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(251,191,36,.25);">デライト（ポジティブ急変）タイムライン</span>
-        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">タスク別サマリー（イベント連携）</span>
-        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">頭部動作検知イベント（nod / shake / tilt）</span>
+        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(199,125,17,.30);">デライト（ポジティブ急変）タイムライン</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(243,152,30,.25);">タスク別サマリー（イベント連携）</span>
+        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(63,145,66,.30);">頭部動作検知イベント（nod / shake / tilt）</span>
       </div>
 
       <p><strong>タスク別サマリー</strong>には「時系列分析」タブで登録したイベント（タスク区間）ごとの感情スコアとUXスコアが集計されます。「どのタスクで最もフラストレーションが高かったか」を比較できます。</p>
@@ -1189,13 +1203,13 @@
       <p>1つのCSVに複数の顔（FaceID）が含まれるとき、サイドバーに表示されるタブです。顔ごとのデータ品質管理と、顔どうしの感情の比較を行います。</p>
 
       <div class="pill-list">
-        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(251,191,36,.25);">データ品質サマリ＋しきい値調整</span>
-        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">顔の管理リスト（色・フレーム数・ラベル名・表示トグル）</span>
-        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(192,132,252,.25);">感情オーバーレイ（指標選択式・時間軸切替）</span>
-        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">スムージング（SMA/EMA）</span>
-        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">集団平均±SDバンド</span>
-        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(251,191,36,.25);">イベント帯の重ね描画（実時間モード）</span>
-        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">オーバーレイのCSV出力</span>
+        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(199,125,17,.30);">データ品質サマリ＋しきい値調整</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(243,152,30,.25);">顔の管理リスト（色・フレーム数・ラベル名・表示トグル）</span>
+        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(142,91,191,.30);">感情オーバーレイ（指標選択式・時間軸切替）</span>
+        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(63,145,66,.30);">スムージング（SMA/EMA）</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(243,152,30,.25);">集団平均±SDバンド</span>
+        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(199,125,17,.30);">イベント帯の重ね描画（実時間モード）</span>
+        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(63,145,66,.30);">オーバーレイのCSV出力</span>
       </div>
 
       <div class="howto">
@@ -1251,15 +1265,15 @@
       <p>2つのCSVセッションを並べてA/B比較するタブです。ヘッダー右上の「＋比較CSV」ボタンで第2CSVを追加したときのみ表示されます。</p>
 
       <div class="pill-list">
-        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">セッションメタデータ比較（フレーム数・時間・FPS・顔検出率）</span>
-        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(192,132,252,.25);">感情スコア平均値の比較（EMOTION MEANS）</span>
-        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">特殊指標比較（Engagement / Valence / Attention）</span>
-        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(251,191,36,.25);">感情状態の象限分布（CIRCUMPLEX MODEL）</span>
-        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">感情変動性レーダー（AFFECT DYNAMICS — VARIABILITY）</span>
-        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">タイムラインオーバーレイ（指標選択式・時間軸切替）</span>
-        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(56,189,248,.25);">感情差分ランキング（DIFFERENCE TABLE、|B−A| 降順）</span>
-        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(192,132,252,.25);">統計検定（Welch t / Mann-Whitney U トグル）</span>
-        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(74,222,128,.25);">CSV出力（4セクション構成）</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(243,152,30,.25);">セッションメタデータ比較（フレーム数・時間・FPS・顔検出率）</span>
+        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(142,91,191,.30);">感情スコア平均値の比較（EMOTION MEANS）</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(243,152,30,.25);">特殊指標比較（Engagement / Valence / Attention）</span>
+        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(199,125,17,.30);">感情状態の象限分布（CIRCUMPLEX MODEL）</span>
+        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(63,145,66,.30);">感情変動性レーダー（AFFECT DYNAMICS — VARIABILITY）</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(243,152,30,.25);">タイムラインオーバーレイ（指標選択式・時間軸切替）</span>
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(243,152,30,.25);">感情差分ランキング（DIFFERENCE TABLE、|B−A| 降順）</span>
+        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(142,91,191,.30);">統計検定（Welch t / Mann-Whitney U トグル）</span>
+        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(63,145,66,.30);">CSV出力（4セクション構成）</span>
       </div>
 
       <div class="howto">
