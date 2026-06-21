@@ -476,8 +476,8 @@
       <a href="#tab-engagement">特殊指標</a>
       <a href="#tab-emotions">感情分布</a>
       <a href="#tab-transitions">感情遷移</a>
-      <a href="#tab-academic">学術的分析</a>
       <a href="#tab-actionunits">アクションユニット</a>
+      <a href="#tab-academic">学術的分析</a>
       <a href="#tab-uxresearch">UXリサーチ</a>
       <a href="#tab-multiface">マルチFaceID</a>
       <a href="#tab-comparison">比較分析</a>
@@ -998,27 +998,35 @@
     <div class="doc-section" id="tab-engagement">
       <h2>
         <span class="h2-icon" style="background:var(--gold-dim); color:var(--gold);">⚡</span>
-        タブ③：特殊指標（Engagement / Valence）
+        タブ③：特殊指標（Valence / Engagement）
       </h2>
-      <p><strong>Engagement（関与度）</strong>と<strong>Valence（感情価）</strong>をタブで切り替えながら深掘り分析するセクションです。</p>
+      <p><strong>Valence（感情価）</strong>と<strong>Engagement（関与度）</strong>を深掘り分析するセクションです。タブ切替ではなく、1ページ内に<strong>上から Valence ブロック → Engagement ブロック</strong>の順で縦に並べて表示します。</p>
 
       <div class="howto">
-        <div class="howto-title">Engagement タブ</div>
+        <div class="howto-title">Valence ブロック（上）</div>
         <ul>
           <li><strong>基本統計量</strong>：平均・最大・中央値・標準偏差の4カード</li>
-          <li><strong>レベル分布</strong>：5段階（Very Low〜Very High）のフレーム数分布</li>
-          <li><strong>感情との相関係数</strong>：Engagementと各感情のPearson相関を横棒グラフで表示。+1.0に近いほど同時に高くなる傾向</li>
-          <li><strong>Engagement × Valence 散布図</strong>：各フレームを2次元空間にプロット。右上＝積極的かつポジティブ</li>
-          <li><strong>感情プロファイル比較</strong>：Engagement高時 vs 低時の感情スコア比較棒グラフ</li>
-          <li><strong>Affect Dynamics</strong>：慣性(AR1)・変動性(SD)・不安定性(MSSD)・レンジ・平均絶対変化量</li>
+          <li><strong>Affect Dynamics（Valence）</strong>：変動性(SD)・不安定性(MSSD)・慣性(AR1)・レンジ・平均絶対変化量</li>
+          <li><strong>レベル分布</strong>：測定範囲を5区間に等分したフレーム数分布</li>
+          <li><strong>各指標との相関係数</strong>：Valenceと各感情のPearson相関を横棒グラフで表示</li>
         </ul>
       </div>
 
       <div class="howto">
-        <div class="howto-title">Valence タブ</div>
+        <div class="howto-title">Engagement ブロック（下）</div>
         <ul>
-          <li>Valenceの基本統計量・レベル分布・感情との相関係数</li>
-          <li>Affect Dynamics（Valence版）</li>
+          <li><strong>基本統計量</strong>：平均・最大・中央値・標準偏差の4カード</li>
+          <li><strong>Affect Dynamics（Engagement）</strong>：変動性(SD)・不安定性(MSSD)・慣性(AR1)・レンジ・平均絶対変化量</li>
+          <li><strong>レベル分布</strong>：5段階（Very Low〜Very High）のフレーム数分布</li>
+          <li><strong>各指標との相関係数</strong>：Engagementと各感情のPearson相関を横棒グラフで表示。+1.0に近いほど同時に高くなる傾向</li>
+        </ul>
+      </div>
+
+      <div class="howto">
+        <div class="howto-title">ページ下部（共通）</div>
+        <ul>
+          <li><strong>Engagementレベル別の感情プロファイル</strong>：Engagement高時 vs 低時で各感情の平均スコアを比較する棒グラフ</li>
+          <li><strong>Engagement × Valence 散布図</strong>：各フレームを2次元空間にプロット（このタブの最下部）。横軸=Valence・縦軸=Engagement、右上＝積極的かつポジティブ。点の色は支配的感情</li>
           <li class="note" style="list-style:none; margin-left:-1.2em;">※ Circumplex Model（円環モデル・4象限分析）は「学術的分析」タブに集約しています。</li>
         </ul>
       </div>
@@ -1080,10 +1088,29 @@
     </div>
 
 
+    <div class="doc-section" id="tab-actionunits">
+      <h2>
+        <span class="h2-icon" style="background:var(--teal-dim); color:var(--teal);">😶</span>
+        タブ⑥：アクションユニット（Action Units）
+      </h2>
+      <p>顔の表情筋（アクションユニット、AU）の動きを詳細に分析します。FACSシステムに基づき22種類のAUを追跡します。</p>
+
+      <div class="pill-list">
+        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(243,152,30,.25);">AU別平均活性化値（棒グラフ）</span>
+        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(199,125,17,.30);">AU活動率（有意に動いていた時間の割合）</span>
+        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(142,91,191,.30);">AUリファレンス表</span>
+        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(63,145,66,.30);">頭部姿勢分析（Pitch / Yaw / Roll）</span>
+      </div>
+
+      <p>追跡するAU：<code>smile</code> / <code>blink</code> / <code>brow raise</code> / <code>brow furrow</code> / <code>eye widen</code> / <code>nose wrinkle</code> / <code>mouth open</code> / <code>jaw drop</code> / <code>smirk</code> など22種類。</p>
+      <div class="note">💡 うなづき・首振り・首傾げの「頭部動作検知イベント」は、非言語サイン（行動）の解釈として「UXリサーチ」タブに移動しました。</div>
+    </div>
+
+
     <div class="doc-section" id="tab-academic">
       <h2>
         <span class="h2-icon" style="background:var(--green-dim); color:var(--green);">🧠</span>
-        タブ⑥：学術的分析（Academic）
+        タブ⑦：学術的分析（Academic）
       </h2>
       <p>感情心理学の研究手法に基づいた高度な指標を提供します。研究論文・学術レポートの作成に活用できます。</p>
       <p>Affect Dynamics は、状態の持続性を示す感情慣性（AR1）、セッション全体の揺れ幅を示す感情変動性（SD）、隣接フレーム間の急変しやすさを示す不安定性（√MSSD）の順に表示します。変動性と不安定性は似た傾向になることもありますが、ゆっくり大きく変化する反応と、短時間で細かく上下する反応を区別するために併記しています。Engagement / Valence は感情カテゴリそのものではないため、動態グラフでは薄い塗りと点線枠の棒で感情系列と区別しています。</p>
@@ -1138,25 +1165,6 @@
         </table>
         <div class="note">💡 統計ソフト（R / Python / SPSS）への読み込みや、論文への数値転記にご活用ください。複数顔データでは、どの基準で何を除外したかが <code>## FACE FILTERING</code> に記録され、分析の再現性を担保します。</div>
       </div>
-    </div>
-
-
-    <div class="doc-section" id="tab-actionunits">
-      <h2>
-        <span class="h2-icon" style="background:var(--teal-dim); color:var(--teal);">😶</span>
-        タブ⑦：アクションユニット（Action Units）
-      </h2>
-      <p>顔の表情筋（アクションユニット、AU）の動きを詳細に分析します。FACSシステムに基づき22種類のAUを追跡します。</p>
-
-      <div class="pill-list">
-        <span class="pill" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(243,152,30,.25);">AU別平均活性化値（棒グラフ）</span>
-        <span class="pill" style="background:var(--gold-dim);color:var(--gold);border-color:rgba(199,125,17,.30);">AU活動率（有意に動いていた時間の割合）</span>
-        <span class="pill" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(142,91,191,.30);">AUリファレンス表</span>
-        <span class="pill" style="background:var(--green-dim);color:var(--green);border-color:rgba(63,145,66,.30);">頭部姿勢分析（Pitch / Yaw / Roll）</span>
-      </div>
-
-      <p>追跡するAU：<code>smile</code> / <code>blink</code> / <code>brow raise</code> / <code>brow furrow</code> / <code>eye widen</code> / <code>nose wrinkle</code> / <code>mouth open</code> / <code>jaw drop</code> / <code>smirk</code> など22種類。</p>
-      <div class="note">💡 うなづき・首振り・首傾げの「頭部動作検知イベント」は、非言語サイン（行動）の解釈として「UXリサーチ」タブに移動しました。</div>
     </div>
 
 
