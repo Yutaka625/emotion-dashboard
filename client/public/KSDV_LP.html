@@ -4,22 +4,35 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>KSDV — 顔表情ログを、研究で使える分析へ</title>
-<meta name="description" content="KSDVは心sensor（AFFDEX互換）の感情ログCSVをアップロードするだけで、時系列・学術指標・UXスコアまで自動分析するブラウザ完結のダッシュボード。研究・UXリサーチ・PoCに。" />
+<meta name="description" content="KSDVは心sensor（AFFDEX互換）の感情ログCSVをアップロードするだけで、感情の推移・分析指標・UXスコアまで自動でまとめるブラウザ完結のダッシュボード。研究・UXリサーチ・効果検証に。" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
+  /* 心sensor（kokoro sensor）デザインシステム v1.0 — ライト/暖色テーマ。
+     既存の変数名を維持しつつ、値を心sensorトークンへ差し替え（kokoro-design-tokens.css 準拠）。
+     主アクセント＝kokoro Orange、文字＝チャコール、背景＝暖色オフホワイト。 */
   :root{
-    --bg:#0b0e14;
-    --bg-soft:#11161f;
-    --panel:#151c28;
-    --panel-2:#1a2230;
-    --line:#243044;
-    --text:#e7ecf3;
-    --muted:#9aa6b8;
-    --accent:#4cc4ff;
-    --accent-2:#7c8bff;
-    --accent-3:#34e0c0;
-    --warn:#ffb454;
-    --radius:16px;
+    --bg:#FAF8F6;          /* ページ背景（暖色オフホワイト） */
+    --bg-soft:#FFF6EC;     /* 淡い下地（Orange Pale） */
+    --panel:#FFFFFF;       /* カード面 */
+    --panel-2:#EFEDEB;     /* サブ面（薄い暖色グレー） */
+    --line:#D6D2D0;        /* 枠線・区切り */
+    --text:#4C4949;        /* 公式チャコール */
+    --muted:#6E6A6A;       /* 補足文字 */
+    --accent:#F3981E;      /* kokoro Orange（主アクセント） */
+    --accent-2:#D97E10;    /* Orange Dark（hover/濃いめ） */
+    --accent-3:#F3981E;    /* 旧ミント強調 → オレンジ系へ */
+    --warn:#E08A1E;        /* 警告（ブランド寄り） */
+    --brand-light:#FCE3C2; /* バッジ背景（Orange Light） */
+    --brand-text:#9A5A00;  /* オレンジ背景に乗せる文字 */
+    --shadow-sm:0 1px 3px rgba(76,73,73,.10);
+    --shadow-lg:0 8px 24px rgba(76,73,73,.14);
+    --radius:14px;
+    --radius-lg:24px;
     --maxw:1080px;
+    --font-heading:"M PLUS Rounded 1c","Yu Gothic",sans-serif; /* 見出し：丸ゴシック */
+    --font-body:"Noto Sans JP","Yu Gothic","Meiryo",sans-serif; /* 本文 */
   }
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;}
@@ -27,8 +40,8 @@
     margin:0;
     background:var(--bg);
     color:var(--text);
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Noto Sans JP",Meiryo,sans-serif;
-    line-height:1.75;
+    font-family:var(--font-body);
+    line-height:1.8;
     -webkit-font-smoothing:antialiased;
   }
   a{color:inherit;text-decoration:none;}
@@ -37,6 +50,7 @@
     display:inline-block;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;
     color:var(--accent);font-weight:700;margin-bottom:14px;
   }
+  h1,h2,h3,h4{font-family:var(--font-heading);}
   h1,h2,h3{line-height:1.3;margin:0;}
   .section{padding:88px 0;border-top:1px solid var(--line);}
   .muted{color:var(--muted);}
@@ -44,14 +58,13 @@
   /* nav */
   header.nav{
     position:sticky;top:0;z-index:50;
-    background:rgba(11,14,20,.82);backdrop-filter:blur(10px);
+    background:rgba(250,248,246,.85);backdrop-filter:blur(10px);
     border-bottom:1px solid var(--line);
   }
   .nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px;}
-  .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.02em;}
-  .brand .dot{width:11px;height:11px;border-radius:50%;
-    background:radial-gradient(circle at 30% 30%,var(--accent),var(--accent-2));
-    box-shadow:0 0 14px var(--accent);}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.02em;font-family:var(--font-heading);}
+  .brand .dot{width:12px;height:12px;border-radius:50%;
+    background:var(--accent);}
   .nav-cta{
     font-size:.9rem;font-weight:700;padding:9px 16px;border-radius:999px;
     border:1px solid var(--line);color:var(--text);transition:.2s;
@@ -63,12 +76,12 @@
     position:relative;overflow:hidden;
     padding:110px 0 96px;
     background:
-      radial-gradient(900px 420px at 78% -8%,rgba(76,196,255,.16),transparent 60%),
-      radial-gradient(700px 380px at 8% 12%,rgba(124,139,255,.14),transparent 60%);
+      radial-gradient(900px 420px at 78% -8%,rgba(243,152,30,.14),transparent 60%),
+      radial-gradient(700px 380px at 8% 12%,rgba(243,152,30,.08),transparent 60%);
   }
-  .hero h1{font-size:clamp(2rem,4.6vw,3.4rem);font-weight:850;letter-spacing:.01em;}
+  .hero h1{font-size:clamp(2rem,4.6vw,3.4rem);font-weight:700;letter-spacing:.01em;}
   .hero h1 .grad{
-    background:linear-gradient(100deg,var(--accent),var(--accent-3));
+    background:linear-gradient(100deg,var(--accent),var(--accent-2));
     -webkit-background-clip:text;background-clip:text;color:transparent;
   }
   .hero p.lead{font-size:1.18rem;color:var(--muted);max-width:640px;margin:22px 0 0;}
@@ -77,7 +90,7 @@
     font-size:.85rem;color:var(--text);background:var(--panel);
     border:1px solid var(--line);border-radius:999px;padding:7px 14px;
   }
-  .chip b{color:var(--accent-3);font-weight:700;}
+  .chip b{color:var(--accent);font-weight:700;}
   .btn-row{display:flex;flex-wrap:wrap;gap:14px;}
   .btn{
     display:inline-flex;align-items:center;gap:9px;
@@ -85,29 +98,29 @@
     transition:.2s;cursor:pointer;border:1px solid transparent;
   }
   .btn-primary{
-    background:linear-gradient(100deg,var(--accent),var(--accent-2));
-    color:#06121c;box-shadow:0 10px 30px -8px rgba(76,196,255,.5);
+    background:var(--accent);
+    color:#FFFFFF;box-shadow:var(--shadow-sm);
   }
-  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 36px -8px rgba(76,196,255,.6);}
-  .btn-ghost{border-color:var(--line);color:var(--text);}
+  .btn-primary:hover{background:var(--accent-2);transform:translateY(-2px);box-shadow:var(--shadow-lg);}
+  .btn-ghost{border-color:var(--line);color:var(--text);background:var(--panel);}
   .btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
 
   /* hero mock */
   .mock{
     margin-top:64px;border:1px solid var(--line);border-radius:var(--radius);
-    background:linear-gradient(180deg,var(--panel),var(--bg-soft));
-    padding:18px;box-shadow:0 30px 80px -30px rgba(0,0,0,.7);
+    background:var(--panel);
+    padding:18px;box-shadow:var(--shadow-lg);
   }
   .mock-bar{display:flex;gap:7px;margin-bottom:16px;}
-  .mock-bar i{width:11px;height:11px;border-radius:50%;background:#33405a;display:inline-block;}
+  .mock-bar i{width:11px;height:11px;border-radius:50%;background:var(--line);display:inline-block;}
   .mock-grid{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:14px;}
   .mock-card{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:16px;min-height:120px;}
   .mock-card .k{font-size:.72rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;}
   .mock-card .v{font-size:1.7rem;font-weight:800;margin-top:6px;}
-  .mock-card .v.pos{color:var(--accent-3);}
+  .mock-card .v.pos{color:var(--accent);}
   .spark{display:flex;align-items:flex-end;gap:5px;height:54px;margin-top:14px;}
   .spark span{flex:1;border-radius:3px 3px 0 0;
-    background:linear-gradient(180deg,var(--accent),rgba(76,196,255,.25));}
+    background:linear-gradient(180deg,var(--accent),rgba(243,152,30,.25));}
 
   /* problem */
   .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;}
@@ -122,12 +135,12 @@
   /* value */
   .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
   .value{
-    background:linear-gradient(180deg,var(--panel),var(--bg-soft));
-    border:1px solid var(--line);border-radius:16px;padding:28px;
+    background:var(--panel);
+    border:1px solid var(--line);border-radius:16px;padding:28px;box-shadow:var(--shadow-sm);
   }
   .value .ic{
     width:46px;height:46px;border-radius:12px;display:grid;place-items:center;
-    background:rgba(76,196,255,.12);border:1px solid rgba(76,196,255,.3);
+    background:var(--brand-light);border:1px solid rgba(243,152,30,.3);
     font-size:1.4rem;margin-bottom:16px;
   }
   .value h3{font-size:1.15rem;margin-bottom:10px;}
@@ -140,8 +153,8 @@
     background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;
   }
   .feat .tag{
-    flex-shrink:0;font-size:.7rem;font-weight:800;color:var(--accent);
-    background:rgba(76,196,255,.1);border:1px solid rgba(76,196,255,.25);
+    flex-shrink:0;font-size:.7rem;font-weight:800;color:var(--brand-text);
+    background:var(--brand-light);border:1px solid rgba(243,152,30,.3);
     border-radius:7px;padding:4px 8px;letter-spacing:.05em;white-space:nowrap;
   }
   .feat h4{margin:0 0 4px;font-size:1rem;}
@@ -161,10 +174,10 @@
 
   /* use cases */
   .uc{
-    background:linear-gradient(180deg,var(--panel-2),var(--bg-soft));
-    border:1px solid var(--line);border-radius:16px;padding:28px;
+    background:var(--panel);
+    border:1px solid var(--line);border-radius:16px;padding:28px;box-shadow:var(--shadow-sm);
   }
-  .uc .label{font-size:.78rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-3);}
+  .uc .label{font-size:.78rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);}
   .uc h3{font-size:1.18rem;margin:10px 0 12px;}
   .uc p{color:var(--muted);margin:0 0 14px;font-size:.95rem;}
   .uc ul{margin:0;padding-left:18px;color:var(--muted);font-size:.9rem;}
@@ -176,19 +189,19 @@
     padding:34px;display:grid;grid-template-columns:repeat(4,1fr);gap:24px;
   }
   .trust .item .t{font-weight:750;margin-bottom:6px;display:flex;align-items:center;gap:8px;}
-  .trust .item .t::before{content:"✓";color:var(--accent-3);font-weight:900;}
+  .trust .item .t::before{content:"✓";color:var(--accent);font-weight:900;}
   .trust .item p{margin:0;color:var(--muted);font-size:.88rem;}
 
   /* form / cta */
   .cta-section{
     background:
-      radial-gradient(700px 360px at 80% 0%,rgba(124,139,255,.16),transparent 60%),
+      radial-gradient(700px 360px at 80% 0%,rgba(243,152,30,.12),transparent 60%),
       var(--bg-soft);
     border-top:1px solid var(--line);
   }
   .cta-card{
     background:var(--panel);border:1px solid var(--line);border-radius:20px;
-    padding:44px;display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:start;
+    padding:44px;display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:start;box-shadow:var(--shadow-sm);
   }
   .cta-card h2{font-size:1.7rem;margin-bottom:14px;}
   .cta-card .sub{color:var(--muted);margin:0 0 22px;}
@@ -200,7 +213,7 @@
     color:var(--text);padding:12px 14px;font-size:.95rem;font-family:inherit;transition:.2s;
   }
   form input:focus,form textarea:focus,form select:focus{
-    outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(76,196,255,.15);
+    outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(243,152,30,.18);
   }
   form textarea{min-height:96px;resize:vertical;}
   .form-note{font-size:.78rem;color:var(--muted);margin-top:10px;}
@@ -209,17 +222,17 @@
   /* real screenshots */
   .shot{
     border:1px solid var(--line);border-radius:14px;overflow:hidden;
-    background:var(--panel-2);box-shadow:0 24px 60px -28px rgba(0,0,0,.75);
+    background:var(--panel-2);box-shadow:var(--shadow-lg);
   }
   .shot img{display:block;width:100%;height:auto;}
   .shot.hero-shot{
     margin-top:56px;border-radius:16px;
-    box-shadow:0 36px 90px -34px rgba(0,0,0,.8);
+    box-shadow:var(--shadow-lg);
   }
   .shot-cap{
     font-size:.8rem;color:var(--muted);margin:12px 2px 0;display:flex;gap:8px;align-items:center;
   }
-  .shot-cap::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent-3);flex-shrink:0;}
+  .shot-cap::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0;}
   .shot-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
 
   /* showcase: 1セクション1ビジュアルを大きく見せる */
@@ -231,7 +244,7 @@
   .show.flip .show-media{order:1;}
   .show-text .tag2{
     display:inline-block;font-size:.72rem;font-weight:800;letter-spacing:.08em;
-    color:var(--accent);background:rgba(76,196,255,.1);border:1px solid rgba(76,196,255,.25);
+    color:var(--brand-text);background:var(--brand-light);border:1px solid rgba(243,152,30,.3);
     border-radius:7px;padding:5px 11px;margin-bottom:14px;
   }
   .show-text h3{font-size:1.4rem;margin-bottom:12px;}
@@ -270,10 +283,11 @@
 <section class="hero">
   <div class="wrap">
     <span class="eyebrow">感情ログ分析ダッシュボード</span>
-    <h1>顔表情ログのCSVを、<br /><span class="grad">研究で使える分析</span>へ。</h1>
+    <h1>顔の表情データのCSVを、<br /><span class="grad">そのまま使える分析</span>へ。</h1>
     <p class="lead">
-      心sensor（AFFDEX互換）が出力する感情ログを、アップロードするだけ。
-      時系列・学術指標・UXスコアまで自動で計算し、ブラウザの中だけで完結します。
+      心sensor（AFFDEX互換）が書き出した感情データを、アップロードするだけ。
+      感情の移り変わり・分析に役立つ指標・UXスコアまで自動でまとめます。
+      しかも、すべてブラウザの中だけで完結します。
     </p>
     <div class="chips">
       <span class="chip"><b>インストール不要</b>・ブラウザ完結</span>
@@ -298,28 +312,28 @@
     <span class="eyebrow">こんなところで止まっていませんか</span>
     <h2 style="font-size:1.9rem;margin-bottom:8px;">CSVは出た。でも、ここから何時間かかる？</h2>
     <p class="muted" style="max-width:680px;margin:0 0 36px;">
-      感情認識ツールはログを吐き出すところまで。研究で使える形にするのは、いつも自分の仕事になりがちです。
+      感情を読み取るツールは、データを書き出すところまで。そこから使える形に整えるのは、いつも自分の仕事になりがちです。
     </p>
     <div class="grid-2">
       <div class="pain">
-        <div class="n">PAIN 01</div>
-        <h3>生CSVから先に進めない</h3>
-        <p>平均・分散・相関・遷移——分析は結局すべて自前で書く必要がある。動画を見返して手作業で集計するのは、時間がかかり消耗する。</p>
+        <div class="n">悩み 01</div>
+        <h3>CSVを開いても、そこから進めない</h3>
+        <p>平均・ばらつき・指標どうしの関係・感情の移り変わり——分析は結局すべて自分で計算するしかない。動画を見返して手作業で数えるのは、時間がかかり消耗する。</p>
       </div>
       <div class="pain">
-        <div class="n">PAIN 02</div>
-        <h3>学術指標の実装が重い</h3>
-        <p>Affect Dynamics（変動性・慣性・不安定性）や円環モデルを出すたびに、R / Python でコードを書き直す。理論は確立しているのに、毎回が負担。</p>
+        <div class="n">悩み 02</div>
+        <h3>専門的な指標を出すのが大変</h3>
+        <p>感情の動き方（Affect Dynamics）や円環モデルを出すたびに、R / Python でプログラムを書き直す。やり方は決まっているのに、毎回が負担。</p>
       </div>
       <div class="pain">
-        <div class="n">PAIN 03</div>
-        <h3>再現性と共有がしづらい</h3>
-        <p>手元のスクリプトは閉じがちで、除外基準や前処理がブラックボックスに。査読・共同研究で「どう処理したか」を示しにくい。</p>
+        <div class="n">悩み 03</div>
+        <h3>同じ手順をもう一度たどりにくい</h3>
+        <p>手元のプログラムは自分しか分からなくなりがちで、どのデータを除いたか・どう下ごしらえしたかが見えにくい。査読や共同研究で「どう処理したか」を示しづらい。</p>
       </div>
       <div class="pain">
-        <div class="n">PAIN 04</div>
-        <h3>データの素性が暴れる</h3>
-        <p>不規則なサンプリング、符号付き valence、1ファイルに混在する複数被験者、検出が不安定な少フレームのノイズ。前処理だけで消耗する。</p>
+        <div class="n">悩み 04</div>
+        <h3>データのクセに振り回される</h3>
+        <p>記録間隔がそろっていない、プラス／マイナスの値が混ざる、1つのファイルに複数の人物が入っている、検出が不安定なごく短い区間のノイズ——。下ごしらえだけで消耗する。</p>
       </div>
     </div>
   </div>
@@ -329,22 +343,22 @@
 <section class="section" id="value">
   <div class="wrap">
     <span class="eyebrow">使うと何が変わるか</span>
-    <h2 style="font-size:1.9rem;margin-bottom:36px;">前処理とコード実装に使っていた時間が、分析と解釈に変わる。</h2>
+    <h2 style="font-size:1.9rem;margin-bottom:36px;">下ごしらえと計算にかけていた時間が、分析と読み解きに変わる。</h2>
     <div class="grid-3">
       <div class="value">
         <div class="ic">⚡</div>
-        <h3>CSVを入れるだけで自動分析</h3>
-        <p>CSVをブラウザに投入すると、10感情・Engagement・Valence の時系列グラフがすぐに並びます。FaceID の検出状態やノイズフレームの除外も、手を加えずに処理されます。</p>
+        <h3>CSVを入れるだけで自動でまとまる</h3>
+        <p>CSVをブラウザに入れると、10種類の感情・Engagement（表情の動きの大きさ）・Valence（感情の快・不快）の推移グラフがすぐに並びます。人物ID（FaceID）の検出状況や、ノイズになる短い区間の除外も、手を加えずに処理されます。</p>
       </div>
       <div class="value">
         <div class="ic">🎓</div>
-        <h3>学術指標を標準搭載</h3>
-        <p>Affect Dynamics（変動性・慣性・不安定性）、Russell の円環モデル、相関行列、感情遷移マトリクスが自動で計算されます。R や Python のスクリプトを書かずに、査読に耐える指標が揃います。</p>
+        <h3>専門的な指標も、はじめから用意</h3>
+        <p>感情の動き方（Affect Dynamics）、感情を“快/不快×覚醒度”で見る円環モデル、指標どうしの関係、感情の移り変わりが自動で計算されます。R や Python のプログラムを書かなくても、論文に使える指標がそろいます。</p>
       </div>
       <div class="value">
         <div class="ic">🔒</div>
-        <h3>ブラウザ完結で安全・再現可能</h3>
-        <p>処理はすべて手元のブラウザ内。データは外部に送られません。除外基準は出力CSVに記録され、分析の再現性も担保します。</p>
+        <h3>ブラウザ完結だから安心、やり直しもできる</h3>
+        <p>処理はすべて手元のブラウザの中。データが外に送られることはありません。どのデータを除いたかは書き出すCSVに記録されるので、同じ手順をあとからたどり直せます。</p>
       </div>
     </div>
   </div>
@@ -354,21 +368,21 @@
 <section class="section" id="features">
   <div class="wrap">
     <span class="eyebrow">できること</span>
-    <h2 style="font-size:1.9rem;margin-bottom:8px;">1つのCSVから、10の視点で読む。</h2>
+    <h2 style="font-size:1.9rem;margin-bottom:8px;">1つのCSVを、10の切り口で読み解く。</h2>
     <p class="muted" style="max-width:680px;margin:0 0 36px;">
-      時系列・分布・遷移・学術指標・AUなど、それぞれ独立したセクションとして用意しています。必要な分析から開けば、余計な操作は要りません。
+      推移・分布・移り変わり・専門的な指標・表情のパーツなど、それぞれ独立した画面として用意しています。見たい分析から開けば、余計な操作は要りません。
     </p>
     <div class="feat-grid">
-      <div class="feat"><span class="tag">時系列</span><div><h4>タイムラインと範囲フィルタ</h4><p>10感情・Engagement・Valence の推移をイベント注釈付きで表示。時間範囲を絞って局所を分析。</p></div></div>
-      <div class="feat"><span class="tag">分布</span><div><h4>10種類の感情分布</h4><p>怒り・喜び・驚き・困惑ほか10感情の強度を分布で把握。セッション全体の傾向を一目で。</p></div></div>
-      <div class="feat"><span class="tag">遷移</span><div><h4>感情遷移マトリクス</h4><p>10×10のヒートマップで「どの感情からどの感情へ」を可視化。状態の流れを定量化。</p></div></div>
-      <div class="feat"><span class="tag">学術</span><div><h4>学術指標・相関行列</h4><p>変動性・慣性・不安定性などの動態指標と Pearson 相関行列を自動算出。</p></div></div>
-      <div class="feat"><span class="tag">AU</span><div><h4>アクションユニット22種</h4><p>smile・blink・brow furrow など顔表情単位の活性度を分析し、表情の構成要素まで踏み込む。</p></div></div>
-      <div class="feat"><span class="tag">頭部</span><div><h4>頭部動作の自動検知</h4><p>うなづき・首振り・首傾げを自動検出。発話やリアクションの手がかりに。</p></div></div>
-      <div class="feat"><span class="tag">変化点</span><div><h4>感情変化点の検出</h4><p>スコアが急変したポイント上位20件を自動抽出。注目すべき瞬間へ素早く到達。</p></div></div>
-      <div class="feat"><span class="tag">複数人</span><div><h4>マルチFaceID対応</h4><p>複数被験者が混在するCSVを人物別に切り替え。不安定な少フレームはノイズとして自動除外、ラベル付けも可能。</p></div></div>
-      <div class="feat"><span class="tag">補正</span><div><h4>ベースライン補正</h4><p>安静時セッションとの差分で補正済みスコアを表示。個人差を均して刺激の効果を見る。</p></div></div>
-      <div class="feat"><span class="tag">A/B</span><div><h4>セッション比較（A/B）</h4><p>2つのセッションを並列比較。指標選択式のタイムラインオーバーレイで差分を定量評価。</p></div></div>
+      <div class="feat"><span class="tag">推移</span><div><h4>時間の流れと範囲の絞り込み</h4><p>10種類の感情・Engagement・Valence の移り変わりを、出来事のメモ付きで表示。時間の範囲を絞って一部分だけを見ることもできます。</p></div></div>
+      <div class="feat"><span class="tag">分布</span><div><h4>10種類の感情の出方</h4><p>怒り・喜び・驚き・困惑ほか10種類の感情の強さを分布で把握。記録全体の傾向がひと目で分かります。</p></div></div>
+      <div class="feat"><span class="tag">移り変わり</span><div><h4>感情の移り変わり表</h4><p>10×10の色分け表で「どの感情から、どの感情へ」を見える化。状態の流れを数字でとらえます。</p></div></div>
+      <div class="feat"><span class="tag">専門指標</span><div><h4>専門的な指標・指標どうしの関係</h4><p>感情の動き方（変動の大きさ・引きずりやすさ など）と、指標どうしの関係（Pearson 相関）を自動で算出します。</p></div></div>
+      <div class="feat"><span class="tag">表情パーツ</span><div><h4>表情のパーツ22種（アクションユニット）</h4><p>笑み・まばたき・眉の動きなど、顔の細かなパーツの動きを分析。表情を作っている要素まで踏み込めます。</p></div></div>
+      <div class="feat"><span class="tag">頭の動き</span><div><h4>頭の動きを自動で検知</h4><p>うなずき・首振り・首かしげを自動で検出。発話やリアクションを読み取る手がかりになります。</p></div></div>
+      <div class="feat"><span class="tag">変化点</span><div><h4>感情が大きく動いた瞬間</h4><p>値が急に変わった瞬間の上位20件を自動で抽出。注目すべきポイントへすぐにたどり着けます。</p></div></div>
+      <div class="feat"><span class="tag">複数人</span><div><h4>複数の人物に対応</h4><p>複数の人が混ざったCSVを人物ごとに切り替え。検出が不安定なごく短い区間はノイズとして自動で除外し、名前を付けることもできます。</p></div></div>
+      <div class="feat"><span class="tag">補正</span><div><h4>平常時を基準にした補正</h4><p>リラックスした状態の記録との差で、補正後の値を表示。個人差をならして、刺激そのものの効果を見られます。</p></div></div>
+      <div class="feat"><span class="tag">A/B</span><div><h4>2つの記録をくらべる（A/B）</h4><p>2つの記録を並べて比較。見たい指標を選んで推移を重ね、違いを数字で確かめられます。</p></div></div>
     </div>
   </div>
 </section>
@@ -377,9 +391,9 @@
 <section class="section" id="screens">
   <div class="wrap">
     <span class="eyebrow">実際の画面</span>
-    <h2 style="font-size:1.9rem;margin-bottom:8px;">モックではありません。これが分析結果です。</h2>
+    <h2 style="font-size:1.9rem;margin-bottom:8px;">イメージ図ではありません。これが分析結果です。</h2>
     <p class="muted" style="max-width:680px;margin:0 0 56px;">
-      すべてサンプルデータを読み込んだ実際の画面。アップロードするだけで、ここまで自動で揃います。
+      すべてサンプルデータを読み込んだ実際の画面。アップロードするだけで、ここまで自動でそろいます。
     </p>
 
     <div class="showcase">
@@ -387,12 +401,12 @@
       <!-- 時系列 -->
       <div class="show">
         <div class="show-text">
-          <span class="tag2">時系列分析</span>
-          <h3>感情の動きを、タスク区間と重ねて読む</h3>
-          <p>10種の感情をひとつのグラフに重ね、ベースラインからの変化として表示。タスクやイベントの区間を色帯で重ねられます。</p>
+          <span class="tag2">感情の推移</span>
+          <h3>感情の動きを、作業の区間と重ねて読む</h3>
+          <p>10種類の感情をひとつのグラフに重ね、平常時からの変化として表示。作業や出来事の区間を、色の帯で重ねて見られます。</p>
           <ul>
-            <li>タスクA/B/C区間を<b>そのまま重畳</b>して比較</li>
-            <li>急変ポイントを<b>変化点として自動検出</b></li>
+            <li>作業A/B/Cの区間を<b>そのまま重ねて</b>比較</li>
+            <li>急に変わった瞬間を<b>自動で検出</b></li>
             <li>Engagement・Valence・Attention も同じ時間軸で</li>
           </ul>
         </div>
@@ -407,12 +421,12 @@
       <div class="show flip">
         <div class="show-text">
           <span class="tag2">UXリサーチ</span>
-          <h3>「このUIどこで詰まった？」を、感情データで確かめる</h3>
-          <p>フラストレーション・デライト・認知負荷を集計して総合UXスコアを出します。ヒートマップでは「どの操作タイミングで感情が動いたか」が時系列で見えます。</p>
+          <h3>「この画面、どこでつまずいた？」を感情データで確かめる</h3>
+          <p>いらだち・うれしさ・頭の使いぐあい（負担）を集計して、総合的なUXスコアを出します。色分け表では「どの操作のタイミングで感情が動いたか」が時間の流れで見えます。</p>
           <ul>
             <li><b>総合UXスコア</b>で課題の有無をひと目で</li>
-            <li>デライト指数・認知負荷を<b>定量化</b></li>
-            <li>感情強度ヒートマップで山場を特定</li>
+            <li>うれしさ・頭の使いぐあいを<b>数値で</b></li>
+            <li>感情の強さの色分け表で山場を特定</li>
           </ul>
         </div>
         <div class="show-media">
@@ -425,13 +439,13 @@
       <!-- 学術的分析 -->
       <div class="show">
         <div class="show-text">
-          <span class="tag2">学術的分析</span>
-          <h3>論文に使える指標を、コードなしで</h3>
-          <p>感情指標間の相関行列と、円環モデル（Russell, 1980）の象限分析を自動計算。Affect Dynamics の変動性・慣性も揃います。</p>
+          <span class="tag2">専門的な分析</span>
+          <h3>論文に使える指標を、プログラムなしで</h3>
+          <p>指標どうしの関係（相関）と、感情を“快/不快×覚醒度”で見る円環モデル（Russell, 1980）の4分類を自動で計算。感情の動き方（変動の大きさ・引きずりやすさ）もそろいます。</p>
           <ul>
-            <li>Pearson <b>相関行列</b>を自動算出</li>
-            <li>覚醒度×感情価の<b>4象限分類</b></li>
-            <li>変動性・慣性・不安定性の動態指標</li>
+            <li>指標どうしの<b>関係（Pearson 相関）</b>を自動算出</li>
+            <li>覚醒度×快・不快の<b>4分類</b></li>
+            <li>変動の大きさ・引きずりやすさ などの指標</li>
           </ul>
         </div>
         <div class="show-media">
@@ -444,13 +458,13 @@
       <!-- 感情遷移 -->
       <div class="show flip">
         <div class="show-text">
-          <span class="tag2">感情遷移</span>
-          <h3>「どの感情からどの感情へ」を可視化</h3>
-          <p>10×10の遷移行列で状態の移り変わりを定量化。よく起きる遷移パターンを上位順にランキングします。</p>
+          <span class="tag2">感情の移り変わり</span>
+          <h3>「どの感情から、どの感情へ」を見える化</h3>
+          <p>10×10の表で状態の移り変わりを数字に。よく起きる移り変わりのパターンを多い順に並べます。</p>
           <ul>
-            <li>10×10の<b>遷移マトリクス</b></li>
-            <li>主要な遷移パターン<b>上位10件</b></li>
-            <li>各感情の継続時間・累積時間も</li>
+            <li>10×10の<b>移り変わり表</b></li>
+            <li>よく起きるパターン<b>上位10件</b></li>
+            <li>各感情の続いた時間・合計時間も</li>
           </ul>
         </div>
         <div class="show-media">
@@ -463,13 +477,13 @@
       <!-- セッション比較 -->
       <div class="show">
         <div class="show-text">
-          <span class="tag2">セッション比較（A/B）</span>
-          <h3>2つの条件を、統計的に比べる</h3>
-          <p>2セッションの感情反応を並列比較。タイムラインを実時間で重ね、Welch のt検定で有意差まで判定します。</p>
+          <span class="tag2">記録の比較（A/B）</span>
+          <h3>2つの条件を、統計でしっかり比べる</h3>
+          <p>2つの記録の感情の反応を並べて比較。推移を実際の時間で重ね、その差が偶然かどうかの検定（Welch のt検定）まで行います。</p>
           <ul>
-            <li>2セッションの<b>タイムライン重ね合わせ</b></li>
-            <li>感情差分ランキングで違いを一覧</li>
-            <li><b>Welch t検定</b>で有意差を判定</li>
+            <li>2つの記録の<b>推移を重ね合わせ</b></li>
+            <li>感情の差が大きい順に一覧</li>
+            <li><b>Welch のt検定</b>で意味のある差かを判定</li>
           </ul>
         </div>
         <div class="show-media">
@@ -487,19 +501,19 @@
 <section class="section" id="how">
   <div class="wrap">
     <span class="eyebrow">使い方</span>
-    <h2 style="font-size:1.9rem;margin-bottom:36px;">3ステップ。コードは要りません。</h2>
+    <h2 style="font-size:1.9rem;margin-bottom:36px;">3ステップ。プログラムは要りません。</h2>
     <div class="steps">
       <div class="step">
-        <h3>CSVをドラッグ&ドロップ</h3>
-        <p>心sensor が出力したCSVをそのまま投入。FaceID 列やデータ品質は自動で判定されます。</p>
+        <h3>CSVをドラッグ＆ドロップ</h3>
+        <p>心sensor が書き出したCSVをそのまま入れるだけ。人物ID（FaceID）の列やデータの状態は自動で判定されます。</p>
       </div>
       <div class="step">
-        <h3>自動で分析・可視化</h3>
-        <p>感情の時系列・学術指標・UXスコアまで即座に計算。セクションを切り替えて深掘りします。</p>
+        <h3>自動で分析・見える化</h3>
+        <p>感情の推移・専門的な指標・UXスコアまですぐに計算。画面を切り替えて、気になるところを深掘りできます。</p>
       </div>
       <div class="step">
-        <h3>絞り込んでCSV出力</h3>
-        <p>必要な範囲をフィルタして書き出し。除外基準も併せて記録され、再現性のある分析結果に。</p>
+        <h3>絞り込んでCSVに書き出し</h3>
+        <p>必要な範囲を選んで書き出し。どのデータを除いたかも一緒に記録されるので、あとから同じ手順をたどれます。</p>
       </div>
     </div>
   </div>
@@ -514,31 +528,31 @@
       <div class="uc">
         <div class="label">Research</div>
         <h3>研究プロジェクト</h3>
-        <p>実験終了後にCSVをそのまま投入して、学術指標を確認する用途が中心です。Rで書いていた前処理コードを、毎回書き直す必要がなくなります。</p>
+        <p>実験のあとにCSVをそのまま入れて、専門的な指標を確認する使い方が中心です。Rで書いていた下ごしらえのプログラムを、毎回書き直す必要がなくなります。</p>
         <ul>
-          <li>Affect Dynamics・円環モデルを自動計算</li>
-          <li>相関行列・遷移マトリクスで仮説検証</li>
-          <li>除外基準つき出力で再現性を確保</li>
+          <li>感情の動き方・円環モデルを自動で計算</li>
+          <li>指標どうしの関係・移り変わり表で仮説を確かめる</li>
+          <li>除いたデータも記録され、手順をたどり直せる</li>
         </ul>
       </div>
       <div class="uc">
         <div class="label">UX Research</div>
         <h3>ユーザーテスト・UX改善</h3>
-        <p>プロトタイプや改修後のUIを被験者に触ってもらい、どこでフラストレーションが上がったかを見るケースで使われています。</p>
+        <p>試作品や改修後の画面を実際に触ってもらい、どこでいらだちが高まったかを見る場面で使われています。</p>
         <ul>
-          <li>総合UXスコア・認知負荷を数値化</li>
-          <li>タスク区間ごとの感情反応を分析</li>
-          <li>A/B比較で改善効果を可視化</li>
+          <li>総合UXスコア・頭の使いぐあいを数値化</li>
+          <li>作業の区間ごとに感情の反応を分析</li>
+          <li>A/B比較で改善の効果を見える化</li>
         </ul>
       </div>
       <div class="uc">
         <div class="label">Marketing / PoC</div>
-        <h3>マーケ効果測定・PoC検証</h3>
-        <p>広告視聴中の感情変化を記録して、「この素材はどこで飽きられているか」を確かめるPoC用途に。クリエイティブの比較にA/B機能を使えます。</p>
+        <h3>マーケ効果測定・試験導入（PoC）</h3>
+        <p>広告を見ている間の感情の変化を記録して、「この素材はどこで飽きられているか」を確かめる試験導入（PoC）に。素材の比較にはA/B機能が使えます。</p>
         <ul>
-          <li>視聴中の関与度・感情価を測定</li>
-          <li>複数被験者を1ファイルで管理・比較</li>
-          <li>施策の前後をA/Bで検証</li>
+          <li>見ている間の関与度・快/不快を測定</li>
+          <li>複数の人を1つのファイルでまとめて比較</li>
+          <li>施策の前後をA/Bで確かめる</li>
         </ul>
       </div>
     </div>
@@ -551,10 +565,10 @@
     <span class="eyebrow">データの扱いについて</span>
     <h2 style="font-size:1.9rem;margin-bottom:36px;">実験参加者のデータが、外部のサーバーに届くことはありません。</h2>
     <div class="trust">
-      <div class="item"><div class="t">ブラウザ側で処理</div><p>解析処理はブラウザのみで動きます。インターネット接続がなくても動作します。</p></div>
-      <div class="item"><div class="t">外部送信なし</div><p>アップロードしたデータがサーバーに送られることはありません。</p></div>
-      <div class="item"><div class="t">個人識別情報を扱わない</div><p>扱うのは感情スコア・AUの数値データのみです。氏名・映像・音声は読み込みません。</p></div>
-      <div class="item"><div class="t">GDPR・個人情報保護に準拠</div><p>サーバーへのデータ送信がないため、GDPR・個人情報保護法の観点からもリスクが生じません。</p></div>
+      <div class="item"><div class="t">手元のブラウザで処理</div><p>分析はブラウザの中だけで動きます。インターネットにつながっていなくても使えます。</p></div>
+      <div class="item"><div class="t">外部に送らない</div><p>アップロードしたデータが、外部のサーバーに送られることはありません。</p></div>
+      <div class="item"><div class="t">個人が分かる情報は扱わない</div><p>扱うのは感情の数値や表情のパーツ（アクションユニット）の数値だけ。氏名・映像・音声は読み込みません。</p></div>
+      <div class="item"><div class="t">GDPR・個人情報保護にも安心</div><p>データを外部に送らないので、GDPR・個人情報保護法の面でもリスクが生じません。</p></div>
     </div>
   </div>
 </section>
